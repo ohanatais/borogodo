@@ -4,12 +4,13 @@
 @layer base {
   :root {
     /* Paleta principal */
-    --color-primary:      oklch(42% 0.19 320);   /* roxo-jambo */
+    --color-primary:      oklch(30% 0.20 320);   /* roxo-jambo */
     --color-primary-fg:   oklch(98% 0.01 320);
     --color-accent:       oklch(62% 0.22 28);    /* coral-faísca */
     --color-accent-fg:    oklch(98% 0.01 28);
     --color-warm:         oklch(74% 0.12 75);    /* mel */
     --color-teal:         oklch(70% 0.10 190);   /* verde-água */
+    --color-lilas-nevoa:  oklch(95% 0.01 320);   /* lilas-névoa */
 
     /* Superfícies */
     --background:         oklch(98% 0.008 90);   /* creme */
@@ -65,10 +66,13 @@
 }
 
 @layer base {
-  * { @apply border-border; }
+  * { border-color: var(--border); }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    background-color: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-family: var(--font-sans);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
@@ -78,6 +82,8 @@
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring), 0 0 0 4px var(--background);
   }
 }
+

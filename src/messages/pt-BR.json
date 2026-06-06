@@ -1,0 +1,91 @@
+{
+  "metadata": {
+    "title": "Borogodó",
+    "description": "Descubra no que você é bom, por que você é bom nisso, e tenha o registro completo da carreira que você já construiu."
+  },
+  "nav": {
+    "cta": "Criar conta",
+    "ctaAriaLabel": "Criar conta gratuita no Borogodó"
+  },
+  "hero": {
+    "tagline": "todo mundo tem um. o seu merece ser visto.",
+    "headline": "Todo mundo tem um borogodó.",
+    "headlineEmphasis": "A gente te mostra o seu.",
+    "subheadline": "Borogodó registra sua trajetória, revela no que você é bom e por quê, e te dá a narrativa que faltava para a carreira que você já construiu.",
+    "cta": {
+      "primary": "Criar conta",
+      "secondary": "Já tenho conta",
+      "primaryAriaLabel": "Criar conta gratuita no Borogodó",
+      "secondaryAriaLabel": "Entrar na minha conta"
+    }
+  },
+  "painPoints": {
+    "title": "Você já sabe que tem mais para mostrar.",
+    "items": [
+      {
+        "title": "Você entrega muito. O mundo vê pouco.",
+        "description": "Você tem anos de entrega acumulada, mas quem não te conhece não consegue enxergar. Não por falta de conteúdo, mas por falta de registro."
+      },
+      {
+        "title": "Na hora de falar de você, as palavras somem.",
+        "description": "Você sabe que entregou aquele projeto inteiro quase sozinho, mas na conversa de performance a memória falha e o argumento vai embora."
+      },
+      {
+        "title": "Você tem o que dizer, mas não sabe por onde começar.",
+        "description": "A ideia existe, a experiência existe, mas transformar isso em conteúdo que soa como você parece uma missão impossível."
+      },
+      {
+        "title": "Você evoluiu demais para não conseguir explicar como.",
+        "description": "A identidade profissional que você foi construindo ao longo dos anos ainda não tem forma visível. Está na hora de mudar isso."
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "Como funciona",
+    "subtitle": "Três passos para finalmente ver o que você já construiu.",
+    "steps": [
+      {
+        "number": "01",
+        "title": "Você conta sua história",
+        "description": "Registre experiências, projetos e conquistas no seu ritmo. O Borogodó organiza, guarda e nunca perde nada."
+      },
+      {
+        "number": "02",
+        "title": "Você recebe seu espelho",
+        "description": "A IA identifica seus padrões, revela no que você é bom e por quê, e te devolve uma síntese que faz sentido de verdade."
+      },
+      {
+        "number": "03",
+        "title": "Você usa como quiser",
+        "description": "LinkedIn, posts, currículo, portfólio, reunião de performance. Tudo sai do mesmo lugar, com a sua voz."
+      }
+    ]
+  },
+  "mirror": {
+    "title": "Seu espelho profissional",
+    "subtitle": "Cada insight parte da sua história real, construída experiência por experiência.",
+    "patternLabel": "Padrão identificado",
+    "evidenceLabel": "Baseado em",
+    "insightLabel": "Sua síntese"
+  },
+  "careerMap": {
+    "title": "Mapa da sua carreira",
+    "subtitle": "Visualize como suas habilidades se conectam e onde você está indo.",
+    "clustersLabel": "Suas competências",
+    "timelineLabel": "Sua jornada"
+  },
+  "contentGen": {
+    "title": "Conteúdo que soa como você",
+    "subtitle": "A diferença entre uma IA que te conhece e uma IA qualquer.",
+    "realLabel": "Com o Borogodó",
+    "genericLabel": "IA genérica"
+  },
+  "cta": {
+    "title": "Seu borogodó está esperando ser nomeado.",
+    "subtitle": "Comece de graça e descubra o que todo mundo já sente em você.",
+    "primary": "Criar conta",
+    "secondary": "Já tenho conta",
+    "primaryAriaLabel": "Criar conta gratuita",
+    "secondaryAriaLabel": "Entrar na minha conta"
+  }
+}

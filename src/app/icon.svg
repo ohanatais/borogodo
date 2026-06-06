@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#5C0E75"/>
+  <defs>
+    <linearGradient id="g" x1="16" y1="6" x2="16" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F0B464"/>
+      <stop offset="42%" stop-color="#E85840"/>
+      <stop offset="100%" stop-color="#C23828"/>
+    </linearGradient>
+  </defs>
+  <!--
+    LogoMark (faísca) scaled to 20×20 active area, centered at (16,16).
+    Original 40×40 path scaled by 0.526, translated to center.
+  -->
+  <path
+    d="M16,6 Q18.23,13.77 26,16 Q18.23,18.23 16,26 Q13.77,18.23 6,16 Q13.77,13.77 16,6Z"
+    fill="url(#g)"
+  />
+</svg>
