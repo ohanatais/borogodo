@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "title": "",
+    "description": ""
+  },
+  "hero": {
+    "tagline": "",
+    "headline": "",
+    "headlineEmphasis": "",
+    "subheadline": "",
+    "cta": {
+      "primary": "",
+      "secondary": "",
+      "primaryAriaLabel": "",
+      "secondaryAriaLabel": ""
+    }
+  },
+  "painPoints": {
+    "title": "",
+    "items": [
+      { "title": "", "description": "" },
+      { "title": "", "description": "" },
+      { "title": "", "description": "" },
+      { "title": "", "description": "" }
+    ]
+  },
+  "howItWorks": {
+    "title": "",
+    "subtitle": "",
+    "steps": [
+      { "number": "01", "title": "", "description": "" },
+      { "number": "02", "title": "", "description": "" },
+      { "number": "03", "title": "", "description": "" }
+    ]
+  },
+  "mirror": {
+    "title": "",
+    "subtitle": "",
+    "patternLabel": "",
+    "evidenceLabel": "",
+    "insightLabel": ""
+  },
+  "careerMap": {
+    "title": "",
+    "subtitle": "",
+    "clustersLabel": "",
+    "timelineLabel": ""
+  },
+  "contentGen": {
+    "title": "",
+    "subtitle": "",
+    "realLabel": "",
+    "genericLabel": ""
+  },
+  "cta": {
+    "title": "",
+    "subtitle": "",
+    "primary": "",
+    "secondary": "",
+    "primaryAriaLabel": "",
+    "secondaryAriaLabel": ""
+  }
+}

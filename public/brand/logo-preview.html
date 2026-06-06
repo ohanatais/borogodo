@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borogodó — Logo Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --roxo-jambo:  oklch(30% 0.20 320);
+    --coral:       oklch(62% 0.22 28);
+    --mel:         oklch(74% 0.12 75);
+    --verde-agua:  oklch(70% 0.10 190);
+    --creme:       oklch(98% 0.008 90);
+    --tinta:       oklch(18% 0.02 260);
+    --lilas-nevoa: oklch(95% 0.01 320); /* confirmado: usar esse, não o 82% */
+  }
+
+  body {
+    background: #111;
+    font-family: 'Fraunces', Georgia, serif;
+    padding: 48px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+  }
+
+  h2 {
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #555;
+    align-self: flex-start;
+    margin-bottom: -32px;
+    margin-left: 4px;
+  }
+
+  /* ── MARK SVG ─────────────────────────── */
+  .mark svg { display: block; }
+
+  /* ── LOGO ROW ─────────────────────────── */
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-wordmark {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── CARDS ────────────────────────────── */
+  .cards {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .card {
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    padding: 40px 48px;
+    min-width: 220px;
+  }
+
+  /* Variant A: roxo-jambo (primary brand expression) */
+  .card-dark {
+    background: var(--roxo-jambo);
+  }
+  .card-dark .logo-wordmark {
+    color: var(--creme);
+    font-size: 2.25rem;
+  }
+  .card-dark .tagline {
+    color: oklch(85% 0.04 320);
+    font-size: 0.9rem;
+    font-weight: 300;
+    font-style: italic;
+    text-align: center;
+    max-width: 260px;
+    line-height: 1.5;
+  }
+
+  /* Variant B: creme (nav / light context) */
+  .card-light {
+    background: var(--creme);
+    border: 1px solid oklch(90% 0.01 260);
+  }
+  .card-light .logo-wordmark {
+    color: var(--roxo-jambo);
+    font-size: 2rem;
+  }
+
+  /* Variant C: coral monogram */
+  .card-coral {
+    background: var(--coral);
+  }
+  .card-coral .logo-wordmark {
+    color: var(--roxo-jambo);
+    font-size: 3.5rem;
+    font-weight: 700;
+  }
+
+  /* Variant D: mark only (icon) */
+  .card-icon {
+    background: var(--roxo-jambo);
+    min-width: 160px;
+    padding: 40px;
+  }
+
+  /* ── MARK SIZES ───────────────────────── */
+  .mark-32 { width: 32px; height: 32px; }
+  .mark-48 { width: 48px; height: 48px; }
+  .mark-80 { width: 80px; height: 80px; }
+  .mark-120 { width: 120px; height: 120px; }
+
+  /* ── NAV PREVIEW ──────────────────────── */
+  .nav-preview {
+    width: 100%;
+    max-width: 680px;
+    background: var(--roxo-jambo);
+    border-radius: 12px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-preview .logo-wordmark {
+    color: var(--creme);
+    font-size: 1.125rem;
+  }
+  .nav-preview .nav-cta {
+    font-family: system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: var(--creme);
+    color: var(--roxo-jambo);
+    border: none;
+    border-radius: 9999px;
+    padding: 8px 20px;
+    cursor: pointer;
+  }
+
+  .nav-preview-light {
+    background: var(--creme);
+    border: 1px solid oklch(90% 0.01 260);
+  }
+  .nav-preview-light .logo-wordmark {
+    color: var(--roxo-jambo);
+  }
+  .nav-preview-light .nav-cta {
+    background: var(--roxo-jambo);
+    color: var(--creme);
+  }
+
+  /* ── MARK SVG inline ─────────────────── */
+  .inline-mark {
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<h2>Mark — tamanhos</h2>
+<div class="cards">
+  <div class="card card-dark" style="flex-direction:row; gap:24px; padding:32px 40px;">
+    <img src="mark.svg" class="mark-32">
+    <img src="mark.svg" class="mark-48">
+    <img src="mark.svg" class="mark-80">
+    <img src="mark.svg" class="mark-120">
+  </div>
+</div>
+
+<h2>Variante A — primary (roxo-jambo)</h2>
+<div class="cards">
+  <div class="card card-dark">
+    <div class="logo">
+      <img src="mark.svg" class="mark-48">
+      <span class="logo-wordmark">borogodó</span>
+    </div>
+    <p class="tagline">todo mundo tem um.<br>o seu merece ser visto.</p>
+  </div>
+</div>
+
+<h2>Variante B — light (creme)</h2>
+<div class="cards">
+  <div class="card card-light">
+    <div class="logo">
+      <img src="mark.svg" class="mark-32">
+      <span class="logo-wordmark">borogodó</span>
+    </div>
+  </div>
+</div>
+
+<h2>Variante C — monogram (coral)</h2>
+<div class="cards">
+  <div class="card card-coral" style="min-width:160px; padding:40px;">
+    <span class="logo-wordmark" style="color: oklch(30% 0.20 320); font-size:3.5rem; font-weight:700;">b</span>
+  </div>
+</div>
+
+<h2>Nav — roxo-jambo</h2>
+<nav class="nav-preview">
+  <div class="logo">
+    <img src="mark.svg" class="mark-32">
+    <span class="logo-wordmark">borogodó</span>
+  </div>
+  <button class="nav-cta">Criar conta</button>
+</nav>
+
+<h2>Nav — creme (scroll state)</h2>
+<nav class="nav-preview nav-preview-light">
+  <div class="logo">
+    <img src="mark.svg" class="mark-32">
+    <span class="logo-wordmark">borogodó</span>
+  </div>
+  <button class="nav-cta">Criar conta</button>
+</nav>
+
+</body>
+</html>

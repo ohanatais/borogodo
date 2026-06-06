@@ -44,6 +44,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Claude Code — proteger tokens de auth que podem aparecer aqui
+.claude/auth.json
+.claude/.credentials
+.claude/settings.local.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
