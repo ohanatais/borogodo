@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/* ─── Borogodó Design Tokens ─────────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* Paleta principal */
+    --color-primary:      oklch(42% 0.19 320);   /* roxo-jambo */
+    --color-primary-fg:   oklch(98% 0.01 320);
+    --color-accent:       oklch(62% 0.22 28);    /* coral-faísca */
+    --color-accent-fg:    oklch(98% 0.01 28);
+    --color-warm:         oklch(74% 0.12 75);    /* mel */
+    --color-teal:         oklch(70% 0.10 190);   /* verde-água */
+
+    /* Superfícies */
+    --background:         oklch(98% 0.008 90);   /* creme */
+    --foreground:         oklch(18% 0.02 260);
+    --card:               oklch(100% 0 0);
+    --card-foreground:    oklch(18% 0.02 260);
+    --popover:            oklch(100% 0 0);
+    --popover-foreground: oklch(18% 0.02 260);
+
+    /* Shadcn aliases */
+    --primary:            var(--color-primary);
+    --primary-foreground: var(--color-primary-fg);
+    --secondary:          oklch(95% 0.01 320);
+    --secondary-foreground: oklch(25% 0.05 320);
+    --muted:              oklch(95% 0.005 260);
+    --muted-foreground:   oklch(52% 0.02 260);
+    --accent:             var(--color-accent);
+    --accent-foreground:  var(--color-accent-fg);
+    --destructive:        oklch(55% 0.22 25);
+    --destructive-foreground: oklch(98% 0.01 25);
+    --border:             oklch(90% 0.01 260);
+    --input:              oklch(90% 0.01 260);
+    --ring:               var(--color-primary);
+    --radius:             0.625rem;
+
+    /* Tipografia */
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-sans:    var(--font-geist-sans), system-ui, sans-serif;
+    --font-mono:    var(--font-geist-mono), 'Courier New', monospace;
+  }
+
+  .dark {
+    --background:         oklch(14% 0.02 260);
+    --foreground:         oklch(96% 0.005 260);
+    --card:               oklch(18% 0.02 260);
+    --card-foreground:    oklch(96% 0.005 260);
+    --popover:            oklch(18% 0.02 260);
+    --popover-foreground: oklch(96% 0.005 260);
+    --primary:            oklch(65% 0.16 320);
+    --primary-foreground: oklch(14% 0.02 320);
+    --secondary:          oklch(22% 0.03 320);
+    --secondary-foreground: oklch(90% 0.02 320);
+    --muted:              oklch(22% 0.02 260);
+    --muted-foreground:   oklch(65% 0.02 260);
+    --accent:             oklch(68% 0.18 28);
+    --accent-foreground:  oklch(14% 0.02 28);
+    --destructive:        oklch(50% 0.20 25);
+    --destructive-foreground: oklch(96% 0.01 25);
+    --border:             oklch(28% 0.02 260);
+    --input:              oklch(28% 0.02 260);
+    --ring:               oklch(65% 0.16 320);
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
