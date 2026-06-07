@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Borogodó
 
-## Getting Started
+Camada de memória e inteligência de carreira para o profissional brasileiro.
+Borogodó transforma o que você já fez — entregas, decisões, conquistas — num espelho
+vivo da sua trajetória: clareza sobre seu valor, um mapa de carreira e conteúdo pronto
+para construir presença profissional.
 
-First, run the development server:
+## Stack
+
+- [Next.js 16](https://nextjs.org) (App Router, Server Components) + React 19 + TypeScript estrito
+- [Tailwind CSS v4](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com) (Radix primitives)
+- [Supabase](https://supabase.com) (PostgreSQL + Auth + Storage + RLS)
+- [Anthropic API](https://www.anthropic.com/api) (Claude Haiku para extração, Claude Sonnet para espelho/geração)
+- [next-intl](https://next-intl.dev) (i18n — pt-BR como fallback)
+- [Framer Motion](https://www.framer.com/motion/) (animações)
+- [Vitest](https://vitest.dev) + Testing Library (testes unitários e de integração)
+
+## Como rodar localmente
+
+### Pré-requisitos
+
+- Node.js 24+
+- Um projeto [Supabase](https://supabase.com) (recomenda-se um projeto separado para
+  desenvolvimento — veja `.env.example`)
+- Uma chave da [Anthropic API](https://console.anthropic.com)
+
+### Setup
 
 ```bash
+npm install
+cp .env.example .env.local
+# preencha .env.local com suas credenciais (Supabase, Anthropic, etc.)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> As variáveis de ambiente necessárias e onde encontrá-las estão documentadas em
+> `.env.example`. Nunca commite `.env.local` — ele já está no `.gitignore`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Scripts
 
-## Learn More
+```bash
+npm run dev      # servidor de desenvolvimento
+npm run build    # build de produção
+npm run start    # roda o build de produção localmente
+npm run lint     # eslint
+npx tsc --noEmit # checagem de tipos
+npx vitest       # testes
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Estrutura de pastas
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+  app/              ← Next.js App Router
+  components/
+    ui/             ← componentes base (sem lógica de negócio)
+    features/       ← componentes por feature
+  i18n/             ← configuração next-intl
+  messages/         ← pt-BR.json, en.json (stub)
+  lib/
+    ai/             ← wrappers da Anthropic API
+    db/             ← Supabase client e queries tipadas
+    utils.ts        ← cn() e utilitários
+  hooks/            ← custom React hooks
+  types/            ← types globais
+specs/              ← artefatos de planejamento por feature (spec-driven development)
+docs/               ← PRD, brand book, processo de desenvolvimento
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Documentação
 
-## Deploy on Vercel
+- [PRODUCT.md](./PRODUCT.md) — produto, personas, proposta de valor
+- [DESIGN.md](./DESIGN.md) — sistema de design e identidade visual
+- [docs/dev-process.md](./docs/dev-process.md) — processo de desenvolvimento, do zero ao deploy
+- [docs/marca.md](./docs/marca.md) — marca e identidade
+- `specs/` — spec, plano técnico, modelo de dados e tasks de cada feature
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+O deploy é feito via [Vercel](https://vercel.com), com integração automática a partir do
+branch `main`. As variáveis de ambiente de produção e preview são configuradas em
+**Project → Settings → Environment Variables** no painel do Vercel — devem apontar para
+projetos Supabase e chaves Anthropic distintos dos usados em desenvolvimento.
