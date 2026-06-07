@@ -47,7 +47,7 @@ Captura uma modalidade, extrai entrada(s) estruturada(s) e devolve um reflexo. S
 ```
 
 ### 400 Bad Request
-- Texto < 3 chars → `{ "error": "Conta um pouco mais — não consegui captar." }`
+- Texto < 3 chars → `{ "error": "Conta um pouco mais, ainda não consegui captar." }`
 - Arquivo não-PDF → `{ "error": "Arquivo inválido" }`
 - Arquivo > 10 MB → `{ "error": "Arquivo muito grande (máx 10 MB)" }`
 

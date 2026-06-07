@@ -30,7 +30,7 @@ Uma profissional digita um momento de trabalho em linguagem livre ("fechei a mig
 **Acceptance Scenarios**:
 
 1. **Given** usuária autenticada, **When** envia `{ kind: 'text', content: 'texto de trabalho' }`, **Then** uma entrada é salva e a resposta traz `{ entries, reflection }` com reflexo na voz dela
-2. **Given** texto com menos de 3 caracteres, **When** envia, **Then** recebe 400 "Conta um pouco mais — não consegui captar" **antes** de qualquer chamada de IA
+2. **Given** texto com menos de 3 caracteres, **When** envia, **Then** recebe 400 "Conta um pouco mais, ainda não consegui captar" **antes** de qualquer chamada de IA
 3. **Given** requisição sem sessão válida, **When** chama `/api/capture`, **Then** recebe 401 e nada é salvo
 4. **Given** o Haiku retorna algo que não passa na validação Zod, **When** processa, **Then** retorna erro e **nada parcial** é persistido
 
