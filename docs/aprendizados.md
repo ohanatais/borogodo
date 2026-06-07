@@ -15,6 +15,34 @@ real no ecossistema (`build-with-claude`, `product-thinking`) quando fizer senti
 
 ---
 
+## 2026-06-07 — Um CI "verde" pode estar verde porque não está testando nada
+
+**O que aconteceu:** o PR #6 começou a falhar no CI com 6 testes quebrados, e a
+pergunta natural foi "por que só agora, se os PRs anteriores passaram?". Investigando,
+descobri que o `package.json` nunca teve um script `test` antes desta feature. O passo
+de CI rodava `npm test --if-present` — a flag `--if-present` faz o comando simplesmente
+não fazer nada (e retornar sucesso) quando o script não existe. Ou seja: **o CI estava
+"passando" há duas features inteiras sem nunca ter executado um teste sequer**. Os 6
+testes que falharam agora sempre estiveram quebrados — só nunca tinham sido rodados de
+verdade. Corrigi os 6 (eram bugs nos próprios testes: faltava mockar `IntersectionObserver`
+no jsdom para o Framer Motion, e um teste de cadastro não preenchia o campo de confirmar
+senha) e fechei as issues #4 e #5.
+
+**O que aprendi:** "está verde" não é a mesma coisa que "está sendo testado". Um pipeline
+de CI pode reportar sucesso de boa-fé enquanto pula silenciosamente a parte mais
+importante — e isso é mais comum do que parece, porque flags como `--if-present` existem
+justamente para "não quebrar quando não tem nada para rodar", o que é ótimo... até o dia
+em que você espera que aquilo rode. Vale a pena, de tempos em tempos, abrir o log do CI e
+confirmar que cada etapa está fazendo o que você acha que está fazendo — não só olhar o
+selo verde.
+
+**Por que importa:** esse é o tipo de armadilha que ninguém ensina a procurar — porque
+"deu certo" é exatamente o sinal que nos faz parar de olhar. Para quem está aprendendo a
+configurar CI pela primeira vez, vale mostrar como ler o log de uma execução "bem
+sucedida" e confirmar que ela rodou o que deveria, não só que terminou sem erro.
+
+---
+
 ## 2026-06-07 — Branches "esquecidas" deixam o repo parecer mais bagunçado do que é
 
 **O que aconteceu:** revisei a estrutura do repo e apontei o README e o CLAUDE.md raiz
