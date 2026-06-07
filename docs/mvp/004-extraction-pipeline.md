@@ -1,36 +1,48 @@
-# 004 — Pipeline de Extração (Claude Haiku)
+# 004 — Pipeline de Captura: Extração + Reflexo (Claude Haiku)
 
 ## O que é
 
-O serviço central que transforma conteúdo bruto (texto de PDF, transcrição de áudio, chips + texto do onboarding) em entradas estruturadas no esquema do Borogodó.
+O serviço central que transforma input bruto (texto, transcrição de áudio, imagem, arquivo) em **duas coisas**:
 
-É reutilizado pelos três caminhos de entrada: LinkedIn PDF, áudio e perguntas guiadas.
-Usa Claude Haiku (velocidade + custo) para extração. Sonnet é reservado para o espelho.
+1. **Entrada(s) estruturada(s)** — no esquema do Borogodó.
+2. **Reflexo** — o diagnóstico que volta pra pessoa no `CaptureConversation`: resumo na voz dela + pílulas + **um movimento** (pergunta, afirmação ou sugestão).
+
+É a metade-rápida do produto (Haiku). A metade-profunda (síntese do espelho, Sonnet) está no doc 005. Uma captura = **uma chamada Haiku** que devolve `{ entries, reflection }`.
+
+```
+input bruto + contexto (temas existentes, nº entradas, dias desde última)
+        │
+        ▼
+  Claude Haiku  ── extrai entrada(s)  ── gera reflexo (resumo + pílulas + 1 movimento)
+        │
+        ▼
+  { entries, reflection }
+        │
+        ├── salva entries (captura sem fricção)
+        └── reflection → CaptureConversation (doc 002)
+```
 
 ---
 
-## Esquema de uma entrada estruturada
+## Tipos
 
 ```typescript
 // src/types/entry.ts
-
-export type EntrySource = 'linkedin_pdf' | 'audio' | 'text' | 'chips'
-
-export type EntryType = 'o_que_fiz' | 'decisao' | 'aprendizado' | 'impacto'
+export type EntrySource = 'linkedin_pdf' | 'audio' | 'text' | 'chips' | 'image'
 
 export interface ExtractedEntry {
-  what_i_did: string          // obrigatório — o que aconteceu
-  decision?: string           // decisão tomada (se houver)
-  learning?: string           // aprendizado gerado
-  impact?: string             // impacto qualitativo
-  metric?: string             // número ou evidência quantitativa (ex: "30% menos churn")
-  entry_date?: string         // data ISO da experiência (não da captura)
-  tags: string[]              // skills/temas detectados
-  company?: string            // empresa (LinkedIn e áudio principalmente)
-  role_title?: string         // cargo
-  role_start?: string         // início do cargo (ISO date)
-  role_end?: string           // fim do cargo (null = atual)
-  raw_content: string         // texto original antes da extração
+  what_i_did: string
+  decision?: string | null
+  learning?: string | null
+  impact?: string | null
+  metric?: string | null
+  entry_date?: string | null
+  tags: string[]
+  company?: string | null
+  role_title?: string | null
+  role_start?: string | null
+  role_end?: string | null
+  raw_content: string
   source: EntrySource
 }
 
@@ -42,313 +54,302 @@ export interface Entry extends ExtractedEntry {
 }
 ```
 
----
+```typescript
+// src/types/capture.ts
+export type CaptureInput =
+  | { kind: 'text'; content: string }
+  | { kind: 'audio'; blob: Blob }
+  | { kind: 'image'; file: File }
+  | { kind: 'file'; file: File }
 
-## Arquitetura do pipeline
+export type ReflectionMoveType = 'question' | 'affirmation' | 'suggestion'
 
-```
-Input (texto bruto)
-  │
-  ├── extractFromLinkedIn(text)   ← vem do PDF do LinkedIn
-  ├── extractFromAudio(transcript) ← vem do Whisper
-  └── extractFromText(text)        ← vem de chips + texto livre
-          │
-          ▼
-  extractEntries(rawText, source, options)
-  [função compartilhada]
-          │
-          ▼
-  Claude Haiku
-  [prompt calibrado por source]
-          │
-          ▼
-  ExtractedEntry[]
-  [validação de schema]
-          │
-          ▼
-  saveEntries(entries, userId)
-  [Supabase insert]
-          │
-          ▼
-  Entry[]
-  [retorna para o chamador]
+export interface ReflectionMove {
+  type: ReflectionMoveType
+  text: string
+  field?: 'metric' | 'impact' | 'decision' | 'learning'  // para 'question': qual campo enriquecer
+}
+
+export interface Reflection {
+  summary: string        // 1–2 frases na voz da pessoa: "Entendi: você..."
+  pills: string[]        // 2–4 dimensões detectadas (= tags da entrada)
+  move: ReflectionMove   // UM movimento só
+}
+
+export interface CaptureResult {
+  entries: Entry[]
+  reflection: Reflection
+}
 ```
 
 ---
 
-## Estrutura de arquivos
+## Contexto que alimenta o reflexo
 
-```
-src/
-  lib/
-    ai/
-      extraction/
-        extractFromLinkedIn.ts    ← wrapper com prompt LinkedIn
-        extractFromAudio.ts       ← wrapper com prompt áudio
-        extractFromText.ts        ← wrapper com prompt texto/chips
-        extractEntries.ts         ← função base compartilhada
-        schemas.ts                ← schema de validação (Zod)
-        prompts/
-          linkedin.ts             ← prompt system + user para LinkedIn
-          audio.ts                ← prompt para transcrição de áudio
-          text.ts                 ← prompt para texto livre
-    db/
-      entries.ts                  ← saveEntries(), getEntries(), etc.
-```
-
----
-
-## extractEntries — função base
+O movimento (pergunta/afirmação/sugestão) só é bom se o modelo souber o que a pessoa já tem. O `/api/capture` monta um **contexto compacto** antes de chamar o Haiku:
 
 ```typescript
-// src/lib/ai/extraction/extractEntries.ts
+interface CaptureContext {
+  strengthThemes: string[]   // do mirror_snapshot mais recente (até 6)
+  recentSummaries: string[]  // what_i_did das últimas ~5 entradas (compacto)
+  entryCount: number
+}
+```
+
+Isso permite movimentos como *"isso bate com 2 entradas suas sobre migração"* (sugestão de conexão) ou *"liderança aparece pouco em você — vale registrar"* (gap), sem custo de Sonnet.
+
+---
+
+## API Route: /api/capture
+
+```typescript
+// src/app/api/capture/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@/lib/db/supabase/server'
+import { transcribeAudio } from '@/lib/ai/transcribe'
+import { extractTextFromPDF } from '@/lib/pdf/extractText'
+import { captureAndReflect } from '@/lib/ai/extraction/captureAndReflect'
+import { buildCaptureContext } from '@/lib/ai/extraction/context'
+import { saveEntries } from '@/lib/db/entries'
+
+export async function POST(request: NextRequest) {
+  const supabase = createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+
+  const form = await request.formData()
+  const kind = form.get('kind') as string
+
+  // 1. Normaliza qualquer modalidade em texto + source
+  let rawText = ''
+  let source: 'text' | 'audio' | 'file' | 'image' = 'text'
+
+  if (kind === 'text') {
+    rawText = form.get('content') as string
+    source = 'text'
+  } else if (kind === 'audio') {
+    const blob = form.get('audio') as File
+    rawText = await transcribeAudio(blob)     // Whisper
+    source = 'audio'
+  } else if (kind === 'file') {
+    const file = form.get('file') as File
+    rawText = await extractTextFromPDF(Buffer.from(await file.arrayBuffer()))
+    source = 'file'
+  } else if (kind === 'image') {
+    // imagem vai direto pro Haiku como bloco de imagem (visão) — ver captureAndReflect
+    source = 'image'
+  }
+
+  if (source !== 'image' && rawText.trim().length < 3) {
+    return NextResponse.json({ error: 'Conta um pouco mais — não consegui captar.' }, { status: 400 })
+  }
+
+  // 2. Contexto compacto
+  const context = await buildCaptureContext(user.id)
+
+  // 3. Haiku: extrai + reflete (uma chamada)
+  const { entries, reflection } = await captureAndReflect({
+    rawText,
+    source,
+    image: source === 'image' ? (form.get('image') as File) : undefined,
+    context,
+  })
+
+  // 4. Salva (sem fricção)
+  const saved = await saveEntries(entries, user.id)
+
+  // 5. Dispara jobs assíncronos (não bloqueiam a resposta)
+  triggerProactiveInsight(user.id).catch(() => {})
+  maybeRegenerateMirror(user.id, context.entryCount + saved.length).catch(() => {}) // doc 005
+
+  return NextResponse.json({ entries: saved, reflection })
+}
+```
+
+---
+
+## captureAndReflect — a chamada Haiku
+
+```typescript
+// src/lib/ai/extraction/captureAndReflect.ts
 import Anthropic from '@anthropic-ai/sdk'
-import { validateEntries } from './schemas'
-import type { ExtractedEntry, EntrySource } from '@/types/entry'
+import { CAPTURE_SYSTEM_PROMPT, buildCaptureUserPrompt } from './prompts/capture'
+import { validateCaptureResult } from './schemas'
+import type { CaptureContext } from '@/types/capture'
 
 const client = new Anthropic()
 
-interface ExtractionOptions {
-  source: EntrySource
-  systemPrompt: string
-  userPrompt: string
-  maxEntries?: number
+interface Args {
+  rawText: string
+  source: 'text' | 'audio' | 'file' | 'image'
+  image?: File
+  context: CaptureContext
 }
 
-export async function extractEntries(options: ExtractionOptions): Promise<ExtractedEntry[]> {
-  const { source, systemPrompt, userPrompt, maxEntries = 20 } = options
+export async function captureAndReflect(args: Args) {
+  const { rawText, source, image, context } = args
+
+  const userContent: Anthropic.MessageParam['content'] = image
+    ? [
+        { type: 'image', source: { type: 'base64', media_type: image.type as any,
+          data: Buffer.from(await image.arrayBuffer()).toString('base64') } },
+        { type: 'text', text: buildCaptureUserPrompt('', source, context) },
+      ]
+    : buildCaptureUserPrompt(rawText, source, context)
 
   const message = await client.messages.create({
     model: 'claude-haiku-4-5',
-    max_tokens: 4096,
-    system: systemPrompt,
-    messages: [
-      {
-        role: 'user',
-        content: userPrompt,
-      },
-    ],
+    max_tokens: 2048,
+    system: CAPTURE_SYSTEM_PROMPT,
+    messages: [{ role: 'user', content: userContent }],
   })
 
-  const content = message.content[0]
-  if (content.type !== 'text') {
-    throw new Error('Resposta inesperada do modelo')
-  }
+  const block = message.content[0]
+  if (block.type !== 'text') throw new Error('Resposta inesperada')
 
-  // Extrai JSON da resposta
-  const jsonMatch = content.text.match(/```json\n([\s\S]*?)\n```/)
-  if (!jsonMatch) {
-    throw new Error('Modelo não retornou JSON válido')
-  }
+  const json = block.text.match(/```json\n([\s\S]*?)\n```/)
+  if (!json) throw new Error('JSON não encontrado')
 
-  const parsed = JSON.parse(jsonMatch[1])
-  const entries = Array.isArray(parsed) ? parsed : parsed.entries ?? []
-
-  // Adiciona source em todas as entradas
-  const withSource = entries.slice(0, maxEntries).map((e: Partial<ExtractedEntry>) => ({
-    ...e,
-    source,
-    tags: e.tags ?? [],
-  }))
-
-  // Valida schema
-  return validateEntries(withSource)
+  return validateCaptureResult(JSON.parse(json[1]), source)
 }
 ```
 
 ---
 
-## Prompt: LinkedIn PDF
+## Prompt de captura (extração + reflexo)
 
 ```typescript
-// src/lib/ai/extraction/prompts/linkedin.ts
+// src/lib/ai/extraction/prompts/capture.ts
 
-export const LINKEDIN_SYSTEM_PROMPT = `
-Você é um assistente especializado em extrair informações de trajetória profissional
-de perfis do LinkedIn exportados como PDF.
+export const CAPTURE_SYSTEM_PROMPT = `
+Você é a inteligência de captura do Borogodó. A pessoa acabou de registrar um momento
+de trabalho — escrito, falado, ou em imagem/arquivo. Pode ser bagunçado e informal.
 
-Seu trabalho é transformar o texto bruto do PDF em entradas estruturadas de carreira.
-Cada entrada corresponde a uma experiência profissional relevante.
+Você faz DUAS coisas:
 
-REGRAS:
-1. Extraia UMA entrada por cargo/experiência significativa
-2. Priorize evidências concretas: projetos, entregas, decisões, impactos com números
-3. Se o cargo tem descrição longa, extraia os pontos mais relevantes em "what_i_did"
-4. Detecte skills implícitas nas descrições (ex: "liderou time de 5" → tag "liderança")
-5. Se há métricas mencionadas (%, R$, tempo), coloque em "metric"
-6. "entry_date" deve ser a data de início do cargo no formato ISO (YYYY-MM-DD)
-7. Nunca invente informação que não está no texto
-8. Se o texto mencionar apenas cargo e empresa sem descrição, ainda extraia — use o título como "what_i_did"
+A) EXTRAÇÃO — transforme o input em uma ou mais entradas estruturadas:
+   what_i_did, decision, learning, impact, metric, entry_date, tags.
+   - Preserve a VOZ da pessoa em "what_i_did". Não reescreva em corporês.
+   - tags = skills/temas concretos (não adjetivos genéricos).
+   - Não invente o que não está no input.
 
-FORMATO DE SAÍDA — responda APENAS com JSON válido dentro de bloco de código:
+B) REFLEXO — devolva um diagnóstico curto e caloroso pra mostrar na hora:
+   - summary: 1–2 frases começando com "Entendi:" — o que você captou, na voz dela.
+   - pills: 2–4 dimensões detectadas (geralmente = as tags principais).
+   - move: UM movimento só, escolhido com julgamento:
+       * "question" — quando falta algo que enriqueceria a entrada (ex: um número).
+         Sempre OPCIONAL: a entrada já vale sem a resposta. Defina "field".
+       * "affirmation" — quando o que ela trouxe é valioso E você pode ENSINAR por quê.
+         Nunca bajulação vazia. Não "mandou bem"; sim "isso é material de entrevista
+         porque a maioria não registra esse tipo de vitória".
+       * "suggestion" — quando isso conecta com o histórico dela (ver CONTEXTO) ou revela
+         um padrão. Ex: "isso bate com 2 entradas suas sobre X".
+
+REGRA DE OURO DO MOVIMENTO: escolha o que mais serve a PESSOA agora, não o que enche.
+Se nada agrega, prefira uma afirmação específica e curta. Nunca faça mais de um movimento.
+
+CONTEXTO da pessoa (use para sugestões e gaps, não repita de volta):
+{{CONTEXT}}
+
+SAÍDA — apenas JSON dentro de bloco de código:
 \`\`\`json
-[
-  {
-    "what_i_did": "descrição clara do que foi feito nesse cargo",
-    "decision": "decisão importante tomada, se houver",
-    "learning": "aprendizado gerado, se mencionado",
-    "impact": "impacto qualitativo descrito",
-    "metric": "número ou evidência quantitativa",
-    "entry_date": "YYYY-MM-DD",
-    "tags": ["skill1", "skill2"],
-    "company": "nome da empresa",
-    "role_title": "título do cargo",
-    "role_start": "YYYY-MM-DD",
-    "role_end": "YYYY-MM-DD ou null se atual",
-    "raw_content": "trecho original do PDF que originou essa entrada"
+{
+  "entries": [
+    {
+      "what_i_did": "...",
+      "decision": null,
+      "learning": null,
+      "impact": "...",
+      "metric": null,
+      "entry_date": "YYYY-MM-DD ou null",
+      "tags": ["...", "..."]
+    }
+  ],
+  "reflection": {
+    "summary": "Entendi: ...",
+    "pills": ["...", "..."],
+    "move": { "type": "question", "text": "...", "field": "metric" }
   }
-]
+}
 \`\`\`
 `
 
-export function buildLinkedInUserPrompt(pdfText: string): string {
-  return `
-Extraia as experiências profissionais do seguinte perfil do LinkedIn:
+export function buildCaptureUserPrompt(
+  rawText: string,
+  source: string,
+  context: { strengthThemes: string[]; recentSummaries: string[]; entryCount: number }
+): string {
+  const ctx = `
+- Forças já detectadas: ${context.strengthThemes.join(', ') || 'nenhuma ainda'}
+- Entradas recentes: ${context.recentSummaries.slice(0, 5).join(' | ') || 'nenhuma'}
+- Total de entradas: ${context.entryCount}
+  `.trim()
 
----
-${pdfText.slice(0, 12000)} ${pdfText.length > 12000 ? '\n[... texto truncado ...]' : ''}
----
+  const filled = CAPTURE_SYSTEM_PROMPT.replace('{{CONTEXT}}', ctx) // (ou injete no system)
 
-Retorne as entradas em ordem cronológica reversa (mais recente primeiro).
-`
+  return source === 'image'
+    ? `A pessoa enviou uma imagem relacionada ao trabalho dela. Extraia o contexto e reflita.\n\nContexto:\n${ctx}`
+    : `Input (${source}):\n---\n${rawText.slice(0, 8000)}\n---\n\nContexto:\n${ctx}`
 }
 ```
 
----
-
-## Prompt: Áudio (transcrição)
-
-```typescript
-// src/lib/ai/extraction/prompts/audio.ts
-
-export const AUDIO_SYSTEM_PROMPT = `
-Você é um assistente especializado em extrair entradas de carreira de transcrições de áudio.
-A pessoa gravou uma narrativa informal sobre seu trabalho — pode ser desorganizada, com hesitações.
-
-Seu trabalho é identificar os momentos relevantes e transformá-los em entradas estruturadas.
-
-REGRAS:
-1. Ignore hesitações, repetições e linguagem coloquial — foque no conteúdo
-2. Uma frase pode gerar uma entrada; um parágrafo longo pode gerar várias
-3. Se a pessoa menciona projeto, decisão, entrega ou aprendizado → é uma entrada
-4. Mantenha o tom da pessoa no "what_i_did" — não reescreva em corporês
-5. Detecte skills implícitas no que foi descrito
-6. Se há data mencionada, use. Se não há, não invente.
-
-FORMATO — responda APENAS com JSON válido dentro de bloco de código:
-\`\`\`json
-[
-  {
-    "what_i_did": "...",
-    "decision": "...",
-    "learning": "...",
-    "impact": "...",
-    "metric": "...",
-    "entry_date": "YYYY-MM-DD ou null",
-    "tags": ["skill1", "skill2"],
-    "company": "nome se mencionado",
-    "role_title": "cargo se mencionado",
-    "raw_content": "trecho original da transcrição"
-  }
-]
-\`\`\`
-`
-
-export function buildAudioUserPrompt(transcript: string): string {
-  return `
-Extraia entradas de carreira da seguinte transcrição de áudio:
-
----
-${transcript}
----
-`
-}
-```
+> Nota de implementação: injete `{{CONTEXT}}` no `system` uma vez por request (o exemplo acima simplifica). Mantenha o system estável para aproveitar **prompt caching**.
 
 ---
 
-## Prompt: Texto livre / chips
-
-```typescript
-// src/lib/ai/extraction/prompts/text.ts
-
-export const TEXT_SYSTEM_PROMPT = `
-Você é um assistente especializado em estruturar registros de trabalho.
-A pessoa descreveu algo que fez, decidiu ou aprendeu — pode ser um parágrafo curto ou longo.
-
-Seu trabalho é extrair uma ou mais entradas estruturadas a partir desse texto.
-
-REGRAS:
-1. Se o texto descreve um evento único → uma entrada
-2. Se o texto descreve vários eventos → várias entradas
-3. Preserve a voz da pessoa em "what_i_did"
-4. Extraia métricas mesmo que vagas ("reduziu bastante" → coloque em impact, não em metric)
-5. Tags devem ser skills ou temas concretos, não adjetivos genéricos
-
-FORMATO — responda APENAS com JSON válido dentro de bloco de código:
-\`\`\`json
-[
-  {
-    "what_i_did": "...",
-    "decision": "...",
-    "learning": "...",
-    "impact": "...",
-    "metric": "...",
-    "entry_date": "YYYY-MM-DD ou null",
-    "tags": ["skill1", "skill2"],
-    "raw_content": "texto original"
-  }
-]
-\`\`\`
-`
-```
-
----
-
-## Schema de validação (Zod)
+## Validação (Zod)
 
 ```typescript
 // src/lib/ai/extraction/schemas.ts
 import { z } from 'zod'
-import type { ExtractedEntry } from '@/types/entry'
 
-const extractedEntrySchema = z.object({
+const entrySchema = z.object({
   what_i_did: z.string().min(1),
-  decision: z.string().optional().nullable(),
-  learning: z.string().optional().nullable(),
-  impact: z.string().optional().nullable(),
-  metric: z.string().optional().nullable(),
-  entry_date: z.string().optional().nullable(),
+  decision: z.string().nullish(),
+  learning: z.string().nullish(),
+  impact: z.string().nullish(),
+  metric: z.string().nullish(),
+  entry_date: z.string().nullish(),
   tags: z.array(z.string()).default([]),
-  company: z.string().optional().nullable(),
-  role_title: z.string().optional().nullable(),
-  role_start: z.string().optional().nullable(),
-  role_end: z.string().optional().nullable(),
-  raw_content: z.string().default(''),
-  source: z.enum(['linkedin_pdf', 'audio', 'text', 'chips']),
+  company: z.string().nullish(),
+  role_title: z.string().nullish(),
 })
 
-export function validateEntries(raw: unknown[]): ExtractedEntry[] {
-  return raw.flatMap((item) => {
-    const result = extractedEntrySchema.safeParse(item)
-    if (result.success) return [result.data as ExtractedEntry]
-    console.warn('Entrada inválida ignorada:', result.error.issues)
-    return []
-  })
+const reflectionSchema = z.object({
+  summary: z.string().min(1),
+  pills: z.array(z.string()).min(1).max(4),
+  move: z.object({
+    type: z.enum(['question', 'affirmation', 'suggestion']),
+    text: z.string().min(1),
+    field: z.enum(['metric', 'impact', 'decision', 'learning']).optional(),
+  }),
+})
+
+export function validateCaptureResult(raw: unknown, source: string) {
+  const parsed = z.object({
+    entries: z.array(entrySchema).min(1),
+    reflection: reflectionSchema,
+  }).parse(raw)
+
+  return {
+    entries: parsed.entries.map(e => ({ ...e, source, tags: e.tags ?? [], raw_content: '' })),
+    reflection: parsed.reflection,
+  }
 }
 ```
 
 ---
 
-## Wrapper: extractFromLinkedIn
+## Wrappers por modalidade
+
+`extractFromLinkedIn` (import em lote, **só extração**, sem reflexo individual) e os wrappers de áudio/texto continuam, mas a captura avulsa do painel usa `captureAndReflect`.
 
 ```typescript
-// src/lib/ai/extraction/extractFromLinkedIn.ts
+// src/lib/ai/extraction/extractFromLinkedIn.ts  — usado pelo doc 003
 import { extractEntries } from './extractEntries'
 import { LINKEDIN_SYSTEM_PROMPT, buildLinkedInUserPrompt } from './prompts/linkedin'
-import type { ExtractedEntry } from '@/types/entry'
 
-export async function extractFromLinkedIn(pdfText: string): Promise<ExtractedEntry[]> {
+export async function extractFromLinkedIn(pdfText: string) {
   return extractEntries({
     source: 'linkedin_pdf',
     systemPrompt: LINKEDIN_SYSTEM_PROMPT,
@@ -358,63 +359,43 @@ export async function extractFromLinkedIn(pdfText: string): Promise<ExtractedEnt
 }
 ```
 
+(O `LINKEDIN_SYSTEM_PROMPT`, `extractEntries` base e o prompt de áudio seguem como na versão anterior deste doc — extração pura, sem o bloco de reflexo.)
+
 ---
 
-## saveEntries — persistência
+## buildCaptureContext
 
 ```typescript
-// src/lib/db/entries.ts
+// src/lib/ai/extraction/context.ts
 import { createServerClient } from '@/lib/db/supabase/server'
-import type { ExtractedEntry, Entry } from '@/types/entry'
+import type { CaptureContext } from '@/types/capture'
 
-export async function saveEntries(
-  entries: ExtractedEntry[],
-  userId: string
-): Promise<Entry[]> {
+export async function buildCaptureContext(userId: string): Promise<CaptureContext> {
   const supabase = createServerClient()
-
-  const toInsert = entries.map((e) => ({
-    ...e,
-    user_id: userId,
-  }))
-
-  const { data, error } = await supabase
-    .from('entries')
-    .insert(toInsert)
-    .select()
-
-  if (error) throw new Error(`Erro ao salvar entradas: ${error.message}`)
-
-  return data as Entry[]
+  const [mirror, recent, count] = await Promise.all([
+    supabase.from('mirror_snapshots').select('strength_themes')
+      .eq('user_id', userId).order('generated_at', { ascending: false }).limit(1).maybeSingle(),
+    supabase.from('entries').select('what_i_did')
+      .eq('user_id', userId).order('created_at', { ascending: false }).limit(5),
+    supabase.from('entries').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+  ])
+  return {
+    strengthThemes: mirror.data?.strength_themes ?? [],
+    recentSummaries: (recent.data ?? []).map(e => e.what_i_did),
+    entryCount: count.count ?? 0,
+  }
 }
+```
 
-export async function getRecentEntries(userId: string, limit = 3): Promise<Entry[]> {
-  const supabase = createServerClient()
+---
 
-  const { data, error } = await supabase
-    .from('entries')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(limit)
+## Enriquecimento (responder a pergunta do reflexo)
 
-  if (error) throw new Error(`Erro ao buscar entradas: ${error.message}`)
-
-  return data as Entry[]
-}
-
-export async function countEntries(userId: string): Promise<number> {
-  const supabase = createServerClient()
-
-  const { count, error } = await supabase
-    .from('entries')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-
-  if (error) throw new Error(`Erro ao contar entradas: ${error.message}`)
-
-  return count ?? 0
-}
+```typescript
+// src/app/api/entries/[id]/enrich/route.ts
+// PATCH { answer, field } → atualiza o campo da entrada (ex: metric)
+// Sem nova chamada de IA: o texto da resposta vira o valor do campo.
+// Mantém a captura barata e a resposta instantânea.
 ```
 
 ---
@@ -423,30 +404,30 @@ export async function countEntries(userId: string): Promise<number> {
 
 | Cenário | Comportamento |
 |---|---|
-| Modelo não retorna JSON | Log de erro + retorna `[]` + mostra mensagem para tentar de novo |
-| Entrada falha na validação | Ignora a entrada inválida, continua com as válidas |
-| Supabase falha no insert | Lança erro → API route retorna 500 → UI mostra retry |
-| Texto muito curto (<50 chars) | Haiku tenta mesmo assim; se retornar vazio, UI pede mais contexto |
-| PDF ilegível / escaneado | `extractText` retorna string vazia → erro claro na UI |
+| Haiku não retorna JSON | Erro → CaptureConversation mostra retry; entrada não salva |
+| Entrada falha validação | Erro → retry (no MVP, não salva parcial) |
+| Input < 3 chars | 400 "Conta um pouco mais" antes de chamar IA |
+| Áudio não transcreve | Erro claro; oferece digitar |
+| Imagem sem contexto de trabalho | Reflexo pergunta "o que é isso?" em vez de inventar |
 
 ---
 
-## Estimativa de custo (Claude Haiku)
+## Custo (Haiku) por captura
 
-| Cenário | Tokens estimados | Custo aprox. |
+| Modalidade | Tokens aprox. | Custo |
 |---|---|---|
-| LinkedIn PDF (5 cargos) | ~3.000 input + 1.000 output | ~$0.001 |
-| Áudio 3 min (transcrição) | ~1.500 input + 800 output | < $0.001 |
-| Texto livre (1 parágrafo) | ~500 input + 300 output | < $0.0001 |
+| Texto curto + reflexo | ~700 in + 400 out | < $0.0002 |
+| Áudio (após Whisper) | ~1.500 in + 400 out | < $0.0005 |
+| Imagem (visão) | ~1.500 in + 400 out | < $0.001 |
 
-Haiku é a escolha certa aqui. Sonnet é reservado para o espelho (doc 005).
+Reflexo + extração numa chamada Haiku mantém a captura quase gratuita. Sonnet fica só pro espelho (doc 005).
 
 ---
 
-## Fora do escopo neste bloco
+## Fora do escopo
 
-- Streaming de entradas enquanto extrai (v2 — nice to have)
-- Extração incremental de PDFs muito longos (>20 páginas)
-- Deduplicação de entradas (detectar se a pessoa já importou o mesmo cargo)
-- Embeddings para busca semântica (v2)
-- Classificação automática de tipo de entrada (o_que_fiz vs decisao) — tags são suficientes no v1
+- Streaming token-a-token do reflexo (animação fixa no MVP)
+- Múltiplos movimentos por reflexo (sempre um só)
+- Reflexo no import em lote do LinkedIn (lá é diagnóstico de conjunto, doc 003)
+- Deduplicação de entradas
+- Embeddings / busca semântica

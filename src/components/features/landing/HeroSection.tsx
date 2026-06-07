@@ -64,7 +64,7 @@ function HeroVisual() {
                 fontStyle: 'italic',
               }}
             >
-              "Organizei a força-tarefa na crise do servidor e alinhei os times em tempo real..."
+              &ldquo;Organizei a força-tarefa na crise do servidor e alinhei os times em tempo real...&rdquo;
             </p>
           </div>
         </div>
@@ -197,7 +197,7 @@ export function HeroSection() {
 
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                href="/sign-up"
+                href="/login?mode=signup"
                 aria-label={t('cta.primaryAriaLabel')}
                 className="inline-flex items-center justify-center min-h-[52px] px-8 py-3 rounded-full font-semibold transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                 style={{
@@ -209,7 +209,7 @@ export function HeroSection() {
               </Link>
 
               <Link
-                href="/sign-in"
+                href="/login"
                 aria-label={t('cta.secondaryAriaLabel')}
                 className="inline-flex items-center justify-center min-h-[52px] px-8 py-3 rounded-full font-medium transition-opacity hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                 style={{

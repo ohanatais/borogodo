@@ -31,7 +31,7 @@ export function CtaSection() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/sign-up"
+            href="/login?mode=signup"
             aria-label={t('primaryAriaLabel')}
             className="inline-flex items-center justify-center min-h-[52px] px-8 py-3 rounded-full font-semibold transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             style={{
@@ -43,7 +43,7 @@ export function CtaSection() {
           </Link>
 
           <Link
-            href="/sign-in"
+            href="/login"
             aria-label={t('secondaryAriaLabel')}
             className="inline-flex items-center justify-center min-h-[52px] px-8 py-3 rounded-full font-medium transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             style={{

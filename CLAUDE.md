@@ -1,9 +1,9 @@
 <!-- SPECKIT START -->
-Current feature: **001-landing-page**
-Implementation plan: [specs/001-landing-page/plan.md](specs/001-landing-page/plan.md)
-Spec: [specs/001-landing-page/spec.md](specs/001-landing-page/spec.md)
-Research: [specs/001-landing-page/research.md](specs/001-landing-page/research.md)
-Data model: [specs/001-landing-page/data-model.md](specs/001-landing-page/data-model.md)
-Contracts: [specs/001-landing-page/contracts/ui-contracts.md](specs/001-landing-page/contracts/ui-contracts.md)
-Quickstart: [specs/001-landing-page/quickstart.md](specs/001-landing-page/quickstart.md)
+Current feature: **002-user-auth**
+Implementation plan: [specs/002-user-auth/plan.md](specs/002-user-auth/plan.md)
+Spec: [specs/002-user-auth/spec.md](specs/002-user-auth/spec.md)
+Research: [specs/002-user-auth/research.md](specs/002-user-auth/research.md)
+Data model: [specs/002-user-auth/data-model.md](specs/002-user-auth/data-model.md)
+Contracts: [specs/002-user-auth/contracts/ui-contracts.md](specs/002-user-auth/contracts/ui-contracts.md)
+Quickstart: [specs/002-user-auth/quickstart.md](specs/002-user-auth/quickstart.md)
 <!-- SPECKIT END -->

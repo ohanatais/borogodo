@@ -87,5 +87,54 @@
     "secondary": "Já tenho conta",
     "primaryAriaLabel": "Criar conta gratuita",
     "secondaryAriaLabel": "Entrar na minha conta"
+  },
+  "auth": {
+    "headline": {
+      "signup": "Seu borogodó começa aqui",
+      "login": "Bem-vindo de volta"
+    },
+    "subheadline": {
+      "signup": "Crie sua conta para descobrir onde você manda bem"
+    },
+    "tab": {
+      "signup": "Criar conta",
+      "login": "Entrar"
+    },
+    "google": "Entrar com Google",
+    "divider": "ou",
+    "field": {
+      "name": "Nome",
+      "email": "E-mail",
+      "password": "Senha",
+      "confirmPassword": "Confirmar senha"
+    },
+    "hint": {
+      "password": "Mínimo 8 caracteres"
+    },
+    "submit": {
+      "signup": "Criar conta",
+      "login": "Entrar"
+    },
+    "confirm": {
+      "title": "Confira sua caixa de entrada",
+      "body": "o link chega em segundos"
+    },
+    "resend": "Reenviar e-mail de confirmação",
+    "error": {
+      "emailTaken": "Esse e-mail já tem uma conta. Quer entrar?",
+      "wrongPassword": "Senha incorreta",
+      "emailNotConfirmed": "Confirme seu e-mail antes de entrar",
+      "nameRequired": "Nome é obrigatório",
+      "emailInvalid": "E-mail inválido",
+      "passwordTooShort": "A senha precisa ter pelo menos 8 caracteres",
+      "passwordMismatch": "As senhas não coincidem",
+      "network": "Erro de conexão. Tente novamente"
+    }
+  },
+  "painel": {
+    "greeting": "Olá, {name}",
+    "placeholder": "Seu painel está chegando. Por enquanto, tudo certo.",
+    "logout": "Sair",
+    "logoutAriaLabel": "Encerrar sessão"
   }
 }

@@ -7,15 +7,15 @@ describe('HeroSection', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
   })
 
-  it('"Criar conta" link points to /sign-up', () => {
+  it('T028: "Criar conta" link points to /login?mode=signup', () => {
     const { container } = render(<HeroSection />)
-    const link = container.querySelector('a[href="/sign-up"]')
+    const link = container.querySelector('a[href="/login?mode=signup"]')
     expect(link).toBeInTheDocument()
   })
 
-  it('"Já tenho conta" link points to /sign-in', () => {
+  it('T028: "Já tenho conta" link points to /login', () => {
     const { container } = render(<HeroSection />)
-    const link = container.querySelector('a[href="/sign-in"]')
+    const link = container.querySelector('a[href="/login"]')
     expect(link).toBeInTheDocument()
   })
 

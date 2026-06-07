@@ -59,5 +59,54 @@
     "secondary": "",
     "primaryAriaLabel": "",
     "secondaryAriaLabel": ""
+  },
+  "auth": {
+    "headline": {
+      "signup": "Your borogodó starts here",
+      "login": "Welcome back"
+    },
+    "subheadline": {
+      "signup": "Create your account to discover where you shine"
+    },
+    "tab": {
+      "signup": "Sign up",
+      "login": "Sign in"
+    },
+    "google": "Sign in with Google",
+    "divider": "or",
+    "field": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password"
+    },
+    "hint": {
+      "password": "Minimum 8 characters"
+    },
+    "submit": {
+      "signup": "Create account",
+      "login": "Sign in"
+    },
+    "confirm": {
+      "title": "Check your inbox",
+      "body": "the link arrives in seconds"
+    },
+    "resend": "Resend confirmation email",
+    "error": {
+      "emailTaken": "This email already has an account. Want to sign in?",
+      "wrongPassword": "Incorrect password",
+      "emailNotConfirmed": "Please confirm your email before signing in",
+      "nameRequired": "Name is required",
+      "emailInvalid": "Invalid email",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match",
+      "network": "Connection error. Please try again"
+    }
+  },
+  "painel": {
+    "greeting": "Hello, {name}",
+    "placeholder": "Your dashboard is coming. Everything's good for now.",
+    "logout": "Sign out",
+    "logoutAriaLabel": "End session"
   }
 }
