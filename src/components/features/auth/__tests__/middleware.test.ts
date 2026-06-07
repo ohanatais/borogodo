@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockGetUser = vi.fn()
@@ -14,7 +14,6 @@ vi.mock('@/lib/db/supabase/middleware', () => ({
 
 vi.mock('next-intl/middleware', () => ({
   default: () => (_request: NextRequest) => {
-    const { NextResponse } = require('next/server')
     return NextResponse.next()
   },
 }))

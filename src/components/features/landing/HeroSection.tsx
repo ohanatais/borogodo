@@ -64,7 +64,7 @@ function HeroVisual() {
                 fontStyle: 'italic',
               }}
             >
-              "Organizei a força-tarefa na crise do servidor e alinhei os times em tempo real..."
+              &ldquo;Organizei a força-tarefa na crise do servidor e alinhei os times em tempo real...&rdquo;
             </p>
           </div>
         </div>
