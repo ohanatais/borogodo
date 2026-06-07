@@ -70,3 +70,11 @@ Code como par de implementação. Isso muda como o trabalho deve acontecer aqui:
 - **Atualize este arquivo quando tomarmos decisões importantes.** Contexto persistente
   é o que evita recomeçar do zero a cada sessão — me lembre de manter isso em dia.
 - Prefiro entender o que está sendo feito a ter o resultado mais rápido.
+
+## Aprendizados (`docs/aprendizados.md`)
+
+Quando algo me surpreender, destravar algo, ou exigir uma decisão não-óbvia durante o
+trabalho — flag isso e proponha uma entrada para `docs/aprendizados.md`, no formato já
+estabelecido lá (o que aconteceu, o que aprendi, por que importa). Não registre tudo —
+só o que valeria a pena lembrar depois ou virar conteúdo real para o ecossistema da
+Ohana (`build-with-claude`, `product-thinking`). A decisão final de incluir é sempre dela.
