@@ -1,0 +1,138 @@
+---
+description: "Task list for 003-capture-pipeline"
+---
+
+# Tasks: Pipeline de Captura (Extração + Reflexo)
+
+**Input**: `/specs/003-capture-pipeline/` (plan.md, spec.md, data-model.md, contracts/, research.md)
+
+**Tests**: OBRIGATÓRIOS (constituição — TDD; cobertura ≥ 80%). Escrever testes antes da implementação.
+
+**Referência de código/prompts**: `docs/mvp/004-extraction-pipeline.md`.
+
+## Format: `[ID] [P?] [Story] Description`
+
+- **[P]**: paralelizável (arquivos diferentes, sem dependência)
+- **[Story]**: US1 (captura texto), US2 (import arquivo), US3 (enrich)
+
+---
+
+## Phase 1: Setup
+
+- [x] T001 Instalar deps: `npm install @anthropic-ai/sdk zod pdf-parse` + `npm install -D @types/pdf-parse`
+- [x] T002 [P] Garantir config Vitest + Testing Library (reusar do 002) e script `test:coverage`
+- [x] T003 [P] Criar `src/lib/log.ts` (logger que NUNCA registra dados de usuário) se não existir
+
+---
+
+## Phase 2: Foundational (bloqueia todas as stories)
+
+**⚠️ Nenhuma story começa antes desta fase.**
+
+- [x] T004 Criar migration `supabase/migrations/00X_entries.sql` (tabela `entries` + RLS + índice) conforme `data-model.md`
+- [x] T005 **Manual**: aplicar a migration no SQL editor do Supabase
+- [x] T006 [P] Criar tipos `src/types/entry.ts` (`EntrySource`, `ExtractedEntry`, `Entry`)
+- [x] T007 [P] Criar tipos `src/types/capture.ts` (`CaptureInput` com 4 ramos, `Reflection*`, `CaptureContext`, `CaptureResult`)
+- [x] T008 [P] Criar a **costura de provider de IA** (ver `research.md` D10):
+      - `src/lib/ai/provider.ts` (`LLMProvider`, `LLMRequest`, `AIRole`, `getProvider()` lendo `AI_PROVIDER`, default `anthropic`)
+      - `src/lib/ai/models.ts` (papel `extraction` → `claude-haiku-4-5`; `synthesis` → `claude-sonnet-4-6` para a 004)
+      - `src/lib/ai/providers/anthropic.ts` (implementa `complete()` via `@anthropic-ai/sdk`, lê `ANTHROPIC_API_KEY`) — DEFAULT
+      - `src/lib/ai/providers/deepseek.ts` (**stub documentado**, OpenAI-compatible; lança "não habilitado no MVP")
+      - `src/lib/ai/client.ts` delega ao provider ativo
+      - Teste unitário `tests/unit/provider.test.ts`: default = Anthropic; `AI_PROVIDER=deepseek` seleciona o stub (FAIL primeiro)
+- [x] T009 Criar `src/lib/ai/extraction/schemas.ts` com Zod (`validateCaptureResult`, `validateEntries`) — **escrever T010 antes**
+- [x] T010 [P] Teste `tests/unit/schemas.test.ts`: valida reflexo (1–4 pills, 1 move, field em question), rejeita JSON malformado (FAIL primeiro)
+- [x] T011 Criar `src/lib/db/entries.ts` (`saveEntries`, `getRecentEntries`, `enrichEntryField`) usando server client autenticado (RLS)
+- [x] T012 [P] Criar `src/lib/ai/extraction/jobs.ts`: `triggerProactiveInsight` e `maybeRegenerateMirror` como **stubs no-op documentados** (costuras p/ 005 e 004)
+- [x] T013 [P] Criar `src/lib/ai/transcribe.ts` como **stub documentado** (áudio futuro — lança "não implementado")
+- [x] T014 [P] Criar `src/lib/pdf/extractText.ts` (wrapper `pdf-parse`)
+
+**Checkpoint**: schema, tipos, validação, persistência e costuras prontos.
+
+---
+
+## Phase 3: User Story 1 — Captura de texto (P1) 🎯 MVP
+
+**Goal**: texto livre → entrada estruturada + reflexo, salvo sem fricção.
+
+**Independent Test**: `POST /api/capture` (kind=text) salva entrada e retorna reflexo válido.
+
+### Tests (FAIL primeiro)
+- [x] T015 [P] [US1] `tests/unit/prompts.test.ts`: `buildCaptureUserPrompt` injeta contexto sem vazar p/ outro usuário; system estável
+- [x] T016 [P] [US1] `tests/unit/context.test.ts`: `buildCaptureContext` retorna `strengthThemes:[]` quando não há mirror (tolerante)
+- [x] T017 [P] [US1] `tests/integration/capture-route.test.ts`: 200 salva entrada; 400 texto<3; 401 sem sessão; 500 se Zod falha (nada persistido)
+
+### Implementação
+- [x] T018 [US1] `src/lib/ai/extraction/prompts/capture.ts`: `CAPTURE_SYSTEM_PROMPT` + `buildCaptureUserPrompt` (doc 004)
+- [x] T019 [US1] `src/lib/ai/extraction/context.ts`: `buildCaptureContext` (mirror tolerante, recent ~5, count)
+- [x] T020 [US1] `src/lib/ai/extraction/captureAndReflect.ts`: chama `getProvider().complete({ role: 'extraction', system, user, maxTokens })` (default = Haiku), parse do bloco JSON, `validateCaptureResult`
+- [x] T021 [US1] `src/app/api/capture/route.ts`: auth no topo → validação de borda → normaliza (text) → contexto → `captureAndReflect` → `saveEntries` → dispara jobs (log no catch) → 200. Ramos `audio`/`image` → 501; `file` delega à US2.
+- [x] T022 [US1] Garantir cobertura e refino (funções ≤ 40 linhas, sem `any`, sem catch vazio)
+
+**Checkpoint**: captura de texto funcional e testada isolada.
+
+---
+
+## Phase 4: User Story 2 — Import de arquivo / LinkedIn (P2)
+
+**Goal**: PDF → texto → entradas estruturadas (extração pura). Motor reusado por 006.
+
+**Independent Test**: `extractFromLinkedIn(pdfText)` retorna entradas válidas; rota aceita `kind=file`.
+
+### Tests (FAIL primeiro)
+- [x] T023 [P] [US2] `tests/integration/extract-linkedin.test.ts`: extrai 1..N entradas válidas; respeita `maxEntries`
+- [x] T024 [P] [US2] Estender `capture-route.test.ts`: `kind=file` válido salva entradas; não-PDF → 400; >10MB → 400
+
+### Implementação
+- [x] T025 [US2] `src/lib/ai/extraction/prompts/linkedin.ts`: `LINKEDIN_SYSTEM_PROMPT` + `buildLinkedInUserPrompt`
+- [x] T026 [US2] `src/lib/ai/extraction/extractEntries.ts`: base de extração pura (Haiku, validação Zod, `maxEntries`)
+- [x] T027 [US2] `src/lib/ai/extraction/extractFromLinkedIn.ts`: wrapper sobre `extractEntries` (source `linkedin_pdf`, máx 20)
+- [x] T028 [US2] Ramo `file` em `/api/capture`: `extractTextFromPDF` → extração → `saveEntries` (validação de borda PDF/10MB)
+
+**Checkpoint**: import de arquivo funcional; `extractFromLinkedIn` pronto para 006.
+
+---
+
+## Phase 5: User Story 3 — Enriquecimento sem IA (P3)
+
+**Goal**: resposta do usuário vira valor de campo, sem LLM, respeitando RLS.
+
+**Independent Test**: `PATCH /api/entries/:id/enrich` atualiza campo do próprio usuário; bloqueia de outros.
+
+### Tests (FAIL primeiro)
+- [x] T029 [P] [US3] `tests/integration/enrich-route.test.ts`: 200 atualiza campo; 400 field inválido; entrada de outro usuário não é alterada (RLS)
+
+### Implementação
+- [x] T030 [US3] `src/app/api/entries/[id]/enrich/route.ts`: auth → valida `field` (conjunto fechado) + `answer` → `enrichEntryField` (sem IA) → 200
+
+**Checkpoint**: enrich funcional e seguro.
+
+---
+
+## Phase 6: Polish & Cross-Cutting
+
+- [x] T031 [P] Revisar mensagens de erro (constantes pt-BR) e alinhar microcopy ao doc 004
+- [x] T032 Auditoria de segurança: auth no topo de todas as rotas; RLS; zero dado em log; sem segredo no client
+- [x] T033 Rodar `test:coverage` e confirmar ≥ 80% nos módulos de extração/validação/rota
+- [x] T034 Atualizar `quickstart.md` se algo divergiu; deixar costuras (jobs, audio/image) claramente marcadas para 004/005
+
+---
+
+## Dependencies & Execution Order
+
+- **Setup (P1)** → **Foundational (P2)** bloqueia tudo.
+- **US1 (P3 fase)** é o MVP; **US2** e **US3** dependem só da Foundational e podem seguir em paralelo após US1.
+- Dentro de cada story: testes (FAIL) → implementação → refino.
+- Costuras `jobs.ts` (T012) e ramos 501 (T021) não devem ser removidas — são preenchidas por 004/005.
+
+## Parallel Opportunities
+
+- T006, T007, T008 em paralelo (arquivos distintos).
+- Testes marcados [P] de stories diferentes em paralelo.
+- T013 (transcribe stub) e T014 (pdf) independentes.
+
+## Notes
+
+- Commit após cada task ou grupo lógico.
+- Verificar que cada teste FALHA antes de implementar.
+- `maybeRegenerateMirror` será ligado de verdade na feature 004; `triggerProactiveInsight` na 005.

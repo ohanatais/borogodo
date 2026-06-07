@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (source !== 'image' && rawText.trim().length < 3) {
-    return NextResponse.json({ error: 'Conta um pouco mais — não consegui captar.' }, { status: 400 })
+    return NextResponse.json({ error: 'Conta um pouco mais, ainda não consegui captar.' }, { status: 400 })
   }
 
   // 2. Contexto compacto

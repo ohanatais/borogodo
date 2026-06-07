@@ -89,6 +89,9 @@ describe('AuthForm — signup mode', () => {
     fireEvent.change(screen.getByLabelText('field.password'), {
       target: { value: 'senha12345' },
     })
+    fireEvent.change(screen.getByLabelText('field.confirmPassword'), {
+      target: { value: 'senha12345' },
+    })
     fireEvent.click(screen.getByRole('button', { name: 'submit.signup' }))
     await waitFor(() => {
       expect(screen.getByText('error.emailTaken')).toBeInTheDocument()
@@ -106,6 +109,9 @@ describe('AuthForm — signup mode', () => {
       target: { value: 'new@example.com' },
     })
     fireEvent.change(screen.getByLabelText('field.password'), {
+      target: { value: 'senha12345' },
+    })
+    fireEvent.change(screen.getByLabelText('field.confirmPassword'), {
       target: { value: 'senha12345' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'submit.signup' }))

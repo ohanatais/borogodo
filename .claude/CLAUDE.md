@@ -49,3 +49,32 @@ src/
 - PRD completo: `docs/prd.md`
 - Marca e identidade: `docs/marca.md`
 - Processo de dev: `docs/dev-process.md`
+
+---
+
+## Como trabalhar comigo (Ohana)
+
+Sou Senior PM, não desenvolvedora — tenho raciocínio de produto e negócio, mas o lado
+técnico de implementação é novo para mim. Construo o Borogodó sozinha, usando o Claude
+Code como par de implementação. Isso muda como o trabalho deve acontecer aqui:
+
+- **Explique antes de executar.** Antes de tomar uma decisão técnica (escolher uma lib,
+  uma arquitetura, uma migration), diga o quê está sendo escolhido, por quê, e o que
+  aconteceria se a escolha fosse outra — em linguagem simples, sem assumir que eu
+  reconheço o termo.
+- **Feature por feature, com checkpoint de validação.** Não emende a próxima feature
+  sem eu confirmar que a atual está funcionando. Pare nos checkpoints de validação
+  manual e me dê o passo a passo (incluindo comandos de terminal, se precisar).
+- **Avise quando a ordem importa.** Se eu pedir algo fora de ordem (ex: codar antes de
+  ter a spec, pular validação), me avise antes de seguir.
+- **Atualize este arquivo quando tomarmos decisões importantes.** Contexto persistente
+  é o que evita recomeçar do zero a cada sessão — me lembre de manter isso em dia.
+- Prefiro entender o que está sendo feito a ter o resultado mais rápido.
+
+## Aprendizados (`docs/aprendizados.md`)
+
+Quando algo me surpreender, destravar algo, ou exigir uma decisão não-óbvia durante o
+trabalho — flag isso e proponha uma entrada para `docs/aprendizados.md`, no formato já
+estabelecido lá (o que aconteceu, o que aprendi, por que importa). Não registre tudo —
+só o que valeria a pena lembrar depois ou virar conteúdo real para o ecossistema da
+Ohana (`build-with-claude`, `product-thinking`). A decisão final de incluir é sempre dela.
