@@ -1,7 +1,48 @@
-import createMiddleware from 'next-intl/middleware'
+import createIntlMiddleware from 'next-intl/middleware'
+import { NextResponse, type NextRequest } from 'next/server'
 import { routing } from './i18n/routing'
+import { updateSession } from './lib/db/supabase/middleware'
 
-export default createMiddleware(routing)
+const intlMiddleware = createIntlMiddleware(routing)
+
+const PUBLIC_ROUTES = ['/', '/login', '/auth/callback']
+
+function isPublicRoute(pathname: string): boolean {
+  return PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + '/')
+  )
+}
+
+function transferCookies(from: NextResponse, to: NextResponse): void {
+  from.cookies.getAll().forEach((cookie) => {
+    to.cookies.set(cookie.name, cookie.value, { path: '/' })
+  })
+}
+
+export default async function middleware(request: NextRequest) {
+  const { user, supabaseResponse } = await updateSession(request)
+  const { pathname } = request.nextUrl
+
+  if (!user && !isPublicRoute(pathname)) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    const redirectResponse = NextResponse.redirect(url)
+    transferCookies(supabaseResponse, redirectResponse)
+    return redirectResponse
+  }
+
+  if (user && pathname === '/login') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/painel'
+    const redirectResponse = NextResponse.redirect(url)
+    transferCookies(supabaseResponse, redirectResponse)
+    return redirectResponse
+  }
+
+  const intlResponse = intlMiddleware(request)
+  transferCookies(supabaseResponse, intlResponse)
+  return intlResponse
+}
 
 export const config = {
   matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],

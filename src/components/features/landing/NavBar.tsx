@@ -27,7 +27,7 @@ export function NavBar() {
         <Logo variant={scrolled ? 'light' : 'dark'} size="sm" />
 
         <Link
-          href="/sign-up"
+          href="/login?mode=signup"
           aria-label={t('ctaAriaLabel')}
           className="inline-flex items-center justify-center px-5 py-2 rounded-full text-sm font-semibold transition-colors duration-300"
           style={{
