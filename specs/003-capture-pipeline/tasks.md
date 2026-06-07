@@ -33,7 +33,13 @@ description: "Task list for 003-capture-pipeline"
 - [ ] T005 **Manual**: aplicar a migration no SQL editor do Supabase
 - [ ] T006 [P] Criar tipos `src/types/entry.ts` (`EntrySource`, `ExtractedEntry`, `Entry`)
 - [ ] T007 [P] Criar tipos `src/types/capture.ts` (`CaptureInput` com 4 ramos, `Reflection*`, `CaptureContext`, `CaptureResult`)
-- [ ] T008 [P] Criar `src/lib/ai/client.ts` (instância Anthropic compartilhada, lê `ANTHROPIC_API_KEY`)
+- [ ] T008 [P] Criar a **costura de provider de IA** (ver `research.md` D10):
+      - `src/lib/ai/provider.ts` (`LLMProvider`, `LLMRequest`, `AIRole`, `getProvider()` lendo `AI_PROVIDER`, default `anthropic`)
+      - `src/lib/ai/models.ts` (papel `extraction` → `claude-haiku-4-5`; `synthesis` → `claude-sonnet-4-6` para a 004)
+      - `src/lib/ai/providers/anthropic.ts` (implementa `complete()` via `@anthropic-ai/sdk`, lê `ANTHROPIC_API_KEY`) — DEFAULT
+      - `src/lib/ai/providers/deepseek.ts` (**stub documentado**, OpenAI-compatible; lança "não habilitado no MVP")
+      - `src/lib/ai/client.ts` delega ao provider ativo
+      - Teste unitário `tests/unit/provider.test.ts`: default = Anthropic; `AI_PROVIDER=deepseek` seleciona o stub (FAIL primeiro)
 - [ ] T009 Criar `src/lib/ai/extraction/schemas.ts` com Zod (`validateCaptureResult`, `validateEntries`) — **escrever T010 antes**
 - [ ] T010 [P] Teste `tests/unit/schemas.test.ts`: valida reflexo (1–4 pills, 1 move, field em question), rejeita JSON malformado (FAIL primeiro)
 - [ ] T011 Criar `src/lib/db/entries.ts` (`saveEntries`, `getRecentEntries`, `enrichEntryField`) usando server client autenticado (RLS)
@@ -59,7 +65,7 @@ description: "Task list for 003-capture-pipeline"
 ### Implementação
 - [ ] T018 [US1] `src/lib/ai/extraction/prompts/capture.ts`: `CAPTURE_SYSTEM_PROMPT` + `buildCaptureUserPrompt` (doc 004)
 - [ ] T019 [US1] `src/lib/ai/extraction/context.ts`: `buildCaptureContext` (mirror tolerante, recent ~5, count)
-- [ ] T020 [US1] `src/lib/ai/extraction/captureAndReflect.ts`: chamada Haiku `claude-haiku-4-5`, parse do bloco JSON, `validateCaptureResult`
+- [ ] T020 [US1] `src/lib/ai/extraction/captureAndReflect.ts`: chama `getProvider().complete({ role: 'extraction', system, user, maxTokens })` (default = Haiku), parse do bloco JSON, `validateCaptureResult`
 - [ ] T021 [US1] `src/app/api/capture/route.ts`: auth no topo → validação de borda → normaliza (text) → contexto → `captureAndReflect` → `saveEntries` → dispara jobs (log no catch) → 200. Ramos `audio`/`image` → 501; `file` delega à US2.
 - [ ] T022 [US1] Garantir cobertura e refino (funções ≤ 40 linhas, sem `any`, sem catch vazio)
 

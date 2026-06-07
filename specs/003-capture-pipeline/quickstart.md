@@ -6,6 +6,7 @@
 
 1. **Variáveis de ambiente** em `.env.local`:
    - `ANTHROPIC_API_KEY` (server-side; nunca `NEXT_PUBLIC_`)
+   - `AI_PROVIDER` (opcional; default `anthropic`). Mantenha `anthropic` no MVP — `deepseek` é só costura (stub).
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (já do 002)
 2. **Dependências**:
    ```bash

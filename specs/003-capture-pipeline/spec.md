@@ -15,6 +15,7 @@
 - Q: Quais modalidades de captura entram no MVP? → A: **Texto e arquivo (PDF)**. Áudio (Whisper) e imagem (visão Haiku) ficam fora do MVP, mas o type union `CaptureInput` e o `switch` da rota preservam os ramos `audio`/`image` retornando 501 — costuras prontas para ativação futura sem refatoração.
 - Q: O `triggerProactiveInsight` da rota pertence a esta feature? → A: Não. Aqui ele é um **stub no-op documentado** (a tabela `proactive_insights` nasce na feature 005-panel). A rota já o chama de forma defensiva (com log de erro, nunca catch vazio).
 - Q: O `maybeRegenerateMirror` pertence a esta feature? → A: Não. É costura para a feature 004-mirror; em 003 fica como stub no-op. A tabela `mirror_snapshots` ainda não existe nesta feature.
+- Q: Como tratar a possibilidade de trocar Anthropic por um provider mais barato (ex.: DeepSeek)? → A: **Costura de provider**. Todas as chamadas de LLM passam por uma interface `LLMProvider` (`getProvider()` lê `AI_PROVIDER`, default `anthropic`). O default do MVP é Haiku (conformidade com a constituição); um `DeepSeekProvider` (OpenAI-compatible) entra como stub documentado. Trocar o default vira config, mas exige emenda à constituição.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -95,6 +96,7 @@ Após o reflexo, se houve um movimento do tipo "pergunta" (ex.: "tem um número 
 - **FR-014**: A rota MUST disparar `triggerProactiveInsight(userId)` e `maybeRegenerateMirror(userId, total)` como jobs assíncronos não-bloqueantes, com tratamento de erro que **loga** (nunca catch vazio). Em 003 ambos são stubs no-op.
 - **FR-015**: Os ramos `audio` e `image` MUST permanecer no type union e no `switch` da rota, retornando 501 com microcopy "em breve".
 - **FR-016**: Nenhum dado de usuário MUST aparecer em logs; nenhum ID interno de banco MUST vazar em respostas além do `id` da entrada necessário ao enrich.
+- **FR-017**: Toda chamada de LLM MUST passar por uma interface `LLMProvider` (`getProvider()` lendo `AI_PROVIDER`, default `anthropic`), de modo que o modelo concreto seja resolvido por papel lógico (`extraction`). O default do MVP MUST permanecer `claude-haiku-4-5`; um `DeepSeekProvider` entra como stub documentado (não usado). Trocar o default para provider não-Anthropic MUST exigir emenda à constituição.
 
 ### Key Entities
 

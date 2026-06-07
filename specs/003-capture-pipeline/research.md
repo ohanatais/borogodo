@@ -54,6 +54,28 @@ evita buraco de integração entre features.
 **Decisão**: usar `pdf-parse` (doc 003) para extrair texto de PDF server-side.
 **Alternativas rejeitadas**: parsing manual — desnecessário; `pdf-parse` é battle-tested.
 
+### D10 — Costura de provider de IA (Anthropic default, DeepSeek como stub)
+**Decisão**: introduzir uma interface fina `LLMProvider` em `src/lib/ai/provider.ts` com
+`getProvider()` que lê `AI_PROVIDER` (default `anthropic`). `models.ts` mapeia papéis lógicos
+(`extraction` → `claude-haiku-4-5`; `synthesis` → `claude-sonnet-4-6` na 004) para o model id de
+cada provider. `AnthropicProvider` é o único implementado no MVP; `DeepSeekProvider`
+(OpenAI-compatible) fica como **stub documentado**.
+**Racional**: o usuário tem orçamento Anthropic limitado e cogita DeepSeek (mais barato) no futuro.
+Os testes mockam a IA (TDD), então o custo do build é quase zero; o risco de custo é só em produção.
+A costura torna a troca de provider uma questão de config, sem refatorar a extração/reflexo.
+**Interface (mínima, KISS)**:
+```ts
+export type AIRole = 'extraction' | 'synthesis'
+export interface LLMRequest { role: AIRole; system: string; user: string; maxTokens: number /* image?: ... (costura) */ }
+export interface LLMProvider { complete(req: LLMRequest): Promise<string> } // retorna texto bruto; quem chama faz parse do bloco JSON
+export function getProvider(): LLMProvider // lê AI_PROVIDER; default 'anthropic'
+```
+**Conformidade**: o default permanece Haiku/Sonnet → **não viola o Princípio III**. Trocar o
+default para um provider não-Anthropic exige **emenda à constituição** (registrado no plan).
+**Alternativas rejeitadas**: instanciar a Anthropic direto em cada wrapper (acopla; troca futura
+vira refatoração ampla); adotar DeepSeek já agora (risco de qualidade no PT-BR e quebra de
+conformidade sem necessidade de custo no build).
+
 ## Pontos de atenção / riscos
 
 - **Variação do JSON do modelo**: mitigado por Zod + retry no cliente (sem persistência parcial).

@@ -42,7 +42,7 @@ por 005 e 004 respectivamente.
 
 - **I. Security First**: ✅ auth no topo da rota; RLS por `user_id`; sem segredos no client; sem dados em log; validação de input antes de qualquer LLM. Sem violação.
 - **II. TypeScript Strict & Code Quality**: ✅ sem `any` (saída do LLM tipada via Zod infer); funções ≤ 40 linhas (extrair helpers em `normalizeInput`, `buildFormData`); arquivos ≤ 800; sem catch vazio (jobs logam erro).
-- **III. AI-First**: ✅ Haiku para extração/reflexo; saída validada (Zod) antes de persistir; wrappers só em `src/lib/ai/`; prompt caching via system estável; contexto nunca cruza usuários.
+- **III. AI-First**: ✅ Haiku para extração/reflexo **(default do MVP)**; saída validada (Zod) antes de persistir; wrappers só em `src/lib/ai/`; prompt caching via system estável; contexto nunca cruza usuários. **Costura de provider**: `getProvider()` lê `AI_PROVIDER` (default `anthropic`, que mapeia `extraction → claude-haiku-4-5`); a abstração existe para tornar uma troca futura de provider (ex.: DeepSeek) uma questão de config, **sem** violar o Princípio III no MVP. Trocar o default para um provider não-Anthropic exigiria **emenda à constituição** — registrado explicitamente.
 - **IV. Server-First & Performance**: ✅ tudo server-side; sem JS de cliente nesta feature.
 - **V. Accessibility**: N/A (sem UI nesta feature).
 - **VI. TDD**: ✅ testes antes da implementação; cobertura ≥ 80%; alvo = comportamento.
@@ -81,7 +81,12 @@ src/
 │   └── capture.ts                            # CaptureInput, Reflection*, CaptureContext, CaptureResult
 ├── lib/
 │   ├── ai/
-│   │   ├── client.ts                         # instância Anthropic compartilhada
+│   │   ├── provider.ts                       # interface LLMProvider + getProvider() (lê AI_PROVIDER; default 'anthropic')
+│   │   ├── models.ts                         # mapeia papel lógico ('extraction'|'synthesis') → model id por provider
+│   │   ├── providers/
+│   │   │   ├── anthropic.ts                  # AnthropicProvider (@anthropic-ai/sdk) — DEFAULT do MVP
+│   │   │   └── deepseek.ts                   # STUB documentado (OpenAI-compatible) — costura, não usado no MVP
+│   │   ├── client.ts                         # delega ao provider ativo (mantém compat)
 │   │   ├── transcribe.ts                     # STUB documentado (áudio futuro)
 │   │   └── extraction/
 │   │       ├── captureAndReflect.ts          # chamada Haiku (extração + reflexo)
@@ -117,6 +122,13 @@ tests/
 (route handlers + libs + migration), sem componentes de UI. Toda lógica de IA vive em
 `src/lib/ai/` (Princípio III). A tabela `entries` e os tipos são propositalmente criados aqui
 para serem reusados pelas features 004/005/006.
+
+**Costura de provider de IA** (decisão de custo — ver `research.md` D10): todas as chamadas de
+LLM passam por uma interface fina `LLMProvider` (`src/lib/ai/provider.ts`). O `AnthropicProvider`
+é o **default** (Haiku para `extraction`); o `DeepSeekProvider` (OpenAI-compatible) entra como
+**stub documentado**, não usado no MVP. `captureAndReflect`/`extractEntries` chamam
+`getProvider().complete({ role: 'extraction', ... })` em vez de instanciar a Anthropic
+diretamente. Isso isola a troca futura de provider num único módulo, sem refatorar a extração.
 
 ## Complexity Tracking
 
