@@ -52,7 +52,7 @@ description: "Task list for 004-mirror-generation"
 
 ### Implementação
 - [ ] T013 [US1] `src/lib/ai/mirror/prompts/firstMirror.ts`: `MIRROR_SYSTEM_PROMPT` + `buildMirrorUserPrompt(entries, userName)` (doc 005)
-- [ ] T014 [US1] `src/lib/ai/mirror/generateMirror.ts`: `generateAndSaveMirror(userId)` — lê ≤20 entradas, Sonnet `claude-sonnet-4-6`, parse JSON, `validateMirror`, insere snapshot
+- [ ] T014 [US1] `src/lib/ai/mirror/generateMirror.ts`: `generateAndSaveMirror(userId)` — lê ≤20 entradas, chama `getProvider().complete({ role: 'synthesis', system, user, maxTokens })` (default = Sonnet `claude-sonnet-4-6`, costura de 003), parse JSON, `validateMirror`, insere snapshot
 - [ ] T015 [US1] `src/app/api/mirror/generate/route.ts`: auth → checa entradas → `generateAndSaveMirror` → marca `onboarding_completed` → 200
 - [ ] T016 [US1] Refino: funções ≤ 40 linhas, sem `any`, mensagens de erro pt-BR
 

@@ -20,7 +20,7 @@ stub** já chamado por `/api/capture` (003). Sem UI — a revelação progressiv
 
 **Language/Version**: TypeScript estrito, Next.js 15 App Router
 
-**Primary Dependencies**: `@anthropic-ai/sdk` (Sonnet `claude-sonnet-4-6`), `zod`, `@supabase/ssr` + `@supabase/supabase-js` (service_role para jobs background)
+**Primary Dependencies**: a costura de provider de IA de 003 (`getProvider()`; default Anthropic → Sonnet `claude-sonnet-4-6` no papel `synthesis`), `zod`, `@supabase/ssr` + `@supabase/supabase-js` (service_role para jobs background)
 
 **Storage**: Supabase PostgreSQL com RLS; nova tabela `mirror_snapshots`
 
@@ -40,7 +40,7 @@ stub** já chamado por `/api/capture` (003). Sem UI — a revelação progressiv
 
 - **I. Security First**: ✅ auth no topo da rota; RLS via request; jobs background com `service_role` filtrando `user_id`; sem dados em log; contexto nunca cruza usuários.
 - **II. TS Strict & Quality**: ✅ sem `any` (Zod infer); funções ≤ 40 linhas; sem catch vazio (regen loga e preserva snapshot).
-- **III. AI-First**: ✅ Sonnet para o espelho; saída validada antes de persistir; wrappers só em `src/lib/ai/mirror`; contexto isolado por usuário.
+- **III. AI-First**: ✅ Sonnet para o espelho **(default do MVP, papel `synthesis`)**; saída validada antes de persistir; wrappers só em `src/lib/ai/mirror`; contexto isolado por usuário. Usa a costura de provider de 003 (`getProvider().complete({ role: 'synthesis', ... })`) — o default `anthropic` mapeia `synthesis → claude-sonnet-4-6`. Trocar o default para provider não-Anthropic exigiria emenda à constituição.
 - **IV. Server-First**: ✅ tudo server-side.
 - **V/VII/VIII**: N/A (sem UI).
 - **VI. TDD**: ✅ testes antes; cobertura ≥ 80%, incluindo o teste do limiar.

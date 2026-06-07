@@ -16,6 +16,7 @@
 - Q: De onde vêm `entries` e os tipos? → A: Da feature **003-capture-pipeline** (tabela `entries`, tipos `Entry`). Esta feature deve ser implementada **após** 003 estar mergeada (rebase em `main`).
 - Q: Onde o `maybeRegenerateMirror` é chamado? → A: No `/api/capture` (003), que já tem a costura (stub no-op). Esta feature **preenche** o corpo do stub — sem mudar a assinatura da rota.
 - Q: Regeneração roda fora do request HTTP — como respeitar RLS? → A: Usa o client `service_role` server-side, **sempre filtrando `user_id`** explicitamente em toda query. Nunca mistura dados de usuários.
+- Q: A geração instancia a Anthropic diretamente? → A: Não. Usa a **costura de provider** de 003 (`getProvider().complete({ role: 'synthesis', ... })`). O default `anthropic` mapeia `synthesis → claude-sonnet-4-6` (conformidade com a constituição). Trocar provider vira config; um provider não-Anthropic exigiria emenda à constituição.
 
 ## User Scenarios & Testing *(mandatory)*
 
