@@ -77,7 +77,11 @@
     "field": {
       "name": "Name",
       "email": "Email",
-      "password": "Password"
+      "password": "Password",
+      "confirmPassword": "Confirm password"
+    },
+    "hint": {
+      "password": "Minimum 8 characters"
     },
     "submit": {
       "signup": "Create account",
@@ -93,7 +97,9 @@
       "wrongPassword": "Incorrect password",
       "emailNotConfirmed": "Please confirm your email before signing in",
       "nameRequired": "Name is required",
+      "emailInvalid": "Invalid email",
       "passwordTooShort": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match",
       "network": "Connection error. Please try again"
     }
   },

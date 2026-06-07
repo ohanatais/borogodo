@@ -15,14 +15,31 @@ type FieldErrors = {
   name?: string
   email?: string
   password?: string
+  confirmPassword?: string
   general?: string
 }
 
-function validateSignup(name: string, email: string, password: string): FieldErrors {
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function validateSignup(
+  name: string,
+  email: string,
+  password: string,
+  confirmPassword: string
+): FieldErrors {
   const errors: FieldErrors = {}
   if (!name.trim()) errors.name = 'error.nameRequired'
-  if (!email.trim()) errors.email = 'error.nameRequired'
+  if (!EMAIL_REGEX.test(email)) errors.email = 'error.emailInvalid'
   if (password.length < 8) errors.password = 'error.passwordTooShort'
+  if (password.length >= 8 && confirmPassword !== password) {
+    errors.confirmPassword = 'error.passwordMismatch'
+  }
+  return errors
+}
+
+function validateLogin(email: string): FieldErrors {
+  const errors: FieldErrors = {}
+  if (!EMAIL_REGEX.test(email)) errors.email = 'error.emailInvalid'
   return errors
 }
 
@@ -41,6 +58,56 @@ function classifyLoginError(message: string): FieldErrors {
   return { general: 'error.wrongPassword' }
 }
 
+function Field({
+  id,
+  label,
+  type = 'text',
+  autoComplete,
+  value,
+  onChange,
+  error,
+  hint,
+}: {
+  id: string
+  label: string
+  type?: string
+  autoComplete?: string
+  value: string
+  onChange: (v: string) => void
+  error?: string
+  hint?: string
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+        {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        autoComplete={autoComplete}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 rounded-lg border text-sm outline-none transition-colors focus:border-current"
+        style={{
+          borderColor: error ? 'var(--color-accent)' : 'var(--border)',
+          background: 'var(--background)',
+          color: 'var(--foreground)',
+        }}
+      />
+      {error ? (
+        <p className="text-xs" style={{ color: 'var(--color-accent)' }}>
+          {error}
+        </p>
+      ) : hint ? (
+        <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
 export function AuthForm({ initialMode }: AuthFormProps) {
   const t = useTranslations('auth')
   const router = useRouter()
@@ -48,6 +115,7 @@ export function AuthForm({ initialMode }: AuthFormProps) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [errors, setErrors] = useState<FieldErrors>({})
   const [loading, setLoading] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
@@ -55,6 +123,7 @@ export function AuthForm({ initialMode }: AuthFormProps) {
   function switchMode(next: Mode) {
     setMode(next)
     setErrors({})
+    setConfirmPassword('')
     router.replace(`/login${next === 'signup' ? '?mode=signup' : ''}`)
   }
 
@@ -63,7 +132,7 @@ export function AuthForm({ initialMode }: AuthFormProps) {
     setErrors({})
 
     if (mode === 'signup') {
-      const validationErrors = validateSignup(name, email, password)
+      const validationErrors = validateSignup(name, email, password, confirmPassword)
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors)
         return
@@ -84,6 +153,11 @@ export function AuthForm({ initialMode }: AuthFormProps) {
       return
     }
 
+    const loginErrors = validateLogin(email)
+    if (Object.keys(loginErrors).length > 0) {
+      setErrors(loginErrors)
+      return
+    }
     setLoading(true)
     const supabase = createBrowserClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -137,98 +211,60 @@ export function AuthForm({ initialMode }: AuthFormProps) {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3" noValidate>
         {mode === 'signup' && (
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="name"
-              className="text-sm font-medium"
-              style={{ color: 'var(--foreground)' }}
-            >
-              {t('field.name')}
-            </label>
-            <input
-              id="name"
-              type="text"
-              autoComplete="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border text-sm outline-none transition-colors focus:border-current"
-              style={{
-                borderColor: errors.name ? 'var(--color-accent)' : 'var(--border)',
-                background: 'var(--background)',
-                color: 'var(--foreground)',
-              }}
-            />
-            {errors.name && (
-              <p className="text-xs" style={{ color: 'var(--color-accent)' }}>
-                {t(errors.name as Parameters<typeof t>[0])}
-              </p>
-            )}
-          </div>
+          <Field
+            id="name"
+            label={t('field.name')}
+            autoComplete="name"
+            value={name}
+            onChange={setName}
+            error={errors.name ? t(errors.name as Parameters<typeof t>[0]) : undefined}
+          />
         )}
 
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="email"
-            className="text-sm font-medium"
-            style={{ color: 'var(--foreground)' }}
-          >
-            {t('field.email')}
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border text-sm outline-none transition-colors focus:border-current"
-            style={{
-              borderColor: errors.email ? 'var(--color-accent)' : 'var(--border)',
-              background: 'var(--background)',
-              color: 'var(--foreground)',
-            }}
-          />
-          {errors.email && (
-            <p className="text-xs" style={{ color: 'var(--color-accent)' }}>
-              {t(errors.email as Parameters<typeof t>[0])}
-            </p>
-          )}
-        </div>
+        <Field
+          id="email"
+          label={t('field.email')}
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={setEmail}
+          error={errors.email ? t(errors.email as Parameters<typeof t>[0]) : undefined}
+        />
 
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="password"
-            className="text-sm font-medium"
-            style={{ color: 'var(--foreground)' }}
-          >
-            {t('field.password')}
-          </label>
-          <input
-            id="password"
+        <Field
+          id="password"
+          label={t('field.password')}
+          type="password"
+          autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+          value={password}
+          onChange={setPassword}
+          error={errors.password ? t(errors.password as Parameters<typeof t>[0]) : undefined}
+          hint={mode === 'signup' ? t('hint.password') : undefined}
+        />
+
+        {mode === 'signup' && (
+          <Field
+            id="confirmPassword"
+            label={t('field.confirmPassword')}
             type="password"
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border text-sm outline-none transition-colors focus:border-current"
-            style={{
-              borderColor: errors.password ? 'var(--color-accent)' : 'var(--border)',
-              background: 'var(--background)',
-              color: 'var(--foreground)',
-            }}
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            error={
+              errors.confirmPassword
+                ? t(errors.confirmPassword as Parameters<typeof t>[0])
+                : undefined
+            }
           />
-          {errors.password && (
-            <p className="text-xs" style={{ color: 'var(--color-accent)' }}>
-              {t(errors.password as Parameters<typeof t>[0])}
-            </p>
-          )}
-        </div>
+        )}
 
         {errors.general && (
           <p className="text-sm text-center" style={{ color: 'var(--color-accent)' }}>
             {t(errors.general as Parameters<typeof t>[0])}
-            {errors.general === 'auth.error.emailNotConfirmed' && (
+            {errors.general === 'error.emailNotConfirmed' && (
               <button
                 type="button"
-                className="block mt-1 underline text-xs"
+                className="block mt-1 underline text-xs mx-auto"
                 style={{ color: 'var(--color-accent)' }}
               >
                 {t('resend')}

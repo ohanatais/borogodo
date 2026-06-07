@@ -105,7 +105,11 @@
     "field": {
       "name": "Nome",
       "email": "E-mail",
-      "password": "Senha"
+      "password": "Senha",
+      "confirmPassword": "Confirmar senha"
+    },
+    "hint": {
+      "password": "Mínimo 8 caracteres"
     },
     "submit": {
       "signup": "Criar conta",
@@ -121,7 +125,9 @@
       "wrongPassword": "Senha incorreta",
       "emailNotConfirmed": "Confirme seu e-mail antes de entrar",
       "nameRequired": "Nome é obrigatório",
+      "emailInvalid": "E-mail inválido",
       "passwordTooShort": "A senha precisa ter pelo menos 8 caracteres",
+      "passwordMismatch": "As senhas não coincidem",
       "network": "Erro de conexão. Tente novamente"
     }
   },

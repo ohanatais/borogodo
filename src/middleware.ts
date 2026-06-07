@@ -39,6 +39,11 @@ export default async function middleware(request: NextRequest) {
     return redirectResponse
   }
 
+  // Route handlers (e.g. /auth/callback) don't need i18n processing
+  if (pathname.startsWith('/auth/')) {
+    return supabaseResponse
+  }
+
   const intlResponse = intlMiddleware(request)
   transferCookies(supabaseResponse, intlResponse)
   return intlResponse
