@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: transparent; }
+  body { font-family: 'Fraunces', Georgia, serif; }
+
+  .mark svg { display: block; }
+
+  .lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px;
+  }
+  .wordmark {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-size: 64px;
+  }
+  .wordmark--creme  { color: oklch(98% 0.008 90); }
+  .wordmark--roxo   { color: oklch(30% 0.20 320); }
+
+  .bg-roxo { background: oklch(30% 0.20 320); }
+  .bg-creme { background: oklch(98% 0.008 90); }
+</style>
+</head>
+<body>
+
+<!-- Mark only, transparent background, used for favicon/app-icon exports -->
+<div id="mark-only" class="mark" style="width:512px; height:512px; display:flex; align-items:center; justify-content:center;">
+  MARK_SVG
+</div>
+
+<!-- Full logo lockup — for dark / roxo-jambo backgrounds (wordmark in creme) -->
+<div id="lockup-dark" class="lockup bg-roxo" style="border-radius:20px;">
+  <div class="mark" style="width:64px; height:64px;">MARK_SVG</div>
+  <span class="wordmark wordmark--creme">borogodó</span>
+</div>
+
+<!-- Full logo lockup — for light / creme backgrounds (wordmark in roxo-jambo) -->
+<div id="lockup-light" class="lockup bg-creme" style="border-radius:20px;">
+  <div class="mark" style="width:64px; height:64px;">MARK_SVG</div>
+  <span class="wordmark wordmark--roxo">borogodó</span>
+</div>
+
+<!-- Full logo lockup — transparent background, creme wordmark (for placing over photos/dark UI) -->
+<div id="lockup-transparent-creme" class="lockup" style="background: transparent;">
+  <div class="mark" style="width:64px; height:64px;">MARK_SVG</div>
+  <span class="wordmark wordmark--creme">borogodó</span>
+</div>
+
+<!-- Full logo lockup — transparent background, roxo wordmark (for placing over light UI) -->
+<div id="lockup-transparent-roxo" class="lockup" style="background: transparent;">
+  <div class="mark" style="width:64px; height:64px;">MARK_SVG</div>
+  <span class="wordmark wordmark--roxo">borogodó</span>
+</div>
+
+</body>
+</html>
