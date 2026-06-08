@@ -1,4 +1,5 @@
 import { logger } from '@/lib/log'
+import { maybeRegenerateMirror as regenerateMirror } from '@/lib/ai/mirror/maybeRegenerate'
 
 /**
  * Stub no-op — preenchido pela feature 005-panel (tabela `proactive_insights` ainda não existe).
@@ -9,12 +10,11 @@ export async function triggerProactiveInsight(userId: string): Promise<void> {
 }
 
 /**
- * Stub no-op — preenchido pela feature 004-mirror (tabela `mirror_snapshots` ainda não existe).
- * Mantido como costura: a assinatura não muda quando 004 implementar o corpo real.
+ * Costura da feature 004-mirror: delega para o corpo real (regeneração por limiar, Sonnet).
+ * A assinatura não muda — `/api/capture` (003) continua chamando como antes.
  */
 export async function maybeRegenerateMirror(userId: string, totalEntries: number): Promise<void> {
-  void userId
-  void totalEntries
+  await regenerateMirror(userId, totalEntries)
 }
 
 /**

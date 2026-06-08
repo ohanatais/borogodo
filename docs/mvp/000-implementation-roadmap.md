@@ -42,6 +42,20 @@ MVP, **mas a arquitetura os acomoda sem refatoração**:
 
 Cada feature marca explicitamente esses pontos como *seams* (costuras) na sua `tasks.md`.
 
+### Costura de provider de IA (custo)
+
+Para acomodar uma eventual troca por um provider mais barato (ex.: DeepSeek) sem refatoração,
+**toda chamada de LLM passa por uma interface fina** `LLMProvider` em `src/lib/ai/provider.ts`
+(`getProvider()` lê `AI_PROVIDER`, default `anthropic`). `models.ts` mapeia papéis lógicos →
+model id por provider: `extraction → claude-haiku-4-5`, `synthesis → claude-sonnet-4-6`.
+
+- **Default do MVP = Anthropic** (Haiku/Sonnet) — conformidade com o Princípio III da constituição.
+- `DeepSeekProvider` (OpenAI-compatible) entra como **stub documentado**, não usado no MVP.
+- Os testes **mockam** a IA (TDD), então o custo do build é ~$0; o risco de custo é só em produção.
+- **Trocar o default para um provider não-Anthropic exige emenda à constituição** (Princípio III).
+
+A interface nasce na **003** (papel `extraction`); a **004** a consome no papel `synthesis`.
+
 ---
 
 ## Mapa de dependências
@@ -98,7 +112,8 @@ defensiva, então 005 só preenche o corpo — sem tocar na assinatura da rota.
 - [ ] **Manual:** confirmar variáveis de ambiente em `.env.local`: `ANTHROPIC_API_KEY`,
       `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
       (a `service_role` é necessária para jobs server-side de IA que escrevem como o usuário —
-      sempre filtrando por `user_id`).
+      sempre filtrando por `user_id`). `AI_PROVIDER` é opcional (default `anthropic`); manter
+      `anthropic` no MVP.
 - [ ] **Manual:** ter acesso ao painel Supabase do projeto para rodar migrations SQL.
 
 ### Feature 003 — capture-pipeline

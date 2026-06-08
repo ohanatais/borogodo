@@ -1,0 +1,59 @@
+import { NextResponse } from 'next/server'
+import { createServerClient } from '@/lib/db/supabase/server'
+import { generateAndSaveMirror } from '@/lib/ai/mirror/generateMirror'
+import { errorMessage, NoEntriesError } from '@/lib/errors'
+import { logger } from '@/lib/log'
+
+const ERROR_MESSAGES = {
+  unauthorized: 'Não autorizado',
+  noEntries: 'Sem entradas',
+  generic: 'Algo deu errado ao gerar seu espelho. Tenta de novo?',
+}
+
+type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
+
+function jsonError(message: string, status: number): NextResponse {
+  return NextResponse.json({ error: message }, { status })
+}
+
+export async function POST(): Promise<NextResponse> {
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return jsonError(ERROR_MESSAGES.unauthorized, 401)
+  }
+
+  try {
+    const snapshot = await generateAndSaveMirror(supabase, user.id)
+    await markOnboardingCompleted(supabase, user.id)
+
+    return NextResponse.json({ mirror: snapshot.mirror }, { status: 200 })
+  } catch (error: unknown) {
+    if (error instanceof NoEntriesError) {
+      return jsonError(ERROR_MESSAGES.noEntries, 400)
+    }
+
+    logger.error('mirror generation failed', { message: errorMessage(error) })
+    return jsonError(ERROR_MESSAGES.generic, 500)
+  }
+}
+
+async function markOnboardingCompleted(
+  supabase: SupabaseServerClient,
+  userId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ onboarding_completed: true })
+    .eq('id', userId)
+
+  if (error) {
+    // O snapshot já foi persistido; surfacemos a falha (500) para o cliente repetir
+    // em vez de deixar o usuário preso no onboarding sem sinal. Retry regera o espelho
+    // (idempotência aceitável no MVP: último snapshot vence) e tenta a flag de novo.
+    throw new Error('Não foi possível concluir o onboarding')
+  }
+}
