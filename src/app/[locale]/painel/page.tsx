@@ -4,6 +4,8 @@ import { createServerClient } from '@/lib/db/supabase/server'
 import { AppHeader } from '@/components/layout/AppHeader'
 import { MirrorHeadline } from '@/components/features/painel/MirrorHeadline'
 import { IndicatorStrip } from '@/components/features/painel/IndicatorStrip'
+import { ProactiveInsightCard } from '@/components/features/painel/ProactiveInsightCard'
+import { RecentEntries } from '@/components/features/painel/RecentEntries'
 import { CaptureComposer } from '@/components/features/capture/CaptureComposer'
 import { getPanelData } from '@/lib/panel/getPanelData'
 
@@ -31,6 +33,8 @@ export default async function PainelPage() {
           strengthCount={data.mirror?.strengthThemes.length ?? 0}
           daysSince={data.daysSince ?? 0}
         />
+        <ProactiveInsightCard insight={data.insight} />
+        <RecentEntries entries={data.recentEntries} />
       </div>
 
       <CaptureComposer placeholder={data.composerPlaceholder} />

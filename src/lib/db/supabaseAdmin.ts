@@ -1,13 +1,13 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-let cachedAdmin: ReturnType<typeof createClient> | null = null
+let cachedAdmin: SupabaseClient | null = null
 
 /**
  * Client `service_role` para jobs fora do ciclo de request (sem cookie de sessão, RLS não se aplica).
  * Uso restrito a `src/lib/ai/mirror` — toda query MUST filtrar `user_id` explicitamente.
  * NUNCA importar no client/browser.
  */
-export function getSupabaseAdmin(): ReturnType<typeof createClient> {
+export function getSupabaseAdmin(): SupabaseClient {
   if (cachedAdmin) {
     return cachedAdmin
   }

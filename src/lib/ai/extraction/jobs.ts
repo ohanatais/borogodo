@@ -1,12 +1,14 @@
 import { logger } from '@/lib/log'
 import { maybeRegenerateMirror as regenerateMirror } from '@/lib/ai/mirror/maybeRegenerate'
+import { triggerProactiveInsight as generateProactiveInsight } from '@/lib/ai/insights/triggerProactiveInsight'
 
 /**
- * Stub no-op — preenchido pela feature 005-panel (tabela `proactive_insights` ainda não existe).
- * Mantido como costura: a assinatura não muda quando 005 implementar o corpo real.
+ * Costura da feature 005-panel: delega para o corpo real (geração via Haiku, persistência
+ * em `proactive_insights`). A assinatura não muda — `/api/capture` (003) continua chamando
+ * como antes (fire-and-forget, sem bloquear a resposta da captura).
  */
 export async function triggerProactiveInsight(userId: string): Promise<void> {
-  void userId
+  await generateProactiveInsight(userId)
 }
 
 /**
