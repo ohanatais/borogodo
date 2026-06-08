@@ -6,8 +6,9 @@
 
 1. **Feature 003 mergeada** em `main`. Neste branch: `git rebase main`.
 2. **Env**: `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server-side), além das do 002.
-3. **Migration Supabase**: rodar `supabase/migrations/00X_mirror_snapshots.sql` (ver `data-model.md`).
-4. **Verificar** se `profiles.onboarding_completed` existe; se não, aplicar o `alter table ... add column if not exists`.
+3. **Migrations Supabase**: rodar `supabase/migrations/002_mirror_snapshots.sql` e
+   `supabase/migrations/003_profiles_onboarding_completed.sql` (`add column if not exists` —
+   defensiva, pois `onboarding_completed` foi especificada em 002-user-auth mas sem migration commitada).
 
 ## Validação rápida (após implementação)
 
