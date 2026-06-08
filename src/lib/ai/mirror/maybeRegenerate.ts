@@ -1,24 +1,25 @@
 import { generateAndSaveMirror } from '@/lib/ai/mirror/generateMirror'
 import { getSupabaseAdmin } from '@/lib/db/supabaseAdmin'
+import { errorMessage } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
 const REGEN_EVERY = 3
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : 'unknown error'
-}
 
 async function loadLastEntryCount(
   admin: ReturnType<typeof getSupabaseAdmin>,
   userId: string
 ): Promise<number> {
-  const { data } = await admin
+  const { data, error } = await admin
     .from('mirror_snapshots')
     .select('entry_count')
     .eq('user_id', userId)
     .order('generated_at', { ascending: false })
     .limit(1)
     .maybeSingle()
+
+  if (error) {
+    throw new Error('Não foi possível ler o último snapshot')
+  }
 
   return (data as { entry_count?: number } | null)?.entry_count ?? 0
 }
@@ -27,7 +28,8 @@ async function loadLastEntryCount(
  * Regenera o espelho a cada `REGEN_EVERY` novas entradas desde o último snapshot.
  * Roda fora do request (sem cookie de sessão) — usa client `service_role`, sempre
  * filtrando `user_id`. Erros são logados (sem dados de usuário) e o snapshot anterior
- * é preservado; nunca quebra a captura.
+ * é preservado; nunca quebra a captura. Um erro de leitura pula a regeneração (não
+ * dispara uma geração indevida tratando a falha como "zero entradas").
  */
 export async function maybeRegenerateMirror(userId: string, newTotal: number): Promise<void> {
   const admin = getSupabaseAdmin()

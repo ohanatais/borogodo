@@ -6,6 +6,7 @@ import { extractFromLinkedIn } from '@/lib/ai/extraction/extractFromLinkedIn'
 import { extractTextFromPDF } from '@/lib/pdf/extractText'
 import { saveEntries } from '@/lib/db/entries'
 import { fireAndForget, maybeRegenerateMirror, triggerProactiveInsight } from '@/lib/ai/extraction/jobs'
+import { errorMessage } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
 const MIN_TEXT_LENGTH = 3
@@ -128,8 +129,4 @@ async function handleFileCapture(supabase: SupabaseServerClient, userId: string,
 function dispatchAsyncJobs(userId: string, totalEntries: number): void {
   fireAndForget('triggerProactiveInsight', triggerProactiveInsight(userId))
   fireAndForget('maybeRegenerateMirror', maybeRegenerateMirror(userId, totalEntries))
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : 'unknown error'
 }

@@ -20,8 +20,11 @@ vi.mock('@/lib/log', () => ({
 
 import { maybeRegenerateMirror } from '@/lib/ai/mirror/maybeRegenerate'
 
-function buildAdmin(lastCount: number | null) {
-  const maybeSingle = vi.fn(async () => ({ data: lastCount === null ? null : { entry_count: lastCount }, error: null }))
+function buildAdmin(lastCount: number | null, readError: { message: string } | null = null) {
+  const maybeSingle = vi.fn(async () => ({
+    data: readError || lastCount === null ? null : { entry_count: lastCount },
+    error: readError,
+  }))
   const limit = vi.fn(() => ({ maybeSingle }))
   const order = vi.fn(() => ({ limit }))
   const eq = vi.fn((column: string) => {
@@ -68,6 +71,16 @@ describe('maybeRegenerateMirror', () => {
     await maybeRegenerateMirror('user-1', 3)
 
     expect(mockGenerateAndSaveMirror).toHaveBeenCalledWith(admin, 'user-1')
+  })
+
+  it('pula a regeneração e loga quando a leitura do último snapshot falha (não trata erro como zero)', async () => {
+    const admin = buildAdmin(null, { message: 'connection reset' })
+    mockGetSupabaseAdmin.mockReturnValue(admin)
+
+    await expect(maybeRegenerateMirror('user-1', 10)).resolves.toBeUndefined()
+
+    expect(mockGenerateAndSaveMirror).not.toHaveBeenCalled()
+    expect(mockLoggerError).toHaveBeenCalled()
   })
 
   it('loga e preserva o snapshot anterior quando a geração falha', async () => {

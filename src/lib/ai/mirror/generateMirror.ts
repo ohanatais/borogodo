@@ -1,7 +1,9 @@
 import { getProvider } from '@/lib/ai/provider'
+import { extractJSONBlock } from '@/lib/ai/extractJSON'
 import { MIRROR_SYSTEM_PROMPT, buildMirrorUserPrompt } from '@/lib/ai/mirror/prompts/firstMirror'
 import { validateMirror } from '@/lib/ai/mirror/schemas'
 import { insertMirrorSnapshot } from '@/lib/db/mirror'
+import { NoEntriesError } from '@/lib/errors'
 import type { createServerClient } from '@/lib/db/supabase/server'
 import type { Mirror, MirrorSnapshot } from '@/types/mirror'
 
@@ -9,7 +11,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 
 const MAX_TOKENS = 2048
 const MAX_ENTRIES = 20
-const JSON_BLOCK_PATTERN = /```json\n([\s\S]*?)\n```/
+const FALLBACK_NAME = 'você'
 
 interface MirrorEntryRow {
   what_i_did: string
@@ -20,15 +22,6 @@ interface MirrorEntryRow {
   metric: string | null
 }
 
-function extractJSONBlock(text: string): unknown {
-  const match = text.match(JSON_BLOCK_PATTERN)
-  if (!match?.[1]) {
-    throw new Error('JSON não encontrado na resposta do modelo')
-  }
-
-  return JSON.parse(match[1])
-}
-
 async function loadEntries(supabase: SupabaseServerClient, userId: string): Promise<MirrorEntryRow[]> {
   const { data, error } = await supabase
     .from('entries')
@@ -37,8 +30,12 @@ async function loadEntries(supabase: SupabaseServerClient, userId: string): Prom
     .order('created_at', { ascending: false })
     .limit(MAX_ENTRIES)
 
-  if (error || !data?.length) {
-    throw new Error('Sem entradas')
+  if (error) {
+    throw new Error('Não foi possível carregar as entradas')
+  }
+
+  if (!data?.length) {
+    throw new NoEntriesError()
   }
 
   return data as MirrorEntryRow[]
@@ -46,9 +43,9 @@ async function loadEntries(supabase: SupabaseServerClient, userId: string): Prom
 
 async function loadUserName(supabase: SupabaseServerClient, userId: string): Promise<string> {
   const { data } = await supabase.from('profiles').select('name').eq('id', userId).maybeSingle()
-  const name = (data as { name?: string | null } | null)?.name
+  const firstName = (data as { name?: string | null } | null)?.name?.trim().split(' ')[0]
 
-  return name?.split(' ')[0] ?? 'você'
+  return firstName || FALLBACK_NAME
 }
 
 async function generateMirror(

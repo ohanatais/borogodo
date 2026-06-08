@@ -14,6 +14,7 @@ vi.mock('@/lib/db/mirror', () => ({
 }))
 
 import { generateAndSaveMirror } from '@/lib/ai/mirror/generateMirror'
+import { NoEntriesError } from '@/lib/errors'
 
 const VALID_MIRROR = {
   intro: 'Já consigo ver algumas coisas, Ana.',
@@ -42,7 +43,14 @@ const OTHER_USER_ENTRY = {
   metric: null,
 }
 
-function buildSupabase(entriesForUser: Record<string, unknown>[]) {
+interface SupabaseOptions {
+  entriesError?: { message: string }
+  profileName?: string | null
+}
+
+function buildSupabase(entriesForUser: Record<string, unknown>[], options: SupabaseOptions = {}) {
+  const { entriesError = null, profileName = 'Ana Lima' } = options
+
   return {
     from: vi.fn((table: string) => ({
       select: vi.fn(() => ({
@@ -51,13 +59,16 @@ function buildSupabase(entriesForUser: Record<string, unknown>[]) {
             limit: vi.fn(async () => {
               if (table === 'entries') {
                 expect(column).toBe('user_id')
+                if (entriesError) {
+                  return { data: null, error: entriesError }
+                }
                 return { data: value === 'user-1' ? entriesForUser : [OTHER_USER_ENTRY], error: null }
               }
 
               return { data: [], error: null }
             }),
           })),
-          maybeSingle: vi.fn(async () => ({ data: { name: 'Ana Lima' }, error: null })),
+          maybeSingle: vi.fn(async () => ({ data: { name: profileName }, error: null })),
         })),
       })),
     })),
@@ -92,11 +103,29 @@ describe('generateAndSaveMirror', () => {
     )
   })
 
-  it('lança erro sem persistir quando o usuário não tem entradas', async () => {
+  it('lança NoEntriesError sem persistir quando o usuário não tem entradas', async () => {
     const supabase = buildSupabase([])
 
-    await expect(generateAndSaveMirror(supabase as never, 'user-1')).rejects.toThrow('Sem entradas')
+    await expect(generateAndSaveMirror(supabase as never, 'user-1')).rejects.toThrow(NoEntriesError)
     expect(mockInsertMirrorSnapshot).not.toHaveBeenCalled()
+  })
+
+  it('distingue erro de DB de "sem entradas" (não lança NoEntriesError em falha de query)', async () => {
+    const supabase = buildSupabase([], { entriesError: { message: 'connection reset' } })
+
+    await expect(generateAndSaveMirror(supabase as never, 'user-1')).rejects.toThrow(
+      'Não foi possível carregar as entradas'
+    )
+    expect(mockInsertMirrorSnapshot).not.toHaveBeenCalled()
+  })
+
+  it('usa o fallback "você" quando o nome do perfil é vazio', async () => {
+    const supabase = buildSupabase([OWN_ENTRY], { profileName: '' })
+
+    await generateAndSaveMirror(supabase as never, 'user-1')
+
+    const userPrompt = mockComplete.mock.calls[0]?.[0]?.user as string
+    expect(userPrompt).toContain('Pessoa: você')
   })
 
   it('lança erro sem persistir quando o Sonnet retorna JSON inválido', async () => {

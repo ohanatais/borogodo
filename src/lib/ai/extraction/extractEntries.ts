@@ -1,18 +1,13 @@
 import { getProvider } from '@/lib/ai/provider'
+import { extractJSONBlock } from '@/lib/ai/extractJSON'
 import { LINKEDIN_SYSTEM_PROMPT, buildLinkedInUserPrompt } from '@/lib/ai/extraction/prompts/linkedin'
 import { validateEntries } from '@/lib/ai/extraction/schemas'
 import type { EntrySource, ExtractedEntry } from '@/types/entry'
 
 const MAX_TOKENS = 4096
-const JSON_BLOCK_PATTERN = /```json\n([\s\S]*?)\n```/
 
 function extractEntriesArray(raw: string): unknown {
-  const match = raw.match(JSON_BLOCK_PATTERN)
-  if (!match?.[1]) {
-    throw new Error('JSON não encontrado na resposta do modelo')
-  }
-
-  const parsed = JSON.parse(match[1]) as { entries?: unknown }
+  const parsed = extractJSONBlock(raw) as { entries?: unknown }
   if (!Array.isArray(parsed.entries)) {
     throw new Error('Formato inesperado: esperava { entries: [...] }')
   }

@@ -24,6 +24,7 @@ vi.mock('@/lib/ai/mirror/generateMirror', () => ({
 }))
 
 import { POST } from '@/app/api/mirror/generate/route'
+import { NoEntriesError } from '@/lib/errors'
 
 const AUTH_USER = { id: 'user-1', email: 'ana@example.com' }
 
@@ -68,8 +69,8 @@ describe('POST /api/mirror/generate', () => {
     expect(mockEq).toHaveBeenCalledWith('id', 'user-1')
   })
 
-  it('400: sem entradas', async () => {
-    mockGenerateAndSaveMirror.mockRejectedValue(new Error('Sem entradas'))
+  it('400: sem entradas (NoEntriesError tipado, sem acoplar string)', async () => {
+    mockGenerateAndSaveMirror.mockRejectedValue(new NoEntriesError())
 
     const response = await POST()
     const body = await response.json()
@@ -88,5 +89,16 @@ describe('POST /api/mirror/generate', () => {
     expect(response.status).toBe(500)
     expect(body.error).toBe('Algo deu errado ao gerar seu espelho. Tenta de novo?')
     expect(mockUpdate).not.toHaveBeenCalled()
+  })
+
+  it('500: espelho gerado mas falha ao marcar onboarding — surfaceia o erro', async () => {
+    mockEq.mockResolvedValue({ error: { message: 'rls denied' } })
+
+    const response = await POST()
+    const body = await response.json()
+
+    expect(response.status).toBe(500)
+    expect(body.error).toBe('Algo deu errado ao gerar seu espelho. Tenta de novo?')
+    expect(mockGenerateAndSaveMirror).toHaveBeenCalled()
   })
 })

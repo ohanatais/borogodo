@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { generateAndSaveMirror } from '@/lib/ai/mirror/generateMirror'
+import { errorMessage, NoEntriesError } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
 const ERROR_MESSAGES = {
@@ -9,12 +10,10 @@ const ERROR_MESSAGES = {
   generic: 'Algo deu errado ao gerar seu espelho. Tenta de novo?',
 }
 
+type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
+
 function jsonError(message: string, status: number): NextResponse {
   return NextResponse.json({ error: message }, { status })
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : 'unknown error'
 }
 
 export async function POST(): Promise<NextResponse> {
@@ -33,19 +32,17 @@ export async function POST(): Promise<NextResponse> {
 
     return NextResponse.json({ mirror: snapshot.mirror }, { status: 200 })
   } catch (error: unknown) {
-    const message = errorMessage(error)
-
-    if (message === 'Sem entradas') {
+    if (error instanceof NoEntriesError) {
       return jsonError(ERROR_MESSAGES.noEntries, 400)
     }
 
-    logger.error('mirror generation failed', { message })
+    logger.error('mirror generation failed', { message: errorMessage(error) })
     return jsonError(ERROR_MESSAGES.generic, 500)
   }
 }
 
 async function markOnboardingCompleted(
-  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  supabase: SupabaseServerClient,
   userId: string
 ): Promise<void> {
   const { error } = await supabase
@@ -54,6 +51,9 @@ async function markOnboardingCompleted(
     .eq('id', userId)
 
   if (error) {
-    logger.error('failed to mark onboarding completed', { message: error.message })
+    // O snapshot já foi persistido; surfacemos a falha (500) para o cliente repetir
+    // em vez de deixar o usuário preso no onboarding sem sinal. Retry regera o espelho
+    // (idempotência aceitável no MVP: último snapshot vence) e tenta a flag de novo.
+    throw new Error('Não foi possível concluir o onboarding')
   }
 }
