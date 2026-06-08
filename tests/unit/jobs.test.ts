@@ -1,9 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { mockLoggerError } = vi.hoisted(() => ({ mockLoggerError: vi.fn() }))
+const { mockLoggerError, mockRegenerateMirror } = vi.hoisted(() => ({
+  mockLoggerError: vi.fn(),
+  mockRegenerateMirror: vi.fn(async () => {}),
+}))
 
 vi.mock('@/lib/log', () => ({
   logger: { error: mockLoggerError },
+}))
+
+vi.mock('@/lib/ai/mirror/maybeRegenerate', () => ({
+  maybeRegenerateMirror: mockRegenerateMirror,
 }))
 
 import { fireAndForget, triggerProactiveInsight, maybeRegenerateMirror } from '@/lib/ai/extraction/jobs'
@@ -36,12 +43,20 @@ describe('fireAndForget', () => {
   })
 })
 
-describe('stubs (costuras para 004/005)', () => {
-  it('triggerProactiveInsight resolve como no-op', async () => {
+describe('triggerProactiveInsight (stub costura para 005)', () => {
+  it('resolve como no-op', async () => {
     await expect(triggerProactiveInsight('user-1')).resolves.toBeUndefined()
   })
+})
 
-  it('maybeRegenerateMirror resolve como no-op', async () => {
-    await expect(maybeRegenerateMirror('user-1', 3)).resolves.toBeUndefined()
+describe('maybeRegenerateMirror (costura ligada à 004)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('delega para a regeneração real sem alterar a assinatura', async () => {
+    await maybeRegenerateMirror('user-1', 5)
+
+    expect(mockRegenerateMirror).toHaveBeenCalledWith('user-1', 5)
   })
 })
