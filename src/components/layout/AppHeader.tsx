@@ -1,14 +1,11 @@
-import { getTranslations } from 'next-intl/server'
 import { Logo } from '@/components/ui/Logo'
 import { LogoutButton } from '@/components/features/auth/LogoutButton'
 
 interface AppHeaderProps {
-  name: string
+  greeting: string
 }
 
-export async function AppHeader({ name }: AppHeaderProps) {
-  const t = await getTranslations('painel')
-
+export function AppHeader({ greeting }: AppHeaderProps) {
   return (
     <header
       className="flex items-center justify-between px-6 py-4 border-b"
@@ -18,7 +15,7 @@ export async function AppHeader({ name }: AppHeaderProps) {
 
       <div className="flex items-center gap-4">
         <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          {t('greeting', { name })}
+          {greeting}
         </p>
         <LogoutButton />
       </div>

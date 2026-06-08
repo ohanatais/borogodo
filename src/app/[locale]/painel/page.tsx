@@ -1,7 +1,11 @@
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
-import { LogoutButton } from '@/components/features/auth/LogoutButton'
+import { AppHeader } from '@/components/layout/AppHeader'
+import { MirrorHeadline } from '@/components/features/painel/MirrorHeadline'
+import { IndicatorStrip } from '@/components/features/painel/IndicatorStrip'
+import { CaptureComposer } from '@/components/features/capture/CaptureComposer'
+import { getPanelData } from '@/lib/panel/getPanelData'
 
 export default async function PainelPage() {
   const supabase = await createServerClient()
@@ -11,35 +15,25 @@ export default async function PainelPage() {
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('name')
-    .eq('id', user.id)
-    .single()
-
+  const data = await getPanelData(supabase, user.id)
+  const name = data.name || user.email || ''
   const t = await getTranslations('painel')
-  const name = profile?.name ?? user.email ?? ''
 
   return (
-    <main className="min-h-screen" style={{ background: 'var(--color-creme)' }}>
-      <header
-        className="flex items-center justify-between px-6 py-4 border-b"
-        style={{ background: 'var(--background)', borderColor: 'var(--border)' }}
-      >
-        <p
-          className="font-semibold"
-          style={{ color: 'var(--foreground)' }}
-        >
-          {t('greeting', { name })}
-        </p>
-        <LogoutButton />
-      </header>
+    <main className="min-h-screen flex flex-col" style={{ background: 'var(--color-creme)' }}>
+      <AppHeader greeting={t('greeting', { name })} />
 
-      <section className="flex items-center justify-center px-6 py-24 text-center">
-        <p style={{ color: 'var(--muted-foreground)' }}>
-          {t('placeholder')}
-        </p>
-      </section>
+      <div className="flex-1">
+        <MirrorHeadline headline={data.mirror?.headline ?? null} status={data.status} />
+        <IndicatorStrip
+          entryCount={data.entryCount}
+          monthsSpan={data.monthsSpan}
+          strengthCount={data.mirror?.strengthThemes.length ?? 0}
+          daysSince={data.daysSince ?? 0}
+        />
+      </div>
+
+      <CaptureComposer placeholder={data.composerPlaceholder} />
     </main>
   )
 }
