@@ -108,5 +108,68 @@
     "placeholder": "Your dashboard is coming. Everything's good for now.",
     "logout": "Sign out",
     "logoutAriaLabel": "End session"
+  },
+  "panel": {
+    "status": {
+      "building": "Building",
+      "emerging": "Taking shape",
+      "active": "Active"
+    },
+    "mirror": {
+      "fallback": "Your mirror is forming — keep capturing.",
+      "link": "View mirror"
+    },
+    "indicators": {
+      "entries": "{count, plural, one {# entry} other {# entries}}",
+      "months": "{count, plural, one {# month} other {# months}}",
+      "strengths": "{count, plural, one {# strength} other {# strengths}}",
+      "timeSince": {
+        "today": "Captured today ✓",
+        "oneDay": "1 day ago",
+        "days": "{count} days ago",
+        "week": "1 week ago"
+      }
+    },
+    "insight": {
+      "label": "✦ Detected something new this week",
+      "viewContext": "View context →"
+    },
+    "recentEntries": {
+      "title": "Recent entries",
+      "viewAll": "View all"
+    },
+    "prompt": {
+      "first": "Tell me something you did at work.",
+      "today": "Nice. Anything else from today?",
+      "yesterday": "What happened at work yesterday?",
+      "recentDays": "It's been {count} days. What's been going on at work?",
+      "themeNudge": "Your strength in \"{theme}\" could use more evidence. Anything recent?",
+      "longGap": "A week is a long time. Tell me what you did."
+    }
+  },
+  "capture": {
+    "composer": {
+      "submitAriaLabel": "Send",
+      "audioAriaLabel": "Record audio (coming soon)",
+      "audioComingSoon": "coming soon",
+      "fileAriaLabel": "Attach file",
+      "imageAriaLabel": "Attach image (coming soon)",
+      "imageComingSoon": "coming soon"
+    },
+    "reading": "Reading what you told me...",
+    "reflection": {
+      "opening": "Got it:",
+      "respond": "Respond",
+      "saveAsIs": "Save as is",
+      "answerPlaceholder": "Your answer..."
+    },
+    "error": {
+      "message": "Something went wrong while processing your capture.",
+      "retry": "Try again",
+      "close": "Close"
+    },
+    "sheet": {
+      "closeAriaLabel": "Close"
+    }
   }
 }
