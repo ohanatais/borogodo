@@ -77,6 +77,31 @@ describe('validateCaptureResult', () => {
   })
 })
 
+describe('coerce de datas parciais (LinkedIn)', () => {
+  it('aceita YYYY-MM-DD sem alteração', () => {
+    const [entry] = validateEntries([{ ...validEntry, role_start: '2022-03-01' }], 'linkedin_pdf')
+    expect(entry?.role_start).toBe('2022-03-01')
+  })
+
+  it('coerce YYYY-MM para o primeiro dia do mês', () => {
+    const [entry] = validateEntries([{ ...validEntry, role_start: '2022-03', role_end: '2024-11' }], 'linkedin_pdf')
+    expect(entry?.role_start).toBe('2022-03-01')
+    expect(entry?.role_end).toBe('2024-11-01')
+  })
+
+  it('coerce YYYY para o primeiro dia do ano', () => {
+    const [entry] = validateEntries([{ ...validEntry, entry_date: '2023', role_start: '2021' }], 'linkedin_pdf')
+    expect(entry?.entry_date).toBe('2023-01-01')
+    expect(entry?.role_start).toBe('2021-01-01')
+  })
+
+  it('descarta strings de data inválidas como null', () => {
+    const [entry] = validateEntries([{ ...validEntry, role_start: 'Jan 2022', role_end: 'Present' }], 'linkedin_pdf')
+    expect(entry?.role_start).toBeNull()
+    expect(entry?.role_end).toBeNull()
+  })
+})
+
 describe('validateEntries', () => {
   it('valida um lote de entradas com source e tags', () => {
     const result = validateEntries([validEntry, { ...validEntry, what_i_did: 'Outra entrada' }], 'linkedin_pdf')

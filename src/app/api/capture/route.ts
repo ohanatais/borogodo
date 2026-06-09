@@ -100,8 +100,10 @@ async function handleTextCapture(supabase: SupabaseServerClient, userId: string,
 
     return NextResponse.json({ entries: saved, reflection }, { status: 200 })
   } catch (error: unknown) {
-    logger.error('capture failed', { kind: 'text', message: errorMessage(error) })
-    return jsonError(ERROR_MESSAGES.generic, 500)
+    const message = errorMessage(error)
+    logger.error('capture failed', { kind: 'text', message })
+    const body = process.env.NODE_ENV === 'development' ? `[dev] ${message}` : ERROR_MESSAGES.generic
+    return jsonError(body, 500)
   }
 }
 
@@ -121,8 +123,10 @@ async function handleFileCapture(supabase: SupabaseServerClient, userId: string,
 
     return NextResponse.json({ entries: saved, reflection: null }, { status: 200 })
   } catch (error: unknown) {
-    logger.error('capture failed', { kind: 'file', message: errorMessage(error) })
-    return jsonError(ERROR_MESSAGES.generic, 500)
+    const message = errorMessage(error)
+    logger.error('capture failed', { kind: 'file', message })
+    const body = process.env.NODE_ENV === 'development' ? `[dev] ${message}` : ERROR_MESSAGES.generic
+    return jsonError(body, 500)
   }
 }
 
