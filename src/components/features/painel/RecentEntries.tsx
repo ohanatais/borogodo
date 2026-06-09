@@ -8,6 +8,7 @@ interface RecentEntry {
   id: string
   what_i_did: string
   source: EntrySource
+  created_at: string
 }
 
 interface RecentEntriesProps {
@@ -28,7 +29,7 @@ export function RecentEntries({ entries }: RecentEntriesProps) {
       </h2>
       <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
         {visibleEntries.map((entry) => (
-          <EntryItem key={entry.id} whatIDid={entry.what_i_did} source={entry.source} />
+          <EntryItem key={entry.id} whatIDid={entry.what_i_did} source={entry.source} createdAt={entry.created_at} />
         ))}
       </ul>
     </section>

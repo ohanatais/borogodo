@@ -9,8 +9,8 @@ export function getMirrorStatus(entryCount: number): MirrorStatus {
   return 'active'
 }
 
-export const STATUS_CONFIG: Record<MirrorStatus, { dot: string; label: string }> = {
-  building: { dot: 'bg-orange-500', label: 'Em construção' },
-  emerging: { dot: 'bg-amber-500', label: 'Tomando forma' },
-  active: { dot: 'bg-green-500', label: 'Ativo' },
+export const STATUS_CONFIG: Record<MirrorStatus, { dot: string }> = {
+  building: { dot: 'bg-orange-500' },
+  emerging: { dot: 'bg-amber-500' },
+  active: { dot: 'bg-green-500' },
 }

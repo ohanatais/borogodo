@@ -44,25 +44,54 @@ const EXTRACTED: ExtractedEntry = {
 
 const SAVED_ENTRY = { ...EXTRACTED, id: 'entry-1', user_id: 'user-1', created_at: 't', updated_at: 't' }
 
+function buildSaveEntriesSupabase(
+  existingItems: Array<{ what_i_did: string }>,
+  insertResult: { data: unknown; error: unknown }
+) {
+  // First from('entries') call: dedup SELECT → .select().eq() awaitable
+  const dedupChain = {
+    select: vi.fn(function(this: unknown) { return dedupChain }),
+    eq: vi.fn(async () => ({ data: existingItems, error: null })),
+  }
+  // Second from('entries') call: INSERT → .insert().select() awaitable
+  const insertChain = {
+    insert: vi.fn(function(this: unknown) { return insertChain }),
+    select: vi.fn(async () => insertResult),
+  }
+  let call = 0
+  const from = vi.fn(() => (call++ === 0 ? dedupChain : insertChain))
+  return { from, insertChain }
+}
+
 describe('saveEntries', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('insere as entradas com user_id e retorna as linhas salvas', async () => {
-    const { from, query } = buildSupabase({ data: [SAVED_ENTRY], error: null })
-    // saveEntries termina em .select(), não em .limit()/.maybeSingle() — ajusta o retorno
-    query.select = vi.fn(async () => ({ data: [SAVED_ENTRY], error: null }))
+    const { from, insertChain } = buildSaveEntriesSupabase([], { data: [SAVED_ENTRY], error: null })
 
     const supabase = { from } as unknown as Parameters<typeof saveEntries>[0]
     const result = await saveEntries(supabase, 'user-1', [EXTRACTED])
 
     expect(from).toHaveBeenCalledWith('entries')
-    expect(query.insert).toHaveBeenCalledWith([{ ...EXTRACTED, user_id: 'user-1' }])
+    expect(insertChain.insert).toHaveBeenCalledWith([{ ...EXTRACTED, user_id: 'user-1' }])
     expect(result).toEqual([SAVED_ENTRY])
   })
 
+  it('filtra entradas duplicadas antes de inserir', async () => {
+    const { from, insertChain } = buildSaveEntriesSupabase(
+      [{ what_i_did: EXTRACTED.what_i_did }],
+      { data: [], error: null }
+    )
+
+    const supabase = { from } as unknown as Parameters<typeof saveEntries>[0]
+    const result = await saveEntries(supabase, 'user-1', [EXTRACTED])
+
+    expect(insertChain.insert).not.toHaveBeenCalled()
+    expect(result).toEqual([])
+  })
+
   it('lança erro quando o insert falha', async () => {
-    const { from, query } = buildSupabase({ data: null, error: new Error('boom') })
-    query.select = vi.fn(async () => ({ data: null, error: new Error('boom') }))
+    const { from } = buildSaveEntriesSupabase([], { data: null, error: new Error('boom') })
 
     const supabase = { from } as unknown as Parameters<typeof saveEntries>[0]
 

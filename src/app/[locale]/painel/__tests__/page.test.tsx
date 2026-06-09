@@ -29,6 +29,8 @@ vi.mock('next/headers', () => ({
 
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
+  useRouter: vi.fn(() => ({ refresh: vi.fn(), push: vi.fn() })),
+  usePathname: vi.fn(() => '/painel'),
 }))
 
 vi.mock('@/components/features/auth/LogoutButton', () => ({
@@ -62,8 +64,8 @@ describe('PainelPage', () => {
     expect(screen.getByPlaceholderText('O que aconteceu no trabalho ontem?')).toBeInTheDocument()
   })
 
-  it('T022: shows the mirror fallback when there is no snapshot yet', async () => {
-    mockGetPanelData.mockResolvedValueOnce({ ...BASE_DATA, mirror: null, status: 'building' })
+  it('T022: shows the mirror fallback when there is no snapshot yet and fewer than 3 entries', async () => {
+    mockGetPanelData.mockResolvedValueOnce({ ...BASE_DATA, mirror: null, status: 'building', entryCount: 1 })
 
     const { default: PainelPage } = await import('../page')
     const jsx = await PainelPage()

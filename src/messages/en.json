@@ -117,6 +117,7 @@
     },
     "mirror": {
       "fallback": "Your mirror is forming — keep capturing.",
+      "ready": "You have enough data. Ready to see your mirror?",
       "link": "View mirror"
     },
     "indicators": {
@@ -138,13 +139,15 @@
       "title": "Recent entries",
       "viewAll": "View all"
     },
-    "prompt": {
-      "first": "Tell me something you did at work.",
-      "today": "Nice. Anything else from today?",
-      "yesterday": "What happened at work yesterday?",
-      "recentDays": "It's been {count} days. What's been going on at work?",
-      "themeNudge": "Your strength in \"{theme}\" could use more evidence. Anything recent?",
-      "longGap": "A week is a long time. Tell me what you did."
+    "entryDate": {
+      "today": "today",
+      "yesterday": "yesterday",
+      "days": "{count} days ago",
+      "weeks": "{count, plural, one {# week ago} other {# weeks ago}}"
+    },
+    "empty": {
+      "title": "Everything starts with a story.",
+      "subtitle": "Tell me something you did at work — it can be small. Borogodó will start building your mirror from there."
     }
   },
   "capture": {

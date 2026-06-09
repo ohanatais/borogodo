@@ -1,15 +1,19 @@
-import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { STATUS_CONFIG, type MirrorStatus } from '@/lib/panel/getMirrorStatus'
+import { GenerateMirrorButton } from './GenerateMirrorButton'
+
+const MIRROR_READY_THRESHOLD = 3
 
 interface MirrorHeadlineProps {
   headline: string | null
   status: MirrorStatus
+  entryCount: number
 }
 
-export function MirrorHeadline({ headline, status }: MirrorHeadlineProps) {
+export function MirrorHeadline({ headline, status, entryCount }: MirrorHeadlineProps) {
   const t = useTranslations('panel')
-  const { dot, label } = STATUS_CONFIG[status]
+  const { dot } = STATUS_CONFIG[status]
+  const mirrorReady = !headline && entryCount >= MIRROR_READY_THRESHOLD
 
   return (
     <section className="space-y-3 px-6 py-8 text-center sm:text-left">
@@ -19,25 +23,21 @@ export function MirrorHeadline({ headline, status }: MirrorHeadlineProps) {
       </span>
 
       {headline ? (
-        <div className="space-y-2">
-          <p className="text-xl sm:text-2xl font-semibold" style={{ color: 'var(--foreground)' }}>
-            {headline}
+        <p className="text-xl sm:text-2xl font-semibold" style={{ color: 'var(--foreground)' }}>
+          {headline}
+        </p>
+      ) : mirrorReady ? (
+        <div className="space-y-3">
+          <p className="text-xl sm:text-2xl font-medium" style={{ color: 'var(--foreground)' }}>
+            {t('mirror.ready')}
           </p>
-          <Link
-            href="/espelho"
-            className="inline-block text-sm font-semibold"
-            style={{ color: 'var(--color-primary)' }}
-          >
-            {t('mirror.link')} →
-          </Link>
+          <GenerateMirrorButton />
         </div>
       ) : (
         <p className="text-xl sm:text-2xl font-medium" style={{ color: 'var(--muted-foreground)' }}>
           {t('mirror.fallback')}
         </p>
       )}
-
-      <p className="sr-only">{label}</p>
     </section>
   )
 }

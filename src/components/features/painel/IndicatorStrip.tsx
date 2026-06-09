@@ -7,12 +7,12 @@ interface IndicatorStripProps {
   daysSince: number
 }
 
-const RECENT_DAYS_LIMIT = 6
+const DAYS_LABEL_LIMIT = 6
 
 function timeSinceKey(daysSince: number): 'today' | 'oneDay' | 'days' | 'week' {
   if (daysSince === 0) return 'today'
   if (daysSince === 1) return 'oneDay'
-  if (daysSince <= RECENT_DAYS_LIMIT) return 'days'
+  if (daysSince <= DAYS_LABEL_LIMIT) return 'days'
   return 'week'
 }
 

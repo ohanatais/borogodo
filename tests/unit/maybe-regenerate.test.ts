@@ -59,8 +59,8 @@ describe('maybeRegenerateMirror', () => {
     mockGenerateAndSaveMirror.mockResolvedValue({ id: 'snap-2' })
   })
 
-  it('dispara generateAndSaveMirror quando total - lastCount >= 3', async () => {
-    const admin = buildAdmin(2, 5)
+  it('dispara generateAndSaveMirror em regeneração quando total - lastCount >= 5', async () => {
+    const admin = buildAdmin(5, 10)
     mockGetSupabaseAdmin.mockReturnValue(admin)
 
     await maybeRegenerateMirror('user-1')
@@ -68,8 +68,8 @@ describe('maybeRegenerateMirror', () => {
     expect(mockGenerateAndSaveMirror).toHaveBeenCalledWith(admin, 'user-1')
   })
 
-  it('não dispara quando total - lastCount < 3', async () => {
-    const admin = buildAdmin(4, 6)
+  it('não dispara em regeneração quando total - lastCount < 5', async () => {
+    const admin = buildAdmin(7, 10)
     mockGetSupabaseAdmin.mockReturnValue(admin)
 
     await maybeRegenerateMirror('user-1')

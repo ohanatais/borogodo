@@ -25,7 +25,7 @@ export function FileButton({ accept, icon: Icon, ariaLabel, onFile }: FileButton
         type="button"
         aria-label={ariaLabel}
         onClick={() => inputRef.current?.click()}
-        className="p-2 rounded-full transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center"
+        className="p-2 rounded-full transition-opacity min-w-[48px] min-h-[48px] flex items-center justify-center hover:opacity-70"
         style={{ color: 'var(--muted-foreground)' }}
       >
         <Icon size={20} />

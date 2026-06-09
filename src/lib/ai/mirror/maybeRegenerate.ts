@@ -3,7 +3,8 @@ import { getSupabaseAdmin } from '@/lib/db/supabaseAdmin'
 import { errorMessage } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
-const REGEN_EVERY = 3
+const FIRST_MIRROR_MIN_ENTRIES = 3
+const REGEN_EVERY = 5
 
 type Admin = ReturnType<typeof getSupabaseAdmin>
 
@@ -46,7 +47,13 @@ export async function maybeRegenerateMirror(userId: string): Promise<void> {
       loadTotalEntryCount(admin, userId),
     ])
 
-    if (newTotal - lastCount >= REGEN_EVERY) {
+    const shouldGenerate =
+      lastCount === 0
+        ? newTotal >= FIRST_MIRROR_MIN_ENTRIES
+        : newTotal - lastCount >= REGEN_EVERY
+
+    if (shouldGenerate) {
+      logger.info('generating mirror', { userId: '[redacted]', lastCount, newTotal })
       await generateAndSaveMirror(admin, userId)
     }
   } catch (error: unknown) {

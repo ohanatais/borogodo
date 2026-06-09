@@ -6,7 +6,6 @@ import { getCapturePrompt } from './getCapturePrompt'
 
 const MS_PER_DAY = 86_400_000
 const MS_PER_MONTH = MS_PER_DAY * 30
-const MIN_DATED_ENTRIES_FOR_SPAN = 2
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 
@@ -56,7 +55,7 @@ function calculateDaysSince(createdAt: string | undefined): number | null {
 }
 
 export async function getPanelData(supabase: SupabaseServerClient, userId: string): Promise<PanelData> {
-  const [profileRes, countRes, recentRes, oldestRes, mirrorRes, insightRes] = await Promise.all([
+  const [profileRes, countRes, recentRes, oldestRes, newestRes, mirrorRes, insightRes] = await Promise.all([
     supabase.from('profiles').select('name').eq('id', userId).single(),
     supabase.from('entries').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase
@@ -71,6 +70,14 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .eq('user_id', userId)
       .not('entry_date', 'is', null)
       .order('entry_date', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('entries')
+      .select('entry_date')
+      .eq('user_id', userId)
+      .not('entry_date', 'is', null)
+      .order('entry_date', { ascending: false })
       .limit(1)
       .maybeSingle(),
     supabase
@@ -96,6 +103,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
   const lastEntry = recentEntries[0]
   const daysSince = calculateDaysSince(lastEntry?.created_at)
   const oldestEntryDate = (oldestRes.data as { entry_date: string } | null)?.entry_date ?? null
+  const newestEntryDate = (newestRes.data as { entry_date: string } | null)?.entry_date ?? null
 
   const mirror: PanelMirror | null = mirrorRow
     ? {
@@ -108,7 +116,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     name: profileRes.data?.name ?? '',
     status: getMirrorStatus(entryCount),
     entryCount,
-    monthsSpan: calculateMonthsSpan(oldestEntryDate, lastEntry?.entry_date ?? null),
+    monthsSpan: calculateMonthsSpan(oldestEntryDate, newestEntryDate),
     daysSince,
     recentEntries,
     mirror,

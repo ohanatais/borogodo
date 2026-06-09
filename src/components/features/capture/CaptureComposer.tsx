@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Paperclip, ImageIcon, ArrowUp } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { CaptureInput } from '@/types/capture'
@@ -16,11 +16,21 @@ export function CaptureComposer({ placeholder }: CaptureComposerProps) {
   const t = useTranslations('capture')
   const [text, setText] = useState('')
   const [activeCapture, setActiveCapture] = useState<CaptureInput | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleSubmit = () => {
     if (!text.trim()) return
     setActiveCapture({ kind: 'text', content: text.trim() })
     setText('')
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+    }
+  }
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value)
+    e.target.style.height = 'auto'
+    e.target.style.height = `${e.target.scrollHeight}px`
   }
 
   const handleFile = (file: File) => {
@@ -39,12 +49,13 @@ export function CaptureComposer({ placeholder }: CaptureComposerProps) {
             style={{ background: 'var(--muted)' }}
           >
             <textarea
+              ref={textareaRef}
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={handleTextChange}
               placeholder={placeholder}
               rows={1}
-              className="flex-1 bg-transparent resize-none outline-none text-sm"
-              style={{ color: 'var(--foreground)' }}
+              className="flex-1 bg-transparent resize-none outline-none text-sm overflow-y-auto"
+              style={{ color: 'var(--foreground)', maxHeight: '8rem' }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()

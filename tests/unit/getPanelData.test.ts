@@ -5,6 +5,7 @@ interface TableFixture {
   count?: number
   single?: { data: unknown; error: unknown }
   maybeSingle?: { data: unknown; error: unknown }
+  maybySingleSeq?: Array<{ data: unknown; error: unknown }>
   list?: { data: unknown[]; error: unknown }
 }
 
@@ -16,7 +17,12 @@ function chain(fixture: TableFixture) {
     order: () => result,
     limit: () => result,
     single: async () => fixture.single ?? { data: null, error: null },
-    maybeSingle: async () => fixture.maybeSingle ?? { data: null, error: null },
+    maybeSingle: async () => {
+      if (fixture.maybySingleSeq?.length) {
+        return fixture.maybySingleSeq.shift() ?? { data: null, error: null }
+      }
+      return fixture.maybeSingle ?? { data: null, error: null }
+    },
     then: (resolve: (value: { data: unknown[] | null; count?: number; error: unknown }) => unknown) =>
       resolve({ data: fixture.list?.data ?? null, count: fixture.count, error: null }),
   }
@@ -39,7 +45,14 @@ describe('getPanelData', () => {
   it('derives status, indicators and composer placeholder from the four reads', async () => {
     const supabase = buildSupabase({
       profiles: { single: { data: { name: 'Ana Silva' }, error: null } },
-      entries: { count: 12, list: { data: RECENT_ENTRIES, error: null }, maybeSingle: { data: { entry_date: '2025-01-15' }, error: null } },
+      entries: {
+        count: 12,
+        list: { data: RECENT_ENTRIES, error: null },
+        maybySingleSeq: [
+          { data: { entry_date: '2020-01-15' }, error: null },
+          { data: { entry_date: '2026-06-05' }, error: null },
+        ],
+      },
       mirror_snapshots: {
         maybeSingle: {
           data: { primary_strength: { headline: 'Você lidera pelo exemplo.' }, strength_themes: ['liderança'], generated_at: '2026-06-01' },
@@ -64,7 +77,7 @@ describe('getPanelData', () => {
   it('returns null mirror and "building" status with no entries', async () => {
     const supabase = buildSupabase({
       profiles: { single: { data: { name: 'Ana Silva' }, error: null } },
-      entries: { count: 0, list: { data: [], error: null }, maybeSingle: { data: null, error: null } },
+      entries: { count: 0, list: { data: [], error: null }, maybySingleSeq: [{ data: null, error: null }, { data: null, error: null }] },
       mirror_snapshots: { maybeSingle: { data: null, error: null } },
       proactive_insights: { maybeSingle: { data: null, error: null } },
     })

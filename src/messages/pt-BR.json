@@ -145,6 +145,7 @@
     },
     "mirror": {
       "fallback": "Seu espelho está se formando — continue capturando.",
+      "ready": "Você tem dados suficientes. Pronto para ver seu espelho?",
       "link": "Ver espelho"
     },
     "indicators": {
@@ -166,13 +167,15 @@
       "title": "Últimas entradas",
       "viewAll": "Ver todas"
     },
-    "prompt": {
-      "first": "Conta uma coisa que você fez no trabalho.",
-      "today": "Boa. Tem mais alguma coisa do dia?",
-      "yesterday": "O que aconteceu no trabalho ontem?",
-      "recentDays": "Faz {count} dias. O que rolou no trabalho?",
-      "themeNudge": "Sua força em \"{theme}\" pede mais evidência. Tem algo recente?",
-      "longGap": "Uma semana é muito tempo. Conta o que você fez."
+    "entryDate": {
+      "today": "hoje",
+      "yesterday": "ontem",
+      "days": "há {count} dias",
+      "weeks": "{count, plural, one {há # semana} other {há # semanas}}"
+    },
+    "empty": {
+      "title": "Tudo começa com uma história.",
+      "subtitle": "Conta o que você fez no trabalho — pode ser algo pequeno. O Borogodó começa a montar seu espelho a partir daí."
     }
   },
   "capture": {

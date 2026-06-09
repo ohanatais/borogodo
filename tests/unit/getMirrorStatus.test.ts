@@ -28,9 +28,9 @@ describe('getMirrorStatus', () => {
 })
 
 describe('STATUS_CONFIG', () => {
-  it('provides a dot color and label for every status', () => {
-    expect(STATUS_CONFIG.building).toEqual({ dot: 'bg-orange-500', label: 'Em construção' })
-    expect(STATUS_CONFIG.emerging).toEqual({ dot: 'bg-amber-500', label: 'Tomando forma' })
-    expect(STATUS_CONFIG.active).toEqual({ dot: 'bg-green-500', label: 'Ativo' })
+  it('provides a dot color for every status', () => {
+    expect(STATUS_CONFIG.building.dot).toBe('bg-orange-500')
+    expect(STATUS_CONFIG.emerging.dot).toBe('bg-amber-500')
+    expect(STATUS_CONFIG.active.dot).toBe('bg-green-500')
   })
 })

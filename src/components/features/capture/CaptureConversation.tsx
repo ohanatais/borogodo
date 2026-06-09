@@ -69,6 +69,7 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
         const data = (await res.json()) as { entries: Array<{ id: string }>; reflection: Reflection | null }
         if (cancelled) return
         if (!data.reflection) {
+          router.refresh()
           onResolved()
           return
         }
