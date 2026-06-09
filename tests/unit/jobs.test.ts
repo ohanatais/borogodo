@@ -66,8 +66,8 @@ describe('maybeRegenerateMirror (costura ligada à 004)', () => {
   })
 
   it('delega para a regeneração real sem alterar a assinatura', async () => {
-    await maybeRegenerateMirror('user-1', 5)
+    await maybeRegenerateMirror('user-1')
 
-    expect(mockRegenerateMirror).toHaveBeenCalledWith('user-1', 5)
+    expect(mockRegenerateMirror).toHaveBeenCalledWith('user-1')
   })
 })

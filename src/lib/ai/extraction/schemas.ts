@@ -18,12 +18,20 @@ const dateField = z
   .nullish()
   .transform(coerceDate)
 
+// LLMs sometimes return numeric values for free-text fields when the user mentions
+// numbers (e.g. metric: 80000 instead of "80000"). Coerce to string so the DB
+// insert doesn't fail on a type mismatch.
+const textField = z
+  .union([z.string(), z.number()])
+  .nullish()
+  .transform((v) => (v == null ? null : String(v)))
+
 const extractedEntrySchema = z.object({
   what_i_did: z.string().min(1),
-  decision: z.string().nullish(),
-  learning: z.string().nullish(),
-  impact: z.string().nullish(),
-  metric: z.string().nullish(),
+  decision: textField,
+  learning: textField,
+  impact: textField,
+  metric: textField,
   entry_date: dateField,
   tags: z.array(z.string()).default([]),
   company: z.string().nullish(),

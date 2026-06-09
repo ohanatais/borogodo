@@ -97,7 +97,7 @@ async function handleTextCapture(supabase: SupabaseServerClient, userId: string,
     const { entries, reflection } = await captureAndReflect(textInput.rawText, 'text', context)
     const saved = await saveEntries(supabase, userId, entries)
 
-    dispatchAsyncJobs(userId, saved.length)
+    dispatchAsyncJobs(userId)
 
     return NextResponse.json({ entries: saved, reflection }, { status: 200 })
   } catch (error: unknown) {
@@ -120,7 +120,7 @@ async function handleFileCapture(supabase: SupabaseServerClient, userId: string,
     const entries = await extractFromDocument(pdfText)
     const saved = await saveEntries(supabase, userId, entries)
 
-    dispatchAsyncJobs(userId, saved.length)
+    dispatchAsyncJobs(userId)
 
     return NextResponse.json({ entries: saved, reflection: null }, { status: 200 })
   } catch (error: unknown) {
@@ -131,7 +131,7 @@ async function handleFileCapture(supabase: SupabaseServerClient, userId: string,
   }
 }
 
-function dispatchAsyncJobs(userId: string, totalEntries: number): void {
+function dispatchAsyncJobs(userId: string): void {
   fireAndForget('triggerProactiveInsight', triggerProactiveInsight(userId))
-  fireAndForget('maybeRegenerateMirror', maybeRegenerateMirror(userId, totalEntries))
+  fireAndForget('maybeRegenerateMirror', maybeRegenerateMirror(userId))
 }

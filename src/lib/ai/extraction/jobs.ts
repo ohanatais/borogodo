@@ -15,8 +15,8 @@ export async function triggerProactiveInsight(userId: string): Promise<void> {
  * Costura da feature 004-mirror: delega para o corpo real (regeneração por limiar, Sonnet).
  * A assinatura não muda — `/api/capture` (003) continua chamando como antes.
  */
-export async function maybeRegenerateMirror(userId: string, totalEntries: number): Promise<void> {
-  await regenerateMirror(userId, totalEntries)
+export async function maybeRegenerateMirror(userId: string): Promise<void> {
+  await regenerateMirror(userId)
 }
 
 /**

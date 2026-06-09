@@ -96,8 +96,13 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ answer, field: reflection.move.field }),
       })
-      router.refresh()
     }
+    router.refresh()
+    onResolved()
+  }
+
+  const handleDismiss = () => {
+    router.refresh()
     onResolved()
   }
 
@@ -121,7 +126,7 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
     >
       {phase === 'reading' && <ReadingState />}
       {phase === 'reflecting' && reflection && (
-        <ReflectionCard reflection={reflection} onEnrich={handleEnrich} onDismiss={onResolved} />
+        <ReflectionCard reflection={reflection} onEnrich={handleEnrich} onDismiss={handleDismiss} />
       )}
       {phase === 'error' && (
         <div className="text-center space-y-4">

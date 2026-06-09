@@ -20,21 +20,34 @@ vi.mock('@/lib/log', () => ({
 
 import { maybeRegenerateMirror } from '@/lib/ai/mirror/maybeRegenerate'
 
-function buildAdmin(lastCount: number | null, readError: { message: string } | null = null) {
-  const maybeSingle = vi.fn(async () => ({
-    data: readError || lastCount === null ? null : { entry_count: lastCount },
+// Builds a mock admin that handles both mirror_snapshots (lastCount) and entries (totalCount).
+function buildAdmin(lastSnapshotCount: number | null, totalEntryCount: number, readError: { message: string } | null = null) {
+  const snapshotMaybeSingle = vi.fn(async () => ({
+    data: readError || lastSnapshotCount === null ? null : { entry_count: lastSnapshotCount },
     error: readError,
   }))
-  const limit = vi.fn(() => ({ maybeSingle }))
-  const order = vi.fn(() => ({ limit }))
-  const eq = vi.fn((column: string) => {
-    expect(column).toBe('user_id')
-    return { order }
-  })
-  const select = vi.fn(() => ({ eq }))
+
+  const countThen = (resolve: (value: { count: number | null; error: null }) => unknown) =>
+    resolve({ count: readError ? null : totalEntryCount, error: null })
+
+  const snapshotChain: Record<string, unknown> = {
+    select: vi.fn(() => snapshotChain),
+    eq: vi.fn(() => snapshotChain),
+    order: vi.fn(() => snapshotChain),
+    limit: vi.fn(() => snapshotChain),
+    maybeSingle: snapshotMaybeSingle,
+  }
+
+  const entriesChain: Record<string, unknown> = {
+    select: vi.fn(() => entriesChain),
+    eq: vi.fn(() => entriesChain),
+    then: countThen,
+  }
+
   const from = vi.fn((table: string) => {
-    expect(table).toBe('mirror_snapshots')
-    return { select }
+    if (table === 'mirror_snapshots') return snapshotChain
+    if (table === 'entries') return entriesChain
+    throw new Error(`unexpected table: ${table}`)
   })
 
   return { from }
@@ -46,49 +59,49 @@ describe('maybeRegenerateMirror', () => {
     mockGenerateAndSaveMirror.mockResolvedValue({ id: 'snap-2' })
   })
 
-  it('dispara generateAndSaveMirror quando newTotal - lastCount >= 3', async () => {
-    const admin = buildAdmin(2)
+  it('dispara generateAndSaveMirror quando total - lastCount >= 3', async () => {
+    const admin = buildAdmin(2, 5)
     mockGetSupabaseAdmin.mockReturnValue(admin)
 
-    await maybeRegenerateMirror('user-1', 5)
+    await maybeRegenerateMirror('user-1')
 
     expect(mockGenerateAndSaveMirror).toHaveBeenCalledWith(admin, 'user-1')
   })
 
-  it('não dispara quando newTotal - lastCount < 3', async () => {
-    const admin = buildAdmin(4)
+  it('não dispara quando total - lastCount < 3', async () => {
+    const admin = buildAdmin(4, 6)
     mockGetSupabaseAdmin.mockReturnValue(admin)
 
-    await maybeRegenerateMirror('user-1', 6)
+    await maybeRegenerateMirror('user-1')
 
     expect(mockGenerateAndSaveMirror).not.toHaveBeenCalled()
   })
 
-  it('considera lastCount = 0 quando não há snapshot anterior', async () => {
-    const admin = buildAdmin(null)
+  it('considera lastCount = 0 quando não há snapshot anterior e gera com 3+ entradas', async () => {
+    const admin = buildAdmin(null, 3)
     mockGetSupabaseAdmin.mockReturnValue(admin)
 
-    await maybeRegenerateMirror('user-1', 3)
+    await maybeRegenerateMirror('user-1')
 
     expect(mockGenerateAndSaveMirror).toHaveBeenCalledWith(admin, 'user-1')
   })
 
-  it('pula a regeneração e loga quando a leitura do último snapshot falha (não trata erro como zero)', async () => {
-    const admin = buildAdmin(null, { message: 'connection reset' })
+  it('pula a regeneração e loga quando a leitura falha (não trata erro como zero)', async () => {
+    const admin = buildAdmin(null, 0, { message: 'connection reset' })
     mockGetSupabaseAdmin.mockReturnValue(admin)
 
-    await expect(maybeRegenerateMirror('user-1', 10)).resolves.toBeUndefined()
+    await expect(maybeRegenerateMirror('user-1')).resolves.toBeUndefined()
 
     expect(mockGenerateAndSaveMirror).not.toHaveBeenCalled()
     expect(mockLoggerError).toHaveBeenCalled()
   })
 
   it('loga e preserva o snapshot anterior quando a geração falha', async () => {
-    const admin = buildAdmin(0)
+    const admin = buildAdmin(0, 3)
     mockGetSupabaseAdmin.mockReturnValue(admin)
     mockGenerateAndSaveMirror.mockRejectedValue(new Error('Sonnet indisponível'))
 
-    await expect(maybeRegenerateMirror('user-1', 3)).resolves.toBeUndefined()
+    await expect(maybeRegenerateMirror('user-1')).resolves.toBeUndefined()
 
     expect(mockLoggerError).toHaveBeenCalled()
     const [, meta] = mockLoggerError.mock.calls[0] as [string, Record<string, unknown> | undefined]
