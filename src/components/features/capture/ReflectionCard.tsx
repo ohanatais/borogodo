@@ -28,28 +28,20 @@ export function ReflectionCard({ reflection, onEnrich, onDismiss }: ReflectionCa
   }
 
   return (
-    <div
-      className="w-full max-w-md rounded-2xl p-6 space-y-4"
-      style={{ background: 'var(--background)', border: '1px solid var(--border)' }}
-    >
-      <div className="space-y-2">
-        <p className="text-sm font-semibold" style={{ color: 'var(--muted-foreground)' }}>
-          {t('reflection.opening')}
-        </p>
-        <p className="text-base" style={{ color: 'var(--foreground)' }}>
-          {reflection.summary}
-        </p>
-      </div>
+    <div className="w-full max-w-sm space-y-4">
+      <p className="text-base leading-relaxed" style={{ color: 'var(--foreground)' }}>
+        {reflection.summary}
+      </p>
 
       {reflection.pills.length > 0 && (
         <ul className="flex flex-wrap gap-2">
           {reflection.pills.map((pill) => (
             <li
               key={pill}
-              className="text-xs font-medium px-3 py-1 rounded-full"
+              className="text-xs font-medium px-3 py-1 rounded-full capitalize"
               style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
             >
-              {pill}
+              {pill.replace(/_/g, ' ')}
             </li>
           ))}
         </ul>

@@ -113,46 +113,82 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
     setRetryCount((n) => n + 1)
   }
 
+  const userBubbleText =
+    input.kind === 'text'
+      ? input.content
+      : input.kind === 'file'
+        ? input.file.name
+        : t('reading')
+
   return (
     <motion.div
       ref={dialogRef}
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       role="dialog"
       aria-modal="true"
       tabIndex={-1}
-      className="fixed inset-0 z-50 flex items-center justify-center px-4 outline-none"
+      className="fixed inset-0 z-50 flex flex-col outline-none"
       style={{ background: 'var(--background)' }}
     >
-      {phase === 'reading' && <ReadingState />}
-      {phase === 'reflecting' && reflection && (
-        <ReflectionCard reflection={reflection} onEnrich={handleEnrich} onDismiss={handleDismiss} />
-      )}
-      {phase === 'error' && (
-        <div className="text-center space-y-4">
-          <p className="text-sm" style={{ color: 'var(--foreground)' }}>
-            {serverError ?? t('error.message')}
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={handleRetry}
-              className="text-sm font-semibold px-4 py-2 rounded-full"
-              style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-            >
-              {t('error.retry')}
-            </button>
-            <button
-              type="button"
-              onClick={onResolved}
-              className="text-sm font-medium px-4 py-2 rounded-full"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              {t('error.close')}
-            </button>
+      {/* top bar */}
+      <div className="flex justify-end px-6 py-4 shrink-0">
+        <button
+          type="button"
+          onClick={handleDismiss}
+          className="text-sm font-medium w-8 h-8 flex items-center justify-center rounded-full"
+          style={{ color: 'var(--muted-foreground)' }}
+          aria-label={t('error.close')}
+        >
+          ×
+        </button>
+      </div>
+
+      {/* chat thread — anchored to the bottom */}
+      <div className="flex-1 flex flex-col justify-end overflow-y-auto px-4 pb-8 gap-6">
+        {/* user message */}
+        <div className="flex justify-end">
+          <div
+            className="max-w-xs rounded-2xl rounded-br-sm px-4 py-3 text-sm leading-relaxed"
+            style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+          >
+            {userBubbleText}
           </div>
         </div>
-      )}
+
+        {/* AI response */}
+        <div className="flex justify-start">
+          {phase === 'reading' && <ReadingState />}
+          {phase === 'reflecting' && reflection && (
+            <ReflectionCard reflection={reflection} onEnrich={handleEnrich} onDismiss={handleDismiss} />
+          )}
+          {phase === 'error' && (
+            <div className="space-y-4 max-w-sm">
+              <p className="text-sm" style={{ color: 'var(--foreground)' }}>
+                {serverError ?? t('error.message')}
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleRetry}
+                  className="text-sm font-semibold px-4 py-2 rounded-full"
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+                >
+                  {t('error.retry')}
+                </button>
+                <button
+                  type="button"
+                  onClick={onResolved}
+                  className="text-sm font-medium px-4 py-2 rounded-full"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  {t('error.close')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </motion.div>
   )
 }
