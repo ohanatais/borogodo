@@ -41,6 +41,7 @@ vi.mock('@/lib/pdf/extractText', () => ({
 }))
 
 vi.mock('@/lib/ai/extraction/extractFromLinkedIn', () => ({
+  extractFromDocument: mockExtractFromLinkedIn,
   extractFromLinkedIn: mockExtractFromLinkedIn,
 }))
 

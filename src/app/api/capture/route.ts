@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { buildCaptureContext } from '@/lib/ai/extraction/context'
 import { captureAndReflect } from '@/lib/ai/extraction/captureAndReflect'
-import { extractFromLinkedIn } from '@/lib/ai/extraction/extractFromLinkedIn'
+import { extractFromDocument } from '@/lib/ai/extraction/extractFromLinkedIn'
 import { extractTextFromPDF } from '@/lib/pdf/extractText'
 import { saveEntries } from '@/lib/db/entries'
 import { fireAndForget, maybeRegenerateMirror, triggerProactiveInsight } from '@/lib/ai/extraction/jobs'
@@ -46,7 +46,8 @@ function readFileInput(formData: FormData): { file: File } | { error: NextRespon
     return { error: jsonError(ERROR_MESSAGES.missingFile, 400) }
   }
 
-  if (file.type !== 'application/pdf') {
+  const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+  if (!isPdf) {
     return { error: jsonError(ERROR_MESSAGES.invalidFile, 400) }
   }
 
@@ -116,7 +117,7 @@ async function handleFileCapture(supabase: SupabaseServerClient, userId: string,
   try {
     const buffer = Buffer.from(await fileInput.file.arrayBuffer())
     const pdfText = await extractTextFromPDF(buffer)
-    const entries = await extractFromLinkedIn(pdfText)
+    const entries = await extractFromDocument(pdfText)
     const saved = await saveEntries(supabase, userId, entries)
 
     dispatchAsyncJobs(userId, saved.length)
