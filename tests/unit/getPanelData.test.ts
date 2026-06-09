@@ -12,6 +12,7 @@ function chain(fixture: TableFixture) {
   const result = {
     select: () => result,
     eq: () => result,
+    not: () => result,
     order: () => result,
     limit: () => result,
     single: async () => fixture.single ?? { data: null, error: null },
@@ -38,7 +39,7 @@ describe('getPanelData', () => {
   it('derives status, indicators and composer placeholder from the four reads', async () => {
     const supabase = buildSupabase({
       profiles: { single: { data: { name: 'Ana Silva' }, error: null } },
-      entries: { count: 12, list: { data: RECENT_ENTRIES, error: null } },
+      entries: { count: 12, list: { data: RECENT_ENTRIES, error: null }, maybeSingle: { data: { entry_date: '2025-01-15' }, error: null } },
       mirror_snapshots: {
         maybeSingle: {
           data: { primary_strength: { headline: 'Você lidera pelo exemplo.' }, strength_themes: ['liderança'], generated_at: '2026-06-01' },
@@ -63,7 +64,7 @@ describe('getPanelData', () => {
   it('returns null mirror and "building" status with no entries', async () => {
     const supabase = buildSupabase({
       profiles: { single: { data: { name: 'Ana Silva' }, error: null } },
-      entries: { count: 0, list: { data: [], error: null } },
+      entries: { count: 0, list: { data: [], error: null }, maybeSingle: { data: null, error: null } },
       mirror_snapshots: { maybeSingle: { data: null, error: null } },
       proactive_insights: { maybeSingle: { data: null, error: null } },
     })

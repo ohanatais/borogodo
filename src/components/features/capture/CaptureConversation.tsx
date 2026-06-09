@@ -36,6 +36,8 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
   const [phase, setPhase] = useState<Phase>('reading')
   const [reflection, setReflection] = useState<Reflection | null>(null)
   const [entryId, setEntryId] = useState<string | null>(null)
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
   const dialogRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -54,10 +56,13 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
 
     const run = async () => {
       setPhase('reading')
+      setServerError(null)
       try {
         const res = await fetch('/api/capture', { method: 'POST', body: buildFormData(input) })
         if (cancelled) return
         if (!res.ok) {
+          const body = await res.json().catch(() => ({})) as { error?: string }
+          if (!cancelled) setServerError(body.error ?? null)
           setPhase('error')
           return
         }
@@ -82,7 +87,7 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input])
+  }, [input, retryCount])
 
   const handleEnrich = async (answer: string) => {
     if (entryId && reflection) {
@@ -97,9 +102,10 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
   }
 
   const handleRetry = () => {
-    setPhase('reading')
     setReflection(null)
     setEntryId(null)
+    setServerError(null)
+    setRetryCount((n) => n + 1)
   }
 
   return (
@@ -120,7 +126,7 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
       {phase === 'error' && (
         <div className="text-center space-y-4">
           <p className="text-sm" style={{ color: 'var(--foreground)' }}>
-            {t('error.message')}
+            {serverError ?? t('error.message')}
           </p>
           <div className="flex items-center justify-center gap-3">
             <button

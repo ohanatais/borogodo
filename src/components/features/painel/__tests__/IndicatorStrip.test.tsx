@@ -8,9 +8,9 @@ describe('IndicatorStrip', () => {
       <IndicatorStrip entryCount={12} monthsSpan={3} strengthCount={4} daysSince={2} />
     )
 
-    expect(screen.getByText('12 indicators.entries')).toBeInTheDocument()
-    expect(screen.getByText('3 indicators.months')).toBeInTheDocument()
-    expect(screen.getByText('4 indicators.strengths')).toBeInTheDocument()
+    expect(screen.getByText('indicators.entries')).toBeInTheDocument()
+    expect(screen.getByText('indicators.months')).toBeInTheDocument()
+    expect(screen.getByText('indicators.strengths')).toBeInTheDocument()
     expect(screen.getByText('indicators.timeSince.days')).toBeInTheDocument()
   })
 

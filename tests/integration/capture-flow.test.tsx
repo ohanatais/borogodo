@@ -82,8 +82,20 @@ describe('Capture flow — composer to reflection', () => {
     })
   })
 
-  it('T012: shows an error state with retry when the capture request fails', async () => {
-    mockFetch.mockResolvedValueOnce(jsonResponse({ error: 'boom' }, false))
+  it('T012: shows the server error message when the capture request fails with a 4xx', async () => {
+    mockFetch.mockResolvedValueOnce(jsonResponse({ error: 'Conta um pouco mais, ainda não consegui captar.' }, false))
+
+    render(<CaptureComposer placeholder="Conta uma coisa que você fez no trabalho." />)
+
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Uma entrada qualquer' } })
+    fireEvent.click(screen.getByRole('button', { name: 'composer.submitAriaLabel' }))
+
+    expect(await screen.findByText('Conta um pouco mais, ainda não consegui captar.')).toBeInTheDocument()
+    expect(screen.getByText('error.retry')).toBeInTheDocument()
+  })
+
+  it('T012: falls back to the generic error message when the server sends no body', async () => {
+    mockFetch.mockResolvedValueOnce(jsonResponse({}, false))
 
     render(<CaptureComposer placeholder="Conta uma coisa que você fez no trabalho." />)
 
@@ -91,7 +103,27 @@ describe('Capture flow — composer to reflection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'composer.submitAriaLabel' }))
 
     expect(await screen.findByText('error.message')).toBeInTheDocument()
-    expect(screen.getByText('error.retry')).toBeInTheDocument()
+  })
+
+  it('T012: retry re-fires the capture request', async () => {
+    mockFetch
+      .mockResolvedValueOnce(jsonResponse({ error: 'falha transitória' }, false))
+      .mockResolvedValueOnce(jsonResponse({ entries: [{ id: 'entry-1' }], reflection: REFLECTION }))
+
+    render(<CaptureComposer placeholder="Conta uma coisa que você fez no trabalho." />)
+
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Uma entrada qualquer' } })
+    fireEvent.click(screen.getByRole('button', { name: 'composer.submitAriaLabel' }))
+
+    await screen.findByText('error.retry')
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+
+    fireEvent.click(screen.getByText('error.retry'))
+
+    await waitFor(() => {
+      expect(screen.getByText(REFLECTION.summary)).toBeInTheDocument()
+    })
+    expect(mockFetch).toHaveBeenCalledTimes(2)
   })
 
   it('T013: renders audio and image buttons disabled with a "coming soon" tooltip', () => {

@@ -20,16 +20,14 @@ export function IndicatorStrip({ entryCount, monthsSpan, strengthCount, daysSinc
   const t = useTranslations('panel')
   const key = timeSinceKey(daysSince)
 
-  const items: string[] = [
-    `${entryCount} ${t('indicators.entries', { count: entryCount })}`,
-  ]
+  const items: string[] = [t('indicators.entries', { count: entryCount })]
 
   if (monthsSpan !== null) {
-    items.push(`${monthsSpan} ${t('indicators.months', { count: monthsSpan })}`)
+    items.push(t('indicators.months', { count: monthsSpan }))
   }
 
   if (strengthCount > 0) {
-    items.push(`${strengthCount} ${t('indicators.strengths', { count: strengthCount })}`)
+    items.push(t('indicators.strengths', { count: strengthCount }))
   }
 
   items.push(t(`indicators.timeSince.${key}`, { count: daysSince }))

@@ -41,15 +41,12 @@ export interface PanelData {
   composerPlaceholder: string
 }
 
-function calculateMonthsSpan(entries: RecentEntryRow[]): number | null {
-  const dates = entries
-    .map((entry) => entry.entry_date)
-    .filter((date): date is string => Boolean(date))
-    .map((date) => new Date(date).getTime())
+function calculateMonthsSpan(oldestDate: string | null, newestDate: string | null): number | null {
+  if (!oldestDate || !newestDate) return null
 
-  if (dates.length < MIN_DATED_ENTRIES_FOR_SPAN) return null
+  const span = new Date(newestDate).getTime() - new Date(oldestDate).getTime()
+  if (span < MS_PER_MONTH) return null
 
-  const span = Math.max(...dates) - Math.min(...dates)
   return Math.max(1, Math.round(span / MS_PER_MONTH))
 }
 
@@ -59,7 +56,7 @@ function calculateDaysSince(createdAt: string | undefined): number | null {
 }
 
 export async function getPanelData(supabase: SupabaseServerClient, userId: string): Promise<PanelData> {
-  const [profileRes, countRes, recentRes, mirrorRes, insightRes] = await Promise.all([
+  const [profileRes, countRes, recentRes, oldestRes, mirrorRes, insightRes] = await Promise.all([
     supabase.from('profiles').select('name').eq('id', userId).single(),
     supabase.from('entries').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase
@@ -68,6 +65,14 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(3),
+    supabase
+      .from('entries')
+      .select('entry_date')
+      .eq('user_id', userId)
+      .not('entry_date', 'is', null)
+      .order('entry_date', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
     supabase
       .from('mirror_snapshots')
       .select('primary_strength, strength_themes, generated_at')
@@ -90,6 +95,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
   const mirrorRow = mirrorRes.data as MirrorRow | null
   const lastEntry = recentEntries[0]
   const daysSince = calculateDaysSince(lastEntry?.created_at)
+  const oldestEntryDate = (oldestRes.data as { entry_date: string } | null)?.entry_date ?? null
 
   const mirror: PanelMirror | null = mirrorRow
     ? {
@@ -102,7 +108,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     name: profileRes.data?.name ?? '',
     status: getMirrorStatus(entryCount),
     entryCount,
-    monthsSpan: calculateMonthsSpan(recentEntries),
+    monthsSpan: calculateMonthsSpan(oldestEntryDate, lastEntry?.entry_date ?? null),
     daysSince,
     recentEntries,
     mirror,
