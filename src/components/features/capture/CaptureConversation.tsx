@@ -62,7 +62,8 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
         if (cancelled) return
         if (!res.ok) {
           const body = await res.json().catch(() => ({})) as { error?: string }
-          if (!cancelled) setServerError(body.error ?? null)
+          if (cancelled) return
+          setServerError(body.error ?? null)
           setPhase('error')
           return
         }

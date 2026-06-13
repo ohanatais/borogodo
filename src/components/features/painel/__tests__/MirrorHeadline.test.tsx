@@ -8,7 +8,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 describe('MirrorHeadline', () => {
-  it('renders the headline from the latest mirror snapshot', () => {
+  it('renders the headline from the latest mirror snapshot with a link to /espelho', () => {
     render(
       <MirrorHeadline
         headline="Você transforma complexidade em clareza — e faz isso melhor do que percebe."
@@ -20,7 +20,8 @@ describe('MirrorHeadline', () => {
     expect(
       screen.getByText('Você transforma complexidade em clareza — e faz isso melhor do que percebe.')
     ).toBeInTheDocument()
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    const link = screen.getByRole('link')
+    expect(link).toHaveAttribute('href', '/espelho')
   })
 
   it('shows the chromatic status pill for the given status', () => {

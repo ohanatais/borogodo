@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { STATUS_CONFIG, type MirrorStatus } from '@/lib/panel/getMirrorStatus'
 import { GenerateMirrorButton } from './GenerateMirrorButton'
@@ -23,9 +24,18 @@ export function MirrorHeadline({ headline, status, entryCount }: MirrorHeadlineP
       </span>
 
       {headline ? (
-        <p className="text-xl sm:text-2xl font-semibold" style={{ color: 'var(--foreground)' }}>
-          {headline}
-        </p>
+        <div className="space-y-2">
+          <p className="text-xl sm:text-2xl font-semibold" style={{ color: 'var(--foreground)' }}>
+            {headline}
+          </p>
+          <Link
+            href="/espelho"
+            className="inline-block text-sm font-semibold"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            {t('mirror.link')} →
+          </Link>
+        </div>
       ) : mirrorReady ? (
         <div className="space-y-3">
           <p className="text-xl sm:text-2xl font-medium" style={{ color: 'var(--foreground)' }}>

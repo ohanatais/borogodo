@@ -4,7 +4,7 @@ let cachedAdmin: SupabaseClient | null = null
 
 /**
  * Client `service_role` para jobs fora do ciclo de request (sem cookie de sessão, RLS não se aplica).
- * Uso restrito a `src/lib/ai/mirror` — toda query MUST filtrar `user_id` explicitamente.
+ * Uso restrito a `src/lib/ai/mirror` e `src/lib/ai/insights` — toda query MUST filtrar `user_id` explicitamente.
  * NUNCA importar no client/browser.
  */
 export function getSupabaseAdmin(): SupabaseClient {
