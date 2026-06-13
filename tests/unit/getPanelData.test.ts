@@ -1,5 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { getPanelData } from '@/lib/panel/getPanelData'
+
+vi.mock('next-intl/server', () => ({
+  getTranslations: vi.fn(async () => (key: string, values?: Record<string, unknown>) => {
+    if (values) return `${key}:${JSON.stringify(values)}`
+    return key
+  }),
+}))
 
 interface TableFixture {
   count?: number

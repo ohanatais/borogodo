@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import type { createServerClient } from '@/lib/db/supabase/server'
 import type { Entry } from '@/types/entry'
 import type { ProactiveInsight } from '@/types/insight'
@@ -112,6 +113,9 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       }
     : null
 
+  const t = await getTranslations('capture.composer.prompt')
+  const prompt = getCapturePrompt(daysSince, mirror?.strengthThemes)
+
   return {
     name: profileRes.data?.name ?? '',
     status: getMirrorStatus(entryCount),
@@ -121,6 +125,6 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     recentEntries,
     mirror,
     insight: (insightRes.data as ProactiveInsight | null) ?? null,
-    composerPlaceholder: getCapturePrompt(daysSince, mirror?.strengthThemes),
+    composerPlaceholder: t(prompt.key, prompt.values),
   }
 }

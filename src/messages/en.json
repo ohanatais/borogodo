@@ -157,7 +157,15 @@
       "audioComingSoon": "coming soon",
       "fileAriaLabel": "Attach file",
       "imageAriaLabel": "Attach image (coming soon)",
-      "imageComingSoon": "coming soon"
+      "imageComingSoon": "coming soon",
+      "prompt": {
+        "first": "Tell me something you did at work.",
+        "today": "Nice. Anything else from today?",
+        "yesterday": "What happened at work yesterday?",
+        "recentDays": "It's been {days} days. What's been going on at work?",
+        "themeNudge": "Your strength in \"{theme}\" could use more evidence. Anything recent?",
+        "longGap": "A week is a long time. Tell me what you've been up to."
+      }
     },
     "reading": "Reading what you told me...",
     "reflection": {
@@ -170,6 +178,16 @@
       "message": "Something went wrong while processing your capture.",
       "retry": "Try again",
       "close": "Close"
+    },
+    "apiErrors": {
+      "unauthorized": "Unauthorized",
+      "textTooShort": "Tell me a bit more, I couldn't catch that yet.",
+      "invalidKind": "Invalid capture type",
+      "comingSoon": "Audio/image capture is coming soon.",
+      "invalidFile": "Invalid file",
+      "fileTooLarge": "File too large (max 10 MB)",
+      "missingFile": "No file sent",
+      "generic": "I couldn't process your capture right now, try again?"
     },
     "sheet": {
       "closeAriaLabel": "Close"

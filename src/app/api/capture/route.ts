@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
+import { routing } from '@/i18n/routing'
 import { buildCaptureContext } from '@/lib/ai/extraction/context'
 import { captureAndReflect } from '@/lib/ai/extraction/captureAndReflect'
 import { extractFromDocument } from '@/lib/ai/extraction/extractFromLinkedIn'
@@ -12,47 +15,48 @@ import { logger } from '@/lib/log'
 const MIN_TEXT_LENGTH = 3
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
 
-const ERROR_MESSAGES = {
-  unauthorized: 'Não autorizado',
-  textTooShort: 'Conta um pouco mais, ainda não consegui captar.',
-  invalidKind: 'Tipo de captura inválido',
-  comingSoon: 'Captura por áudio/imagem chega em breve.',
-  invalidFile: 'Arquivo inválido',
-  fileTooLarge: 'Arquivo muito grande (máx 10 MB)',
-  missingFile: 'Nenhum arquivo enviado',
-  generic: 'Não consegui processar sua captura agora, tenta de novo?',
-}
-
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
+type ApiErrors = Awaited<ReturnType<typeof getTranslations<'capture.apiErrors'>>>
+type Locale = (typeof routing.locales)[number]
 
 function jsonError(message: string, status: number): NextResponse {
   return NextResponse.json({ error: message }, { status })
 }
 
-function readTextInput(formData: FormData): { rawText: string } | { error: NextResponse } {
+async function getApiErrors(): Promise<ApiErrors> {
+  const cookieStore = await cookies()
+  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
+  const locale: Locale = routing.locales.includes(cookieLocale as Locale)
+    ? (cookieLocale as Locale)
+    : routing.defaultLocale
+
+  return getTranslations({ locale, namespace: 'capture.apiErrors' })
+}
+
+function readTextInput(formData: FormData, t: ApiErrors): { rawText: string } | { error: NextResponse } {
   const content = formData.get('content')
 
   if (typeof content !== 'string' || content.trim().length < MIN_TEXT_LENGTH) {
-    return { error: jsonError(ERROR_MESSAGES.textTooShort, 400) }
+    return { error: jsonError(t('textTooShort'), 400) }
   }
 
   return { rawText: content.trim() }
 }
 
-function readFileInput(formData: FormData): { file: File } | { error: NextResponse } {
+function readFileInput(formData: FormData, t: ApiErrors): { file: File } | { error: NextResponse } {
   const file = formData.get('file')
 
   if (!(file instanceof File)) {
-    return { error: jsonError(ERROR_MESSAGES.missingFile, 400) }
+    return { error: jsonError(t('missingFile'), 400) }
   }
 
   const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
   if (!isPdf) {
-    return { error: jsonError(ERROR_MESSAGES.invalidFile, 400) }
+    return { error: jsonError(t('invalidFile'), 400) }
   }
 
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    return { error: jsonError(ERROR_MESSAGES.fileTooLarge, 400) }
+    return { error: jsonError(t('fileTooLarge'), 400) }
   }
 
   return { file }
@@ -60,34 +64,40 @@ function readFileInput(formData: FormData): { file: File } | { error: NextRespon
 
 export async function POST(request: Request): Promise<NextResponse> {
   const supabase = await createServerClient()
+  const t = await getApiErrors()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return jsonError(ERROR_MESSAGES.unauthorized, 401)
+    return jsonError(t('unauthorized'), 401)
   }
 
   const formData = await request.formData()
   const kind = formData.get('kind')
 
   if (kind === 'audio' || kind === 'image') {
-    return jsonError(ERROR_MESSAGES.comingSoon, 501)
+    return jsonError(t('comingSoon'), 501)
   }
 
   if (kind === 'file') {
-    return handleFileCapture(supabase, user.id, formData)
+    return handleFileCapture(supabase, user.id, formData, t)
   }
 
   if (kind !== 'text') {
-    return jsonError(ERROR_MESSAGES.invalidKind, 400)
+    return jsonError(t('invalidKind'), 400)
   }
 
-  return handleTextCapture(supabase, user.id, formData)
+  return handleTextCapture(supabase, user.id, formData, t)
 }
 
-async function handleTextCapture(supabase: SupabaseServerClient, userId: string, formData: FormData): Promise<NextResponse> {
-  const textInput = readTextInput(formData)
+async function handleTextCapture(
+  supabase: SupabaseServerClient,
+  userId: string,
+  formData: FormData,
+  t: ApiErrors
+): Promise<NextResponse> {
+  const textInput = readTextInput(formData, t)
   if ('error' in textInput) {
     return textInput.error
   }
@@ -103,13 +113,18 @@ async function handleTextCapture(supabase: SupabaseServerClient, userId: string,
   } catch (error: unknown) {
     const message = errorMessage(error)
     logger.error('capture failed', { kind: 'text', message })
-    const body = process.env.NODE_ENV === 'development' ? `[dev] ${message}` : ERROR_MESSAGES.generic
+    const body = process.env.NODE_ENV === 'development' ? `[dev] ${message}` : t('generic')
     return jsonError(body, 500)
   }
 }
 
-async function handleFileCapture(supabase: SupabaseServerClient, userId: string, formData: FormData): Promise<NextResponse> {
-  const fileInput = readFileInput(formData)
+async function handleFileCapture(
+  supabase: SupabaseServerClient,
+  userId: string,
+  formData: FormData,
+  t: ApiErrors
+): Promise<NextResponse> {
+  const fileInput = readFileInput(formData, t)
   if ('error' in fileInput) {
     return fileInput.error
   }
@@ -126,7 +141,7 @@ async function handleFileCapture(supabase: SupabaseServerClient, userId: string,
   } catch (error: unknown) {
     const message = errorMessage(error)
     logger.error('capture failed', { kind: 'file', message })
-    const body = process.env.NODE_ENV === 'development' ? `[dev] ${message}` : ERROR_MESSAGES.generic
+    const body = process.env.NODE_ENV === 'development' ? `[dev] ${message}` : t('generic')
     return jsonError(body, 500)
   }
 }

@@ -15,7 +15,23 @@ vi.mock('@/lib/db/supabase/server', () => ({
 }))
 
 vi.mock('next/headers', () => ({
-  cookies: vi.fn(async () => ({ getAll: () => [], set: vi.fn() })),
+  cookies: vi.fn(async () => ({ getAll: () => [], get: () => undefined, set: vi.fn() })),
+}))
+
+vi.mock('next-intl/server', () => ({
+  getTranslations: vi.fn(async () => {
+    const messages: Record<string, string> = {
+      unauthorized: 'Não autorizado',
+      textTooShort: 'Conta um pouco mais, ainda não consegui captar.',
+      invalidKind: 'Tipo de captura inválido',
+      comingSoon: 'Captura por áudio/imagem chega em breve.',
+      invalidFile: 'Arquivo inválido',
+      fileTooLarge: 'Arquivo muito grande (máx 10 MB)',
+      missingFile: 'Nenhum arquivo enviado',
+      generic: 'Não consegui processar sua captura agora, tenta de novo?',
+    }
+    return (key: string) => messages[key] ?? key
+  }),
 }))
 
 vi.mock('@/lib/ai/extraction/context', () => ({

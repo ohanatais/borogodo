@@ -178,6 +178,24 @@
       "subtitle": "Conta o que você fez no trabalho — pode ser algo pequeno. O Borogodó começa a montar seu espelho a partir daí."
     }
   },
+  "espelho": {
+    "back": "← Voltar ao painel",
+    "regenerate": "Gerar novo espelho",
+    "regenerating": "Gerando...",
+    "regenerateError": "Algo deu errado. Tenta de novo?",
+    "sections": {
+      "primaryStrength": "Força principal",
+      "invisibleSkill": "Habilidade invisível",
+      "contextPattern": "Padrão de contexto"
+    },
+    "themes": "Temas de força",
+    "feedback": {
+      "question": "Resonou com você?",
+      "yes": "Sim",
+      "no": "Não",
+      "confirmed": "Obrigado pelo feedback"
+    }
+  },
   "capture": {
     "composer": {
       "submitAriaLabel": "Enviar",
@@ -185,7 +203,15 @@
       "audioComingSoon": "em breve",
       "fileAriaLabel": "Anexar arquivo",
       "imageAriaLabel": "Anexar imagem (em breve)",
-      "imageComingSoon": "em breve"
+      "imageComingSoon": "em breve",
+      "prompt": {
+        "first": "Conta uma coisa que você fez no trabalho.",
+        "today": "Boa. Tem mais alguma coisa do dia?",
+        "yesterday": "O que aconteceu no trabalho ontem?",
+        "recentDays": "Faz {days} dias. O que rolou no trabalho?",
+        "themeNudge": "Sua força em \"{theme}\" pede mais evidência. Tem algo recente?",
+        "longGap": "Uma semana é muito tempo. Conta o que você fez."
+      }
     },
     "reading": "Lendo o que você me contou...",
     "reflection": {
@@ -198,6 +224,16 @@
       "message": "Algo deu errado ao processar sua captura.",
       "retry": "Tentar de novo",
       "close": "Fechar"
+    },
+    "apiErrors": {
+      "unauthorized": "Não autorizado",
+      "textTooShort": "Conta um pouco mais, ainda não consegui captar.",
+      "invalidKind": "Tipo de captura inválido",
+      "comingSoon": "Captura por áudio/imagem chega em breve.",
+      "invalidFile": "Arquivo inválido",
+      "fileTooLarge": "Arquivo muito grande (máx 10 MB)",
+      "missingFile": "Nenhum arquivo enviado",
+      "generic": "Não consegui processar sua captura agora, tenta de novo?"
     },
     "sheet": {
       "closeAriaLabel": "Fechar"
