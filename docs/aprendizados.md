@@ -81,3 +81,58 @@ ferramenta que está com dificuldade de mostrar isso". Confirmar com uma segunda
 **Por que importa:** para quem não é técnico, um número "errado" na tela costuma soar
 como "eu quebrei algo". Vale mostrar que isso também acontece com gente experiente, e
 que checar a ferramenta antes de duvidar do trabalho é uma habilidade, não uma desculpa.
+
+---
+
+## 2026-06-13 — `/pr-review` e `/verify` enxergam coisas diferentes, e isso não é redundância
+
+**O que aconteceu:** o `/pr-review` (6 subagentes lendo o diff do PR #8) aprovou as
+mudanças sem apontar nada crítico. Em seguida, ao rodar `/verify` — criando uma conta de
+teste real, logando no `/painel` e disparando `/api/capture` de verdade, em pt-BR e em
+inglês — apareceu um problema que nenhum dos subagentes de review tinha visto: o
+placeholder do composer agora respeitava o idioma do usuário (era exatamente o que o PR
+corrigia), mas as mensagens de erro da própria `/api/capture` ("Conta um pouco mais...",
+"Tipo de captura inválido" etc.) continuavam fixas em pt-BR, mesmo com o cookie
+`NEXT_LOCALE=en`. Resultado: um usuário em inglês via a tela toda em inglês, mas qualquer
+erro de captura aparecia em português — uma inconsistência que só fica visível
+*executando* o fluxo nos dois idiomas, não lendo o código.
+
+**O que aprendi:** revisão de código (estática, lendo o diff) responde "esse código está
+correto, isolado?" — e o `/pr-review` fez exatamente isso bem. Verificação em runtime
+(`/verify`) responde uma pergunta diferente: "a experiência, de ponta a ponta, é
+coerente?". As mensagens de erro nem tinham mudado no diff — por isso nenhum revisor de
+código tinha motivo para olhar para elas. Só apareceram como problema quando colocadas ao
+lado do que *tinha* mudado. Um passo não substitui o outro: cada um tem um ângulo cego
+que é exatamente o ponto forte do outro.
+
+**Por que importa:** para quem está montando um processo de revisão, é tentador pensar
+"já passou no review, não precisa rodar de verdade" (ou o contrário). Esse caso mostra um
+exemplo concreto e pequeno de um bug que só existe na junção das duas mudanças — uma
+delas nem estava no PR. Bom exemplo para `product-thinking`: "funciona" e "a jornada faz
+sentido" são perguntas diferentes, e a segunda só se responde usando o produto.
+
+---
+
+## 2026-06-13 — `next-intl`: o idioma da requisição não chega nas Route Handlers
+
+**O que aconteceu:** ao corrigir o placeholder do composer para respeitar o idioma
+(`getTranslations` + cookie `NEXT_LOCALE`), funcionou de primeira no `/painel` (uma
+página). Mas a mesma chamada `getTranslations()` dentro de `/api/capture/route.ts` (uma
+Route Handler) sempre voltava em pt-BR, mesmo com `NEXT_LOCALE=en`. Olhando o código-fonte
+do `next-intl`, o idioma da requisição (`requestLocale`) é lido de um header
+(`X-NEXT-INTL-LOCALE`) que o *middleware* do next-intl injeta — e este projeto não tem
+`middleware.ts` (usa `localePrefix: 'never'` e negocia o idioma só na renderização de
+páginas, via o plugin do Next). Route Handlers nunca recebem esse header, então
+`getTranslations()` cai silenciosamente no idioma padrão (pt-BR), pra sempre, em qualquer
+rota de API.
+
+**O que aprendi:** "internacionalizei a tela" e "internacionalizei o produto" não são a
+mesma garantia quando a tela e a API são coisas tecnicamente separadas — mesmo
+compartilhando a mesma lib de i18n. A correção (ler o cookie `NEXT_LOCALE` direto via
+`cookies()` e passar `{ locale, namespace }` para `getTranslations`) é simples, mas só
+aparece se alguém testar especificamente "uma chamada de API responde no idioma certo?".
+
+**Por que importa:** qualquer rota de API nova que devolva texto para o usuário vai cair
+nessa mesma armadilha por padrão. Vale documentar esse padrão (`getApiErrors()` em
+`src/app/api/capture/route.ts`) como referência para a próxima rota que precisar de i18n,
+e considerar extrair para um helper compartilhado quando a segunda rota precisar disso.
