@@ -11,7 +11,20 @@ export async function saveEntries(
   userId: string,
   entries: ExtractedEntry[]
 ): Promise<Entry[]> {
-  const rows = entries.map((entry) => ({ ...entry, user_id: userId }))
+  if (entries.length === 0) return []
+
+  const { data: existing } = await supabase
+    .from('entries')
+    .select('what_i_did')
+    .eq('user_id', userId)
+
+  const existingTexts = new Set((existing ?? []).map((e: { what_i_did: string }) => e.what_i_did.trim()))
+
+  const newEntries = entries.filter((e) => !existingTexts.has(e.what_i_did.trim()))
+
+  if (newEntries.length === 0) return []
+
+  const rows = newEntries.map((entry) => ({ ...entry, user_id: userId }))
   const { data, error } = await supabase.from('entries').insert(rows).select()
 
   if (error || !data) {

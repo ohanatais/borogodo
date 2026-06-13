@@ -1,6 +1,6 @@
 import { getProvider } from '@/lib/ai/provider'
 import { extractJSONBlock } from '@/lib/ai/extractJSON'
-import { LINKEDIN_SYSTEM_PROMPT, buildLinkedInUserPrompt } from '@/lib/ai/extraction/prompts/linkedin'
+import { DOCUMENT_EXTRACTION_SYSTEM_PROMPT, buildDocumentExtractionPrompt } from '@/lib/ai/extraction/prompts/linkedin'
 import { validateEntries } from '@/lib/ai/extraction/schemas'
 import type { EntrySource, ExtractedEntry } from '@/types/entry'
 
@@ -22,8 +22,8 @@ function extractEntriesArray(raw: string): unknown {
 export async function extractEntries(rawText: string, source: EntrySource, maxEntries: number): Promise<ExtractedEntry[]> {
   const raw = await getProvider().complete({
     role: 'extraction',
-    system: LINKEDIN_SYSTEM_PROMPT,
-    user: buildLinkedInUserPrompt(rawText),
+    system: DOCUMENT_EXTRACTION_SYSTEM_PROMPT,
+    user: buildDocumentExtractionPrompt(rawText),
     maxTokens: MAX_TOKENS,
   })
 

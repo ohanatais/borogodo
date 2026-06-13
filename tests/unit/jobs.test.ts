@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { mockLoggerError, mockRegenerateMirror } = vi.hoisted(() => ({
+const { mockLoggerError, mockRegenerateMirror, mockGenerateProactiveInsight } = vi.hoisted(() => ({
   mockLoggerError: vi.fn(),
   mockRegenerateMirror: vi.fn(async () => {}),
+  mockGenerateProactiveInsight: vi.fn(async () => {}),
 }))
 
 vi.mock('@/lib/log', () => ({
@@ -11,6 +12,10 @@ vi.mock('@/lib/log', () => ({
 
 vi.mock('@/lib/ai/mirror/maybeRegenerate', () => ({
   maybeRegenerateMirror: mockRegenerateMirror,
+}))
+
+vi.mock('@/lib/ai/insights/triggerProactiveInsight', () => ({
+  triggerProactiveInsight: mockGenerateProactiveInsight,
 }))
 
 import { fireAndForget, triggerProactiveInsight, maybeRegenerateMirror } from '@/lib/ai/extraction/jobs'
@@ -43,9 +48,15 @@ describe('fireAndForget', () => {
   })
 })
 
-describe('triggerProactiveInsight (stub costura para 005)', () => {
-  it('resolve como no-op', async () => {
-    await expect(triggerProactiveInsight('user-1')).resolves.toBeUndefined()
+describe('triggerProactiveInsight (costura ligada à 005)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('delega para a geração real sem alterar a assinatura', async () => {
+    await triggerProactiveInsight('user-1')
+
+    expect(mockGenerateProactiveInsight).toHaveBeenCalledWith('user-1')
   })
 })
 
@@ -55,8 +66,8 @@ describe('maybeRegenerateMirror (costura ligada à 004)', () => {
   })
 
   it('delega para a regeneração real sem alterar a assinatura', async () => {
-    await maybeRegenerateMirror('user-1', 5)
+    await maybeRegenerateMirror('user-1')
 
-    expect(mockRegenerateMirror).toHaveBeenCalledWith('user-1', 5)
+    expect(mockRegenerateMirror).toHaveBeenCalledWith('user-1')
   })
 })

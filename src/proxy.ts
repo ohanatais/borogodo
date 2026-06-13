@@ -19,7 +19,7 @@ function transferCookies(from: NextResponse, to: NextResponse): void {
   })
 }
 
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { user, supabaseResponse } = await updateSession(request)
   const { pathname } = request.nextUrl
 

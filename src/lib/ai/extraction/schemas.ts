@@ -2,18 +2,42 @@ import { z } from 'zod'
 import type { Reflection } from '@/types/capture'
 import type { EntrySource, ExtractedEntry } from '@/types/entry'
 
+// PostgreSQL date columns require strict YYYY-MM-DD. LLMs often return partial dates
+// ("2022-01" from LinkedIn, "2022" from résumés). Coerce to first-of-period so the
+// DB insert never fails on a type mismatch.
+function coerceDate(val: string | null | undefined): string | null {
+  if (!val) return null
+  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val
+  if (/^\d{4}-\d{2}$/.test(val)) return `${val}-01`
+  if (/^\d{4}$/.test(val)) return `${val}-01-01`
+  return null
+}
+
+const dateField = z
+  .string()
+  .nullish()
+  .transform(coerceDate)
+
+// LLMs sometimes return numeric values for free-text fields when the user mentions
+// numbers (e.g. metric: 80000 instead of "80000"). Coerce to string so the DB
+// insert doesn't fail on a type mismatch.
+const textField = z
+  .union([z.string(), z.number()])
+  .nullish()
+  .transform((v) => (v == null ? null : String(v)))
+
 const extractedEntrySchema = z.object({
   what_i_did: z.string().min(1),
-  decision: z.string().nullish(),
-  learning: z.string().nullish(),
-  impact: z.string().nullish(),
-  metric: z.string().nullish(),
-  entry_date: z.string().nullish(),
+  decision: textField,
+  learning: textField,
+  impact: textField,
+  metric: textField,
+  entry_date: dateField,
   tags: z.array(z.string()).default([]),
   company: z.string().nullish(),
   role_title: z.string().nullish(),
-  role_start: z.string().nullish(),
-  role_end: z.string().nullish(),
+  role_start: dateField,
+  role_end: dateField,
 })
 
 const reflectionSchema = z.object({

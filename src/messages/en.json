@@ -108,5 +108,89 @@
     "placeholder": "Your dashboard is coming. Everything's good for now.",
     "logout": "Sign out",
     "logoutAriaLabel": "End session"
+  },
+  "panel": {
+    "status": {
+      "building": "Building",
+      "emerging": "Taking shape",
+      "active": "Active"
+    },
+    "mirror": {
+      "fallback": "Your mirror is forming — keep capturing.",
+      "ready": "You have enough data. Ready to see your mirror?",
+      "link": "View mirror"
+    },
+    "indicators": {
+      "entries": "{count, plural, one {# entry} other {# entries}}",
+      "months": "{count, plural, one {# month} other {# months}}",
+      "strengths": "{count, plural, one {# strength} other {# strengths}}",
+      "timeSince": {
+        "today": "Captured today ✓",
+        "oneDay": "1 day ago",
+        "days": "{count} days ago",
+        "week": "1 week ago"
+      }
+    },
+    "insight": {
+      "label": "✦ Detected something new this week",
+      "viewContext": "View context →"
+    },
+    "recentEntries": {
+      "title": "Recent entries",
+      "viewAll": "View all"
+    },
+    "entryDate": {
+      "today": "today",
+      "yesterday": "yesterday",
+      "days": "{count} days ago",
+      "weeks": "{count, plural, one {# week ago} other {# weeks ago}}"
+    },
+    "empty": {
+      "title": "Everything starts with a story.",
+      "subtitle": "Tell me something you did at work — it can be small. Borogodó will start building your mirror from there."
+    }
+  },
+  "capture": {
+    "composer": {
+      "submitAriaLabel": "Send",
+      "audioAriaLabel": "Record audio (coming soon)",
+      "audioComingSoon": "coming soon",
+      "fileAriaLabel": "Attach file",
+      "imageAriaLabel": "Attach image (coming soon)",
+      "imageComingSoon": "coming soon",
+      "prompt": {
+        "first": "Tell me something you did at work.",
+        "today": "Nice. Anything else from today?",
+        "yesterday": "What happened at work yesterday?",
+        "recentDays": "It's been {days} days. What's been going on at work?",
+        "themeNudge": "Your strength in \"{theme}\" could use more evidence. Anything recent?",
+        "longGap": "A week is a long time. Tell me what you've been up to."
+      }
+    },
+    "reading": "Reading what you told me...",
+    "reflection": {
+      "opening": "Got it:",
+      "respond": "Respond",
+      "saveAsIs": "Save as is",
+      "answerPlaceholder": "Your answer..."
+    },
+    "error": {
+      "message": "Something went wrong while processing your capture.",
+      "retry": "Try again",
+      "close": "Close"
+    },
+    "apiErrors": {
+      "unauthorized": "Unauthorized",
+      "textTooShort": "Tell me a bit more, I couldn't catch that yet.",
+      "invalidKind": "Invalid capture type",
+      "comingSoon": "Audio/image capture is coming soon.",
+      "invalidFile": "Invalid file",
+      "fileTooLarge": "File too large (max 10 MB)",
+      "missingFile": "No file sent",
+      "generic": "I couldn't process your capture right now, try again?"
+    },
+    "sheet": {
+      "closeAriaLabel": "Close"
+    }
   }
 }

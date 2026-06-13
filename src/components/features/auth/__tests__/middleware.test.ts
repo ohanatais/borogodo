@@ -29,7 +29,7 @@ describe('middleware — route protection', () => {
 
   it('T010: unauthenticated access to /painel redirects to /login', async () => {
     mockGetUser.mockReturnValue(null)
-    const { default: middleware } = await import('@/middleware')
+    const { default: middleware } = await import('@/proxy')
     const request = makeRequest('/painel')
     const response = await middleware(request)
     expect(response.status).toBe(307)
@@ -38,7 +38,7 @@ describe('middleware — route protection', () => {
 
   it('T011: authenticated user accessing /login redirects to /painel', async () => {
     mockGetUser.mockReturnValue({ id: 'user-123', email: 'test@example.com' })
-    const { default: middleware } = await import('@/middleware')
+    const { default: middleware } = await import('@/proxy')
     const request = makeRequest('/login')
     const response = await middleware(request)
     expect(response.status).toBe(307)
