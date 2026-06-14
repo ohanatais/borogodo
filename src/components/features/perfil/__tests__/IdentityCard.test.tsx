@@ -2,6 +2,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { Profile } from '@/types/profile'
 
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({ refresh: vi.fn() })),
+}))
+
 const mockUpdateProfile = vi.hoisted(() => vi.fn())
 
 vi.mock('@/lib/actions/profile', () => ({

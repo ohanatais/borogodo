@@ -51,7 +51,9 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
       >
         {/* Logo */}
         <div className="flex items-center px-6 border-b" style={{ height: '68px', borderColor: 'var(--border)' }}>
-          <Logo variant="light" size="sm" />
+          <Link href="/painel" aria-label="Ir para o painel">
+            <Logo variant="light" size="sm" />
+          </Link>
         </div>
 
         {/* Nav */}
@@ -97,27 +99,22 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
         {/* Account footer */}
         <div className="px-4 py-4 border-t" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-              style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-              aria-hidden="true"
+            <Link
+              href="/configuracoes"
+              className="flex items-center gap-3 min-w-0 flex-1"
+              aria-label="Configurações"
             >
-              {userName.charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0 flex-1">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+              >
+                {userName.charAt(0).toUpperCase()}
+              </div>
               <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
                 {userName}
               </p>
-              <LogoutButton />
-            </div>
-            <Link
-              href="/configuracoes"
-              aria-label="Configurações"
-              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              <Settings size={16} />
             </Link>
+            <LogoutButton />
           </div>
         </div>
       </aside>

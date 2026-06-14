@@ -31,13 +31,12 @@ describe('validateCaptureResult', () => {
     expect(result.reflection.move.type).toBe('question')
   })
 
-  it('rejeita reflexo sem pills', () => {
-    expect(() =>
-      validateCaptureResult(
-        { entries: [validEntry], reflection: { ...validReflection, pills: [] } },
-        'text'
-      )
-    ).toThrow()
+  it('aceita reflexo com pills vazio (LLM pode retornar array vazio)', () => {
+    const result = validateCaptureResult(
+      { entries: [validEntry], reflection: { ...validReflection, pills: [] } },
+      'text'
+    )
+    expect(result.reflection.pills).toEqual([])
   })
 
   it('rejeita reflexo com mais de 4 pills', () => {

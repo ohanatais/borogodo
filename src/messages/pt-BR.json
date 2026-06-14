@@ -290,7 +290,8 @@
       "invalidFile": "Arquivo inválido",
       "fileTooLarge": "Arquivo muito grande (máx 10 MB)",
       "missingFile": "Nenhum arquivo enviado",
-      "generic": "Não consegui processar sua captura agora, tenta de novo?"
+      "generic": "Não consegui processar sua captura agora, tenta de novo?",
+      "noContent": "Hmm, não consegui identificar uma conquista profissional aí. Conta com mais detalhes — o que você fez, decidiu ou aprendeu?"
     },
     "sheet": {
       "closeAriaLabel": "Fechar"

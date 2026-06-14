@@ -206,7 +206,8 @@
       "invalidFile": "Invalid file",
       "fileTooLarge": "File too large (max 10 MB)",
       "missingFile": "No file sent",
-      "generic": "I couldn't process your capture right now, try again?"
+      "generic": "I couldn't process your capture right now, try again?",
+      "noContent": "Hmm, I couldn't identify a professional achievement there. Tell me more — what did you do, decide, or learn?"
     },
     "sheet": {
       "closeAriaLabel": "Close"

@@ -2,17 +2,17 @@
 
 import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Camera } from 'lucide-react'
 import { uploadAvatarAction } from '@/lib/actions/profile'
 
 interface AvatarUploadProps {
   currentUrl: string | null
+  userName: string
   onUpload: (url: string) => void
 }
 
 type UploadState = 'idle' | 'uploading' | 'error'
 
-export function AvatarUpload({ currentUrl, onUpload }: AvatarUploadProps) {
+export function AvatarUpload({ currentUrl, userName, onUpload }: AvatarUploadProps) {
   const t = useTranslations('configuracoes.identity')
   const inputRef = useRef<HTMLInputElement>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentUrl)
@@ -71,8 +71,11 @@ export function AvatarUpload({ currentUrl, onUpload }: AvatarUploadProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="w-full h-full flex items-center justify-center" style={{ color: 'var(--muted-foreground)' }}>
-            <Camera size={28} />
+          <span
+            className="w-full h-full flex items-center justify-center text-xl font-bold"
+            style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+          >
+            {userName.charAt(0).toUpperCase() || '?'}
           </span>
         )}
         {uploadState === 'uploading' && (

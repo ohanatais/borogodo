@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { AvatarUpload } from './AvatarUpload'
 import { updateProfileAction } from '@/lib/actions/profile'
@@ -14,6 +15,7 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 export function IdentityCard({ profile }: IdentityCardProps) {
   const t = useTranslations('configuracoes.identity')
+  const router = useRouter()
   const [name, setName] = useState(profile?.name ?? '')
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -46,7 +48,8 @@ export function IdentityCard({ profile }: IdentityCardProps) {
 
       <AvatarUpload
         currentUrl={profile?.avatar_url ?? null}
-        onUpload={() => {}}
+        userName={profile?.name ?? ''}
+        onUpload={() => router.refresh()}
       />
 
       <div className="flex flex-col gap-1.5">
@@ -60,7 +63,7 @@ export function IdentityCard({ profile }: IdentityCardProps) {
           onChange={(e) => setName(e.target.value)}
           className="w-full rounded-lg px-3 py-2.5 text-sm outline-none focus-visible:ring-2"
           style={{
-            background: 'var(--input)',
+            background: 'white',
             border: '1px solid var(--border)',
             color: 'var(--foreground)',
           }}
