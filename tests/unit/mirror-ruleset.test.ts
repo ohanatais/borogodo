@@ -293,7 +293,7 @@ describe('validateMirrorRuleset — 9 asserts determinísticos', () => {
         ...GOLDEN_MIRROR,
         closing_question: 'Isso ressoa com você?',
       } as unknown as Mirror & { closing_question?: string }
-      delete (legacyMirror as Mirror).closing
+      delete (legacyMirror as unknown as { closing?: string }).closing
       const violations = validateMirrorRuleset(legacyMirror as Mirror)
       expect(violations.some((v) => v.assert === 9)).toBe(true)
     })

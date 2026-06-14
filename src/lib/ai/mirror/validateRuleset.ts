@@ -9,7 +9,7 @@ export interface RulesetViolation {
 // Campos de texto plano inspecionados em cada assert (exceto strength_themes).
 // Usa ?? '' para ser resiliente a mirrors malformados (ex: campo deletado em testes).
 function textFields(m: Mirror): Array<[string, string]> {
-  const raw = m as Record<string, unknown>
+  const raw = m as unknown as Record<string, unknown>
   const sec = (card: 'primary_strength' | 'invisible_skill' | 'context_pattern') =>
     (m[card] ?? {}) as { headline?: string; evidence?: string }
   return [
@@ -174,7 +174,7 @@ export function validateMirrorRuleset(mirror: Mirror): RulesetViolation[] {
   }
 
   // Assert 9: closing existe e tem conteúdo; closing_question não deve existir
-  const raw = mirror as Record<string, unknown>
+  const raw = mirror as unknown as Record<string, unknown>
   if (!mirror.closing || mirror.closing.trim() === '') {
     violations.push({ assert: 9, field: 'closing', message: 'Campo "closing" está vazio ou ausente' })
   }
