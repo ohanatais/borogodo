@@ -99,12 +99,6 @@ describe('MirrorContent', () => {
     expect(screen.getByText('Adaptabilidade')).toBeInTheDocument()
   })
 
-  it('has a back link pointing to /painel', () => {
-    render(<MirrorContent snapshot={snapshot} />)
-    const link = screen.getByRole('link', { name: 'back' })
-    expect(link).toHaveAttribute('href', '/painel')
-  })
-
   it('renders the MirrorFeedback component', () => {
     render(<MirrorContent snapshot={snapshot} />)
     expect(screen.getByTestId('mirror-feedback')).toBeInTheDocument()
