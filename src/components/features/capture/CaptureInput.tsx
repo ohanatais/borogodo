@@ -24,10 +24,13 @@ export function CaptureInput({ placeholder, mode }: CaptureInputProps) {
     setError(null)
 
     try {
+      const formData = new FormData()
+      formData.append('content', trimmed)
+      formData.append('kind', mode === 'perguntar' ? 'question' : 'text')
+
       const res = await fetch('/api/capture', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: trimmed, kind: mode === 'perguntar' ? 'question' : 'text' }),
+        body: formData,
       })
 
       if (!res.ok) {
