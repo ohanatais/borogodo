@@ -4,7 +4,7 @@ import { MirrorFeedback } from '../MirrorFeedback'
 
 const mockSubmitFeedback = vi.fn()
 
-vi.mock('@/app/[locale]/espelho/actions', () => ({
+vi.mock('@/app/[locale]/(app)/espelho/actions', () => ({
   submitMirrorFeedback: (...args: unknown[]) => mockSubmitFeedback(...args),
 }))
 

@@ -1,12 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-vi.mock('@/app/[locale]/espelho/actions', () => ({
+vi.mock('@/app/[locale]/(app)/espelho/actions', () => ({
   getEvidenceEntries: vi.fn(),
 }))
 
 import { EvidenceText } from '../EvidenceText'
-import { getEvidenceEntries } from '@/app/[locale]/espelho/actions'
+import { getEvidenceEntries } from '@/app/[locale]/(app)/espelho/actions'
 
 const mockGetEvidenceEntries = vi.mocked(getEvidenceEntries)
 

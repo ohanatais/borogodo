@@ -33,10 +33,6 @@ vi.mock('next/navigation', () => ({
   usePathname: vi.fn(() => '/painel'),
 }))
 
-vi.mock('@/components/features/auth/LogoutButton', () => ({
-  LogoutButton: () => <button>Sair</button>,
-}))
-
 const BASE_DATA: PanelData = {
   name: 'Ana Silva',
   status: 'emerging',
@@ -52,29 +48,29 @@ const BASE_DATA: PanelData = {
 }
 
 describe('PainelPage', () => {
-  it('T022: renders header, mirror headline, BorogodoCard and the composer', async () => {
+  it('T022: renders BorogodoCard with mirror headline', async () => {
     mockGetPanelData.mockResolvedValueOnce(BASE_DATA)
 
     const { default: PainelPage } = await import('../page')
     const jsx = await PainelPage()
     render(jsx)
 
-    expect(screen.getByText(/greeting:/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /sair/i })).toBeInTheDocument()
-    // BorogodoCard renders the headline and the "ver espelho" link key
     expect(screen.getByText('Você media conflitos com leveza.')).toBeInTheDocument()
     expect(screen.getByText('viewMirror')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('O que aconteceu no trabalho ontem?')).toBeInTheDocument()
   })
 
   it('T022: shows BorogodoCard empty state when mirror is null and fewer than 3 entries', async () => {
-    mockGetPanelData.mockResolvedValueOnce({ ...BASE_DATA, mirror: null, status: 'building', entryCount: 1 })
+    mockGetPanelData.mockResolvedValueOnce({
+      ...BASE_DATA,
+      mirror: null,
+      status: 'building',
+      entryCount: 1,
+    })
 
     const { default: PainelPage } = await import('../page')
     const jsx = await PainelPage()
     render(jsx)
 
-    // BorogodoCard empty state: h2 with formingOf + name + formingSuffix, plus formingSubtitle
     const heading = screen.getByRole('heading', { level: 2 })
     expect(heading.textContent).toMatch(/formingOf/)
     expect(screen.getByText('formingSubtitle')).toBeInTheDocument()

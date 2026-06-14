@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { getEvidenceEntries } from '@/app/[locale]/espelho/actions'
+import { getEvidenceEntries } from '@/app/[locale]/(app)/espelho/actions'
 import { toEvidenceItem } from '@/types/mirror'
 import { truncate } from '@/lib/utils'
 import type { EvidenceEntry } from '@/lib/db/entries'
