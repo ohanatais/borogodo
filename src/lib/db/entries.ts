@@ -53,6 +53,26 @@ export async function getRecentEntries(
   return data as Entry[]
 }
 
+export async function getEntriesByIds(
+  supabase: SupabaseServerClient,
+  userId: string,
+  ids: string[]
+): Promise<Entry[]> {
+  if (ids.length === 0) return []
+
+  const { data, error } = await supabase
+    .from('entries')
+    .select('id, what_i_did, role_title, company, entry_date, created_at')
+    .eq('user_id', userId)
+    .in('id', ids)
+
+  if (error || !data) {
+    return []
+  }
+
+  return data as Entry[]
+}
+
 export async function enrichEntryField(
   supabase: SupabaseServerClient,
   entryId: string,

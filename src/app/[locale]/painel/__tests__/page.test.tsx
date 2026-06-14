@@ -44,13 +44,15 @@ const BASE_DATA: PanelData = {
   monthsSpan: 2,
   daysSince: 1,
   recentEntries: [],
+  timelineEntries: [],
+  highlights: [],
   mirror: { headline: 'Você media conflitos com leveza.', strengthThemes: ['mediação'] },
   insight: null,
   composerPlaceholder: 'O que aconteceu no trabalho ontem?',
 }
 
 describe('PainelPage', () => {
-  it('T022: renders header, mirror headline, indicators and the composer', async () => {
+  it('T022: renders header, mirror headline, BorogodoCard and the composer', async () => {
     mockGetPanelData.mockResolvedValueOnce(BASE_DATA)
 
     const { default: PainelPage } = await import('../page')
@@ -59,18 +61,21 @@ describe('PainelPage', () => {
 
     expect(screen.getByText(/greeting:/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /sair/i })).toBeInTheDocument()
+    // BorogodoCard renders the headline and the "ver espelho" link key
     expect(screen.getByText('Você media conflitos com leveza.')).toBeInTheDocument()
-    expect(screen.getByText('status.emerging')).toBeInTheDocument()
+    expect(screen.getByText('viewMirror')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('O que aconteceu no trabalho ontem?')).toBeInTheDocument()
   })
 
-  it('T022: shows the mirror fallback when there is no snapshot yet and fewer than 3 entries', async () => {
+  it('T022: shows BorogodoCard empty state when mirror is null and fewer than 3 entries', async () => {
     mockGetPanelData.mockResolvedValueOnce({ ...BASE_DATA, mirror: null, status: 'building', entryCount: 1 })
 
     const { default: PainelPage } = await import('../page')
     const jsx = await PainelPage()
     render(jsx)
 
-    expect(screen.getByText('mirror.fallback')).toBeInTheDocument()
+    // BorogodoCard empty state renders t('forming') and t('formingSubtitle')
+    expect(screen.getByText('forming')).toBeInTheDocument()
+    expect(screen.getByText('formingSubtitle')).toBeInTheDocument()
   })
 })

@@ -6,20 +6,27 @@ export interface RulesetViolation {
   message: string
 }
 
+// Extrai o texto de evidência tanto do novo formato { text, entry_ids } quanto do legado string.
+function extractEvidenceText(ev: unknown): string {
+  if (typeof ev === 'string') return ev
+  if (ev && typeof ev === 'object' && 'text' in ev) return String((ev as { text: unknown }).text ?? '')
+  return ''
+}
+
 // Campos de texto plano inspecionados em cada assert (exceto strength_themes).
 // Usa ?? '' para ser resiliente a mirrors malformados (ex: campo deletado em testes).
 function textFields(m: Mirror): Array<[string, string]> {
   const raw = m as unknown as Record<string, unknown>
   const sec = (card: 'primary_strength' | 'invisible_skill' | 'context_pattern') =>
-    (m[card] ?? {}) as { headline?: string; evidence?: string }
+    (m[card] ?? {}) as { headline?: string; evidence?: unknown }
   return [
     ['intro', String(raw['intro'] ?? '')],
     ['primary_strength.headline', String(sec('primary_strength').headline ?? '')],
-    ['primary_strength.evidence', String(sec('primary_strength').evidence ?? '')],
+    ['primary_strength.evidence', extractEvidenceText(sec('primary_strength').evidence)],
     ['invisible_skill.headline', String(sec('invisible_skill').headline ?? '')],
-    ['invisible_skill.evidence', String(sec('invisible_skill').evidence ?? '')],
+    ['invisible_skill.evidence', extractEvidenceText(sec('invisible_skill').evidence)],
     ['context_pattern.headline', String(sec('context_pattern').headline ?? '')],
-    ['context_pattern.evidence', String(sec('context_pattern').evidence ?? '')],
+    ['context_pattern.evidence', extractEvidenceText(sec('context_pattern').evidence)],
     ['closing', String(raw['closing'] ?? '')],
   ]
 }

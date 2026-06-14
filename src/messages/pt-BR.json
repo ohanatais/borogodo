@@ -176,6 +176,18 @@
     "empty": {
       "title": "Tudo começa com uma história.",
       "subtitle": "Conta o que você fez no trabalho — pode ser algo pequeno. O Borogodó começa a montar seu espelho a partir daí."
+    },
+    "borogodoCard": {
+      "subtitle": "O borogodó de",
+      "viewMirror": "Ver espelho completo →",
+      "forming": "Seu espelho está se formando",
+      "formingSubtitle": "Continue capturando histórias para o Borogodó revelar seu padrão."
+    },
+    "highlights": {
+      "title": "Trajetória em destaque"
+    },
+    "timeline": {
+      "title": "Linha do tempo"
     }
   },
   "espelho": {
@@ -184,11 +196,24 @@
     "regenerating": "Gerando...",
     "regenerateError": "Algo deu errado. Tenta de novo?",
     "sections": {
-      "primaryStrength": "Força principal",
-      "invisibleSkill": "Habilidade invisível",
-      "contextPattern": "Padrão de contexto"
+      "primaryStrength": "No que você manda bem",
+      "invisibleSkill": "Seu borogodó",
+      "contextPattern": "O fio da sua carreira"
     },
     "themes": "Temas de força",
+    "evidence": {
+      "show": "{count, plural, one {Ver # entrada} other {Ver # entradas}}",
+      "collapse": "Recolher",
+      "loading": "Carregando..."
+    },
+    "categories": {
+      "title": "Seus skills por categoria",
+      "tier": {
+        "Emergente": "Emergente",
+        "Consistente": "Consistente",
+        "Comprovada": "Comprovada"
+      }
+    },
     "feedback": {
       "question": "Resonou com você?",
       "yes": "Sim",

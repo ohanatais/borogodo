@@ -6,25 +6,30 @@
  */
 import { describe, it, expect } from 'vitest'
 import { validateMirrorRuleset } from '@/lib/ai/mirror/validateRuleset'
-import type { Mirror } from '@/types/mirror'
+import type { Mirror, EvidenceItem } from '@/types/mirror'
+
+const ev = (text: string, entry_ids: string[] = []): EvidenceItem => ({ text, entry_ids })
 
 // Espelho limpo baseado no exemplo-ouro #1 (deve passar em todos os 9 asserts)
 const GOLDEN_MIRROR: Mirror = {
   intro: 'Ana, já consigo ver o padrão.',
   primary_strength: {
     headline: 'PM que entra na camada de engenharia em vez de esperar alguém explicar',
-    evidence:
-      'Veio da Engenharia Química e lê log e API por conta própria. Cortou tempo de investigação dev em 50% na Vibe e levou esse instinto pra IA: 70% menos tempo de investigação técnica na Cheesecake Labs.',
+    evidence: ev(
+      'Veio da Engenharia Química e lê log e API por conta própria. Cortou tempo de investigação dev em 50% na Vibe e levou esse instinto pra IA: 70% menos tempo de investigação técnica na Cheesecake Labs.'
+    ),
   },
   invisible_skill: {
     headline: 'Chega onde não existe função de produto e monta uma do zero',
-    evidence:
-      'Em 3 das suas 4 casas você foi a primeira contratação de produto (Gestão DS) ou construiu o que faltava do zero (Vibe, Cheesecake). Esse padrão de 0→1 não é coincidência.',
+    evidence: ev(
+      'Em 3 das suas 4 casas você foi a primeira contratação de produto (Gestão DS) ou construiu o que faltava do zero (Vibe, Cheesecake). Esse padrão de 0→1 não é coincidência.'
+    ),
   },
   context_pattern: {
     headline: 'Consultoria de produto em mercado regulado e multi-país',
-    evidence:
-      '9 produtos entregues, 3 países, do primeiro discovery ao pós-launch. Dois reviews 5★ no Clutch em squads multi-fuso: a prova de que o alinhamento funcionou é um cliente te avaliando, não você falando bem de você.',
+    evidence: ev(
+      '9 produtos entregues, 3 países, do primeiro discovery ao pós-launch. Dois reviews 5★ no Clutch em squads multi-fuso: a prova de que o alinhamento funcionou é um cliente te avaliando, não você falando bem de você.'
+    ),
   },
   closing:
     'Com o espelho tomando forma, o próximo passo é trazer mais entradas: cada nova conquista afina o que já aparesce aqui.',
@@ -40,21 +45,27 @@ function mirror(overrides: Partial<Mirror>): Mirror {
 function mirrorWithSection(
   card: 'primary_strength' | 'invisible_skill' | 'context_pattern',
   headline: string,
-  evidence: string
+  evidenceText: string
 ): Mirror {
-  return { ...GOLDEN_MIRROR, [card]: { headline, evidence } }
+  return { ...GOLDEN_MIRROR, [card]: { headline, evidence: ev(evidenceText) } }
 }
 
 // Campos de texto plano do Mirror (exceto strength_themes)
 function textFields(m: Mirror): Array<[string, string]> {
+  const evText = (e: EvidenceItem | unknown): string => {
+    if (!e) return ''
+    if (typeof e === 'string') return e
+    if (typeof e === 'object' && 'text' in (e as object)) return String((e as EvidenceItem).text)
+    return ''
+  }
   return [
     ['intro', m.intro],
     ['primary_strength.headline', m.primary_strength.headline],
-    ['primary_strength.evidence', m.primary_strength.evidence],
+    ['primary_strength.evidence', evText(m.primary_strength.evidence)],
     ['invisible_skill.headline', m.invisible_skill.headline],
-    ['invisible_skill.evidence', m.invisible_skill.evidence],
+    ['invisible_skill.evidence', evText(m.invisible_skill.evidence)],
     ['context_pattern.headline', m.context_pattern.headline],
-    ['context_pattern.evidence', m.context_pattern.evidence],
+    ['context_pattern.evidence', evText(m.context_pattern.evidence)],
     ['closing', m.closing],
   ]
 }
@@ -76,7 +87,7 @@ describe('validateMirrorRuleset — 9 asserts determinísticos', () => {
       const m = mirrorWithSection(
         'primary_strength',
         'PM que lê log — e entrega resultado',
-        GOLDEN_MIRROR.primary_strength.evidence
+        GOLDEN_MIRROR.primary_strength.evidence.text
       )
       const violations = validateMirrorRuleset(m)
       expect(violations.some((v) => v.assert === 1 && v.field === 'primary_strength.headline')).toBe(true)
@@ -139,7 +150,7 @@ describe('validateMirrorRuleset — 9 asserts determinísticos', () => {
       const m = mirrorWithSection(
         'context_pattern',
         'Força ○ em contextos regulados',
-        GOLDEN_MIRROR.context_pattern.evidence
+        GOLDEN_MIRROR.context_pattern.evidence.text
       )
       expect(validateMirrorRuleset(m).some((v) => v.assert === 3)).toBe(true)
     })
@@ -178,7 +189,7 @@ describe('validateMirrorRuleset — 9 asserts determinísticos', () => {
       const m = mirrorWithSection(
         'primary_strength',
         'Não é uma PM comum, é uma arquiteta de produto',
-        GOLDEN_MIRROR.primary_strength.evidence
+        GOLDEN_MIRROR.primary_strength.evidence.text
       )
       expect(validateMirrorRuleset(m).some((v) => v.assert === 5)).toBe(true)
     })
@@ -213,7 +224,7 @@ describe('validateMirrorRuleset — 9 asserts determinísticos', () => {
       const m = mirrorWithSection(
         'context_pattern',
         'Tá voando no mercado regulado',
-        GOLDEN_MIRROR.context_pattern.evidence
+        GOLDEN_MIRROR.context_pattern.evidence.text
       )
       expect(validateMirrorRuleset(m).some((v) => v.assert === 6)).toBe(true)
     })
@@ -244,11 +255,11 @@ describe('validateMirrorRuleset — 9 asserts determinísticos', () => {
         ...GOLDEN_MIRROR,
         primary_strength: {
           headline: GOLDEN_MIRROR.primary_strength.headline,
-          evidence: 'Evidência. (Se tiver um número, fortalece.)',
+          evidence: ev('Evidência. (Se tiver um número, fortalece.)'),
         },
         invisible_skill: {
           headline: GOLDEN_MIRROR.invisible_skill.headline,
-          evidence: 'Outra evidência. (Se lembrar de um dado, inclua.)',
+          evidence: ev('Outra evidência. (Se lembrar de um dado, inclua.)'),
         },
       }
       expect(validateMirrorRuleset(m).some((v) => v.assert === 7)).toBe(true)
@@ -264,9 +275,9 @@ describe('validateMirrorRuleset — 9 asserts determinísticos', () => {
     it('todos os 3 headlines começando com "Você" gera violação', () => {
       const m: Mirror = {
         ...GOLDEN_MIRROR,
-        primary_strength: { headline: 'Você entrega rápido', evidence: 'evidência' },
-        invisible_skill: { headline: 'Você estabiliza times', evidence: 'evidência' },
-        context_pattern: { headline: 'Você brilha em 0→1', evidence: 'evidência' },
+        primary_strength: { headline: 'Você entrega rápido', evidence: ev('evidência') },
+        invisible_skill: { headline: 'Você estabiliza times', evidence: ev('evidência') },
+        context_pattern: { headline: 'Você brilha em 0→1', evidence: ev('evidência') },
       }
       expect(validateMirrorRuleset(m).some((v) => v.assert === 8)).toBe(true)
     })
@@ -274,9 +285,9 @@ describe('validateMirrorRuleset — 9 asserts determinísticos', () => {
     it('apenas 2 dos 3 headlines começando com "Você" não gera violação', () => {
       const m: Mirror = {
         ...GOLDEN_MIRROR,
-        primary_strength: { headline: 'Você entrega rápido', evidence: 'evidência' },
-        invisible_skill: { headline: 'PM que estabiliza times', evidence: 'evidência' },
-        context_pattern: { headline: 'Você brilha em 0→1', evidence: 'evidência' },
+        primary_strength: { headline: 'Você entrega rápido', evidence: ev('evidência') },
+        invisible_skill: { headline: 'PM que estabiliza times', evidence: ev('evidência') },
+        context_pattern: { headline: 'Você brilha em 0→1', evidence: ev('evidência') },
       }
       expect(validateMirrorRuleset(m).filter((v) => v.assert === 8)).toHaveLength(0)
     })
@@ -323,4 +334,3 @@ describe('validateMirrorRuleset — 9 asserts determinísticos', () => {
     })
   })
 })
-

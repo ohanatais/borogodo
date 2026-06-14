@@ -18,6 +18,21 @@ interface RecentEntryRow {
   created_at: string
 }
 
+export interface TimelineEntry {
+  id: string
+  role_title: string | null
+  company: string | null
+  entry_date: string | null
+}
+
+export interface HighlightEntry {
+  id: string
+  what_i_did: string
+  impact: string | null
+  metric: string | null
+  entry_date: string | null
+}
+
 interface MirrorRow {
   primary_strength: { headline: string } | null
   strength_themes: string[] | null
@@ -36,6 +51,8 @@ export interface PanelData {
   monthsSpan: number | null
   daysSince: number | null
   recentEntries: RecentEntryRow[]
+  timelineEntries: TimelineEntry[]
+  highlights: HighlightEntry[]
   mirror: PanelMirror | null
   insight: ProactiveInsight | null
   composerPlaceholder: string
@@ -56,7 +73,17 @@ function calculateDaysSince(createdAt: string | undefined): number | null {
 }
 
 export async function getPanelData(supabase: SupabaseServerClient, userId: string): Promise<PanelData> {
-  const [profileRes, countRes, recentRes, oldestRes, newestRes, mirrorRes, insightRes] = await Promise.all([
+  const [
+    profileRes,
+    countRes,
+    recentRes,
+    oldestRes,
+    newestRes,
+    mirrorRes,
+    insightRes,
+    timelineRes,
+    highlightsRes,
+  ] = await Promise.all([
     supabase.from('profiles').select('name').eq('id', userId).single(),
     supabase.from('entries').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase
@@ -96,6 +123,20 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .order('generated_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from('entries')
+      .select('id, role_title, company, entry_date')
+      .eq('user_id', userId)
+      .not('role_title', 'is', null)
+      .order('entry_date', { ascending: false })
+      .limit(3),
+    supabase
+      .from('entries')
+      .select('id, what_i_did, impact, metric, entry_date')
+      .eq('user_id', userId)
+      .not('impact', 'is', null)
+      .order('entry_date', { ascending: false })
+      .limit(3),
   ])
 
   const recentEntries = (recentRes.data ?? []) as RecentEntryRow[]
@@ -123,6 +164,8 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     monthsSpan: calculateMonthsSpan(oldestEntryDate, newestEntryDate),
     daysSince,
     recentEntries,
+    timelineEntries: (timelineRes.data ?? []) as TimelineEntry[],
+    highlights: (highlightsRes.data ?? []) as HighlightEntry[],
     mirror,
     insight: (insightRes.data as ProactiveInsight | null) ?? null,
     composerPlaceholder: t(prompt.key, prompt.values),
