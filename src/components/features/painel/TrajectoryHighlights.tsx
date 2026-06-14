@@ -1,6 +1,5 @@
 import { useTranslations } from 'next-intl'
 import type { HighlightEntry } from '@/lib/panel/getPanelData'
-import { truncate } from '@/lib/utils'
 
 interface TrajectoryHighlightsProps {
   highlights: HighlightEntry[]
@@ -30,11 +29,11 @@ export function TrajectoryHighlights({ highlights }: TrajectoryHighlightsProps) 
             >
               {resultLine && (
                 <p className="text-sm font-semibold mb-0.5" style={{ color: 'var(--foreground)' }}>
-                  {truncate(resultLine, 100)}
+                  {resultLine}
                 </p>
               )}
               <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                {truncate(entry.what_i_did, 100)}
+                {entry.what_i_did}
               </p>
             </div>
           )

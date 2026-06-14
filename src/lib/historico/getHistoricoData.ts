@@ -92,24 +92,35 @@ export function groupPositions(entries: RawEntry[]): HistoricoPosition[] {
   const map = new Map<string, HistoricoPosition>()
 
   for (const entry of entries) {
-    if (!entry.role_title || !entry.company) continue
+    if (!entry.company) continue
 
-    const key = `${entry.role_title}|||${entry.company}`
+    const key = entry.company
 
     const existing = map.get(key)
     if (existing) {
-      if (existing.entries.length < 5) {
+      if (existing.entries.length < 8) {
         existing.entries.push({
           what_i_did: entry.what_i_did,
           impact: entry.impact,
           metric: entry.metric,
         })
       }
+      // Expand period to cover full company tenure
+      if (entry.role_start && (!existing.role_start || entry.role_start < existing.role_start)) {
+        existing.role_start = entry.role_start
+      }
+      if (!entry.role_end) {
+        existing.role_end = null
+      } else if (existing.role_end && entry.role_end > existing.role_end) {
+        existing.role_end = entry.role_end
+      }
+      existing.period_label = formatPeriodLabel(existing.role_start, existing.role_end)
+      existing.year_label = formatYearLabel(existing.role_start, existing.role_end)
     } else {
       const tint = getCompanyTint(entry.company)
       const initials = getCompanyInitials(entry.company)
       map.set(key, {
-        role_title: entry.role_title,
+        role_title: entry.role_title ?? entry.company,
         company: entry.company,
         company_initials: initials,
         company_tint: tint,
@@ -139,7 +150,6 @@ export async function getHistoricoData(
     .from('entries')
     .select('role_title, company, role_start, role_end, what_i_did, impact, metric')
     .eq('user_id', userId)
-    .not('role_title', 'is', null)
     .not('company', 'is', null)
     .order('role_start', { ascending: false, nullsFirst: false })
 

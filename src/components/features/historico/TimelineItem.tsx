@@ -4,16 +4,9 @@ import { useState } from 'react'
 import { ChevronDown, Paperclip } from 'lucide-react'
 import type { HistoricoPosition } from '@/lib/historico/getHistoricoData'
 
-const MAX_BULLET_CHARS = 110
-
 interface TimelineItemProps {
   position: HistoricoPosition
   isLast: boolean
-}
-
-function truncate(text: string, max: number): string {
-  if (text.length <= max) return text
-  return text.slice(0, max).trimEnd() + '…'
 }
 
 export function TimelineItem({ position, isLast }: TimelineItemProps) {
@@ -22,7 +15,7 @@ export function TimelineItem({ position, isLast }: TimelineItemProps) {
   const bulletText = (entry: HistoricoPosition['entries'][number]) => {
     const parts = [entry.what_i_did]
     if (entry.impact) parts.push(entry.impact)
-    return truncate(parts.join(' — '), MAX_BULLET_CHARS)
+    return parts.join(' — ')
   }
 
   return (
