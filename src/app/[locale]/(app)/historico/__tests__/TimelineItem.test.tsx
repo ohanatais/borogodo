@@ -40,23 +40,29 @@ describe('TimelineItem', () => {
     expect(screen.getByText('2022–2024')).toBeInTheDocument()
   })
 
-  it('renders bullet entries', () => {
+  it('hides bullet entries by default (accordion closed)', () => {
     render(<TimelineItem position={BASE_POSITION} isLast={false} />)
+    expect(screen.queryByText(/Liderou o roadmap/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Criou processo de discovery/)).not.toBeInTheDocument()
+  })
+
+  it('shows bullet entries after expanding', () => {
+    render(<TimelineItem position={BASE_POSITION} isLast={false} />)
+    fireEvent.click(screen.getByRole('button'))
     expect(screen.getByText(/Liderou o roadmap/)).toBeInTheDocument()
     expect(screen.getByText(/Criou processo de discovery/)).toBeInTheDocument()
   })
 
-  it('concatenates impact and metric into bullet text', () => {
+  it('concatenates impact into bullet text when expanded', () => {
     render(<TimelineItem position={BASE_POSITION} isLast={false} />)
+    fireEvent.click(screen.getByRole('button'))
     expect(screen.getByText(/Aumentou retention 20%/)).toBeInTheDocument()
-    expect(screen.getByText(/20%/)).toBeInTheDocument()
   })
 
   it('shows evidências chip after expanding', () => {
     render(<TimelineItem position={BASE_POSITION} isLast={false} />)
     expect(screen.queryByText(/Evidências/)).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: /product manager/i }))
+    fireEvent.click(screen.getByRole('button'))
     expect(screen.getByText(/Evidências \(em breve\)/)).toBeInTheDocument()
   })
 

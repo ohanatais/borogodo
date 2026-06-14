@@ -173,25 +173,25 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
 
         {/* ── Mobile bottom bar ──────────────────────── */}
         <div
-          className="lg:hidden sticky bottom-0 border-t py-2 px-4"
+          className="lg:hidden sticky bottom-0 border-t"
           style={{
-            background: 'oklch(98% 0.008 90 / 0.9)',
+            background: 'oklch(98% 0.008 90 / 0.95)',
             backdropFilter: 'blur(12px)',
             borderColor: 'var(--border)',
           }}
         >
-          {/* Row 1: mode toggle */}
-          <div className="flex justify-center mb-2">
+          {/* Row 1 — captura: toggle + input + enviar */}
+          <div className="flex items-center gap-2 px-3 pt-2 pb-1.5">
             <div
-              className="flex items-center p-0.5 rounded-full"
-              style={{ background: 'oklch(100% 0 0 / 0.7)' }}
+              className="flex items-center p-0.5 rounded-full shrink-0"
+              style={{ background: 'oklch(100% 0 0 / 0.8)' }}
             >
               {(['registrar', 'perguntar'] as const).map((m) => (
                 <button
                   key={m}
                   type="button"
                   onClick={() => setCaptureMode(m)}
-                  className="text-xs px-3 py-1.5 rounded-full capitalize transition-all"
+                  className="text-xs px-2.5 py-1 rounded-full transition-all"
                   style={
                     captureMode === m
                       ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }
@@ -202,60 +202,40 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* Row 2: nav icons + capture input */}
-          <div className="flex items-center gap-2">
-            {/* Left nav icons (Painel, Espelho) */}
-            <div className="flex items-center gap-1 shrink-0">
-              {NAV_ITEMS.slice(0, 2).map((item) => {
-                const active = isActive(item.path)
-                return item.path ? (
-                  <Link
-                    key={item.id}
-                    href={item.path}
-                    aria-label={item.label}
-                    className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
-                    style={{ color: active ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
-                  >
-                    {item.icon}
-                  </Link>
-                ) : null
-              })}
-            </div>
-
-            {/* Capture input */}
             <div className="flex-1 min-w-0">
               <CaptureInput placeholder={inputPlaceholder} mode={captureMode} />
             </div>
-
-            {/* Right nav icons (Historico, Conteudo) */}
-            <div className="flex items-center gap-1 shrink-0">
-              {NAV_ITEMS.slice(2).map((item) => {
-                const active = isActive(item.path)
-                return item.disabled || !item.path ? (
-                  <span
-                    key={item.id}
-                    aria-label={item.label}
-                    className="w-10 h-10 flex items-center justify-center rounded-lg opacity-30 cursor-not-allowed"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    {item.icon}
-                  </span>
-                ) : (
-                  <Link
-                    key={item.id}
-                    href={item.path}
-                    aria-label={item.label}
-                    className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
-                    style={{ color: active ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
-                  >
-                    {item.icon}
-                  </Link>
-                )
-              })}
-            </div>
           </div>
+
+          {/* Row 2 — nav: 4 ícones igualmente espaçados */}
+          <nav
+            className="flex items-center justify-around px-2 pb-2"
+            aria-label="Navegação"
+          >
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item.path)
+              return item.disabled || !item.path ? (
+                <span
+                  key={item.id}
+                  aria-label={item.label}
+                  className="w-10 h-10 flex items-center justify-center rounded-lg opacity-30 cursor-not-allowed"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  {item.icon}
+                </span>
+              ) : (
+                <Link
+                  key={item.id}
+                  href={item.path}
+                  aria-label={item.label}
+                  className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
+                  style={{ color: active ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
+                >
+                  {item.icon}
+                </Link>
+              )
+            })}
+          </nav>
         </div>
       </div>
     </div>

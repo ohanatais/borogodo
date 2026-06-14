@@ -120,7 +120,7 @@ export function MirrorContent({ snapshot, userName = '' }: MirrorContentProps) {
         <motion.p
           variants={item}
           className="text-2xl font-medium mb-8 leading-relaxed"
-          style={{ color: 'var(--foreground)' }}
+          style={{ color: 'var(--foreground)', textAlign: 'justify' }}
         >
           {mirror.intro}
         </motion.p>

@@ -198,6 +198,7 @@
   },
   "espelho": {
     "back": "← Voltar ao painel",
+    "mirrorOf": "Espelho de",
     "regenerate": "Gerar novo espelho",
     "regenerating": "Gerando...",
     "regenerateError": "Algo deu errado. Tenta de novo?",

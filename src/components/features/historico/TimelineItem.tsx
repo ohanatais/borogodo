@@ -4,9 +4,16 @@ import { useState } from 'react'
 import { ChevronDown, Paperclip } from 'lucide-react'
 import type { HistoricoPosition } from '@/lib/historico/getHistoricoData'
 
+const MAX_BULLET_CHARS = 110
+
 interface TimelineItemProps {
   position: HistoricoPosition
   isLast: boolean
+}
+
+function truncate(text: string, max: number): string {
+  if (text.length <= max) return text
+  return text.slice(0, max).trimEnd() + '…'
 }
 
 export function TimelineItem({ position, isLast }: TimelineItemProps) {
@@ -15,8 +22,7 @@ export function TimelineItem({ position, isLast }: TimelineItemProps) {
   const bulletText = (entry: HistoricoPosition['entries'][number]) => {
     const parts = [entry.what_i_did]
     if (entry.impact) parts.push(entry.impact)
-    if (entry.metric) parts.push(entry.metric)
-    return parts.join(' — ')
+    return truncate(parts.join(' — '), MAX_BULLET_CHARS)
   }
 
   return (
@@ -25,7 +31,7 @@ export function TimelineItem({ position, isLast }: TimelineItemProps) {
         {/* Rail */}
         <div className="flex flex-col items-center gap-1 relative">
           <div
-            className="w-[42px] h-[42px] flex items-center justify-center rounded-[11px] text-sm font-semibold shrink-0"
+            className="w-[42px] h-[42px] flex items-center justify-center rounded-full text-sm font-semibold shrink-0"
             style={{
               background: position.company_tint.bg,
               color: position.company_tint.fg,
@@ -77,38 +83,42 @@ export function TimelineItem({ position, isLast }: TimelineItemProps) {
             />
           </button>
 
-          {/* Bullets — always visible */}
-          {position.entries.length > 0 && (
-            <ul className="mt-3 space-y-2">
-              {position.entries.map((entry, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span
-                    className="mt-[6px] w-1 h-1 rounded-full shrink-0"
-                    style={{ background: 'var(--color-accent)' }}
-                    aria-hidden="true"
-                  />
-                  <span className="text-[15px] leading-snug" style={{ color: 'var(--muted-foreground)' }}>
-                    {bulletText(entry)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Expanded: evidências chip */}
+          {/* Bullets + evidências — only when expanded */}
           {expanded && (
-            <div className="mt-4">
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm"
-                style={{
-                  background: 'var(--color-lilas-nevoa)',
-                  color: 'var(--muted-foreground)',
-                }}
-              >
-                <Paperclip size={13} />
-                Evidências (em breve)
-              </span>
-            </div>
+            <>
+              {position.entries.length > 0 && (
+                <ul className="mt-3 space-y-2">
+                  {position.entries.map((entry, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span
+                        className="mt-[6px] w-1 h-1 rounded-full shrink-0"
+                        style={{ background: 'var(--color-accent)' }}
+                        aria-hidden="true"
+                      />
+                      <span
+                        className="text-[15px] leading-snug"
+                        style={{ color: 'var(--muted-foreground)', textAlign: 'justify' }}
+                      >
+                        {bulletText(entry)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-4">
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm"
+                  style={{
+                    background: 'var(--color-lilas-nevoa)',
+                    color: 'var(--muted-foreground)',
+                  }}
+                >
+                  <Paperclip size={13} />
+                  Evidências (em breve)
+                </span>
+              </div>
+            </>
           )}
         </div>
       </div>
