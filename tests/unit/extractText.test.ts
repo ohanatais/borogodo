@@ -1,24 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { mockGetText, mockDestroy, mockConstructor, MockPDFParse } = vi.hoisted(() => {
-  const mockGetText = vi.fn()
-  const mockDestroy = vi.fn(async () => {})
-  const mockConstructor = vi.fn()
-
-  class MockPDFParse {
-    getText = mockGetText
-    destroy = mockDestroy
-
-    constructor(options: unknown) {
-      mockConstructor(options)
-    }
-  }
-
-  return { mockGetText, mockDestroy, mockConstructor, MockPDFParse }
+const { mockGetDocumentProxy, mockExtractText } = vi.hoisted(() => {
+  const mockGetDocumentProxy = vi.fn()
+  const mockExtractText = vi.fn()
+  return { mockGetDocumentProxy, mockExtractText }
 })
 
-vi.mock('pdf-parse', () => ({
-  PDFParse: MockPDFParse,
+vi.mock('unpdf', () => ({
+  getDocumentProxy: mockGetDocumentProxy,
+  extractText: mockExtractText,
 }))
 
 import { extractTextFromPDF } from '@/lib/pdf/extractText'
@@ -28,21 +18,21 @@ describe('extractTextFromPDF', () => {
     vi.clearAllMocks()
   })
 
-  it('retorna o texto extraído e libera o parser', async () => {
-    mockGetText.mockResolvedValue({ text: 'texto extraído do PDF' })
-    const buffer = Buffer.from('conteúdo binário do PDF')
+  it('retorna o texto extraído do PDF', async () => {
+    const fakePdf = {}
+    mockGetDocumentProxy.mockResolvedValue(fakePdf)
+    mockExtractText.mockResolvedValue({ text: 'texto extraído do PDF', totalPages: 1 })
 
-    const text = await extractTextFromPDF(buffer)
+    const text = await extractTextFromPDF(Buffer.from('conteúdo binário do PDF'))
 
     expect(text).toBe('texto extraído do PDF')
-    expect(mockConstructor).toHaveBeenCalledWith({ data: buffer })
-    expect(mockDestroy).toHaveBeenCalledTimes(1)
+    expect(mockGetDocumentProxy).toHaveBeenCalledWith(expect.any(Uint8Array))
+    expect(mockExtractText).toHaveBeenCalledWith(fakePdf, { mergePages: true })
   })
 
-  it('libera o parser mesmo quando a extração falha', async () => {
-    mockGetText.mockRejectedValue(new Error('PDF corrompido'))
+  it('propaga o erro quando a extração falha', async () => {
+    mockGetDocumentProxy.mockRejectedValue(new Error('PDF inválido'))
 
-    await expect(extractTextFromPDF(Buffer.from('lixo'))).rejects.toThrow('PDF corrompido')
-    expect(mockDestroy).toHaveBeenCalledTimes(1)
+    await expect(extractTextFromPDF(Buffer.from('lixo'))).rejects.toThrow('PDF inválido')
   })
 })
