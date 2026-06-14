@@ -30,8 +30,9 @@ export default async function AppLayout({
 
   const name = (profileRes.data as { name?: string | null } | null)?.name ?? ''
   const lastEntryDate = (recentRes.data as { created_at?: string } | null)?.created_at
+  const now = new Date()
   const daysSince = lastEntryDate
-    ? Math.floor((Date.now() - new Date(lastEntryDate).getTime()) / 86_400_000)
+    ? Math.floor((now.getTime() - new Date(lastEntryDate).getTime()) / 86_400_000)
     : null
 
   const prompt = getCapturePrompt(daysSince, [])
