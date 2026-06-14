@@ -15,10 +15,12 @@ describe('BorogodoCard', () => {
     expect(screen.getByText('A')).toBeInTheDocument()
   })
 
-  it('renders first name only (not full name)', () => {
+  it('renders first name in heading, full name as subtitle', () => {
     render(<BorogodoCard name="Ana Silva" mirror={MIRROR} entryCount={5} />)
-    expect(screen.getByText('Ana')).toBeInTheDocument()
-    expect(screen.queryByText('Ana Silva')).not.toBeInTheDocument()
+    // heading shows first name inside em; full name shown as subtitle paragraph
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading.textContent).toContain('Ana')
+    expect(screen.getByText('Ana Silva')).toBeInTheDocument()
   })
 
   it('renders specialty chips from strengthThemes when hasData', () => {
@@ -40,14 +42,17 @@ describe('BorogodoCard', () => {
 
   it('shows empty state when mirror is null', () => {
     render(<BorogodoCard name="Ana" mirror={null} entryCount={0} />)
-    expect(screen.getByText('forming')).toBeInTheDocument()
+    // h2 heading renders formingOf + name + formingSuffix (mixed content)
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading.textContent).toMatch(/formingOf/)
     expect(screen.getByText('formingSubtitle')).toBeInTheDocument()
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
   })
 
   it('shows empty state when entryCount < 3 even with mirror', () => {
     render(<BorogodoCard name="Ana" mirror={MIRROR} entryCount={2} />)
-    expect(screen.getByText('forming')).toBeInTheDocument()
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading.textContent).toMatch(/formingOf/)
   })
 
   it('shows empty state when entryCount is exactly 2', () => {
@@ -60,14 +65,14 @@ describe('BorogodoCard', () => {
     expect(screen.getByRole('link')).toBeInTheDocument()
   })
 
-  it('limits specialty chips to 4', () => {
+  it('limits specialty chips to 5', () => {
     const mirror: PanelMirror = {
       headline: null,
       strengthThemes: ['a', 'b', 'c', 'd', 'e', 'f'],
     }
     render(<BorogodoCard name="Ana" mirror={mirror} entryCount={5} />)
-    // 4 chips + up to 3 skill pills = max 7 spans with theme names; 'e' and 'f' only in pills (max 3) - not shown at all
-    expect(screen.queryByText('e')).not.toBeInTheDocument()
+    // chips: slice(0,5) → a–e visible; skill pills: slice(0,3) → a–c; 'f' not shown anywhere
+    expect(screen.getByText('e')).toBeInTheDocument()
     expect(screen.queryByText('f')).not.toBeInTheDocument()
   })
 

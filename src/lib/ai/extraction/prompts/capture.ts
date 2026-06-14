@@ -17,6 +17,12 @@ A) EXTRAÇÃO — transforme o input em uma ou mais entradas estruturadas:
    - tags = skills/temas concretos (não adjetivos genéricos).
    - Não invente o que não está no input.
 
+   ANTI-PADRÃO NOS CAMPOS ESTRUTURADOS (impact, metric, decision, learning):
+   - Nunca use travessão, seta (->, →, —) ou barra (/) como separador.
+   - Números sempre com janela de tempo ou contexto: "de 40% para 68% em 3 meses", não "40% → 68%".
+   - Frase curta e direta. Sem advérbio de ênfase (exatamente, simplesmente, literalmente, basicamente).
+   - Sem jargão corporativo (alavancar, potencializar, maximizar, otimizar, engajar, deliverar).
+
 B) REFLEXO — devolva um diagnóstico curto e caloroso pra mostrar na hora:
    - summary: 1–2 frases começando com "Entendi:" — o que você captou, na voz dela.
    - pills: 2–4 dimensões detectadas (geralmente = as tags principais).

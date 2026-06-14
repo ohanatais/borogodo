@@ -71,10 +71,12 @@ describe('MacroCategoryTabs', () => {
     expect(screen.getByText('title')).toBeInTheDocument()
   })
 
-  it('renders skill count badges on tabs', () => {
+  it('renders skill counts inline on tabs', () => {
     render(<MacroCategoryTabs categories={CATEGORIES} />)
-    expect(screen.getAllByText('2')[0]).toBeInTheDocument()
-    expect(screen.getAllByText('1')[0]).toBeInTheDocument()
+    // counts rendered as "· N" inline text; check tab label textContent
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs[0].textContent).toContain('2')
+    expect(tabs[1].textContent).toContain('1')
   })
 
   it('ArrowRight moves focus to next tab', () => {
