@@ -223,6 +223,11 @@
         "Comprovada": "Comprovada"
       }
     },
+    "empty": {
+      "title": "Seu espelho está se formando.",
+      "description": "Continue capturando histórias e o Borogodó vai revelar seus padrões aqui.",
+      "cta": "Capturar uma história"
+    },
     "feedback": {
       "question": "Resonou com você?",
       "yes": "Sim",
