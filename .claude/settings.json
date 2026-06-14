@@ -9,5 +9,43 @@
       "Bash(curl * | bash)",
       "Bash(ssh *)"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start-workflow.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-code-without-spec.sh\"",
+            "timeout": 10,
+            "statusMessage": "Checando se a feature tem spec…"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/require-tasks-update.sh\"",
+            "timeout": 10,
+            "statusMessage": "Checando se tasks.md foi atualizado…"
+          }
+        ]
+      }
+    ]
   }
 }
