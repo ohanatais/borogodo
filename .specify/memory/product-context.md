@@ -20,6 +20,53 @@ O produto resolve isso com três cores de igual peso:
 
 **North Star Metric:** ações de valor por usuário ativo por mês — onde "ação de valor" = consultar um insight do espelho OU publicar um conteúdo gerado a partir do histórico.
 
+> **Em revisão (jun/2026):** dado o reposicionamento para "base de evidências com payoff
+> episódico" (ver espinha abaixo), as métricas que importam no começo são **taxa de aha**
+> (a revelação emociona?) e **retorno em momento de carreira** (a pessoa volta quando
+> precisa se mostrar?). Frequência alta vem depois, se vier.
+
+---
+
+## A espinha do produto — o seu borogodó em 4 movimentos
+
+> Esta é a estrutura-mãe do produto **e** da marca (registrada em 13/jun/2026). Toda
+> feature, tela, copy e campanha de marketing se encaixa em um destes quatro movimentos.
+> O nome **é** a estratégia: borogodó é aquilo em que você é bom sem saber nomear — e ele
+> não serve de nada guardado; existe pra ser usado. Versão para marketing/LP em `docs/marca.md`.
+
+1. **Descobrir** o seu borogodó — a revelação, o "aha". *"Eu não sabia que era boa nisso."*
+2. **Entender** o seu borogodó — o mapa: skills segmentadas por categoria, com evidência. *"Agora vejo a forma da minha carreira."*
+3. **Provar** o seu borogodó — evidência externa que sustenta (reviews, produtos no ar, depoimentos, artefatos). *"Tenho como comprovar."*
+4. **Usar** o seu borogodó — onde a carreira pedir: processo seletivo, post, review, conteúdo. *"Sei mostrar — do meu jeito."*
+
+**Os dois jobs, contidos no nome:** Descobrir + Entender = *saber qual é* o seu borogodó
+(introspecção). Provar + Usar = *saber usar* o seu borogodó (projeção). A marca segura os dois.
+
+**Como os três cores antigos se encaixam:** Espelho = Descobrir + Entender; Mapa de carreira
+= Entender; Geração de conteúdo = Usar. O pilar **Provar** é a adição que dá credibilidade de
+recrutador e mata o clichê com evidência real (subiu cirurgicamente: começa só com link de
+validação externa, não com o álbum completo de artefatos).
+
+**Wedge (foco da aposta):** não é uma vitamina de autoconhecimento — é a **base de evidências
+do seu borogodó, que paga nos momentos que importam na carreira** (entrevista, review,
+promoção, um post forte). É por isso que a pessoa volta: pra montar o próprio caso. Não é
+copiloto de busca de emprego (Cluster C) — é a camada de evidência durável embaixo de todos
+esses momentos.
+
+**A premissa brasileira (vai fundo, não é enfeite):** o produto ajuda o profissional
+brasileiro a mostrar valor **sem parecer que está se gabando** e **sem soar como IA** —
+mostrar seu borogodó não é se gabar, é deixar aparecer o que já é seu. A taxonomia de skills
+honra a realidade brasileira (versatilidade forjada na escassez, navegação de ambiguidade,
+articulação relacional) como força evidenciada, não como falta de foco. O antídoto cultural à
+dificuldade brasileira de se vender é a marca, não um recurso.
+
+**Foco inicial:** cravar uma persona primeiro — **Ana (PM)** — antes de generalizar para as
+quatro. Qualidade excepcional da revelação em uma frente bate qualidade média em quatro.
+
+**Anti-clichê (regra de produto, não de prompt):** toda afirmação do espelho aponta para uma
+evidência real (uma entrada). Sem evidência, a IA **pergunta** — nunca inventa. Num produto de
+carreira, fabricação é fatal: específico + citado > grandioso + vago.
+
 ---
 
 ## As quatro personas

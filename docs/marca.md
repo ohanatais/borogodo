@@ -14,6 +14,38 @@ Palavra brasileira pro charme indefinível, "aquele quê". O produto revela o se
 - **Tom de voz:** brasileiro, espirituoso e caloroso, com molho — nunca corporativo.
 - **A verificar:** marca no **INPI** (classes 9/35/42) e **@handles** (Instagram/LinkedIn/X).
 
+---
+
+## A espinha de mensagem — os 4 verbos do borogodó (para marketing e LP)
+
+> Adicionado em 2026-06-13. Estrutura-mãe de mensagem do produto: esqueleto para landing
+> page, copy de campanha, narrativa de vendas e conteúdo. Detalhe completo de produto em
+> `.specify/memory/product-context.md`.
+
+O nome é a estratégia: **borogodó é aquilo em que você é bom sem saber nomear — e ele não
+serve de nada guardado, existe pra ser usado.** O produto leva a pessoa por quatro movimentos:
+
+| Verbo | Promessa | Frase do usuário | Tom na LP |
+|---|---|---|---|
+| **Descobrir** | revelar o seu borogodó | "Eu não sabia que era boa nisso." | o espanto, o aha |
+| **Entender** | mapear, com evidência | "Agora vejo a forma da minha carreira." | clareza, mapa |
+| **Provar** | sustentar com evidência real | "Tenho como comprovar." | credibilidade |
+| **Usar** | mostrar onde a carreira pedir | "Sei mostrar — do meu jeito." | poder, ação |
+
+**Posicionamento-âncora (uma frase):** Borogodó te ajuda a descobrir, entender e provar
+aquilo em que você é bom de verdade — e usar isso, do seu jeito, onde a carreira pede: numa
+entrevista, num post, numa promoção. Mostrando seu valor sem parecer que está se gabando, e
+sem soar como IA.
+
+**O fosso brasileiro (a mensagem que gringo não copia):** mostrar seu borogodó não é se
+gabar — é deixar aparecer o que já é seu. O antídoto cultural à dificuldade brasileira de se
+vender é a marca, não um recurso.
+
+**A faísca do "ó":** o acento de borogodó é uma faísca (já na identidade visual) — o instante
+da descoberta. O pilar 1 (Descobrir) é a porta de entrada emocional da marca.
+
+---
+
 ## Critérios do nome
 1. Curto, fácil de falar/escrever, bom de virar verbo ou @.
 2. Evoca valor, trabalho, trajetória, voz, memória ou descoberta — de leve.

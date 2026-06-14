@@ -136,3 +136,36 @@ aparece se alguém testar especificamente "uma chamada de API responde no idioma
 nessa mesma armadilha por padrão. Vale documentar esse padrão (`getApiErrors()` em
 `src/app/api/capture/route.ts`) como referência para a próxima rota que precisar de i18n,
 e considerar extrair para um helper compartilhado quando a segunda rota precisar disso.
+
+---
+
+## 2026-06-13 — O nome do produto já continha a estratégia (e o "pivô" não era pivô)
+
+**O que aconteceu:** numa sessão que começou como "reorganizar a UI do painel", a conversa
+escalou para "qual é a estratégia do produto". Três coisas se acumularam: (1) o output da IA
+do espelho estava clichê ("você transforma ambiguidade em entrega concreta"), (2) a ideia de
+vincular artefatos de evidência (reviews, protótipos, sites) à história de carreira, e (3)
+uma crítica honesta de que o produto, como vitamina de autoconhecimento, tinha um problema de
+retenção (você não volta toda semana pra rever quem você é). Ao tentar reposicionar para "base
+de evidências que paga nos momentos de carreira", parecia que íamos pivotar o produto. Até
+perceber que o nome — Borogodó, "aquilo em que você é bom sem saber nomear" — já continha
+quatro movimentos: **Descobrir, Entender, Provar e Usar** o seu borogodó. O reposicionamento
+não era pivô; era a marca levada a sério (borogodó guardado não serve de nada — existe pra ser
+usado).
+
+**O que aprendi:** quando um produto tem um nome forte e carregado de sentido, esse nome
+costuma já conter a estrutura da proposta de valor — vale "interrogar o nome" antes de inventar
+framework novo. Os quatro verbos não foram criados, foram extraídos do que a palavra já
+significava. E resolveram de uma vez quatro problemas que pareciam separados: clichê (Provar =
+evidência mata o genérico), retenção (Usar = motivo de voltar nos momentos de carreira), os
+dois jobs do produto (introspecção vs. projeção, ambos contidos no nome) e a brasilidade
+(mostrar sem se gabar é o antídoto cultural, não um recurso). A disciplina de founder aqui foi
+não aceitar de cara a ideia mais brilhante (o álbum de artefatos) e perguntar primeiro "o que
+precisa estar sólido antes disso" — a fundação (a inteligência que classifica bem) é o produto;
+o álbum pendura nela.
+
+**Por que importa:** é um caso forte de `product-thinking` — a diferença entre *inventar*
+posicionamento e *descobrir* o que já estava ali. Para quem constrói, mostra que uma crise
+aparente ("preciso pivotar?") pode ser o produto pedindo pra ser ele mesmo com mais clareza. E
+vira a base de toda a mensagem futura (LP, marketing, vendas), por isso foi persistido em
+`product-context.md` (produto) e `docs/marca.md` (mensagem).
