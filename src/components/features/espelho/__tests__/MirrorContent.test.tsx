@@ -24,6 +24,14 @@ vi.mock('../MirrorFeedback', () => ({
   MirrorFeedback: () => <div data-testid="mirror-feedback" />,
 }))
 
+vi.mock('../EvidenceText', () => ({
+  EvidenceText: ({ evidence }: { evidence: { text: string } }) => <p>{evidence.text}</p>,
+}))
+
+vi.mock('../MacroCategoryTabs', () => ({
+  MacroCategoryTabs: () => null,
+}))
+
 const snapshot: MirrorSnapshot = {
   id: 'snap-1',
   user_id: 'user-1',
@@ -31,22 +39,22 @@ const snapshot: MirrorSnapshot = {
     intro: 'Você tem uma forma única de transformar caos em ordem.',
     primary_strength: {
       headline: 'Você converte complexidade em clareza.',
-      evidence: 'Ficou evidente em 3 projetos de reestruturação.',
+      evidence: { text: 'Ficou evidente em 3 projetos de reestruturação.', entry_ids: [] },
     },
     invisible_skill: {
       headline: 'Você cria segurança psicológica sem perceber.',
-      evidence: 'Times relatam que se sentem mais à vontade quando você está presente.',
+      evidence: { text: 'Times relatam que se sentem mais à vontade quando você está presente.', entry_ids: [] },
     },
     context_pattern: {
       headline: 'Você performa melhor em ambiguidade.',
-      evidence: 'Seus melhores resultados vieram de contextos sem manual.',
+      evidence: { text: 'Seus melhores resultados vieram de contextos sem manual.', entry_ids: [] },
     },
     closing: 'O espelho está tomando forma. Cada nova entrada afina o padrão que já aparece aqui.',
     strength_themes: ['Clareza', 'Liderança', 'Adaptabilidade'],
   },
   primary_strength: {
     headline: 'Você converte complexidade em clareza.',
-    evidence: 'Ficou evidente em 3 projetos.',
+    evidence: { text: 'Ficou evidente em 3 projetos.', entry_ids: [] },
   },
   strength_themes: ['Clareza', 'Liderança', 'Adaptabilidade'],
   entry_count: 12,

@@ -7,9 +7,12 @@ import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import type { MirrorSnapshot } from '@/types/mirror'
 import { MirrorFeedback } from './MirrorFeedback'
+import { EvidenceText } from './EvidenceText'
+import { MacroCategoryTabs } from './MacroCategoryTabs'
 
 interface MirrorContentProps {
   snapshot: MirrorSnapshot
+  userName?: string
 }
 
 const container = {
@@ -25,31 +28,63 @@ const item = {
 interface SectionProps {
   label: string
   headline: string
-  evidence: string
+  evidence: unknown
+  warm?: boolean
 }
 
-function MirrorSection({ label, headline, evidence }: SectionProps) {
+function MirrorSection({ label, headline, evidence, warm = false }: SectionProps) {
   return (
-    <motion.div variants={item} className="py-6 border-b" style={{ borderColor: 'var(--border)' }}>
+    <motion.div
+      variants={item}
+      className="py-6 border-b rounded-lg px-4 mb-2"
+      style={{
+        borderColor: warm ? 'transparent' : 'var(--border)',
+        background: warm ? 'oklch(74% 0.12 75 / 0.12)' : 'transparent',
+      }}
+    >
       <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--muted-foreground)' }}>
         {label}
       </p>
       <p className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
         {headline}
       </p>
-      <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-        {evidence}
-      </p>
+      {/* EvidenceText normalizes internally via toEvidenceItem — no pre-normalization needed here */}
+      <EvidenceText evidence={evidence} />
     </motion.div>
   )
 }
 
-export function MirrorContent({ snapshot }: MirrorContentProps) {
+function MirrorHeader({ name, label }: { name: string; label: string }) {
+  const initial = name?.trim()?.[0]?.toUpperCase() ?? '?'
+
+  return (
+    <div className="flex items-center gap-4 mb-8">
+      <div
+        className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
+        style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+      >
+        {initial}
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
+          {label}
+        </p>
+        <p className="text-lg font-semibold truncate" style={{ color: 'var(--foreground)' }}>
+          {name}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+export function MirrorContent({ snapshot, userName = '' }: MirrorContentProps) {
   const t = useTranslations('espelho')
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [regenerateError, setRegenerateError] = useState<string | null>(null)
   const { mirror } = snapshot
+
+  const personName = userName || mirror.intro.match(/^([A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ]+)/)?.[1] || ''
 
   const handleRegenerate = async () => {
     setLoading(true)
@@ -79,6 +114,8 @@ export function MirrorContent({ snapshot }: MirrorContentProps) {
         {t('back')}
       </Link>
 
+      {personName && <MirrorHeader name={personName} label={t('mirrorOf')} />}
+
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-0">
         <motion.p
           variants={item}
@@ -98,6 +135,7 @@ export function MirrorContent({ snapshot }: MirrorContentProps) {
           label={t('sections.invisibleSkill')}
           headline={mirror.invisible_skill.headline}
           evidence={mirror.invisible_skill.evidence}
+          warm
         />
 
         <MirrorSection
@@ -130,6 +168,12 @@ export function MirrorContent({ snapshot }: MirrorContentProps) {
                 </span>
               ))}
             </div>
+          </motion.div>
+        )}
+
+        {mirror.categories && mirror.categories.length > 0 && (
+          <motion.div variants={item}>
+            <MacroCategoryTabs categories={mirror.categories} />
           </motion.div>
         )}
 

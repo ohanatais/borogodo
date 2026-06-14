@@ -13,15 +13,20 @@ export default async function EspelhoPage() {
 
   if (!user) redirect('/login')
 
-  const snapshot = await getLatestSnapshot(supabase, user.id)
+  const [snapshot, profileRes] = await Promise.all([
+    getLatestSnapshot(supabase, user.id),
+    supabase.from('profiles').select('name').eq('id', user.id).maybeSingle(),
+  ])
+
   if (!snapshot) redirect('/painel')
 
   const t = await getTranslations('painel')
+  const profileName = (profileRes.data as { name?: string | null } | null)?.name ?? ''
 
   return (
     <main className="min-h-screen" style={{ background: 'var(--color-creme)' }}>
-      <AppHeader greeting={t('greeting', { name: '' })} />
-      <MirrorContent snapshot={snapshot} />
+      <AppHeader greeting={t('greeting', { name: profileName })} />
+      <MirrorContent snapshot={snapshot} userName={profileName} />
     </main>
   )
 }

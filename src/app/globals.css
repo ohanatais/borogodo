@@ -11,6 +11,8 @@
     --color-warm:         oklch(74% 0.12 75);    /* mel */
     --color-teal:         oklch(70% 0.10 190);   /* verde-água */
     --color-lilas-nevoa:  oklch(95% 0.01 320);   /* lilas-névoa */
+    --color-lilas-nevoa-text: oklch(40% 0.10 320); /* texto sobre lilas-névoa */
+    --color-warm-text:    oklch(32% 0.08 75);    /* texto sobre mel */
 
     /* Superfícies */
     --background:         oklch(98% 0.008 90);   /* creme */

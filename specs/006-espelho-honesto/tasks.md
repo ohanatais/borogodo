@@ -83,3 +83,30 @@ MVP = Phase 2 + US3 + US1 (gerar, validar e ler um espelho honesto). US2 (feedba
 ## Status
 
 **21/21 tasks concluídas** — feature entregue no PR #13. Regularizada via speckit em 2026-06-14.
+
+---
+
+## 006b — Evidência vinculada (PR 006-007-espelho-painel)
+
+- [X] T022 Adicionar `EvidenceItem` e `toEvidenceItem()` a `src/types/mirror.ts`
+- [X] T023 Atualizar schema Zod para evidence ser objeto em `src/lib/ai/mirror/schemas.ts`
+- [X] T024 Atualizar `loadEntries` para incluir `id`; construir `entryMap` + `resolveEntryIds` em `generateMirror.ts`
+- [X] T025 Atualizar `formatEntry` e prompt para enviar `[E1] …` e receber `{ text, entry_ids }` em `prompts/firstMirror.ts`
+- [X] T026 Atualizar `textFields()` em `validateRuleset.ts` para extrair `evidence.text`
+- [X] T027 Adicionar `getEntriesByIds` em `src/lib/db/entries.ts`
+- [X] T028 Criar `EvidenceText.tsx` (chip expansível de fontes) em `src/components/features/espelho/`
+- [X] T029 Criar Server Action `getEvidenceEntries` em `src/app/[locale]/espelho/actions.ts`
+- [X] T030 Atualizar `MirrorContent.tsx` para usar `toEvidenceItem` + `<EvidenceText>`
+- [X] T031 [P] Testes: `toEvidenceItem`, `resolveEntryIds`, `EvidenceText`, schemas atualizados
+
+## 006c — Página detalhada (5 macros) (PR 006-007-espelho-painel)
+
+- [X] T032 Adicionar `SkillTier`, `SkillItem`, `MacroCategory` a `src/types/mirror.ts`
+- [X] T033 Adicionar schema `categories` opcional a `src/lib/ai/mirror/schemas.ts`
+- [X] T034 Atualizar prompt para gerar 5 macros + skills + tier em `prompts/firstMirror.ts`
+- [X] T035 Atualizar rótulos BR das 3 seções em `MirrorContent.tsx` + `pt-BR.json`
+- [X] T036 Criar `MacroCategoryTabs.tsx` (tabs desktop / accordion mobile) em `src/components/features/espelho/`
+- [X] T037 Criar `SkillTierItem.tsx` (nome + pílula tier + evidence) em `src/components/features/espelho/`
+- [X] T038 Integrar `<MacroCategoryTabs>` no `MirrorContent.tsx`
+- [X] T039 Adicionar strings i18n para categorias e tiers em `pt-BR.json`
+- [X] T040 [P] Testes: `MacroCategoryTabs`, `SkillTierItem`, schemas com categories

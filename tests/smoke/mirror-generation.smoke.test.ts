@@ -36,6 +36,7 @@ function loadAnthropicKey(): void {
 // Entradas fictícias mas realistas, no formato que `/api/mirror/generate` lê de `entries`.
 const SAMPLE_ENTRIES = [
   {
+    id: 'entry-smoke-1',
     what_i_did: 'Conduzi a migração do banco de pagamentos sem downtime, num fim de semana, com o time todo de plantão',
     company: 'Nubank',
     role_title: 'Engenheira de Software Sênior',
@@ -44,6 +45,7 @@ const SAMPLE_ENTRIES = [
     metric: '0 minutos de downtime',
   },
   {
+    id: 'entry-smoke-2',
     what_i_did: 'Traduzi um problema técnico denso de latência para os stakeholders de negócio decidirem o trade-off de custo',
     company: 'Nubank',
     role_title: 'Engenheira de Software Sênior',
@@ -52,6 +54,7 @@ const SAMPLE_ENTRIES = [
     metric: null,
   },
   {
+    id: 'entry-smoke-3',
     what_i_did: 'Criei do zero o processo de onboarding técnico dos novos engenheiros porque ninguém tinha dono',
     company: 'iFood',
     role_title: 'Engenheira de Software',
@@ -60,6 +63,7 @@ const SAMPLE_ENTRIES = [
     metric: '3 semanas → 4 dias',
   },
   {
+    id: 'entry-smoke-4',
     what_i_did: 'Segurei a comunicação do time durante um incidente crítico enquanto a engenharia investigava',
     company: 'iFood',
     role_title: 'Engenheira de Software',
@@ -88,9 +92,9 @@ describe.runIf(process.env.RUN_SMOKE)('SMOKE: geração real do espelho (Sonnet)
     console.log(
       '\n===== ESPELHO GERADO =====\n' +
         `\n${mirror.intro}\n` +
-        `\n● Força principal — ${mirror.primary_strength.headline}\n  ${mirror.primary_strength.evidence}\n` +
-        `\n● Skill invisível — ${mirror.invisible_skill.headline}\n  ${mirror.invisible_skill.evidence}\n` +
-        `\n● Padrão de contexto — ${mirror.context_pattern.headline}\n  ${mirror.context_pattern.evidence}\n` +
+        `\n● Força principal — ${mirror.primary_strength.headline}\n  ${mirror.primary_strength.evidence.text}\n` +
+        `\n● Skill invisível — ${mirror.invisible_skill.headline}\n  ${mirror.invisible_skill.evidence.text}\n` +
+        `\n● Padrão de contexto — ${mirror.context_pattern.headline}\n  ${mirror.context_pattern.evidence.text}\n` +
         `\n${mirror.closing}\n` +
         `\n🏷  Temas de força: ${mirror.strength_themes.join(' · ')}\n` +
         '\n==========================\n'
