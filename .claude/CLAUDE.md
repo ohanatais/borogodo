@@ -42,8 +42,25 @@ src/
 3. /speckit-plan → arquitetura técnica
 4. /speckit-tasks → breakdown
 5. /impeccable shape → planejar UX antes de codar
-6. /speckit-implement → executar
-7. /impeccable audit → checar design antes do PR
+6. /speckit-implement → executar (ver "Skills de apoio" abaixo)
+7. /impeccable audit + web-design-guidelines → checar design e acessibilidade antes do PR
+8. /pr-review → revisão multi-agente (segurança, qualidade, arquitetura, performance,
+   requisitos, regressão) antes de abrir/mergear o PR
+
+## Skills de apoio (durante /speckit-implement)
+
+Consultar conforme o tipo de mudança:
+- **vercel-react-best-practices** — performance em React/Next.js (waterfalls de
+  dados, bundle size, re-renders). Aplicar ao escrever ou revisar componentes e
+  páginas.
+- **vercel-composition-patterns** — composição de componentes (evitar prop
+  booleana em excesso, compound components). Aplicar ao desenhar a API de um
+  componente novo.
+- **supabase** / **supabase-postgres-best-practices** — RLS, auth, queries,
+  migrations. Aplicar em qualquer mudança que toque `supabase/migrations` ou
+  `src/lib/db`.
+- **web-design-guidelines** — checklist de acessibilidade e interface da Vercel,
+  buscado ao vivo. Roda junto do `/impeccable audit` (passo 7).
 
 ## Documentos de referência
 - PRD completo: `docs/prd.md`
@@ -69,6 +86,12 @@ Code como par de implementação. Isso muda como o trabalho deve acontecer aqui:
   ter a spec, pular validação), me avise antes de seguir.
 - **Atualize este arquivo quando tomarmos decisões importantes.** Contexto persistente
   é o que evita recomeçar do zero a cada sessão — me lembre de manter isso em dia.
+- **Contraponha, não concorde por padrão.** Como sou PM e não-técnica, preciso que você seja
+  crítico em alto nível: questione premissas, aponte riscos e estude antes de assumir. Concordância
+  rápida parece prestativa, mas valida ideia errada com confiança e custa caro (retrabalho, pivôs,
+  features fadadas). Pushback honesto e fundamentado vale mais que executar rápido. Vários momentos
+  desta jornada (quase-pivô dos artefatos, risco de retenção do produto-vitamina, foco em personas
+  demais, clichê do espelho) só não viraram caminho errado porque você contrapôs.
 - Prefiro entender o que está sendo feito a ter o resultado mais rápido.
 
 ## Aprendizados (`docs/aprendizados.md`)

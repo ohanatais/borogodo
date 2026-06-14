@@ -169,3 +169,60 @@ posicionamento e *descobrir* o que já estava ali. Para quem constrói, mostra q
 aparente ("preciso pivotar?") pode ser o produto pedindo pra ser ele mesmo com mais clareza. E
 vira a base de toda a mensagem futura (LP, marketing, vendas), por isso foi persistido em
 `product-context.md` (produto) e `docs/marca.md` (mensagem).
+
+---
+
+## 2026-06-13 — Para quem não é técnica, concordância é um risco: o Claude precisa contrapor
+
+**O que aconteceu:** numa sessão longa de produto e design, várias ideias minhas (Ohana) que
+pareciam ótimas teriam virado caminho ruim se o Claude tivesse só concordado: login com LinkedIn
+que não traz dado rico, transformar artefatos de evidência num quase-pivô antes da fundação
+estar pronta, tratar três "cores" do produto como peso igual (dispersão), público amplo demais
+cedo demais, e um espelho que soava clichê. Em cada um, ele contrapôs com análise e pesquisa
+antes de aceitar, e o resultado ficou melhor.
+
+**O que aprendi:** quem é PM e não-técnica corre um risco específico: a IA que concorda rápido
+parece prestativa, mas valida premissa errada com confiança, e isso custa caro (retrabalho,
+pivôs, features fadadas). O valor real está no pushback honesto e de alto nível: questionar a
+premissa, apontar o risco, estudar antes de assumir. "Discordar com fundamento" é mais útil que
+"executar rápido". Virou regra de trabalho no `.claude/CLAUDE.md`.
+
+**Por que importa:** é um dos aprendizados centrais de `build-with-claude` pra não-devs: configure
+o Claude como par crítico, não executor obediente. É a diferença entre um produto que sobrevive e
+um que falha bonito.
+
+---
+
+## 2026-06-13 — Validar "à mão" antes de codar pega o que o código esconderia
+
+**O que aconteceu:** antes de escrever uma linha do novo espelho, o Claude "rodou o prompt na
+mão" (fez o papel do modelo contra os exemplos-ouro e gerou as saídas). Isso, de graça, pegou
+problemas que só apareceriam depois de implementado: a pergunta de fechamento virando fôrma
+repetida (novo tell), o exagero na regra do "Você", a falta de brasilidade, e até o fato de que o
+prompt atual ensina o travessão (o tell que a gente quer matar) no próprio exemplo.
+
+**O que aprendi:** num produto onde o valor é gosto (a revelação emociona ou não?), o teste mais
+barato e mais decisivo é simular o output à mão contra exemplos-padrão, antes de qualquer código.
+E parte da qualidade de voz (sem travessão, sem buzzword, sem antítese) vira **teste
+determinístico** — assert barato no CI. Dá pra encurralar slop com regex.
+
+**Por que importa:** inverte a ordem natural ("codar e ver"). Pra features de IA, validar a régua
+antes economiza dias e evita escalar clichê. Bom material de `build-with-claude`.
+
+---
+
+## 2026-06-13 — "Sem métrica" no Brasil costuma ser contexto, não incompetência
+
+**O que aconteceu:** ao desenhar como o espelho mostra força, a tentação era exigir número
+(impacto quantificado, como recrutador gringo valoriza). Mas muita empresa BR não é gerida por
+dado e muito PM/PO atua apagando incêndio, então a ausência de métrica quase sempre é do contexto,
+não da pessoa. Viramos a regra: métrica é **convite, não cobrança** (a IA convida a quantificar
+uma vez, com leveza, aceita o gap sem punir, e nunca inventa número).
+
+**O que aprendi:** brasilidade de verdade não é gíria por cima, é o que você decide enxergar como
+força. Importar a régua data-driven gringa sem traduzir o contexto faz o produto julgar justo quem
+mais precisa dele. O mesmo vale pra caminho não-linear (RH→QA→produto) e versatilidade na escassez:
+força, não falta de foco.
+
+**Por que importa:** é o fosso de marca (brasilidade de substância) e um princípio de produto que
+cruza espelho, captura e conteúdo. Bom pra `product-thinking`.

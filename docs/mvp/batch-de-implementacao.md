@@ -101,6 +101,21 @@ A issue oferece dois caminhos. Recomendação de founder (KISS/YAGNI + custo + c
   qualidade pros dois, por isso vem cedo (perto da 006 / antes do histórico).
 - **Onde:** `src/lib/db/entries.ts` (`saveEntries`), como a issue #9 aponta. Fechar a issue no PR.
 
+### UX das telas — resumo (detalhe em `decisoes-ux-painel-espelho-historico.md`)
+Decisões de layout travadas pra **007** (painel), **006c** (espelho detalhado) e o **histórico**:
+- **Painel:** cartão do borogodó (especialidades + **skills destaque em pílulas** + padrão
+  específico); **highlights resultado-primeiro** (sem gerúndio burocrático nem verbo genérico);
+  **mini linha do tempo** na lateral direita (cargo · empresa · duração); **sem** label de status
+  estático.
+- **Espelho detalhado:** rótulos BR ("No que você manda bem" / "Seu borogodó" / "O fio da sua
+  carreira"); evidência curta (~2 linhas); **5 categorias em ABAS com contador** (não cards lado a
+  lado); **usuário pode ajustar a classificação** ("não me reconheço nisso") = controle + sinal de
+  feedback; status vira convite no rodapé.
+- **Histórico:** timeline com **nó = marcador de tempo** (ano/período, não 1/2/3), item
+  expansível, espaço "Provas (em breve)" pra 008.
+- **Transversal:** menos texto e menos scroll; tier = pílula com rótulo (nunca barra); abas viram
+  **accordion** no mobile; mini-timeline colapsa pro fim.
+
 ## O pipeline mecânico (por feature)
 
 Cada feature roda este ciclo. As etapas marcadas **[auto]** rodam quase sem você; **[gate]** param pra você.
@@ -160,3 +175,26 @@ Resultado: o mecânico roda no escuro com TDD de guardrail; o gosto e o risco fi
 1. Gerar fixture #1 anonimizado (seus currículos) + draft de taxonomia via web research.
 2. Validar a revelação à mão (gate 2 antecipado).
 3. Abrir a spec da **006** com tudo travado e rodar o pipeline.
+
+---
+
+## Mapa dos documentos (pra não espalhar md nem se perder)
+Todo o planejamento vive em lugares fixos. **Antes de criar um md novo, veja se cabe num destes.**
+
+| Conteúdo | Onde mora | Papel |
+|---|---|---|
+| Estratégia/contexto do produto | `.specify/memory/product-context.md` | espinha (Descobrir/Entender/Provar/Usar), wedge, brasilidade — lido toda sessão |
+| Mensagem de marca / LP | `docs/marca.md` | os 4 verbos pra marketing |
+| Plano de batch (este doc) | `docs/mvp/batch-de-implementacao.md` | ordem das features, breakdown, gates |
+| Inputs de qualidade | `docs/mvp/inputs-de-qualidade.md` | o combustível do auto |
+| Taxonomia / níveis / critérios | `docs/mvp/draft-taxonomia-niveis-criterios.md` | decisões A–F |
+| Prompt do espelho | `docs/mvp/draft-firstmirror-prompt.md` | input da 006a |
+| Decisões de UX (painel/espelho/histórico) | `docs/mvp/decisoes-ux-painel-espelho-historico.md` | input de 007 / 006c / histórico |
+| Exemplos-ouro | `docs/fixtures/exemplos-ouro.md` + `exemplo-ouro-4-junior.md` | régua e fixtures |
+| Aprendizados | `docs/aprendizados.md` | o que vira conteúdo (build-with-claude / product-thinking) |
+| Specs de feature | `specs/00X-*/` | geradas pelo speckit, não à mão |
+
+**Regra:** não criar md novo se o conteúdo cabe num existente.
+
+> **Princípio de trabalho** (ver `.claude/CLAUDE.md`): o Claude deve **contrapor com fundamento**,
+> não concordar por padrão. Vale pra cada decisão deste plano.
