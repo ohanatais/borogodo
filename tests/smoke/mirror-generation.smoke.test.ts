@@ -78,7 +78,7 @@ describe.runIf(process.env.RUN_SMOKE)('SMOKE: geração real do espelho (Sonnet)
     const raw = await getProvider().complete({
       role: 'synthesis',
       system: MIRROR_SYSTEM_PROMPT,
-      user: buildMirrorUserPrompt(SAMPLE_ENTRIES, 'Ana'),
+      user: buildMirrorUserPrompt(SAMPLE_ENTRIES, 'Ana', 'emerging'),
       maxTokens: MAX_TOKENS,
     })
 
@@ -91,7 +91,7 @@ describe.runIf(process.env.RUN_SMOKE)('SMOKE: geração real do espelho (Sonnet)
         `\n● Força principal — ${mirror.primary_strength.headline}\n  ${mirror.primary_strength.evidence}\n` +
         `\n● Skill invisível — ${mirror.invisible_skill.headline}\n  ${mirror.invisible_skill.evidence}\n` +
         `\n● Padrão de contexto — ${mirror.context_pattern.headline}\n  ${mirror.context_pattern.evidence}\n` +
-        `\n❓ ${mirror.closing_question}\n` +
+        `\n${mirror.closing}\n` +
         `\n🏷  Temas de força: ${mirror.strength_themes.join(' · ')}\n` +
         '\n==========================\n'
     )

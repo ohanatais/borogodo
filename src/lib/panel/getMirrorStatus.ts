@@ -14,3 +14,9 @@ export const STATUS_CONFIG: Record<MirrorStatus, { dot: string }> = {
   emerging: { dot: 'bg-amber-500' },
   active: { dot: 'bg-green-500' },
 }
+
+export const STATUS_LABELS_PTBR: Record<MirrorStatus, string> = {
+  building: 'emergente',
+  emerging: 'tomando forma',
+  active: 'consolidado',
+}

@@ -4,6 +4,7 @@ import { MIRROR_SYSTEM_PROMPT, buildMirrorUserPrompt } from '@/lib/ai/mirror/pro
 import { validateMirror } from '@/lib/ai/mirror/schemas'
 import { insertMirrorSnapshot } from '@/lib/db/mirror'
 import { NoEntriesError } from '@/lib/errors'
+import { getMirrorStatus } from '@/lib/panel/getMirrorStatus'
 import type { createServerClient } from '@/lib/db/supabase/server'
 import type { Mirror, MirrorSnapshot } from '@/types/mirror'
 
@@ -55,10 +56,12 @@ async function generateMirror(
   const entries = await loadEntries(supabase, userId)
   const userName = await loadUserName(supabase, userId)
 
+  const status = getMirrorStatus(entries.length)
+
   const raw = await getProvider().complete({
     role: 'synthesis',
     system: MIRROR_SYSTEM_PROMPT,
-    user: buildMirrorUserPrompt(entries, userName),
+    user: buildMirrorUserPrompt(entries, userName, status),
     maxTokens: MAX_TOKENS,
   })
 

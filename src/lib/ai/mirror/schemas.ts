@@ -11,7 +11,7 @@ const mirrorSchema = z.object({
   primary_strength: mirrorSectionSchema,
   invisible_skill: mirrorSectionSchema,
   context_pattern: mirrorSectionSchema,
-  closing_question: z.string().min(1),
+  closing: z.string().min(1),
   strength_themes: z.array(z.string().min(1)).min(3).max(6),
 })
 

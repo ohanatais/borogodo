@@ -8,7 +8,7 @@ export interface Mirror {
   primary_strength: MirrorSection
   invisible_skill: MirrorSection
   context_pattern: MirrorSection
-  closing_question: string
+  closing: string
   strength_themes: string[]
 }
 
