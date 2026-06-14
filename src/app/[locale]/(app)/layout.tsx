@@ -17,7 +17,7 @@ export default async function AppLayout({
   if (!user) redirect('/login')
 
   const [profileRes, recentRes, t] = await Promise.all([
-    supabase.from('profiles').select('name').eq('id', user.id).maybeSingle(),
+    supabase.from('profiles').select('name, onboarding_completed').eq('id', user.id).maybeSingle(),
     supabase
       .from('entries')
       .select('created_at')
@@ -28,7 +28,10 @@ export default async function AppLayout({
     getTranslations('capture.composer.prompt'),
   ])
 
-  const name = (profileRes.data as { name?: string | null } | null)?.name ?? ''
+  const profileData = profileRes.data as { name?: string | null; onboarding_completed?: boolean } | null
+  if (!profileData?.onboarding_completed) redirect('/bem-vindo')
+
+  const name = profileData?.name ?? ''
   const lastEntryDate = (recentRes.data as { created_at?: string } | null)?.created_at
   const now = new Date()
   const daysSince = lastEntryDate

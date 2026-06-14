@@ -16,3 +16,10 @@ export class NoEntriesError extends Error {
     this.name = 'NoEntriesError'
   }
 }
+
+export class NoExtractableContentError extends Error {
+  constructor() {
+    super('Nada para extrair')
+    this.name = 'NoExtractableContentError'
+  }
+}

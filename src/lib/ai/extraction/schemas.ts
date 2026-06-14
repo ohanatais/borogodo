@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { Reflection } from '@/types/capture'
 import type { EntrySource, ExtractedEntry } from '@/types/entry'
+import { NoExtractableContentError } from '@/lib/errors'
 
 // PostgreSQL date columns require strict YYYY-MM-DD. LLMs often return partial dates
 // ("2022-01" from LinkedIn, "2022" from résumés). Coerce to first-of-period so the
@@ -42,16 +43,17 @@ const extractedEntrySchema = z.object({
 
 const reflectionSchema = z.object({
   summary: z.string().min(1),
-  pills: z.array(z.string()).min(1).max(4),
+  pills: z.array(z.string()).max(4).default([]),
   move: z.object({
     type: z.enum(['question', 'affirmation', 'suggestion']),
     text: z.string().min(1),
-    field: z.enum(['metric', 'impact', 'decision', 'learning']).optional(),
+    // nullish: LLMs sometimes return null for optional enums in Zod v4
+    field: z.enum(['metric', 'impact', 'decision', 'learning']).nullish().transform(v => v ?? undefined),
   }),
 })
 
 const captureResultSchema = z.object({
-  entries: z.array(extractedEntrySchema).min(1),
+  entries: z.array(extractedEntrySchema),
   reflection: reflectionSchema,
 })
 
@@ -73,6 +75,10 @@ export function validateCaptureResult(
   rawContent = ''
 ): { entries: ExtractedEntry[]; reflection: Reflection } {
   const parsed = captureResultSchema.parse(raw)
+
+  if (parsed.entries.length === 0) {
+    throw new NoExtractableContentError()
+  }
 
   return {
     entries: parsed.entries.map((entry) => toExtractedEntry(entry, rawContent, source)),

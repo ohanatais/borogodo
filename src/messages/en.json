@@ -206,10 +206,59 @@
       "invalidFile": "Invalid file",
       "fileTooLarge": "File too large (max 10 MB)",
       "missingFile": "No file sent",
-      "generic": "I couldn't process your capture right now, try again?"
+      "generic": "I couldn't process your capture right now, try again?",
+      "noContent": "Hmm, I couldn't identify a professional achievement there. Tell me more — what did you do, decide, or learn?"
     },
     "sheet": {
       "closeAriaLabel": "Close"
+    }
+  },
+  "configuracoes": {
+    "title": "Settings",
+    "identity": {
+      "title": "Identity",
+      "name": "Name",
+      "email": "Email",
+      "emailHint": "Email cannot be changed here.",
+      "photoLabel": "Profile photo",
+      "photoChange": "Change photo",
+      "photoError": {
+        "size": "Photo too large (max 5 MB).",
+        "type": "Invalid format. Use JPEG, PNG or WebP."
+      },
+      "save": "Save",
+      "saved": "Saved!",
+      "error": "Error saving. Please try again."
+    },
+    "links": {
+      "title": "Professional links",
+      "linkedin": "LinkedIn",
+      "linkedinPlaceholder": "linkedin.com/in/your-profile",
+      "github": "GitHub",
+      "githubPlaceholder": "github.com/your-username",
+      "save": "Save",
+      "saved": "Saved!",
+      "error": "Error saving. Please try again."
+    }
+  },
+  "bemvindo": {
+    "step1": {
+      "headline": "Hello, {nome}.",
+      "sub": "This is where your work becomes clarity.",
+      "promise": "You tell me what you did. I reveal what it says about who you are.",
+      "cta": "Let's start"
+    },
+    "loop": {
+      "promptInicial": "Tell me the last relevant thing you did at work.",
+      "placeholder": "E.g.: I led the migration of a critical system, which reduced errors by 40%...",
+      "cta": "Tell",
+      "ctaLinkedin": "Import LinkedIn PDF",
+      "reading": "Reading what you told me...",
+      "evaluating": "Evaluating what I learned...",
+      "generating": "Creating your mirror...",
+      "ctaFinal": "See my full mirror",
+      "retry": "Try again",
+      "errorGeneric": "Something went wrong. Please try again."
     }
   }
 }

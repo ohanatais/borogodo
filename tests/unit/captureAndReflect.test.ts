@@ -59,11 +59,12 @@ describe('captureAndReflect', () => {
     await expect(captureAndReflect('texto válido', 'text', CONTEXT)).rejects.toThrow()
   })
 
-  it('lança erro quando o payload não passa na validação Zod (reflexo sem pills)', async () => {
+  it('aceita reflexo com pills vazio e retorna array vazio', async () => {
     mockComplete.mockResolvedValue(
       jsonBlock({ entries: [VALID_ENTRY], reflection: { ...VALID_REFLECTION, pills: [] } })
     )
 
-    await expect(captureAndReflect('texto válido', 'text', CONTEXT)).rejects.toThrow()
+    const result = await captureAndReflect('texto válido', 'text', CONTEXT)
+    expect(result.reflection.pills).toEqual([])
   })
 })

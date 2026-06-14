@@ -5,26 +5,23 @@ completo de produto, stack e processo de desenvolvimento está em `.claude/CLAUD
 
 ## Status do desenvolvimento
 
-Features entregues e mergeadas em `main`:
+Features mergeadas em `main`:
 - **001-landing-page** — landing page pública, design system e i18n
-- **002-user-auth** — autenticação (Google OAuth + e-mail/senha), painel protegido por
-  middleware, criação automática de perfil via trigger no Supabase
+- **002-user-auth** — autenticação (Google OAuth + e-mail/senha), painel protegido por middleware
+- **003-capture-pipeline** — captura de texto e PDF/LinkedIn, extração via IA com Zod
+- **004-mirror-generation** — geração do espelho via Sonnet, regeneração automática
+- **005-panel-dashboard** — painel com composer, indicadores, insight proativo, entradas recentes
+- **006-espelho-honesto** — página do espelho com categorias macro, evidências e feedback
+- **007-painel-redesign** — BorogodoCard, trajetória em destaque, mini timeline
+- **008-historico-nav** — AppShell com navegação, Linha do Tempo (`/historico`)
 
-Em PR no momento:
-- **003-capture-pipeline** — captura de texto e import de PDF/LinkedIn, extração via IA
-  validada por Zod, e enriquecimento de campos sem IA (PR #6)
-
-Próximas features planejadas em `docs/mvp/`: geração do primeiro espelho (004-mirror),
-painel com insights proativos (005-panel) e o que vier depois.
-
-O bloco abaixo é gerenciado automaticamente pelo speckit e aponta para a feature em
-desenvolvimento no momento — pode estar à frente do que já foi mergeado.
+Próxima feature em branch `009-perfil-onboarding` (a criar após merge de 008):
+- **009-perfil-onboarding** — Central de Configurações (`/configuracoes`) + onboarding WOW/AHA
 
 <!-- SPECKIT START -->
-Current feature: **006-espelho-honesto**
-Implementation plan: [specs/006-espelho-honesto/plan.md](specs/006-espelho-honesto/plan.md)
-Spec: [specs/006-espelho-honesto/spec.md](specs/006-espelho-honesto/spec.md)
-Data model: [specs/006-espelho-honesto/data-model.md](specs/006-espelho-honesto/data-model.md)
-Contracts: [specs/006-espelho-honesto/contracts/mirror-output.md](specs/006-espelho-honesto/contracts/mirror-output.md)
-Quickstart: [specs/006-espelho-honesto/quickstart.md](specs/006-espelho-honesto/quickstart.md)
+Current feature: **009-perfil-onboarding**
+Tasks: [specs/009-perfil-onboarding/tasks.md](specs/009-perfil-onboarding/tasks.md)
+Implementation plan: [specs/009-perfil-onboarding/plan.md](specs/009-perfil-onboarding/plan.md)
+Spec: [specs/009-perfil-onboarding/spec.md](specs/009-perfil-onboarding/spec.md)
+Data model: [specs/009-perfil-onboarding/data-model.md](specs/009-perfil-onboarding/data-model.md)
 <!-- SPECKIT END -->

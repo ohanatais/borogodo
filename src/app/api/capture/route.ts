@@ -9,7 +9,7 @@ import { extractFromDocument } from '@/lib/ai/extraction/extractFromLinkedIn'
 import { extractTextFromPDF } from '@/lib/pdf/extractText'
 import { saveEntries } from '@/lib/db/entries'
 import { fireAndForget, maybeRegenerateMirror, triggerProactiveInsight } from '@/lib/ai/extraction/jobs'
-import { errorMessage } from '@/lib/errors'
+import { errorMessage, NoExtractableContentError } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
 const MIN_TEXT_LENGTH = 3
@@ -111,6 +111,9 @@ async function handleTextCapture(
 
     return NextResponse.json({ entries: saved, reflection }, { status: 200 })
   } catch (error: unknown) {
+    if (error instanceof NoExtractableContentError) {
+      return jsonError(t('noContent'), 422)
+    }
     const message = errorMessage(error)
     logger.error('capture failed', { kind: 'text', message })
     const body = process.env.NODE_ENV === 'development' ? `[dev] ${message}` : t('generic')
