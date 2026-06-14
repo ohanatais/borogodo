@@ -85,7 +85,7 @@ export function LinksCard({ profile }: LinksCardProps) {
           placeholder={t('linkedinPlaceholder')}
           className="w-full rounded-lg px-3 py-2.5 text-sm outline-none focus-visible:ring-2"
           style={{
-            background: 'var(--input)',
+            background: 'white',
             border: '1px solid var(--border)',
             color: 'var(--foreground)',
           }}
@@ -105,7 +105,7 @@ export function LinksCard({ profile }: LinksCardProps) {
           placeholder={t('githubPlaceholder')}
           className="w-full rounded-lg px-3 py-2.5 text-sm outline-none focus-visible:ring-2"
           style={{
-            background: 'var(--input)',
+            background: 'white',
             border: '1px solid var(--border)',
             color: 'var(--foreground)',
           }}
