@@ -182,13 +182,18 @@
       "ariaLabel": "Perfil de {name}",
       "viewMirror": "Ver espelho completo →",
       "forming": "Seu espelho está se formando",
-      "formingSubtitle": "Continue capturando histórias para o Borogodó revelar seu padrão."
+      "formingSubtitle": "Continue capturando histórias para o Borogodó revelar seu padrão.",
+      "formingOf": "O espelho de",
+      "formingSuffix": " tá se formando."
     },
     "highlights": {
-      "title": "Trajetória em destaque"
+      "title": "Trajetória em destaque",
+      "expand": "Ver mais",
+      "collapse": "Recolher"
     },
     "timeline": {
-      "title": "Linha do tempo"
+      "title": "Linha do tempo",
+      "viewAll": "Ver linha do tempo completa"
     }
   },
   "espelho": {
@@ -201,7 +206,6 @@
       "invisibleSkill": "Seu borogodó",
       "contextPattern": "O fio da sua carreira"
     },
-    "mirrorOf": "O espelho de",
     "themes": "Temas de força",
     "evidence": {
       "show": "{count, plural, one {Ver # entrada} other {Ver # entradas}}",

@@ -22,7 +22,8 @@ export interface TimelineEntry {
   id: string
   role_title: string | null
   company: string | null
-  entry_date: string | null
+  start_date: string | null
+  end_date: string | null
 }
 
 export interface HighlightEntry {
@@ -129,7 +130,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .eq('user_id', userId)
       .not('role_title', 'is', null)
       .order('entry_date', { ascending: false })
-      .limit(3),
+      .limit(10),
     supabase
       .from('entries')
       .select('id, what_i_did, impact, metric, entry_date')
@@ -140,6 +141,26 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
   ])
 
   const recentEntries = (recentRes.data ?? []) as RecentEntryRow[]
+
+  // Group timeline rows by role_title + company to build date ranges
+  const timelineGroups = new Map<
+    string,
+    { id: string; role_title: string | null; company: string | null; start_date: string | null; end_date: string | null }
+  >()
+  for (const row of (timelineRes.data ?? []) as { id: string; role_title: string | null; company: string | null; entry_date: string | null }[]) {
+    const key = `${row.role_title ?? ''}||${row.company ?? ''}`
+    const existing = timelineGroups.get(key)
+    if (!existing) {
+      timelineGroups.set(key, { id: row.id, role_title: row.role_title, company: row.company, start_date: row.entry_date, end_date: row.entry_date })
+    } else if (row.entry_date) {
+      timelineGroups.set(key, {
+        ...existing,
+        start_date: (!existing.start_date || row.entry_date < existing.start_date) ? row.entry_date : existing.start_date,
+        end_date: (!existing.end_date || row.entry_date > existing.end_date) ? row.entry_date : existing.end_date,
+      })
+    }
+  }
+  const timelineEntries: TimelineEntry[] = Array.from(timelineGroups.values()).slice(0, 3)
   const entryCount = countRes.count ?? 0
   const mirrorRow = mirrorRes.data as MirrorRow | null
   const lastEntry = recentEntries[0]
@@ -164,7 +185,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     monthsSpan: calculateMonthsSpan(oldestEntryDate, newestEntryDate),
     daysSince,
     recentEntries,
-    timelineEntries: (timelineRes.data ?? []) as TimelineEntry[],
+    timelineEntries,
     highlights: (highlightsRes.data ?? []) as HighlightEntry[],
     mirror,
     insight: (insightRes.data as ProactiveInsight | null) ?? null,

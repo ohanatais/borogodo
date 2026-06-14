@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { getEvidenceEntries } from '@/app/[locale]/espelho/actions'
-import { toEvidenceItem } from '@/types/mirror'
+import { toEvidenceItem, type EvidenceItem } from '@/types/mirror'
 import { truncate } from '@/lib/utils'
 import type { EvidenceEntry } from '@/lib/db/entries'
 
 interface EvidenceTextProps {
-  evidence: unknown
+  evidence: EvidenceItem | string
 }
 
 function formatEntryMeta(entry: EvidenceEntry): string {
@@ -18,6 +18,7 @@ function formatEntryMeta(entry: EvidenceEntry): string {
 
 export function EvidenceText({ evidence }: EvidenceTextProps) {
   const t = useTranslations('espelho.evidence')
+  const panelId = useId()
   const ev = toEvidenceItem(evidence)
   const hasLinks = ev.entry_ids.length > 0
 
@@ -51,7 +52,7 @@ export function EvidenceText({ evidence }: EvidenceTextProps) {
           <button
             type="button"
             aria-expanded={open}
-            aria-controls="evidence-entries-panel"
+            aria-controls={panelId}
             onClick={handleToggle}
             className="text-xs font-medium underline underline-offset-2 transition-opacity hover:opacity-70"
             style={{ color: 'var(--color-primary)' }}
@@ -61,7 +62,7 @@ export function EvidenceText({ evidence }: EvidenceTextProps) {
 
           {open && (
             <div
-              id="evidence-entries-panel"
+              id={panelId}
               role="region"
               aria-label={t('entriesRegion')}
               className="mt-2 rounded-lg border divide-y text-xs"
