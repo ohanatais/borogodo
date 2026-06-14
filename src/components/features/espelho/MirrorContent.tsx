@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
@@ -106,14 +105,6 @@ export function MirrorContent({ snapshot, userName = '' }: MirrorContentProps) {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-8">
-      <Link
-        href="/painel"
-        className="inline-block text-sm mb-8"
-        style={{ color: 'var(--muted-foreground)' }}
-      >
-        {t('back')}
-      </Link>
-
       {personName && <MirrorHeader name={personName} label={t('mirrorOf')} />}
 
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-0">
