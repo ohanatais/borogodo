@@ -44,18 +44,17 @@ describe('TrajectoryHighlights', () => {
     expect(screen.getByText('Liderou a migração do banco de dados sem downtime.')).toBeInTheDocument()
   })
 
-  it('truncates long what_i_did to 100 chars', () => {
+  it('renders long what_i_did in full without truncation', () => {
+    const longText = 'a'.repeat(150)
     const longHighlight: HighlightEntry = {
       id: 'h-long',
-      what_i_did: 'a'.repeat(150),
+      what_i_did: longText,
       impact: 'Impacto',
       metric: null,
       entry_date: null,
     }
     render(<TrajectoryHighlights highlights={[longHighlight]} />)
-    expect(screen.getByText(/a+…/)).toBeInTheDocument()
-    const el = screen.getByText(/a+…/)
-    expect(el.textContent!.length).toBeLessThanOrEqual(105)
+    expect(screen.getByText(longText)).toBeInTheDocument()
   })
 
   it('renders the section title via i18n key', () => {

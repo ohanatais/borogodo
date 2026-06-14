@@ -37,7 +37,7 @@ describe('CaptureInput', () => {
     expect(screen.getByRole('button', { name: /enviar/i })).not.toBeDisabled()
   })
 
-  it('submits text via POST /api/capture on button click', async () => {
+  it('submits text via POST /api/capture as FormData on button click', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true })
     global.fetch = fetchMock
 
@@ -50,8 +50,11 @@ describe('CaptureInput', () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith('/api/capture', expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ text: 'Fiz uma entrega importante', kind: 'text' }),
+        body: expect.any(FormData),
       }))
+      const body = fetchMock.mock.calls[0][1].body as FormData
+      expect(body.get('content')).toBe('Fiz uma entrega importante')
+      expect(body.get('kind')).toBe('text')
     })
   })
 
@@ -66,9 +69,8 @@ describe('CaptureInput', () => {
     fireEvent.click(screen.getByRole('button', { name: /enviar/i }))
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith('/api/capture', expect.objectContaining({
-        body: JSON.stringify({ text: 'Qual é meu ponto forte?', kind: 'question' }),
-      }))
+      const body = fetchMock.mock.calls[0][1].body as FormData
+      expect(body.get('kind')).toBe('question')
     })
   })
 

@@ -76,7 +76,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const formData = await request.formData()
   const kind = formData.get('kind')
 
-  if (kind === 'audio' || kind === 'image') {
+  if (kind === 'audio' || kind === 'image' || kind === 'question') {
     return jsonError(t('comingSoon'), 501)
   }
 

@@ -58,18 +58,22 @@ describe('groupPositions', () => {
     expect(groupPositions([])).toEqual([])
   })
 
-  it('skips entries without role_title or company', () => {
+  it('skips entries without company', () => {
     const result = groupPositions([
-      { ...BASE_ENTRY, role_title: null },
       { ...BASE_ENTRY, company: null },
     ])
     expect(result).toHaveLength(0)
   })
 
-  it('groups entries with same role_title and company', () => {
+  it('includes entries with null role_title when company is present', () => {
+    const result = groupPositions([{ ...BASE_ENTRY, role_title: null }])
+    expect(result).toHaveLength(1)
+  })
+
+  it('groups entries with same company regardless of role_title', () => {
     const entries = [
-      { ...BASE_ENTRY, what_i_did: 'Tarefa A', impact: null, metric: null },
-      { ...BASE_ENTRY, what_i_did: 'Tarefa B', impact: 'Impacto B', metric: null },
+      { ...BASE_ENTRY, role_title: 'PM', what_i_did: 'Tarefa A', impact: null, metric: null },
+      { ...BASE_ENTRY, role_title: 'Designer', what_i_did: 'Tarefa B', impact: 'Impacto B', metric: null },
     ]
     const result = groupPositions(entries)
     expect(result).toHaveLength(1)
@@ -78,33 +82,33 @@ describe('groupPositions', () => {
     expect(result[0].entries[1].what_i_did).toBe('Tarefa B')
   })
 
-  it('keeps distinct positions separate', () => {
+  it('keeps entries from different companies separate', () => {
     const entries = [
-      { ...BASE_ENTRY, role_title: 'PM', company: 'Acme', what_i_did: 'A', impact: null, metric: null },
-      { ...BASE_ENTRY, role_title: 'Designer', company: 'Acme', what_i_did: 'B', impact: null, metric: null },
+      { ...BASE_ENTRY, company: 'Acme', what_i_did: 'A', impact: null, metric: null },
+      { ...BASE_ENTRY, company: 'Beta Corp', what_i_did: 'B', impact: null, metric: null },
     ]
     const result = groupPositions(entries)
     expect(result).toHaveLength(2)
   })
 
-  it('limits entries to 5 per position', () => {
-    const entries = Array.from({ length: 8 }, (_, i) => ({
+  it('limits entries to 8 per company', () => {
+    const entries = Array.from({ length: 10 }, (_, i) => ({
       ...BASE_ENTRY,
       what_i_did: `Tarefa ${i}`,
       impact: null,
       metric: null,
     }))
     const result = groupPositions(entries)
-    expect(result[0].entries).toHaveLength(5)
+    expect(result[0].entries).toHaveLength(8)
   })
 
-  it('uses role_start from the first matching entry', () => {
+  it('tracks earliest role_start across all entries for the company', () => {
     const entries = [
       { ...BASE_ENTRY, role_start: '2022-03-01', what_i_did: 'First', impact: null, metric: null },
       { ...BASE_ENTRY, role_start: '2021-01-01', what_i_did: 'Second', impact: null, metric: null },
     ]
     const result = groupPositions(entries)
-    expect(result[0].role_start).toBe('2022-03-01')
+    expect(result[0].role_start).toBe('2021-01-01')
   })
 
   it('handles position with null role_start', () => {
