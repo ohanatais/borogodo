@@ -38,7 +38,7 @@ Before marking code complete:
 
 ## Security Review Triggers
 
-**STOP and use security-reviewer agent when:**
+**STOP and run `/security-review` (or the `security` subagent inside `/pr-review`) when:**
 
 - Authentication or authorization code
 - User input handling
@@ -57,18 +57,17 @@ Before marking code complete:
 | MEDIUM | Maintainability concern | **INFO** - Consider fixing |
 | LOW | Style or minor suggestion | **NOTE** - Optional |
 
-## Agent Usage
+## Skills para revisão
 
-Use these agents for code review:
+Não há agentes de revisão dedicados por linguagem neste projeto. Usar:
 
-| Agent | Purpose |
-|-------|---------|
-| **code-reviewer** | General code quality, patterns, best practices |
-| **security-reviewer** | Security vulnerabilities, OWASP Top 10 |
-| **typescript-reviewer** | TypeScript/JavaScript specific issues |
-| **python-reviewer** | Python specific issues |
-| **go-reviewer** | Go specific issues |
-| **rust-reviewer** | Rust specific issues |
+| Skill | Quando | Cobre |
+|-------|--------|-------|
+| `/code-review <low\|medium\|high>` | Passes rápidos durante a implementação (fim de cada fase) | bugs, simplificação, eficiência |
+| `/pr-review` | Antes de abrir/mergear o PR | segurança, qualidade, arquitetura, performance, requisitos, regressão — 6 subagentes em paralelo, posta comentários inline no PR |
+| `/security-review` | Mudanças sensíveis (auth, dados, pagamentos) | OWASP Top 10 |
+| `vercel-react-best-practices`, `vercel-composition-patterns` | Componentes/páginas React/Next | performance, composição |
+| `supabase-postgres-best-practices` | Migrations e queries Supabase | RLS, índices, N+1 |
 
 ## Review Workflow
 
@@ -78,7 +77,7 @@ Use these agents for code review:
 3. Review code quality checklist
 4. Run relevant tests
 5. Verify coverage >= 80%
-6. Use appropriate agent for detailed review
+6. /code-review (durante implementação) ou /pr-review (antes do PR) para revisão detalhada
 ```
 
 ## Common Issues to Catch

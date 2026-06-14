@@ -33,7 +33,7 @@ const MIRROR = {
   primary_strength: { headline: 'Síntese para stakeholders', evidence: 'Aparece em 4 entradas.' },
   invisible_skill: { headline: 'Estabiliza o time', evidence: 'Em 3 entradas.' },
   context_pattern: { headline: 'Brilha em 0→1', evidence: 'Sem processo definido.' },
-  closing_question: 'Isso ressoa com você?',
+  closing: 'Isso ressoa com você?',
   strength_themes: ['decisão sob pressão', 'síntese para stakeholders', '0→1'],
 }
 

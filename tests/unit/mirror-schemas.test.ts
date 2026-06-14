@@ -15,7 +15,7 @@ const validMirror = {
     headline: 'Você brilha em situações de 0 a 1',
     evidence: 'Os relatos mais fortes são sempre de quando não havia processo definido.',
   },
-  closing_question: 'Isso ressoa com você?',
+  closing: 'Isso ressoa com você?',
   strength_themes: ['decisão sob pressão', 'síntese para stakeholders', '0→1'],
 }
 
@@ -53,9 +53,9 @@ describe('validateMirror', () => {
     ).toThrow()
   })
 
-  it('rejeita intro ou closing_question vazios', () => {
+  it('rejeita intro ou closing vazios', () => {
     expect(() => validateMirror({ ...validMirror, intro: '' })).toThrow()
-    expect(() => validateMirror({ ...validMirror, closing_question: '' })).toThrow()
+    expect(() => validateMirror({ ...validMirror, closing: '' })).toThrow()
   })
 
   it('rejeita JSON malformado / shape inesperado', () => {

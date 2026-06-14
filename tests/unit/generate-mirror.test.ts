@@ -21,7 +21,7 @@ const VALID_MIRROR = {
   primary_strength: { headline: 'Síntese para stakeholders', evidence: 'Aparece em 4 entradas.' },
   invisible_skill: { headline: 'Estabiliza o time', evidence: 'Em 3 entradas você segurou a crise.' },
   context_pattern: { headline: 'Brilha em 0→1', evidence: 'Os relatos mais fortes são de quando faltava processo.' },
-  closing_question: 'Isso ressoa com você?',
+  closing: 'Isso ressoa com você?',
   strength_themes: ['decisão sob pressão', 'síntese para stakeholders', '0→1'],
 }
 

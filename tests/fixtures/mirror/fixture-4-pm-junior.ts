@@ -1,0 +1,100 @@
+/**
+ * Fixture #4 — APM júnior / valor enterrado / sem métrica (exemplo-ouro #4)
+ * Perfil: histórico estilo lista de responsabilidade, transição CS→QA→produto,
+ * quase nenhum número. É o caso mais difícil e mais comum.
+ */
+export const fixture4Entries = [
+  {
+    what_i_did:
+      'Apoiei o time de produto no discovery, refinamento de backlog e acompanhamento de entregas',
+    company: 'SaaS B2B',
+    role_title: 'Associate Product Manager',
+    role_start: '2024-01-01',
+    role_end: null,
+    impact: null,
+    metric: null,
+    tags: ['discovery', 'backlog', 'produto'],
+    source: 'text' as const,
+  },
+  {
+    what_i_did: 'Conduzi rituais ágeis: daily, planning, review e retrospectiva',
+    company: 'SaaS B2B',
+    role_title: 'Associate Product Manager',
+    role_start: '2024-01-01',
+    role_end: null,
+    impact: null,
+    metric: null,
+    tags: ['agile', 'scrum', 'rituais'],
+    source: 'text' as const,
+  },
+  {
+    what_i_did: 'Levantei requisitos com áreas de negócio, design e engenharia',
+    company: 'SaaS B2B',
+    role_title: 'Associate Product Manager',
+    role_start: '2024-01-01',
+    role_end: null,
+    impact: null,
+    metric: null,
+    tags: ['requisitos', 'stakeholders', 'cross-functional'],
+    source: 'text' as const,
+  },
+  {
+    what_i_did:
+      'Documentei os problemas recorrentes do suporte e montei a base de conhecimento interna do time',
+    company: 'SaaS B2B',
+    role_title: 'Analista de Suporte / CS',
+    role_start: '2022-01-01',
+    role_end: '2024-01-01',
+    impact: 'Base de conhecimento interna que reduziu retrabalho do time de atendimento',
+    metric: null,
+    tags: ['CS', 'voz do cliente', 'documentação', 'discovery'],
+    source: 'text' as const,
+  },
+  {
+    what_i_did: 'Realizei atendimento e resolução de chamados de clientes PME',
+    company: 'SaaS B2B',
+    role_title: 'Analista de Suporte / CS',
+    role_start: '2022-01-01',
+    role_end: '2024-01-01',
+    impact: 'Contato direto com dores reais de clientes PME no dia a dia',
+    metric: null,
+    tags: ['CS', 'PME', 'voz do cliente'],
+    source: 'text' as const,
+  },
+  {
+    what_i_did: 'Treinei novos atendentes durante período de crescimento acelerado da empresa',
+    company: 'SaaS B2B',
+    role_title: 'Analista de Suporte / CS',
+    role_start: '2022-01-01',
+    role_end: '2024-01-01',
+    impact: 'Onboarding de novos membros do time em fase de crescimento',
+    metric: null,
+    tags: ['liderança', 'treinamento', 'crescimento'],
+    source: 'text' as const,
+  },
+  {
+    what_i_did:
+      'Executei testes manuais, escrevi cenários de teste e validei requisitos num app financeiro',
+    company: 'App Financeiro',
+    role_title: 'Analista de QA',
+    role_start: '2021-01-01',
+    role_end: '2022-01-01',
+    impact: null,
+    metric: null,
+    tags: ['QA', 'testes', 'instinto de qualidade'],
+    source: 'text' as const,
+  },
+  {
+    what_i_did: 'Realizei testes de API no Postman antes do deploy para validar comportamento esperado',
+    company: 'App Financeiro',
+    role_title: 'Analista de QA',
+    role_start: '2021-01-01',
+    role_end: '2022-01-01',
+    impact: 'Prevenção de bugs antes de chegarem em produção',
+    metric: null,
+    tags: ['QA', 'API', 'Postman', 'fluência técnica'],
+    source: 'text' as const,
+  },
+]
+
+export const fixture4UserName = 'Juliana'
