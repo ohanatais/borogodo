@@ -30,6 +30,29 @@ describe('EvidenceText', () => {
     expect(screen.getByRole('button')).toBeInTheDocument()
   })
 
+  it('button has aria-expanded=false before toggle', () => {
+    render(<EvidenceText evidence={{ text: 'Com links.', entry_ids: ['uuid-1'] }} />)
+    expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('button has aria-expanded=true after toggle', async () => {
+    mockGetEvidenceEntries.mockResolvedValueOnce([])
+    render(<EvidenceText evidence={{ text: 'Com links.', entry_ids: ['uuid-1'] }} />)
+    fireEvent.click(screen.getByRole('button'))
+    await waitFor(() => {
+      expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'true')
+    })
+  })
+
+  it('shows empty state copy when fetch returns no entries', async () => {
+    mockGetEvidenceEntries.mockResolvedValueOnce([])
+    render(<EvidenceText evidence={{ text: 'Com links.', entry_ids: ['uuid-1'] }} />)
+    fireEvent.click(screen.getByRole('button'))
+    await waitFor(() => {
+      expect(screen.getByText('noEntries')).toBeInTheDocument()
+    })
+  })
+
   it('fetches entries on first toggle and shows them', async () => {
     mockGetEvidenceEntries.mockResolvedValueOnce([
       {

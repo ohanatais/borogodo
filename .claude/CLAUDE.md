@@ -26,6 +26,7 @@ src/
   components/
     ui/             ← componentes base (sem lógica de negócio)
     features/       ← componentes por feature
+    providers/      ← context providers client-side (ex: MotionProvider)
   i18n/             ← configuração next-intl
   messages/         ← pt-BR.json, en.json (stub)
   lib/

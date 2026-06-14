@@ -17,7 +17,7 @@ export function MiniTimeline({ entries }: MiniTimelineProps) {
   if (entries.length === 0) return null
 
   return (
-    <aside className="md:pl-4">
+    <aside aria-label={t('title')} className="md:pl-4">
       <p
         className="text-xs font-semibold uppercase tracking-widest mb-3"
         style={{ color: 'var(--muted-foreground)' }}

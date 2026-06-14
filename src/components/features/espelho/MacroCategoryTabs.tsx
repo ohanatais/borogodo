@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { MacroCategory, SkillTier } from '@/types/mirror'
 import { SkillTierItem } from './SkillTierItem'
@@ -12,10 +12,25 @@ interface MacroCategoryTabsProps {
 export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
   const t = useTranslations('espelho.categories')
   const [activeIndex, setActiveIndex] = useState(0)
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   if (categories.length === 0) return null
 
   const active = categories[activeIndex]
+
+  function handleKeyDown(e: React.KeyboardEvent, i: number) {
+    const last = categories.length - 1
+    let next: number | null = null
+    if (e.key === 'ArrowRight') next = i < last ? i + 1 : 0
+    else if (e.key === 'ArrowLeft') next = i > 0 ? i - 1 : last
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = last
+    if (next !== null) {
+      e.preventDefault()
+      setActiveIndex(next)
+      tabRefs.current[next]?.focus()
+    }
+  }
 
   return (
     <div className="mt-8">
@@ -36,13 +51,16 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
           {categories.map((cat, i) => (
             <button
               key={cat.name}
+              ref={(el) => { tabRefs.current[i] = el }}
               role="tab"
               aria-selected={i === activeIndex}
               aria-controls={`tabpanel-${i}`}
               id={`tab-${i}`}
+              tabIndex={i === activeIndex ? 0 : -1}
               type="button"
               onClick={() => setActiveIndex(i)}
-              className="shrink-0 px-4 py-2 text-sm font-medium transition-colors"
+              onKeyDown={(e) => handleKeyDown(e, i)}
+              className="shrink-0 px-4 min-h-[44px] text-sm font-medium transition-colors"
               style={{
                 color: i === activeIndex ? 'var(--color-primary)' : 'var(--muted-foreground)',
                 borderBottom: i === activeIndex ? '2px solid var(--color-primary)' : '2px solid transparent',

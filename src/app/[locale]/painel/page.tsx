@@ -32,8 +32,8 @@ export default async function PainelPage() {
         {data.entryCount === 0 ? (
           <PanelEmptyState />
         ) : (
-          /* Desktop: 2-col grid (main | mini-timeline). Mobile: stack. */
-          <div className="md:grid md:grid-cols-[1fr_256px] md:gap-6">
+          /* Desktop: 2-col grid (main | mini-timeline). Mobile: stacked column. */
+          <div className="md:grid md:grid-cols-[1fr_256px] md:gap-6 md:items-start">
             {/* Main column */}
             <div className="min-w-0">
               <BorogodoCard
@@ -56,19 +56,10 @@ export default async function PainelPage() {
               <RecentEntries entries={data.recentEntries} />
             </div>
 
-            {/* Sidebar — mini timeline: hidden on mobile, shown at md+ */}
-            <div className="hidden md:block">
-              <div className="sticky top-4">
-                <MiniTimeline entries={data.timelineEntries} />
-              </div>
+            {/* MiniTimeline — single render; appears after main on mobile, sticky sidebar on desktop */}
+            <div className="mt-4 px-4 md:mt-0 md:px-0 md:sticky md:top-4">
+              <MiniTimeline entries={data.timelineEntries} />
             </div>
-          </div>
-        )}
-
-        {/* Mobile: mini timeline after main content (MiniTimeline returns null for empty entries) */}
-        {data.entryCount > 0 && (
-          <div className="md:hidden mt-4 px-4">
-            <MiniTimeline entries={data.timelineEntries} />
           </div>
         )}
       </div>

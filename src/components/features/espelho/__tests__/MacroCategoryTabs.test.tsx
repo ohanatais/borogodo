@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import type { MacroCategory } from '@/types/mirror'
 
@@ -75,5 +75,44 @@ describe('MacroCategoryTabs', () => {
     render(<MacroCategoryTabs categories={CATEGORIES} />)
     expect(screen.getAllByText('2')[0]).toBeInTheDocument()
     expect(screen.getAllByText('1')[0]).toBeInTheDocument()
+  })
+
+  it('ArrowRight moves focus to next tab', () => {
+    render(<MacroCategoryTabs categories={CATEGORIES} />)
+    const tabs = screen.getAllByRole('tab')
+    act(() => tabs[0].focus())
+    fireEvent.keyDown(tabs[0], { key: 'ArrowRight' })
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('ArrowLeft wraps from first tab to last', () => {
+    render(<MacroCategoryTabs categories={CATEGORIES} />)
+    const tabs = screen.getAllByRole('tab')
+    act(() => tabs[0].focus())
+    fireEvent.keyDown(tabs[0], { key: 'ArrowLeft' })
+    expect(tabs[tabs.length - 1]).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('Home key moves to first tab', () => {
+    render(<MacroCategoryTabs categories={CATEGORIES} />)
+    const tabs = screen.getAllByRole('tab')
+    fireEvent.click(tabs[1])
+    fireEvent.keyDown(tabs[1], { key: 'Home' })
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('End key moves to last tab', () => {
+    render(<MacroCategoryTabs categories={CATEGORIES} />)
+    const tabs = screen.getAllByRole('tab')
+    act(() => tabs[0].focus())
+    fireEvent.keyDown(tabs[0], { key: 'End' })
+    expect(tabs[tabs.length - 1]).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('non-active tabs have tabIndex=-1', () => {
+    render(<MacroCategoryTabs categories={CATEGORIES} />)
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs[0]).toHaveAttribute('tabindex', '0')
+    expect(tabs[1]).toHaveAttribute('tabindex', '-1')
   })
 })

@@ -132,6 +132,40 @@ describe('generateAndSaveMirror', () => {
     expect(userPrompt).toContain('Pessoa: você')
   })
 
+  it('resolve rótulos E1, E2 para UUIDs reais antes de persistir', async () => {
+    const mirrorWithLabels = {
+      ...VALID_MIRROR,
+      primary_strength: {
+        headline: 'Síntese para stakeholders',
+        evidence: { text: 'Aparece em entradas.', entry_ids: ['E1'] },
+      },
+    }
+    mockComplete.mockResolvedValueOnce('```json\n' + JSON.stringify(mirrorWithLabels) + '\n```')
+
+    const supabase = buildSupabase([OWN_ENTRY])
+    await generateAndSaveMirror(supabase as never, 'user-1')
+
+    const persistedMirror = mockInsertMirrorSnapshot.mock.calls[0]?.[1]?.mirror
+    expect(persistedMirror.primary_strength.evidence.entry_ids).toEqual([OWN_ENTRY.id])
+  })
+
+  it('descarta rótulos sem match no mapa (não vaza labels brutos)', async () => {
+    const mirrorWithUnknownLabel = {
+      ...VALID_MIRROR,
+      primary_strength: {
+        headline: 'Síntese',
+        evidence: { text: 'Evidência.', entry_ids: ['E99'] },
+      },
+    }
+    mockComplete.mockResolvedValueOnce('```json\n' + JSON.stringify(mirrorWithUnknownLabel) + '\n```')
+
+    const supabase = buildSupabase([OWN_ENTRY])
+    await generateAndSaveMirror(supabase as never, 'user-1')
+
+    const persistedMirror = mockInsertMirrorSnapshot.mock.calls[0]?.[1]?.mirror
+    expect(persistedMirror.primary_strength.evidence.entry_ids).toEqual([])
+  })
+
   it('lança erro sem persistir quando o Sonnet retorna JSON inválido', async () => {
     mockComplete.mockResolvedValue('não é json')
     const supabase = buildSupabase([OWN_ENTRY])

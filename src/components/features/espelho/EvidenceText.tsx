@@ -2,22 +2,13 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import type { EvidenceItem } from '@/types/mirror'
 import { getEvidenceEntries } from '@/app/[locale]/espelho/actions'
 import { toEvidenceItem } from '@/types/mirror'
 import { truncate } from '@/lib/utils'
-
-interface EvidenceEntry {
-  id: string
-  what_i_did: string
-  role_title: string | null
-  company: string | null
-  entry_date: string | null
-  created_at: string
-}
+import type { EvidenceEntry } from '@/lib/db/entries'
 
 interface EvidenceTextProps {
-  evidence: EvidenceItem | unknown
+  evidence: unknown
 }
 
 function formatEntryMeta(entry: EvidenceEntry): string {
@@ -59,6 +50,8 @@ export function EvidenceText({ evidence }: EvidenceTextProps) {
         <div className="mt-2">
           <button
             type="button"
+            aria-expanded={open}
+            aria-controls="evidence-entries-panel"
             onClick={handleToggle}
             className="text-xs font-medium underline underline-offset-2 transition-opacity hover:opacity-70"
             style={{ color: 'var(--color-primary)' }}
@@ -68,26 +61,41 @@ export function EvidenceText({ evidence }: EvidenceTextProps) {
 
           {open && (
             <div
+              id="evidence-entries-panel"
+              role="region"
+              aria-label={t('entriesRegion')}
               className="mt-2 rounded-lg border divide-y text-xs"
               style={{ borderColor: 'var(--border)', background: 'var(--color-lilas-nevoa)' }}
             >
               {loading ? (
-                <p className="px-3 py-2" style={{ color: 'var(--muted-foreground)' }}>
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className="px-3 py-2"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
                   {t('loading')}
                 </p>
-              ) : entries.length === 0 ? null : (
-                entries.map((entry) => (
-                  <div key={entry.id} className="px-3 py-2 space-y-0.5">
-                    {formatEntryMeta(entry) && (
-                      <p className="font-medium" style={{ color: 'var(--foreground)' }}>
-                        {formatEntryMeta(entry)}
+              ) : entries.length === 0 ? (
+                <p className="px-3 py-2" style={{ color: 'var(--muted-foreground)' }}>
+                  {t('noEntries')}
+                </p>
+              ) : (
+                entries.map((entry) => {
+                  const meta = formatEntryMeta(entry)
+                  return (
+                    <div key={entry.id} className="px-3 py-2 space-y-0.5">
+                      {meta && (
+                        <p className="font-medium" style={{ color: 'var(--foreground)' }}>
+                          {meta}
+                        </p>
+                      )}
+                      <p style={{ color: 'var(--muted-foreground)' }}>
+                        {truncate(entry.what_i_did, 120)}
                       </p>
-                    )}
-                    <p style={{ color: 'var(--muted-foreground)' }}>
-                      {truncate(entry.what_i_did, 120)}
-                    </p>
-                  </div>
-                ))
+                    </div>
+                  )
+                })
               )}
             </div>
           )}

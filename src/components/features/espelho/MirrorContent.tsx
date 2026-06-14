@@ -54,7 +54,7 @@ function MirrorSection({ label, headline, evidence, warm = false }: SectionProps
   )
 }
 
-function MirrorHeader({ name }: { name: string }) {
+function MirrorHeader({ name, label }: { name: string; label: string }) {
   const initial = name?.trim()?.[0]?.toUpperCase() ?? '?'
 
   return (
@@ -67,7 +67,7 @@ function MirrorHeader({ name }: { name: string }) {
       </div>
       <div className="min-w-0">
         <p className="text-sm font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
-          O espelho de
+          {label}
         </p>
         <p className="text-lg font-semibold truncate" style={{ color: 'var(--foreground)' }}>
           {name}
@@ -114,7 +114,7 @@ export function MirrorContent({ snapshot, userName = '' }: MirrorContentProps) {
         {t('back')}
       </Link>
 
-      {personName && <MirrorHeader name={personName} />}
+      {personName && <MirrorHeader name={personName} label={t('mirrorOf')} />}
 
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-0">
         <motion.p

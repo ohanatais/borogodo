@@ -2,8 +2,8 @@ import type { SkillItem, SkillTier } from '@/types/mirror'
 import { EvidenceText } from './EvidenceText'
 
 const TIER_STYLES: Record<SkillTier, { bg: string; text: string }> = {
-  Emergente: { bg: 'var(--color-lilas-nevoa)', text: 'oklch(40% 0.10 320)' },
-  Consistente: { bg: 'var(--color-warm)', text: 'oklch(32% 0.08 75)' },
+  Emergente: { bg: 'var(--color-lilas-nevoa)', text: 'var(--color-lilas-nevoa-text)' },
+  Consistente: { bg: 'var(--color-warm)', text: 'var(--color-warm-text)' },
   Comprovada: { bg: 'var(--color-primary)', text: 'var(--color-primary-fg)' },
 }
 

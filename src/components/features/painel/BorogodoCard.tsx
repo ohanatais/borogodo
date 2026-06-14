@@ -21,6 +21,7 @@ export function BorogodoCard({ name, mirror, entryCount }: BorogodoCardProps) {
 
   return (
     <section
+      aria-label={t('ariaLabel', { name: firstName })}
       className="rounded-xl p-6 mb-4"
       style={{ background: 'var(--color-primary)' }}
     >
@@ -28,7 +29,7 @@ export function BorogodoCard({ name, mirror, entryCount }: BorogodoCardProps) {
       <div className="flex items-center gap-3 mb-4">
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
-          style={{ background: 'white', color: 'var(--color-primary)' }}
+          style={{ background: 'var(--background)', color: 'var(--color-primary)' }}
           aria-hidden="true"
         >
           {initial}
