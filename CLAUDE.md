@@ -21,10 +21,10 @@ O bloco abaixo é gerenciado automaticamente pelo speckit e aponta para a featur
 desenvolvimento no momento — pode estar à frente do que já foi mergeado.
 
 <!-- SPECKIT START -->
-Current feature: **003-capture-pipeline**
-Implementation plan: [specs/003-capture-pipeline/plan.md](specs/003-capture-pipeline/plan.md)
-Spec: [specs/003-capture-pipeline/spec.md](specs/003-capture-pipeline/spec.md)
-Data model: [specs/003-capture-pipeline/data-model.md](specs/003-capture-pipeline/data-model.md)
-Contracts: [specs/003-capture-pipeline/contracts/capture-api.md](specs/003-capture-pipeline/contracts/capture-api.md)
-Quickstart: [specs/003-capture-pipeline/quickstart.md](specs/003-capture-pipeline/quickstart.md)
+Current feature: **006-espelho-honesto**
+Implementation plan: [specs/006-espelho-honesto/plan.md](specs/006-espelho-honesto/plan.md)
+Spec: [specs/006-espelho-honesto/spec.md](specs/006-espelho-honesto/spec.md)
+Data model: [specs/006-espelho-honesto/data-model.md](specs/006-espelho-honesto/data-model.md)
+Contracts: [specs/006-espelho-honesto/contracts/mirror-output.md](specs/006-espelho-honesto/contracts/mirror-output.md)
+Quickstart: [specs/006-espelho-honesto/quickstart.md](specs/006-espelho-honesto/quickstart.md)
 <!-- SPECKIT END -->
