@@ -1,12 +1,9 @@
 import { useTranslations } from 'next-intl'
 import type { HighlightEntry } from '@/lib/panel/getPanelData'
+import { truncate } from '@/lib/utils'
 
 interface TrajectoryHighlightsProps {
   highlights: HighlightEntry[]
-}
-
-function truncate(text: string, max: number): string {
-  return text.length <= max ? text : text.slice(0, max).trimEnd() + '…'
 }
 
 export function TrajectoryHighlights({ highlights }: TrajectoryHighlightsProps) {

@@ -39,11 +39,7 @@ describe('EvidenceText', () => {
         company: 'Acme',
         entry_date: '2026-01-01',
         created_at: '2026-01-01T00:00:00Z',
-        source: 'text',
-        tags: [],
-        impact: null,
-        metric: null,
-      } as never,
+      },
     ])
 
     render(<EvidenceText evidence={{ text: 'Evidência.', entry_ids: ['uuid-1'] }} />)
@@ -79,7 +75,7 @@ describe('EvidenceText', () => {
   it('truncates long what_i_did to 120 chars', async () => {
     const longText = 'a'.repeat(150)
     mockGetEvidenceEntries.mockResolvedValueOnce([
-      { id: 'u1', what_i_did: longText, role_title: null, company: null, entry_date: null, created_at: '2026-01-01T00:00:00Z', source: 'text', tags: [], impact: null, metric: null } as never,
+      { id: 'u1', what_i_did: longText, role_title: null, company: null, entry_date: null, created_at: '2026-01-01T00:00:00Z' },
     ])
 
     render(<EvidenceText evidence={{ text: 'E.', entry_ids: ['u1'] }} />)

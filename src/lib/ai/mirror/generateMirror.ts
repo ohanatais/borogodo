@@ -13,7 +13,6 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 const MAX_TOKENS = 2048
 const MAX_ENTRIES = 20
 const FALLBACK_NAME = 'você'
-const ENTRY_LABEL_RE = /^E(\d+)$/
 
 interface MirrorEntryRow {
   id: string
@@ -51,11 +50,9 @@ async function loadUserName(supabase: SupabaseServerClient, userId: string): Pro
   return firstName || FALLBACK_NAME
 }
 
-/** Substitui rótulos sequenciais (E1, E2…) pelos UUIDs reais. Rótulos sem match são filtrados. */
+/** Substitui rótulos sequenciais (E1, E2…) pelos UUIDs reais. Qualquer label fora do mapa é descartado. */
 function resolveEntryIds(ids: string[], entryMap: Map<string, string>): string[] {
-  return ids
-    .map((label) => (ENTRY_LABEL_RE.test(label) ? (entryMap.get(label) ?? '') : label))
-    .filter((id) => id.length > 0)
+  return ids.map((label) => entryMap.get(label) ?? '').filter((id) => id.length > 0)
 }
 
 /** Percorre recursivamente o Mirror resolvendo entry_ids em EvidenceItems e SkillItems. */

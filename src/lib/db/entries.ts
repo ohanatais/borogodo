@@ -1,6 +1,15 @@
 import type { createServerClient } from '@/lib/db/supabase/server'
 import type { Entry, ExtractedEntry } from '@/types/entry'
 
+export interface EvidenceEntry {
+  id: string
+  what_i_did: string
+  role_title: string | null
+  company: string | null
+  entry_date: string | null
+  created_at: string
+}
+
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 
 export const ENRICHABLE_FIELDS = ['metric', 'impact', 'decision', 'learning'] as const
@@ -57,7 +66,7 @@ export async function getEntriesByIds(
   supabase: SupabaseServerClient,
   userId: string,
   ids: string[]
-): Promise<Entry[]> {
+): Promise<EvidenceEntry[]> {
   if (ids.length === 0) return []
 
   const { data, error } = await supabase
@@ -70,7 +79,7 @@ export async function getEntriesByIds(
     return []
   }
 
-  return data as Entry[]
+  return data as EvidenceEntry[]
 }
 
 export async function enrichEntryField(

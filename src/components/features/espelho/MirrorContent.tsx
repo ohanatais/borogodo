@@ -6,13 +6,13 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import type { MirrorSnapshot } from '@/types/mirror'
-import { toEvidenceItem } from '@/types/mirror'
 import { MirrorFeedback } from './MirrorFeedback'
 import { EvidenceText } from './EvidenceText'
 import { MacroCategoryTabs } from './MacroCategoryTabs'
 
 interface MirrorContentProps {
   snapshot: MirrorSnapshot
+  userName?: string
 }
 
 const container = {
@@ -48,7 +48,8 @@ function MirrorSection({ label, headline, evidence, warm = false }: SectionProps
       <p className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
         {headline}
       </p>
-      <EvidenceText evidence={toEvidenceItem(evidence)} />
+      {/* EvidenceText normalizes internally via toEvidenceItem — no pre-normalization needed here */}
+      <EvidenceText evidence={evidence} />
     </motion.div>
   )
 }
@@ -76,19 +77,14 @@ function MirrorHeader({ name }: { name: string }) {
   )
 }
 
-function extractName(intro: string): string {
-  const match = intro.match(/^([A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ]+)/)
-  return match?.[1] ?? ''
-}
-
-export function MirrorContent({ snapshot }: MirrorContentProps) {
+export function MirrorContent({ snapshot, userName = '' }: MirrorContentProps) {
   const t = useTranslations('espelho')
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [regenerateError, setRegenerateError] = useState<string | null>(null)
   const { mirror } = snapshot
 
-  const personName = extractName(mirror.intro)
+  const personName = userName || mirror.intro.match(/^([A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ]+)/)?.[1] || ''
 
   const handleRegenerate = async () => {
     setLoading(true)

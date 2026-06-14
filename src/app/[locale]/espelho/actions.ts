@@ -2,15 +2,14 @@
 
 import { createServerClient } from '@/lib/db/supabase/server'
 import { saveMirrorFeedback } from '@/lib/db/mirror'
-import { getEntriesByIds } from '@/lib/db/entries'
-import type { Entry } from '@/types/entry'
+import { getEntriesByIds, type EvidenceEntry } from '@/lib/db/entries'
 
 export async function submitMirrorFeedback(snapshotId: string, resonated: boolean): Promise<void> {
   const supabase = await createServerClient()
   await saveMirrorFeedback(supabase, snapshotId, { resonated })
 }
 
-export async function getEvidenceEntries(entryIds: string[]): Promise<Entry[]> {
+export async function getEvidenceEntries(entryIds: string[]): Promise<EvidenceEntry[]> {
   if (entryIds.length === 0) return []
 
   const supabase = await createServerClient()

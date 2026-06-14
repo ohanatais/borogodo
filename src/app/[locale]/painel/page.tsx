@@ -65,8 +65,8 @@ export default async function PainelPage() {
           </div>
         )}
 
-        {/* Mobile: mini timeline after main content */}
-        {data.entryCount > 0 && data.timelineEntries.length > 0 && (
+        {/* Mobile: mini timeline after main content (MiniTimeline returns null for empty entries) */}
+        {data.entryCount > 0 && (
           <div className="md:hidden mt-4 px-4">
             <MiniTimeline entries={data.timelineEntries} />
           </div>
