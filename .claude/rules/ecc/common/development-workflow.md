@@ -15,20 +15,24 @@ The Feature Implementation Workflow describes the development pipeline: research
    - Prefer adopting or porting a proven approach over writing net-new code when it meets the requirement.
 
 1. **Plan First**
-   - Use **planner** agent to create implementation plan
-   - Generate planning docs before coding: PRD, architecture, system_design, tech_doc, task_list
+   - Use `/speckit-plan` + `/speckit-tasks` to create the implementation plan and
+     task breakdown (covers PRD, architecture, design artifacts, task list)
+   - For UI work, run `/impeccable shape` before coding
    - Identify dependencies and risks
    - Break down into phases
 
 2. **TDD Approach**
-   - Use **tdd-guide** agent
    - Write tests first (RED)
    - Implement to pass tests (GREEN)
    - Refactor (IMPROVE)
    - Verify 80%+ coverage
+   - See [testing.md](testing.md) for structure and naming conventions
 
 3. **Code Review**
-   - Use **code-reviewer** agent immediately after writing code
+   - Run `/code-review low` (or `medium`/`high`) immediately after writing code
+   - For React/Next.js changes, check against `vercel-react-best-practices` and
+     `vercel-composition-patterns`
+   - For Supabase changes, check against `supabase-postgres-best-practices`
    - Address CRITICAL and HIGH issues
    - Fix MEDIUM issues when possible
 

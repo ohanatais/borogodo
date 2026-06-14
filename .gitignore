@@ -49,6 +49,10 @@ yarn-error.log*
 .claude/.credentials
 .claude/settings.local.json
 
+# Claude Code — skills/agents de terceiros: ferramenta local, não versionar
+.claude/skills/
+.claude/agents/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
