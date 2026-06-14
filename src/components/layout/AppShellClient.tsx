@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Sparkles, GitCommitVertical, PenLine } from 'lucide-react'
+import { Home, Sparkles, GitCommitVertical, PenLine, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
 import { Logo } from '@/components/ui/Logo'
@@ -110,6 +110,14 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
               </p>
               <LogoutButton />
             </div>
+            <Link
+              href="/configuracoes"
+              aria-label="Configurações"
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              <Settings size={16} />
+            </Link>
           </div>
         </div>
       </aside>
@@ -122,13 +130,14 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
           style={{ height: '60px', background: 'var(--card)', borderColor: 'var(--border)' }}
         >
           <Logo variant="light" size="sm" />
-          <div
+          <Link
+            href="/configuracoes"
+            aria-label="Configurações"
             className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
             style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-            aria-hidden="true"
           >
             {userName.charAt(0).toUpperCase()}
-          </div>
+          </Link>
         </header>
 
         {/* Page content */}

@@ -295,5 +295,53 @@
     "sheet": {
       "closeAriaLabel": "Fechar"
     }
+  },
+  "configuracoes": {
+    "title": "Configurações",
+    "identity": {
+      "title": "Identidade",
+      "name": "Nome",
+      "email": "E-mail",
+      "emailHint": "O e-mail não pode ser alterado aqui.",
+      "photoLabel": "Foto de perfil",
+      "photoChange": "Trocar foto",
+      "photoError": {
+        "size": "Foto muito grande (máx 5 MB).",
+        "type": "Formato inválido. Use JPEG, PNG ou WebP."
+      },
+      "save": "Salvar",
+      "saved": "Salvo!",
+      "error": "Erro ao salvar. Tente de novo."
+    },
+    "links": {
+      "title": "Links profissionais",
+      "linkedin": "LinkedIn",
+      "linkedinPlaceholder": "linkedin.com/in/seu-perfil",
+      "github": "GitHub",
+      "githubPlaceholder": "github.com/seu-usuario",
+      "save": "Salvar",
+      "saved": "Salvo!",
+      "error": "Erro ao salvar. Tente de novo."
+    }
+  },
+  "bemvindo": {
+    "step1": {
+      "headline": "Olá, {nome}.",
+      "sub": "Aqui é onde o seu trabalho vira clareza.",
+      "promise": "Você me conta o que fez. Eu revelo o que isso diz sobre quem você é.",
+      "cta": "Vamos começar"
+    },
+    "loop": {
+      "promptInicial": "Me conta a última coisa relevante que você fez no trabalho.",
+      "placeholder": "Ex: liderei a migração de um sistema crítico, que reduziu os erros em 40%...",
+      "cta": "Contar",
+      "ctaLinkedin": "Importar PDF do LinkedIn",
+      "reading": "Lendo o que você me contou...",
+      "evaluating": "Avaliando o que aprendi...",
+      "generating": "Criando seu espelho...",
+      "ctaFinal": "Ver meu espelho completo",
+      "retry": "Tentar de novo",
+      "errorGeneric": "Algo deu errado. Tente de novo."
+    }
   }
 }
