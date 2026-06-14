@@ -74,8 +74,9 @@ describe('PainelPage', () => {
     const jsx = await PainelPage()
     render(jsx)
 
-    // BorogodoCard empty state renders t('forming') and t('formingSubtitle')
-    expect(screen.getByText('forming')).toBeInTheDocument()
+    // BorogodoCard empty state: h2 with formingOf + name + formingSuffix, plus formingSubtitle
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading.textContent).toMatch(/formingOf/)
     expect(screen.getByText('formingSubtitle')).toBeInTheDocument()
   })
 })

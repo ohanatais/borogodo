@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { MacroCategory, SkillTier } from '@/types/mirror'
 import { SkillTierItem } from './SkillTierItem'
@@ -33,16 +34,13 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
   }
 
   return (
-    <div className="mt-8">
-      <p
-        className="text-xs font-semibold uppercase tracking-widest mb-4"
-        style={{ color: 'var(--muted-foreground)' }}
-      >
+    <div>
+      <p className="text-sm font-semibold mb-4" style={{ color: 'var(--muted-foreground)' }}>
         {t('title')}
       </p>
 
-      {/* Desktop: abas horizontais */}
-      <div className="hidden md:block">
+      {/* Desktop lg+: horizontal tabs */}
+      <div className="hidden lg:block">
         <div
           role="tablist"
           className="flex gap-0 border-b mb-4 overflow-x-auto"
@@ -60,7 +58,7 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
               type="button"
               onClick={() => setActiveIndex(i)}
               onKeyDown={(e) => handleKeyDown(e, i)}
-              className="shrink-0 px-4 min-h-[44px] text-sm font-medium transition-colors"
+              className="shrink-0 px-3.5 py-2.5 min-h-[44px] text-sm font-medium transition-colors duration-200"
               style={{
                 color: i === activeIndex ? 'var(--color-primary)' : 'var(--muted-foreground)',
                 borderBottom: i === activeIndex ? '2px solid var(--color-primary)' : '2px solid transparent',
@@ -71,13 +69,10 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
               {cat.name}
               {cat.skills.length > 0 && (
                 <span
-                  className="ml-1.5 text-xs rounded-full px-1.5 py-0.5"
-                  style={{
-                    background: i === activeIndex ? 'var(--color-primary)' : 'var(--border)',
-                    color: i === activeIndex ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
-                  }}
+                  className="ml-1.5 text-xs"
+                  style={{ color: i === activeIndex ? 'var(--color-primary)' : 'var(--muted-foreground)', opacity: 0.7 }}
                 >
-                  {cat.skills.length}
+                  · {cat.skills.length}
                 </span>
               )}
             </button>
@@ -99,44 +94,63 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
         </div>
       </div>
 
-      {/* Mobile: accordion nativo */}
-      <div className="md:hidden space-y-2">
-        {categories.map((cat) => (
-          <details
-            key={cat.name}
-            className="rounded-lg border"
-            style={{ borderColor: 'var(--border)' }}
-          >
-            <summary
-              className="flex items-center justify-between px-4 py-3 cursor-pointer text-sm font-medium select-none list-none"
-              style={{ color: 'var(--foreground)' }}
+      {/* Mobile: accordion */}
+      <div className="lg:hidden space-y-2">
+        {categories.map((cat, i) => {
+          const isOpen = activeIndex === i
+          return (
+            <div
+              key={cat.name}
+              className="rounded-xl border overflow-hidden"
+              style={{ borderColor: 'var(--border)' }}
             >
-              <span>
-                {cat.name}
-                {cat.skills.length > 0 && (
-                  <span
-                    className="ml-1.5 text-xs rounded-full px-1.5 py-0.5"
-                    style={{ background: 'var(--border)', color: 'var(--muted-foreground)' }}
-                  >
-                    {cat.skills.length}
-                  </span>
-                )}
-              </span>
-              <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                ›
-              </span>
-            </summary>
-            <div className="px-4 pb-3">
-              {cat.skills.map((skill) => (
-                <SkillTierItem
-                  key={skill.name}
-                  skill={skill}
-                  tierLabel={t(`tier.${skill.tier as SkillTier}`)}
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={`accordion-${i}`}
+                id={`accordion-header-${i}`}
+                onClick={() => setActiveIndex(isOpen ? -1 : i)}
+                className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left"
+                style={{ background: 'transparent' }}
+              >
+                <span className="text-[15px] font-semibold" style={{ color: 'var(--foreground)' }}>
+                  {cat.name}
+                  {cat.skills.length > 0 && (
+                    <span className="ml-1.5 font-normal text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                      · {cat.skills.length}
+                    </span>
+                  )}
+                </span>
+                <ChevronDown
+                  size={18}
+                  aria-hidden="true"
+                  style={{
+                    color: 'var(--muted-foreground)',
+                    transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 200ms ease-out',
+                    flexShrink: 0,
+                  }}
                 />
-              ))}
+              </button>
+              {isOpen && (
+                <div
+                  id={`accordion-${i}`}
+                  role="region"
+                  aria-labelledby={`accordion-header-${i}`}
+                  className="px-4 pb-2"
+                >
+                  {cat.skills.map((skill) => (
+                    <SkillTierItem
+                      key={skill.name}
+                      skill={skill}
+                      tierLabel={t(`tier.${skill.tier as SkillTier}`)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          </details>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

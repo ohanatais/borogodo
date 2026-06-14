@@ -39,7 +39,7 @@ export function ProactiveInsightCard({ insight }: ProactiveInsightCardProps) {
   return (
     <section
       ref={cardRef}
-      className="mx-6 my-4 space-y-2 rounded-2xl border p-5"
+      className="mb-6 space-y-2 rounded-2xl border p-5"
       style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
     >
       <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
