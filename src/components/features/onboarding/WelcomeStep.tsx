@@ -18,7 +18,7 @@ export function WelcomeStep({ userName, onNext }: WelcomeStepProps) {
       exit={{ opacity: 0, y: -16 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
       className="flex flex-col items-center justify-center min-h-screen px-6 py-12 text-center gap-8"
-      style={{ background: 'var(--color-roxo-jambo)' }}
+      style={{ background: 'var(--color-primary)' }}
     >
       <div className="flex flex-col gap-4 max-w-md">
         <h1
@@ -45,7 +45,7 @@ export function WelcomeStep({ userName, onNext }: WelcomeStepProps) {
         type="button"
         onClick={onNext}
         className="px-8 py-3.5 rounded-full text-base font-semibold transition-opacity hover:opacity-90 active:opacity-75 min-w-[48px] min-h-[48px]"
-        style={{ background: 'oklch(97% 0.02 90)', color: 'var(--color-roxo-jambo)' }}
+        style={{ background: 'oklch(97% 0.02 90)', color: 'var(--color-primary)' }}
       >
         {t('cta')}
       </button>
