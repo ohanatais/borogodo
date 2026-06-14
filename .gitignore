@@ -52,3 +52,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# dados pessoais / fixtures sensíveis — NUNCA commitar (usar só anonimizado em docs/fixtures)
+/Ohana Lohmann - *.md
+/Profile*.pdf
