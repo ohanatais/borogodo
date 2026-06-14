@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { getEvidenceEntries } from '@/app/[locale]/espelho/actions'
+import { getEvidenceEntries } from '@/app/[locale]/(app)/espelho/actions'
 import { toEvidenceItem } from '@/types/mirror'
 import { truncate } from '@/lib/utils'
 import type { EvidenceEntry } from '@/lib/db/entries'
@@ -40,11 +40,34 @@ export function EvidenceText({ evidence }: EvidenceTextProps) {
     setOpen((prev) => !prev)
   }
 
-  return (
-    <div>
-      <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+  const bullets = ev.text
+    .split(/;\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+
+  const textContent =
+    bullets.length > 1 ? (
+      <ul className="text-sm space-y-1.5 list-none">
+        {bullets.map((b, i) => (
+          <li key={i} className="flex items-start gap-2">
+            <span
+              className="mt-[6px] w-1 h-1 rounded-full shrink-0"
+              style={{ background: 'var(--color-accent)' }}
+              aria-hidden="true"
+            />
+            <span style={{ color: 'var(--muted-foreground)' }}>{b}</span>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)', textAlign: 'justify' }}>
         {ev.text}
       </p>
+    )
+
+  return (
+    <div>
+      {textContent}
 
       {hasLinks && (
         <div className="mt-2">

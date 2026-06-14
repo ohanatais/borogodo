@@ -150,6 +150,25 @@
       "subtitle": "Tell me something you did at work — it can be small. Borogodó will start building your mirror from there."
     }
   },
+  "historico": {
+    "title": "O fio da sua carreira",
+    "subtitle": "Cada passo, com a evidência que ficou.",
+    "evidencias": "Evidências (em breve)",
+    "empty": "Nenhuma entrada com cargo e empresa ainda.",
+    "emptyHint": "Conte histórias com seu cargo e empresa e elas aparecem aqui."
+  },
+  "appNav": {
+    "painel": "Painel",
+    "espelho": "Espelho",
+    "historico": "Linha do Tempo",
+    "conteudo": "Conteúdo",
+    "verConta": "Ver conta",
+    "registrar": "Registrar",
+    "perguntar": "Perguntar",
+    "captureHint": "Conte o que você fez hoje...",
+    "askHint": "Pergunte algo sobre sua carreira...",
+    "send": "Enviar"
+  },
   "capture": {
     "composer": {
       "submitAriaLabel": "Send",

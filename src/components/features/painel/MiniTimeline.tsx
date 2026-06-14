@@ -1,8 +1,10 @@
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { TimelineEntry } from '@/lib/panel/getPanelData'
 
 interface MiniTimelineProps {
   entries: TimelineEntry[]
+  showLink?: boolean
 }
 
 function formatYear(dateStr: string | null): string | null {
@@ -11,7 +13,7 @@ function formatYear(dateStr: string | null): string | null {
   return isNaN(year) ? null : String(year)
 }
 
-export function MiniTimeline({ entries }: MiniTimelineProps) {
+export function MiniTimeline({ entries, showLink = true }: MiniTimelineProps) {
   const t = useTranslations('panel.timeline')
 
   if (entries.length === 0) return null
@@ -66,6 +68,16 @@ export function MiniTimeline({ entries }: MiniTimelineProps) {
           )
         })}
       </div>
+
+      {showLink && (
+        <Link
+          href="/historico"
+          className="block mt-4 text-xs font-medium transition-opacity hover:opacity-70"
+          style={{ color: 'var(--color-primary)' }}
+        >
+          {t('viewAll')} →
+        </Link>
+      )}
     </aside>
   )
 }

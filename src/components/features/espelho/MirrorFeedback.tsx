@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { submitMirrorFeedback } from '@/app/[locale]/espelho/actions'
+import { submitMirrorFeedback } from '@/app/[locale]/(app)/espelho/actions'
 
 interface MirrorFeedbackProps {
   snapshotId: string
