@@ -93,3 +93,12 @@ golden set) e 014 (drafts acumulados com voice_feedback)**.
 
 ## Notes
 - ~23 tasks. Migration mínima (`010`). UI leve — reusa as superfícies de 013/014.
+
+### WIP em andamento (registro — NÃO marcar como concluído sem verificar)
+Commit `d7f7362` ("wip(015): mini-bio + anti-clichê de bio") tocou parcialmente, sem conclusão
+verificada, as seguintes tasks. Ao retomar a 015, revisar cada uma e só então marcar `[x]`:
+- **T002** — `supabase/migrations/010_drafts_mini_bio.sql` criada (aplicação/teste não confirmados).
+- **T004** — `bannedTerms.ts` + `validateRuleset.ts` ganharam o assert anti-clichê de bio (parcial).
+- **T005** — golden set (`fixtures/goldenSet.ts` + `goldenSet.test.ts`) ampliado (parcial).
+- **T014–T017** — mini-bio: `miniBioDraftSchema`, `DraftFormat='mini_bio'`, opção no `GenerateSheet`
+  e tipos (`content.ts`) (parcial; prompt `prompts/miniBio.ts` e wiring de geração a confirmar).
