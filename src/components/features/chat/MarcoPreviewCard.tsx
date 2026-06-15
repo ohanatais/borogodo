@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Check } from 'lucide-react'
 import type { MarcoPreview } from '@/lib/ai/chat/answerCareerQuestion'
+import { formatDateBR } from '@/lib/utils'
 
 const FIELD_LABELS: Array<{ key: keyof MarcoPreview; label: string }> = [
   { key: 'what_i_did', label: 'Marco' },
@@ -86,7 +87,9 @@ export function MarcoPreviewCard({ marco, onDismiss }: MarcoPreviewCardProps) {
               <span className="font-medium" style={{ color: 'var(--muted-foreground)' }}>
                 {label}:{' '}
               </span>
-              <span style={{ color: 'var(--foreground)' }}>{value}</span>
+              <span style={{ color: 'var(--foreground)' }}>
+                {key === 'entry_date' ? formatDateBR(value) : value}
+              </span>
             </li>
           )
         })}

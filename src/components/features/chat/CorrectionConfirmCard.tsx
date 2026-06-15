@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Check, Trash2, RefreshCw } from 'lucide-react'
 import type { CorrectionAction } from '@/lib/ai/chat/answerCareerQuestion'
+import { formatDateBR } from '@/lib/utils'
 
 const FIELD_LABELS: Record<string, string> = {
   what_i_did: 'O que fiz',
@@ -140,7 +141,9 @@ export function CorrectionConfirmCard({ correction, onDismiss }: CorrectionConfi
               <span className="font-medium" style={{ color: 'var(--muted-foreground)' }}>
                 {FIELD_LABELS[key] ?? key}:{' '}
               </span>
-              <span style={{ color: 'var(--foreground)' }}>{value}</span>
+              <span style={{ color: 'var(--foreground)' }}>
+                {key === 'entry_date' ? formatDateBR(value) : value}
+              </span>
             </li>
           ))}
         </ul>

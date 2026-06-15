@@ -18,6 +18,7 @@ interface ChatOpenDetail {
     entityId?: string
   }
   prefillMessage?: string
+  mode?: 'registro'
 }
 
 type State = {
@@ -26,6 +27,7 @@ type State = {
   draft: string
   status: 'idle' | 'streaming' | 'error'
   context: ChatOpenDetail['context'] | null
+  mode: 'pergunta' | 'registro'
   pendingCorrection: CorrectionAction | null
   pendingMarco: MarcoPreview | null
   pendingAutoSend: string | null
@@ -59,6 +61,7 @@ function reducer(state: State, action: Action): State {
         ...state,
         open: true,
         context: newContext,
+        mode: action.payload.mode ?? 'pergunta',
         draft: '',
         messages: shouldReset ? [] : state.messages,
         pendingCorrection: shouldReset ? null : state.pendingCorrection,
@@ -76,6 +79,7 @@ function reducer(state: State, action: Action): State {
         messages: [],
         draft: '',
         status: 'idle',
+        mode: 'pergunta',
         pendingCorrection: null,
         pendingMarco: null,
         context: null,
@@ -151,6 +155,7 @@ const initialState: State = {
   draft: '',
   status: 'idle',
   context: null,
+  mode: 'pergunta',
   pendingCorrection: null,
   pendingMarco: null,
   pendingAutoSend: null,
@@ -302,6 +307,7 @@ export function ChatSheet() {
 
   const isEmpty = state.messages.length === 0
   const isCorrectionMode = state.context?.type === 'entry'
+  const isRegistroMode = state.mode === 'registro'
   // Suggestions don't make sense in correction/espelho context: the user needs to
   // type their own free-form correction, not pick a pre-canned response.
   const suggestionsEnabled = state.context?.type !== 'entry' && state.context?.type !== 'espelho'
@@ -340,7 +346,7 @@ export function ChatSheet() {
           >
             <div className="flex items-center gap-2">
               <Dialog.Title className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-                {isCorrectionMode ? 'Corrigir entrada' : 'Perguntar sobre minha carreira'}
+                {isCorrectionMode ? 'Corrigir entrada' : isRegistroMode ? 'Registrar sobre minha carreira' : 'Perguntar sobre minha carreira'}
               </Dialog.Title>
               {isCorrectionMode && (
                 <span
@@ -431,7 +437,7 @@ export function ChatSheet() {
               onChange={(text) => dispatch({ type: 'SET_DRAFT', text })}
               onSubmit={handleSubmit}
               disabled={state.status === 'streaming'}
-              placeholder={isCorrectionMode ? 'O que está incorreto nesta entrada?' : 'Pergunte algo sobre sua carreira...'}
+              placeholder={isCorrectionMode ? 'O que está incorreto nesta entrada?' : isRegistroMode ? 'Adicione mais contexto ou confirme...' : 'Pergunte algo sobre sua carreira...'}
             />
           </div>
         </Dialog.Content>

@@ -185,7 +185,7 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
                 mode="registrar"
                 projectContext={projectContext}
                 onClearProjectContext={() => setProjectContext(null)}
-                onCapture={(content) => setActiveCapture({ kind: 'text', content })}
+                onCapture={(content) => openChatSheet({ prefillMessage: content, mode: 'registro' })}
               />
               <FileButton
                 accept=".pdf"
@@ -233,7 +233,7 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
                 mode="registrar"
                 projectContext={projectContext}
                 onClearProjectContext={() => setProjectContext(null)}
-                onCapture={(content) => setActiveCapture({ kind: 'text', content })}
+                onCapture={(content) => openChatSheet({ prefillMessage: content, mode: 'registro' })}
               />
             </div>
             <FileButton

@@ -45,7 +45,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, placeholder }: 
         rows={1}
         disabled={disabled}
         aria-label="Campo de pergunta sobre sua carreira"
-        className="flex-1 resize-none text-sm outline-none bg-transparent leading-snug min-h-[24px] max-h-[120px] transition-opacity"
+        className="flex-1 resize-none text-sm outline-none focus-visible:shadow-none bg-transparent leading-snug min-h-[24px] max-h-[120px] transition-opacity"
         style={{ color: 'var(--foreground)', opacity: disabled ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'text' }}
       />
       <button

@@ -117,15 +117,20 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful, showSuggest
       </div>
 
       {!isUser && collapsedCitations.length > 0 && !message.isStreaming && (
-        <div className="flex flex-wrap gap-1 pl-1 max-w-[85%]">
-          {collapsedCitations.map((c, i) => (
-            <CitationChip
-              key={c.entryId}
-              citation={c}
-              index={i}
-              count={c.count}
-            />
-          ))}
+        <div className="flex flex-col gap-1 pl-1 max-w-[85%]">
+          <span className="text-[10px] font-medium" style={{ color: 'var(--muted-foreground)' }}>
+            Fontes
+          </span>
+          <div className="flex flex-wrap gap-1">
+            {collapsedCitations.map((c, i) => (
+              <CitationChip
+                key={c.entryId}
+                citation={c}
+                index={i}
+                count={c.count}
+              />
+            ))}
+          </div>
         </div>
       )}
 

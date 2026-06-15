@@ -104,7 +104,7 @@ function buildFileRequest(file: File): Request {
   formData.append('kind', 'file')
   formData.append('file', file)
 
-  return { formData: async () => formData } as unknown as Request
+  return { formData: async () => formData, headers: new Headers() } as unknown as Request
 }
 
 function buildPDFFile(name: string, sizeInBytes: number): File {
