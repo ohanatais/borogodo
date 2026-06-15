@@ -86,6 +86,18 @@ describe('POST /api/content/generate', () => {
     expect(body.error).toBe('generation_failed')
   })
 
+  it('US2: reusa o mesmo motor para resumo de impacto a partir de uma entrada', async () => {
+    const { POST } = await import('../route')
+    const res = await POST(
+      makeRequest({ format: 'impact_summary', seedType: 'entry', seedRef: 'entry-123' })
+    )
+    expect(res.status).toBe(200)
+    expect(mockLoadSeed).toHaveBeenCalledWith(expect.anything(), 'user-1', 'entry', 'entry-123')
+    expect(mockGenerateDraft).toHaveBeenCalledWith(
+      expect.objectContaining({ format: 'impact_summary' })
+    )
+  })
+
   it('não chama o motor quando o seed não existe (sem custo de IA)', async () => {
     mockLoadSeed.mockResolvedValue(null)
     const { POST } = await import('../route')
