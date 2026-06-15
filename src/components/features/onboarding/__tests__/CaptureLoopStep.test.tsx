@@ -81,8 +81,7 @@ describe('CaptureLoopStep', () => {
       fireEvent.click(screen.getByRole('button', { name: 'cta' }))
     })
 
-    // evaluating key → 'evaluating'
-    await waitFor(() => expect(screen.getByText('evaluating')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Avaliando o que já temos...')).toBeInTheDocument())
   })
 
   it('shows error message on capture API failure', async () => {

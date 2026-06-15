@@ -91,14 +91,14 @@ describe('POST /api/mirror/generate', () => {
     expect(mockUpdate).not.toHaveBeenCalled()
   })
 
-  it('500: espelho gerado mas falha ao marcar onboarding — surfaceia o erro', async () => {
+  it('200: espelho retornado mesmo quando marcar onboarding falha (fire-and-forget)', async () => {
     mockEq.mockResolvedValue({ error: { message: 'rls denied' } })
 
     const response = await POST()
     const body = await response.json()
 
-    expect(response.status).toBe(500)
-    expect(body.error).toBe('Algo deu errado ao gerar seu espelho. Tenta de novo?')
+    expect(response.status).toBe(200)
+    expect(body.mirror).toEqual(MIRROR)
     expect(mockGenerateAndSaveMirror).toHaveBeenCalled()
   })
 })

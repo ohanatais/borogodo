@@ -41,8 +41,8 @@ describe('HistoricoTimeline', () => {
   it('renders empty state when no companies', () => {
     const data: HistoricoData = { companies: [] }
     render(<HistoricoTimeline data={data} activeProject={null} onSelectProject={noop} onCloseProject={noop} onStartCapture={noop} />)
-    expect(screen.getByText(/Nenhuma entrada/)).toBeInTheDocument()
-    expect(screen.getByText(/Conte histórias/)).toBeInTheDocument()
+    expect(screen.getByText(/Seu fio ainda está em branco/)).toBeInTheDocument()
+    expect(screen.getByText(/Conte uma história/)).toBeInTheDocument()
   })
 
   it('does not render timeline list when empty', () => {
