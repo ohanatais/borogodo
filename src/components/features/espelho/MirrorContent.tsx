@@ -247,7 +247,7 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
               className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
               style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
             >
-              <RefreshCw size={13} />
+              <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
               {loading ? t('regenerating') : t('regenerate')}
             </button>
             {!loading && !regenerateError && (
@@ -256,7 +256,7 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
               </p>
             )}
             {regenerateError && (
-              <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+              <p className="text-xs font-medium" style={{ color: 'var(--destructive)' }}>
                 {regenerateError}
               </p>
             )}

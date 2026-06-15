@@ -185,6 +185,7 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
                 mode="registrar"
                 projectContext={projectContext}
                 onClearProjectContext={() => setProjectContext(null)}
+                onCapture={(content) => setActiveCapture({ kind: 'text', content })}
               />
               <FileButton
                 accept=".pdf"
@@ -232,6 +233,7 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
                 mode="registrar"
                 projectContext={projectContext}
                 onClearProjectContext={() => setProjectContext(null)}
+                onCapture={(content) => setActiveCapture({ kind: 'text', content })}
               />
             </div>
             <FileButton

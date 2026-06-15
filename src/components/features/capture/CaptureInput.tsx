@@ -14,6 +14,7 @@ interface CaptureInputProps {
   mode: 'registrar' | 'perguntar'
   projectContext?: ProjectContext | null
   onClearProjectContext?: () => void
+  onCapture?: (content: string) => void
 }
 
 export function CaptureInput({
@@ -21,6 +22,7 @@ export function CaptureInput({
   mode,
   projectContext,
   onClearProjectContext,
+  onCapture,
 }: CaptureInputProps) {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,6 +38,15 @@ export function CaptureInput({
   async function handleSubmit() {
     const trimmed = text.trim()
     if (!trimmed || loading) return
+
+    // When parent provides onCapture, delegate entirely (e.g. to open CaptureConversation
+    // which handles the API call + reflection follow-up flow).
+    if (onCapture) {
+      setText('')
+      onClearProjectContext?.()
+      onCapture(trimmed)
+      return
+    }
 
     setLoading(true)
     setError(null)
