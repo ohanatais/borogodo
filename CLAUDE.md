@@ -5,7 +5,7 @@ completo de produto, stack e processo de desenvolvimento está em `.claude/CLAUD
 
 ## Status do desenvolvimento
 
-Features mergeadas em `main` (até PR #18):
+Features mergeadas em `main` (até PR #21):
 - **001-landing-page** — landing page pública, design system e i18n
 - **002-user-auth** — autenticação (Google OAuth + e-mail/senha), painel protegido por middleware
 - **003-capture-pipeline** — captura de texto e PDF/LinkedIn, extração via IA com Zod
@@ -15,12 +15,20 @@ Features mergeadas em `main` (até PR #18):
 - **007-painel-redesign** — BorogodoCard, trajetória em destaque, mini timeline
 - **008-historico-nav** — AppShell com navegação, Linha do Tempo (`/historico`)
 - **009-perfil-onboarding** — Central de Configurações (`/configuracoes`) + onboarding WOW/AHA
+- **010-produto-polish** — 17 itens de refinamento de UX/identidade/bugs
+- **011-skills-robustez** — robustez de skills (PR #20)
+- **012-chat** — Q&A com streaming SSE, correção/marco guiado, discovery (PR #21)
 
 <!-- SPECKIT START -->
-Current feature: **010-produto-polish** (branch: `010-produto-polish`)
-Tasks: [specs/010-produto-polish/tasks.md](specs/010-produto-polish/tasks.md)
+Current feature: **013-motor-de-voz** (branch: `013-motor-de-voz`) — **em planejamento**
+Spec: [specs/013-motor-de-voz/spec.md](specs/013-motor-de-voz/spec.md) ·
+Tasks: [specs/013-motor-de-voz/tasks.md](specs/013-motor-de-voz/tasks.md)
 
-17 itens de refinamento resultantes de audit completo (verify) em 2026-06-14.
-Executar em ordem: Fase 1 (T01–T03) → Fase 2 (T04–T06) → Fase 3 (T07–T10) →
-Fase 4 (T11–T14) → Fase 5 (T15–T17). Ver tasks.md para detalhes de cada item.
+Primeiro elo do bloco de Geração de Conteúdo (Presença) — epic plan em
+`docs/conteudo-plano-de-acao.md`. Trava a fundação compartilhada (`drafts`,
+`voice_profile` JSONB, `src/lib/ai/content/`, golden set) e os formatos âncora
+(post + resumo de impacto). Artefatos speckit completos (spec/plan/tasks/shape)
+prontos; **implementação ainda não iniciada** (decisão: planejar e codar em sessões
+separadas). Kickoff resolvido: nav "Presença" (rota `/presenca` entra na 014),
+`voice_profile` como JSONB, próxima migration `009`.
 <!-- SPECKIT END -->
