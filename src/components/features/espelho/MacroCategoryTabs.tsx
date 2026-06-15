@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { MacroCategory, SkillTier } from '@/types/mirror'
 import { SkillTierItem } from './SkillTierItem'
-import { TierLegend } from './TierLegend'
+import { TierSummaryCards } from './TierSummaryCards'
 import { SectionLabel } from '@/components/ui/SectionLabel'
 
 const RECRUITER_CONTEXT: Partial<Record<string, string>> = {
@@ -26,6 +26,12 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   const visibleCategories = categories.filter((cat) => cat.skills.length > 0)
+  const allSkills = visibleCategories.flatMap((c) => c.skills)
+  const tierCounts = {
+    comprovadas: allSkills.filter((s) => s.tier === 'Comprovada').length,
+    consistentes: allSkills.filter((s) => s.tier === 'Consistente').length,
+    emergentes: allSkills.filter((s) => s.tier === 'Emergente').length,
+  }
 
   if (visibleCategories.length === 0) {
     return (
@@ -58,7 +64,11 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
   return (
     <div>
       <SectionLabel>{t('title')}</SectionLabel>
-      <TierLegend />
+      <TierSummaryCards
+        comprovadas={tierCounts.comprovadas}
+        consistentes={tierCounts.consistentes}
+        emergentes={tierCounts.emergentes}
+      />
 
       {/* Desktop lg+: horizontal tabs */}
       <div className="hidden lg:block">

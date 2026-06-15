@@ -6,6 +6,10 @@ vi.mock('../SkillTierItem', () => ({
   SkillTierItem: ({ skill }: { skill: { name: string } }) => <div data-testid="skill-item">{skill.name}</div>,
 }))
 
+vi.mock('../TierSummaryCards', () => ({
+  TierSummaryCards: () => <div data-testid="tier-summary-cards" />,
+}))
+
 import { MacroCategoryTabs } from '../MacroCategoryTabs'
 
 const CATEGORIES: MacroCategory[] = [

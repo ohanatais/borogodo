@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { PanelMirror } from '@/lib/panel/getPanelData'
+import { TIER_STYLE } from '@/components/features/espelho/tierStyles'
 
 interface BorogodoCardProps {
   name: string
@@ -18,6 +19,7 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
 
   const hasData = mirror !== null
   const specialties = mirror?.strengthThemes?.slice(0, 5) ?? []
+  const growthCount = (mirror?.skillSummary?.emergentes ?? 0) + (mirror?.skillSummary?.consistentes ?? 0)
 
   return (
     <section
@@ -87,8 +89,8 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {mirror.skillSummary.comprovadas > 0 && (
                   <span
-                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: 'oklch(98% 0.01 320 / 0.3)', color: 'var(--color-primary-fg)' }}
+                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={{ background: TIER_STYLE.Comprovada.chipBg, color: TIER_STYLE.Comprovada.chipText }}
                   >
                     <CheckCircle2 size={10} aria-hidden="true" />
                     {t('skills.comprovadas', { count: mirror.skillSummary.comprovadas })}
@@ -96,16 +98,16 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
                 )}
                 {mirror.skillSummary.consistentes > 0 && (
                   <span
-                    className="text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: 'oklch(98% 0.01 320 / 0.18)', color: 'var(--color-primary-fg)' }}
+                    className="text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={{ background: TIER_STYLE.Consistente.chipBg, color: TIER_STYLE.Consistente.chipText }}
                   >
                     {t('skills.consistentes', { count: mirror.skillSummary.consistentes })}
                   </span>
                 )}
                 {mirror.skillSummary.emergentes > 0 && (
                   <span
-                    className="text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: 'oklch(98% 0.01 320 / 0.1)', color: 'var(--color-primary-fg)', opacity: 0.8 }}
+                    className="text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={{ background: TIER_STYLE.Emergente.chipBg, color: TIER_STYLE.Emergente.chipText }}
                   >
                     {t('skills.emergentes', { count: mirror.skillSummary.emergentes })}
                   </span>
@@ -129,7 +131,9 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
             className="inline-flex items-center gap-1.5 text-sm font-semibold transition-opacity hover:opacity-70"
             style={{ color: 'var(--color-primary-fg)' }}
           >
-            {t('viewMirror')}
+            {growthCount > 0
+              ? t('viewMirrorGrowth', { count: growthCount })
+              : t('viewMirror')}
           </Link>
         </>
       ) : (
