@@ -23,3 +23,17 @@ export class NoExtractableContentError extends Error {
     this.name = 'NoExtractableContentError'
   }
 }
+
+/**
+ * Erro de domínio: a geração de conteúdo falhou nas regras (Zod ou ruleset anti-IA) mesmo após
+ * a regeneração única. Tipado para a rota mapear 422 sem acoplar texto (013-motor-de-voz).
+ */
+export class GenerationFailedError extends Error {
+  readonly violations: number[]
+
+  constructor(violations: number[] = []) {
+    super('Falha ao gerar conteúdo dentro das regras')
+    this.name = 'GenerationFailedError'
+    this.violations = violations
+  }
+}
