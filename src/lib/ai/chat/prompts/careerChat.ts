@@ -118,7 +118,12 @@ Se coletou informações suficientes para um marco, adicione o campo "marco":
 
 Regras do bloco:
 - Sempre presente, nunca omitir.
-- "followups": exatamente 2 perguntas de acompanhamento relevantes.
+- "followups": exatamente 2 frases escritas na VOZ DO USUÁRIO — coisas que ele poderia
+  querer dizer ou perguntar a seguir. Nunca escreva perguntas que você (assistente) faria
+  ao usuário. Exemplos corretos: "Quero ver as entradas que geraram essa conclusão",
+  "Pode me explicar o que significa X?", "Isso está errado, o certo é Y".
+  Exemplos ERRADOS (perspectiva do assistente): "Qual parte está incorreta?",
+  "Você tem algum número para ilustrar?".
 - Campos null ou desconhecidos: omita-os (não escreva null).
 - entryId em "correction" deve ser o id exato da entrada (formato uuid).
 - "action" em correction: "update" (corrigir campos), "delete" (remover entrada), "enrich" (adicionar contexto).`)

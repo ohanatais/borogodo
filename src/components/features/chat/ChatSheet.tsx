@@ -302,6 +302,9 @@ export function ChatSheet() {
 
   const isEmpty = state.messages.length === 0
   const isCorrectionMode = state.context?.type === 'entry'
+  // Suggestions don't make sense in correction/espelho context: the user needs to
+  // type their own free-form correction, not pick a pre-canned response.
+  const suggestionsEnabled = state.context?.type !== 'entry' && state.context?.type !== 'espelho'
 
   return (
     <Dialog.Root open={state.open} onOpenChange={(open) => !open && dispatch({ type: 'CLOSE' })}>
@@ -395,7 +398,7 @@ export function ChatSheet() {
                       message={msg}
                       onSuggestionClick={handleSuggestionClick}
                       onHelpful={(helpful) => dispatch({ type: 'SET_HELPFUL', id: msg.id, helpful })}
-                      showSuggestions={i === lastAssistantIdx}
+                      showSuggestions={suggestionsEnabled && i === lastAssistantIdx}
                     />
                   ))
                 })()}
