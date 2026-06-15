@@ -379,3 +379,70 @@ abrangente e descobrir em produção que ela reprova o output bom. A lição que
 pergunta "qual falha eu tolero?", escope a regra para alta precisão, e deixe uma suíte de exemplos bons
 ser a rede que avisa quando você apertou demais. Guard rail determinístico é um contrato sobre o que ele
 garante, não uma muralha.
+
+---
+
+## 2026-06-15 — O gargalo de retenção estava no input, não no output
+
+**O que aconteceu:** num discovery de retenção (sobre Hooked e pesquisa de mercado), eu vinha planejando
+o bloco de conteúdo como três features do lado "Usar" (gerar post, hub, refino). Ao mapear o loop de
+retenção, ficou claro um paradoxo que os próprios docs carregavam: o PRD diz que a retenção é "hábito
+semanal de captura", mas o reposicionamento diz que o valor é episódico (entrevista, review). As duas
+coisas brigam — não se sustenta disciplina semanal por um payoff que só chega em meses. E a conclusão que
+eu não tinha visto: eu estava construindo três features no lado do output, enquanto o elo fraco do loop
+(alimentar dados) estava do jeito que estava desde a captura inicial. Se a alimentação seca, todo o motor
+gera em cima de dado velho — a mesma crítica que faço ao Taplio.
+
+**O que aprendi:** num produto cujo valor é episódico, a recompensa atrasada é o elo fraco do loop Hooked.
+A correção não é forçar hábito (vira a "vitamina" que a gente já decidiu não ser), é dupla: encurtar a
+recompensa pra ser imediata (um aha por captura, ver a pilha crescer) e prender o gatilho à rotina que já
+existe, em vez de criar um ritual novo. E, estrategicamente: o maior ROI de retenção estava no input
+(captura), não em mais um formato de output.
+
+**Por que importa:** é fácil investir onde o trabalho é visível (gerar conteúdo bonito) e negligenciar o
+cano que alimenta tudo. Bom material de `product-thinking`: antes de sofisticar o output, pergunte se o
+que abastece ele está vivo.
+
+---
+
+## 2026-06-15 — Uma mecânica de engajamento tem dois abismos opostos: fofo e genérico
+
+**O que aconteceu:** explorando uma mecânica de "ver sua atividade crescer" (estilo constelação de
+faíscas), meu medo foi "isso não vai ficar infantil e afastar uns usuários?". O reflexo seria deixar tudo
+sóbrio. Mas ao desenhar a versão sóbria, apareceu o risco oposto e igualmente fatal: ela beirava o "SaaS
+cinza de 2022" — genérico, sem identidade, exatamente o que a marca proíbe tanto quanto proíbe o infantil.
+A saída não foi nenhum dos extremos: foi um híbrido (grade estilo GitHub, que empresta credibilidade, com
+a faísca/paleta/serifa nos detalhes), e a decisão de validar com as personas reais, não com o meu gosto.
+
+**O que aprendi:** quando você adiciona uma camada de deleite/gamificação a um produto sério, existem dois
+abismos, não um. Cair no fofo afasta o usuário cético (o Bruno); cair no genérico mata a identidade, que é
+a única defesa contra "parecer IA". Nomear os dois abismos foi o que destravou o meio-termo. E mecânica
+visual só vira adulta quando é útil (navegar o tempo, filtrar) — quando é só "estrelinha pra dar dopamina",
+vira brinquedo.
+
+**Por que importa:** o instinto é mirar um perigo só ("não ficar infantil") e cair no outro sem perceber.
+Bom pra `product-thinking`: a marca existe pra andar no fio entre os dois abismos, e "validar com a persona,
+não com o meu gosto" vale especialmente quando eu (a fundadora) não sou o público-alvo médio.
+
+---
+
+## 2026-06-15 — Duas sessões de Claude na mesma pasta colidem (e o hook não sabe de quem é a mudança)
+
+**O que aconteceu:** eu estava rodando duas janelas do Claude Code no mesmo repositório — uma fazendo
+discovery comigo (só leitura + docs), outra implementando a feature em `src/` (eu tocando 013, 14 e 15 uma
+atrás da outra). A cada vez que a sessão de discovery tentava encerrar, um Stop hook bloqueava ("você mexeu
+em `src/` mas não atualizou o tasks.md") — só que aquela sessão não tinha tocado em `src/`. As mudanças
+eram da outra janela. As duas compartilham a mesma pasta no disco, então o hook olhava a árvore inteira e
+não tinha como saber de quem era a alteração. Confirmamos pelos timestamps (arquivos aparecendo segundo a
+segundo) e por haver dois processos `claude` rodando.
+
+**O que aprendi:** sessões de Claude Code numa mesma pasta dividem o working tree do git — então trocar de
+branch ou editar arquivos numa janela afeta a outra, e hooks de guardrail dão falso positivo numa sessão
+inocente. Discovery em paralelo é tranquilo (é leitura); o problema é duas sessões **escrevendo** ao mesmo
+tempo. Rodar features em série (uma fecha, a próxima abre) não colide; pra paralelizar de verdade, a
+ferramenta certa é `git worktree` (uma pasta por branch). E doc de discovery se commita isolado
+(`git add <arquivo>` específico), pra não ser varrido pro PR da feature errada.
+
+**Por que importa:** é um aprendizado central de `build-with-claude` pra quem usa mais de uma janela. O
+reflexo "abro vários chats e toco tudo em paralelo" parece produtivo e na real cria colisão silenciosa. A
+regra: uma feature/branch por pasta por vez; pra paralelo real, worktrees.
