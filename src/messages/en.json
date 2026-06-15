@@ -263,7 +263,7 @@
   },
   "presenca": {
     "use": "Use",
-    "basedOn": "Based on: {source}",
+    "basedOn": "Based on:",
     "generating": "Writing in your voice...",
     "regenerate": "Generate again",
     "angleLabel": "Angle",

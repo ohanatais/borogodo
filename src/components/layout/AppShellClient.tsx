@@ -8,6 +8,7 @@ import { CaptureInput } from '@/components/features/capture/CaptureInput'
 import { FileButton } from '@/components/features/capture/FileButton'
 import { CaptureConversation } from '@/components/features/capture/CaptureConversation'
 import { ChatSheet, openChatSheet } from '@/components/features/chat/ChatSheet'
+import { GenerateSheet } from '@/components/features/content/GenerateSheet'
 import type { CaptureInput as CapturePayload } from '@/types/capture'
 import { Logo } from '@/components/ui/Logo'
 import { LogoutButton } from '@/components/features/auth/LogoutButton'
@@ -286,6 +287,7 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
       )}
 
       <ChatSheet />
+      <GenerateSheet />
     </div>
   )
 }

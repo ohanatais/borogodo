@@ -374,7 +374,7 @@
   },
   "presenca": {
     "use": "Usar",
-    "basedOn": "Baseado em: {source}",
+    "basedOn": "Baseado em:",
     "generating": "Escrevendo na sua voz...",
     "regenerate": "Gerar de novo",
     "angleLabel": "Ângulo",

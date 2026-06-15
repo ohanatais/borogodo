@@ -1,0 +1,95 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { GenerationFailedError } from '@/lib/errors'
+
+const mockGetUser = vi.fn()
+vi.mock('@/lib/db/supabase/server', () => ({
+  createServerClient: vi.fn(async () => ({ auth: { getUser: mockGetUser } })),
+}))
+
+const mockLoadSeed = vi.fn()
+vi.mock('@/lib/ai/content/loadSeed', () => ({
+  loadSeedEvidence: (...args: unknown[]) => mockLoadSeed(...args),
+}))
+
+const mockGetVoiceProfile = vi.fn()
+vi.mock('@/lib/db/drafts', () => ({
+  getVoiceProfile: (...args: unknown[]) => mockGetVoiceProfile(...args),
+}))
+
+const mockGenerateDraft = vi.fn()
+vi.mock('@/lib/ai/content/generateDraft', () => ({
+  generateDraft: (...args: unknown[]) => mockGenerateDraft(...args),
+}))
+
+vi.mock('@/lib/log', () => ({ logger: { error: vi.fn(), info: vi.fn() } }))
+
+const VARIANTS = [
+  { angle: 'o aprendizado', body: 'Corpo um.', evidenceRefs: ['E1'] },
+  { angle: 'quem participou', body: 'Corpo dois.', evidenceRefs: ['E2'] },
+]
+
+function makeRequest(body: unknown): Request {
+  return new Request('http://localhost/api/content/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
+
+const VALID_BODY = { format: 'post', seedType: 'theme', seedRef: 'produto 0→1' }
+
+describe('POST /api/content/generate', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockLoadSeed.mockResolvedValue({ seedSummary: 'produto 0→1', evidence: [{ label: 'E1', text: 'fato' }] })
+    mockGetVoiceProfile.mockResolvedValue(null)
+    mockGenerateDraft.mockResolvedValue({ variants: VARIANTS })
+  })
+
+  it('devolve 200 com 2 variantes quando o motor gera com sucesso', async () => {
+    const { POST } = await import('../route')
+    const res = await POST(makeRequest(VALID_BODY))
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { variants: unknown[] }
+    expect(body.variants).toHaveLength(2)
+  })
+
+  it('devolve 401 quando não há sessão', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+    const { POST } = await import('../route')
+    const res = await POST(makeRequest(VALID_BODY))
+    expect(res.status).toBe(401)
+  })
+
+  it('devolve 400 quando o payload é inválido', async () => {
+    const { POST } = await import('../route')
+    const res = await POST(makeRequest({ seedType: 'theme' }))
+    expect(res.status).toBe(400)
+  })
+
+  it('devolve 404 quando o seed não é do usuário', async () => {
+    mockLoadSeed.mockResolvedValue(null)
+    const { POST } = await import('../route')
+    const res = await POST(makeRequest(VALID_BODY))
+    expect(res.status).toBe(404)
+    const body = (await res.json()) as { error: string }
+    expect(body.error).toBe('seed_not_found')
+  })
+
+  it('devolve 422 quando o motor falha no ruleset nas duas tentativas', async () => {
+    mockGenerateDraft.mockRejectedValue(new GenerationFailedError([2, 6]))
+    const { POST } = await import('../route')
+    const res = await POST(makeRequest(VALID_BODY))
+    expect(res.status).toBe(422)
+    const body = (await res.json()) as { error: string }
+    expect(body.error).toBe('generation_failed')
+  })
+
+  it('não chama o motor quando o seed não existe (sem custo de IA)', async () => {
+    mockLoadSeed.mockResolvedValue(null)
+    const { POST } = await import('../route')
+    await POST(makeRequest(VALID_BODY))
+    expect(mockGenerateDraft).not.toHaveBeenCalled()
+  })
+})
