@@ -84,6 +84,8 @@ export interface ContentSuggestion {
   seedRef: string
   seedSummary: string
   formats: DraftFormat[]
+  /** Presente só em `kind:'nudge'`: id do `content_opportunity` para marcar `seen` ao interagir. */
+  insightId?: string
 }
 
 /** Projeção de um `ProactiveInsight` do tipo `content_opportunity`, carregando a entrada-origem do nudge. */

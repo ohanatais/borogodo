@@ -62,4 +62,34 @@ describe('ProactiveInsightCard', () => {
     render(<ProactiveInsightCard insight={{ ...INSIGHT, seen: true }} />)
     expect(mockMarkSeen).not.toHaveBeenCalled()
   })
+
+  it('014: nudge content_opportunity NÃO marca seen ao aparecer (só ao interagir)', () => {
+    const nudge: ProactiveInsight = { ...INSIGHT, type: 'content_opportunity', headline: 'Lancei o app' }
+    render(<ProactiveInsightCard insight={nudge} />)
+    expect(screen.getByText('nudge.label')).toBeInTheDocument()
+    expect(screen.getByText('Lancei o app')).toBeInTheDocument()
+    expect(mockMarkSeen).not.toHaveBeenCalled()
+  })
+
+  it('014: clicar "Usar" no nudge abre a geração com a entrada e marca seen', () => {
+    const nudge: ProactiveInsight = {
+      ...INSIGHT,
+      type: 'content_opportunity',
+      headline: 'Lancei o app',
+      entry_ids: ['e-strong'],
+    }
+    render(<ProactiveInsightCard insight={nudge} />)
+
+    let detail: { seedRef?: string } | null = null
+    const handler = (e: Event) => {
+      detail = (e as CustomEvent<{ seedRef?: string }>).detail
+    }
+    window.addEventListener('borogodo:presenca-open', handler)
+    screen.getByText('nudge.cta').click()
+    window.removeEventListener('borogodo:presenca-open', handler)
+
+    expect(detail).not.toBeNull()
+    expect(detail!.seedRef).toBe('e-strong')
+    expect(mockMarkSeen).toHaveBeenCalledWith('insight-1')
+  })
 })
