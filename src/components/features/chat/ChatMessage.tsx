@@ -1,0 +1,71 @@
+'use client'
+
+import { CitationChip } from './CitationChip'
+import type { Citation } from '@/lib/ai/chat/answerCareerQuestion'
+
+export interface MessageData {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  citations?: Citation[]
+  suggestions?: string[]
+  isStreaming?: boolean
+}
+
+interface ChatMessageProps {
+  message: MessageData
+  onSuggestionClick: (suggestion: string) => void
+}
+
+export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
+  const isUser = message.role === 'user'
+
+  return (
+    <div className={`flex flex-col gap-1.5 ${isUser ? 'items-end' : 'items-start'}`}>
+      <div
+        className="max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed"
+        style={
+          isUser
+            ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)', borderBottomRightRadius: '4px' }
+            : { background: 'var(--card)', color: 'var(--foreground)', border: '1px solid var(--border)', borderBottomLeftRadius: '4px' }
+        }
+      >
+        {message.content || (message.isStreaming && <span className="opacity-50">...</span>)}
+        {message.isStreaming && message.content && (
+          <span
+            className="inline-block w-0.5 h-3.5 ml-0.5 rounded-sm animate-pulse align-text-bottom"
+            style={{ background: 'var(--color-primary)' }}
+          />
+        )}
+      </div>
+
+      {!isUser && message.citations && message.citations.length > 0 && !message.isStreaming && (
+        <div className="flex flex-wrap gap-1 pl-1 max-w-[85%]">
+          {message.citations.map((c, i) => (
+            <CitationChip key={c.entryId} citation={c} index={i} />
+          ))}
+        </div>
+      )}
+
+      {!isUser && message.suggestions && message.suggestions.length > 0 && !message.isStreaming && (
+        <div className="flex flex-col gap-1 pl-1 mt-1 max-w-[90%]">
+          {message.suggestions.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => onSuggestionClick(s)}
+              className="text-left text-xs px-3 py-1.5 rounded-xl transition-colors hover:opacity-80"
+              style={{
+                background: 'var(--color-lilas-nevoa)',
+                color: 'var(--color-primary)',
+                border: '1px solid var(--color-primary)',
+              }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

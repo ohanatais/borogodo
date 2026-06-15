@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
 import { FileButton } from '@/components/features/capture/FileButton'
 import { CaptureConversation } from '@/components/features/capture/CaptureConversation'
+import { ChatSheet, openChatSheet } from '@/components/features/chat/ChatSheet'
 import type { CaptureInput as CapturePayload } from '@/types/capture'
 import { Logo } from '@/components/ui/Logo'
 import { LogoutButton } from '@/components/features/auth/LogoutButton'
@@ -33,8 +34,6 @@ interface AppShellClientProps {
 
 export function AppShellClient({ userName, captureHint, children }: AppShellClientProps) {
   const pathname = usePathname()
-  const [captureMode, setCaptureMode] = useState<'registrar' | 'perguntar'>('registrar')
-  const [comingSoonVisible, setComingSoonVisible] = useState(false)
   const [activeCapture, setActiveCapture] = useState<CapturePayload | null>(null)
   const [projectContext, setProjectContext] = useState<{ name: string; company: string } | null>(null)
 
@@ -42,29 +41,15 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
     function handler(e: Event) {
       const detail = (e as CustomEvent<{ name: string; company: string }>).detail
       setProjectContext(detail)
-      setCaptureMode('registrar')
     }
     window.addEventListener('borogodo:capture-context', handler)
     return () => window.removeEventListener('borogodo:capture-context', handler)
   }, [])
 
-  function handleModeClick(m: 'registrar' | 'perguntar') {
-    if (m === 'perguntar') {
-      setComingSoonVisible(true)
-      setTimeout(() => setComingSoonVisible(false), 2500)
-      return
-    }
-    setCaptureMode(m)
-  }
-
   function isActive(path: string | null): boolean {
     if (!path) return false
     return pathname.includes(path)
   }
-
-  const inputPlaceholder = captureMode === 'registrar'
-    ? captureHint
-    : 'Pergunte algo sobre sua carreira...'
 
   return (
     <div className="flex min-h-screen" style={{ background: 'var(--color-creme)' }}>
@@ -174,47 +159,39 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
           }}
         >
           <div className="max-w-[980px] mx-auto px-6 pt-4 pb-5">
-            {comingSoonVisible && (
-              <p className="text-xs mb-2 text-center" style={{ color: 'var(--muted-foreground)' }}>
-                Em breve — estamos construindo isso.
-              </p>
-            )}
             <div className="flex items-center gap-3">
               {/* Toggle */}
               <div
                 className="flex items-center p-0.5 rounded-full shrink-0"
                 style={{ background: 'oklch(100% 0 0 / 0.7)' }}
               >
-                {(['registrar', 'perguntar'] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => handleModeClick(m)}
-                    className="text-xs px-3 py-1.5 rounded-full capitalize transition-all"
-                    style={
-                      captureMode === m
-                        ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }
-                        : { color: 'var(--muted-foreground)' }
-                    }
-                  >
-                    {m.charAt(0).toUpperCase() + m.slice(1)}
-                  </button>
-                ))}
+                <span
+                  className="text-xs px-3 py-1.5 rounded-full capitalize"
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+                >
+                  Registrar
+                </span>
+                <button
+                  type="button"
+                  onClick={() => openChatSheet()}
+                  className="text-xs px-3 py-1.5 rounded-full capitalize transition-all hover:opacity-80"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  Perguntar
+                </button>
               </div>
               <CaptureInput
-                placeholder={inputPlaceholder}
-                mode={captureMode}
+                placeholder={captureHint}
+                mode="registrar"
                 projectContext={projectContext}
                 onClearProjectContext={() => setProjectContext(null)}
               />
-              {captureMode === 'registrar' && (
-                <FileButton
-                  accept=".pdf"
-                  icon={Paperclip}
-                  ariaLabel="Carregar PDF ou CV"
-                  onFile={(file) => setActiveCapture({ kind: 'file', file })}
-                />
-              )}
+              <FileButton
+                accept=".pdf"
+                icon={Paperclip}
+                ariaLabel="Carregar PDF ou CV"
+                onFile={(file) => setActiveCapture({ kind: 'file', file })}
+              />
             </div>
           </div>
         </div>
@@ -234,38 +211,35 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
               className="flex items-center p-0.5 rounded-full shrink-0"
               style={{ background: 'oklch(100% 0 0 / 0.8)' }}
             >
-              {(['registrar', 'perguntar'] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => handleModeClick(m)}
-                  className="text-xs px-2.5 py-1 rounded-full transition-all"
-                  style={
-                    captureMode === m
-                      ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }
-                      : { color: 'var(--muted-foreground)' }
-                  }
-                >
-                  {m.charAt(0).toUpperCase() + m.slice(1)}
-                </button>
-              ))}
+              <span
+                className="text-xs px-2.5 py-1 rounded-full"
+                style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+              >
+                Registrar
+              </span>
+              <button
+                type="button"
+                onClick={() => openChatSheet()}
+                className="text-xs px-2.5 py-1 rounded-full transition-all hover:opacity-80"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                Perguntar
+              </button>
             </div>
             <div className="flex-1 min-w-0">
               <CaptureInput
-                placeholder={inputPlaceholder}
-                mode={captureMode}
+                placeholder={captureHint}
+                mode="registrar"
                 projectContext={projectContext}
                 onClearProjectContext={() => setProjectContext(null)}
               />
             </div>
-            {captureMode === 'registrar' && (
-              <FileButton
-                accept=".pdf"
-                icon={Paperclip}
-                ariaLabel="Carregar PDF ou CV"
-                onFile={(file) => setActiveCapture({ kind: 'file', file })}
-              />
-            )}
+            <FileButton
+              accept=".pdf"
+              icon={Paperclip}
+              ariaLabel="Carregar PDF ou CV"
+              onFile={(file) => setActiveCapture({ kind: 'file', file })}
+            />
           </div>
 
           {/* Row 2 — nav icons com labels */}
@@ -308,6 +282,8 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
           onResolved={() => setActiveCapture(null)}
         />
       )}
+
+      <ChatSheet />
     </div>
   )
 }
