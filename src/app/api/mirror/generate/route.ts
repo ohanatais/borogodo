@@ -28,7 +28,10 @@ export async function POST(): Promise<NextResponse> {
 
   try {
     const snapshot = await generateAndSaveMirror(supabase, user.id)
-    await markOnboardingCompleted(supabase, user.id)
+
+    markOnboardingCompleted(supabase, user.id).catch((err: unknown) => {
+      logger.error('markOnboardingCompleted failed', { message: errorMessage(err) })
+    })
 
     return NextResponse.json({ mirror: snapshot.mirror }, { status: 200 })
   } catch (error: unknown) {
@@ -51,9 +54,6 @@ async function markOnboardingCompleted(
     .eq('id', userId)
 
   if (error) {
-    // O snapshot já foi persistido; surfacemos a falha (500) para o cliente repetir
-    // em vez de deixar o usuário preso no onboarding sem sinal. Retry regera o espelho
-    // (idempotência aceitável no MVP: último snapshot vence) e tenta a flag de novo.
-    throw new Error('Não foi possível concluir o onboarding')
+    throw new Error(`markOnboardingCompleted: ${error.message}`)
   }
 }

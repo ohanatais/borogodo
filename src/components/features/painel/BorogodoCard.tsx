@@ -11,13 +11,11 @@ interface BorogodoCardProps {
   entryCount: number
 }
 
-const MIRROR_READY_THRESHOLD = 3
-
 export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCardProps) {
   const t = useTranslations('panel.borogodoCard')
   const firstName = name.trim().split(' ')[0] || name
 
-  const hasData = mirror !== null && entryCount >= MIRROR_READY_THRESHOLD
+  const hasData = mirror !== null
   const specialties = mirror?.strengthThemes?.slice(0, 5) ?? []
 
   return (
