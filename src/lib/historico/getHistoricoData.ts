@@ -2,24 +2,43 @@ import type { createServerClient } from '@/lib/db/supabase/server'
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 
-export interface HistoricoPosition {
+export interface EvidenceItem {
+  type: 'url' | 'image'
+  value: string
+  label?: string
+}
+
+export interface HistoricoEntry {
+  id: string
+  what_i_did: string
+  impact: string | null
+  metric: string | null
+  evidences: EvidenceItem[]
+}
+
+export interface HistoricoProject {
+  name: string
+  entries: HistoricoEntry[]
+}
+
+export interface RolePeriod {
   role_title: string
+  period_label: string
+  year_label: string
+}
+
+export interface HistoricoCompany {
   company: string
   company_initials: string
   company_tint: { bg: string; fg: string }
-  role_start: string | null
-  role_end: string | null
-  period_label: string
   year_label: string
-  entries: {
-    what_i_did: string
-    impact: string | null
-    metric: string | null
-  }[]
+  roles: RolePeriod[]
+  projects: HistoricoProject[]
+  highlight_bullets: string[]
 }
 
 export interface HistoricoData {
-  positions: HistoricoPosition[]
+  companies: HistoricoCompany[]
 }
 
 const COMPANY_TINTS = [
@@ -43,42 +62,40 @@ export function getCompanyInitials(name: string): string {
     .join('')
 }
 
+function safeYear(dateStr: string | null): number | null {
+  if (!dateStr) return null
+  const y = new Date(dateStr + 'T12:00:00').getFullYear()
+  return isNaN(y) ? null : y
+}
+
 function formatPeriodLabel(start: string | null, end: string | null): string {
   if (!start) return '?'
-
-  const startDate = new Date(start)
+  const startDate = new Date(start + 'T12:00:00')
   const startYear = startDate.getFullYear()
   if (isNaN(startYear)) return '?'
-
   if (!end) {
     const startMonth = startDate.toLocaleString('pt-BR', { month: 'short' })
     return `${startMonth} ${startYear}–atual`
   }
-
-  const endDate = new Date(end)
-  const endYear = endDate.getFullYear()
+  const endYear = new Date(end + 'T12:00:00').getFullYear()
   if (isNaN(endYear)) return String(startYear)
-
   if (startYear === endYear) return String(startYear)
   return `${startYear}–${endYear}`
 }
 
 function formatYearLabel(start: string | null, end: string | null): string {
   if (!start) return '?'
-
-  const startYear = new Date(start).getFullYear()
-  if (isNaN(startYear)) return '?'
-
+  const startYear = safeYear(start)
+  if (startYear === null) return '?'
   if (!end) return `${startYear}–hoje`
-
-  const endYear = new Date(end).getFullYear()
-  if (isNaN(endYear)) return String(startYear)
-
+  const endYear = safeYear(end)
+  if (endYear === null) return String(startYear)
   if (startYear === endYear) return String(startYear)
   return `${startYear}–${endYear}`
 }
 
 interface RawEntry {
+  id: string
   role_title: string | null
   company: string | null
   role_start: string | null
@@ -86,60 +103,185 @@ interface RawEntry {
   what_i_did: string
   impact: string | null
   metric: string | null
+  project_name: string | null
+  evidences: EvidenceItem[]
 }
 
-export function groupPositions(entries: RawEntry[]): HistoricoPosition[] {
-  const map = new Map<string, HistoricoPosition>()
+const MAX_HIGHLIGHT_BULLETS = 3
+
+// Accumulates per-role data so we can merge duplicates captured from different documents.
+// Key: role_title + start-year + end-year (or "current") — same title/year-range = same role.
+interface RoleAcc {
+  role_title: string
+  minStart: string | null
+  maxEnd: string | null
+  hasCurrentEnd: boolean
+}
+
+interface ProjectAcc {
+  entries: HistoricoEntry[]
+  seenKeys: Set<string>
+}
+
+interface CompanyAccumulator {
+  roleAccMap: Map<string, RoleAcc>
+  projectMap: Map<string, ProjectAcc>
+  standaloneEntries: RawEntry[]
+  standaloneSeenKeys: Set<string>
+  minStart: string | null
+  maxEnd: string | null
+  hasCurrentRole: boolean
+}
+
+function dedupKey(text: string): string {
+  return text.trim().slice(0, 120)
+}
+
+export function levenshtein(a: string, b: string): number {
+  const m = a.length, n = b.length
+  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
+    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+  )
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
+    }
+  }
+  return dp[m][n]
+}
+
+function findFuzzyKey(map: Map<string, CompanyAccumulator>, name: string): string | undefined {
+  const normalized = name.trim().toLowerCase()
+  for (const key of map.keys()) {
+    if (levenshtein(key.trim().toLowerCase(), normalized) <= 2) return key
+  }
+  return undefined
+}
+
+export function groupCompanies(entries: RawEntry[]): HistoricoCompany[] {
+  const map = new Map<string, CompanyAccumulator>()
 
   for (const entry of entries) {
     if (!entry.company) continue
 
-    const key = entry.company
+    const canonicalKey = findFuzzyKey(map, entry.company) ?? entry.company
 
-    const existing = map.get(key)
-    if (existing) {
-      if (existing.entries.length < 8) {
-        existing.entries.push({
+    if (!map.has(canonicalKey)) {
+      map.set(canonicalKey, {
+        roleAccMap: new Map(),
+        projectMap: new Map(),
+        standaloneEntries: [],
+        standaloneSeenKeys: new Set(),
+        minStart: null,
+        maxEnd: null,
+        hasCurrentRole: false,
+      })
+    }
+
+    const acc = map.get(canonicalKey)!
+
+    // Role deduplication: key by title + start-year + end-year.
+    // Entries from the same role captured on different dates get merged instead of
+    // creating duplicate "PM 2024–hoje · PM 2024–hoje · PM 2024–hoje" lines.
+    if (entry.role_title) {
+      const startYear = safeYear(entry.role_start)
+      const endYear = entry.role_end ? (safeYear(entry.role_end) ?? 'unknown') : 'current'
+      const roleKey = `${entry.role_title}|||${startYear ?? '?'}|||${endYear}`
+
+      if (!acc.roleAccMap.has(roleKey)) {
+        acc.roleAccMap.set(roleKey, {
+          role_title: entry.role_title,
+          minStart: entry.role_start,
+          maxEnd: entry.role_end,
+          hasCurrentEnd: !entry.role_end,
+        })
+      } else {
+        const ra = acc.roleAccMap.get(roleKey)!
+        if (entry.role_start && (!ra.minStart || entry.role_start < ra.minStart)) {
+          ra.minStart = entry.role_start
+        }
+        if (!entry.role_end) {
+          ra.hasCurrentEnd = true
+        } else if (!ra.hasCurrentEnd && (!ra.maxEnd || entry.role_end > ra.maxEnd)) {
+          ra.maxEnd = entry.role_end
+        }
+      }
+    }
+
+    // Track company date span
+    if (entry.role_start && (!acc.minStart || entry.role_start < acc.minStart)) {
+      acc.minStart = entry.role_start
+    }
+    if (!entry.role_end) {
+      acc.hasCurrentRole = true
+    } else if (!acc.hasCurrentRole && (!acc.maxEnd || entry.role_end > acc.maxEnd)) {
+      acc.maxEnd = entry.role_end
+    }
+
+    // Route to project or standalone, deduplicating by first 120 chars of what_i_did
+    const key = dedupKey(entry.what_i_did)
+
+    if (entry.project_name) {
+      if (!acc.projectMap.has(entry.project_name)) {
+        acc.projectMap.set(entry.project_name, { entries: [], seenKeys: new Set() })
+      }
+      const proj = acc.projectMap.get(entry.project_name)!
+      if (!proj.seenKeys.has(key)) {
+        proj.seenKeys.add(key)
+        proj.entries.push({
+          id: entry.id,
           what_i_did: entry.what_i_did,
           impact: entry.impact,
           metric: entry.metric,
+          evidences: entry.evidences,
         })
       }
-      // Expand period to cover full company tenure
-      if (entry.role_start && (!existing.role_start || entry.role_start < existing.role_start)) {
-        existing.role_start = entry.role_start
-      }
-      if (!entry.role_end) {
-        existing.role_end = null
-      } else if (existing.role_end && entry.role_end > existing.role_end) {
-        existing.role_end = entry.role_end
-      }
-      existing.period_label = formatPeriodLabel(existing.role_start, existing.role_end)
-      existing.year_label = formatYearLabel(existing.role_start, existing.role_end)
     } else {
-      const tint = getCompanyTint(entry.company)
-      const initials = getCompanyInitials(entry.company)
-      map.set(key, {
-        role_title: entry.role_title ?? entry.company,
-        company: entry.company,
-        company_initials: initials,
-        company_tint: tint,
-        role_start: entry.role_start,
-        role_end: entry.role_end,
-        period_label: formatPeriodLabel(entry.role_start, entry.role_end),
-        year_label: formatYearLabel(entry.role_start, entry.role_end),
-        entries: [
-          {
-            what_i_did: entry.what_i_did,
-            impact: entry.impact,
-            metric: entry.metric,
-          },
-        ],
-      })
+      if (!acc.standaloneSeenKeys.has(key)) {
+        acc.standaloneSeenKeys.add(key)
+        acc.standaloneEntries.push(entry)
+      }
     }
   }
 
-  return Array.from(map.values())
+  const result: HistoricoCompany[] = []
+
+  for (const [company, acc] of map) {
+    const effectiveEnd = acc.hasCurrentRole ? null : acc.maxEnd
+
+    const roles: RolePeriod[] = Array.from(acc.roleAccMap.values()).map((ra) => {
+      const end = ra.hasCurrentEnd ? null : ra.maxEnd
+      return {
+        role_title: ra.role_title,
+        period_label: formatPeriodLabel(ra.minStart, end),
+        year_label: formatYearLabel(ra.minStart, end),
+      }
+    })
+
+    const sorted = [
+      ...acc.standaloneEntries.filter((e) => e.metric),
+      ...acc.standaloneEntries.filter((e) => !e.metric),
+    ]
+    const highlight_bullets = sorted.slice(0, MAX_HIGHLIGHT_BULLETS).map((e) => e.what_i_did)
+
+    const projects: HistoricoProject[] = Array.from(acc.projectMap.entries()).map(
+      ([name, proj]) => ({ name, entries: proj.entries })
+    )
+
+    result.push({
+      company,
+      company_initials: getCompanyInitials(company),
+      company_tint: getCompanyTint(company),
+      year_label: formatYearLabel(acc.minStart, effectiveEnd),
+      roles,
+      projects,
+      highlight_bullets,
+    })
+  }
+
+  return result
 }
 
 export async function getHistoricoData(
@@ -148,12 +290,12 @@ export async function getHistoricoData(
 ): Promise<HistoricoData> {
   const { data } = await supabase
     .from('entries')
-    .select('role_title, company, role_start, role_end, what_i_did, impact, metric')
+    .select('id, role_title, company, role_start, role_end, what_i_did, impact, metric, project_name, evidences')
     .eq('user_id', userId)
     .not('company', 'is', null)
     .order('role_start', { ascending: false, nullsFirst: false })
 
-  const positions = groupPositions((data ?? []) as RawEntry[])
+  const companies = groupCompanies((data ?? []) as RawEntry[])
 
-  return { positions }
+  return { companies }
 }

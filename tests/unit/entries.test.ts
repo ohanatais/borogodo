@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { saveEntries, getRecentEntries, enrichEntryField } from '@/lib/db/entries'
 import type { ExtractedEntry } from '@/types/entry'
 
+vi.mock('@/lib/ai/embeddings', () => ({
+  generateEmbedding: vi.fn().mockResolvedValue(Array(1536).fill(0)),
+  cosineSimilarity: vi.fn().mockReturnValue(0),
+  parseEmbedding: vi.fn((raw: unknown) => (Array.isArray(raw) ? raw : null)),
+}))
+
 interface FakeQuery {
   insert: ReturnType<typeof vi.fn>
   select: ReturnType<typeof vi.fn>
@@ -73,7 +79,7 @@ describe('saveEntries', () => {
     const result = await saveEntries(supabase, 'user-1', [EXTRACTED])
 
     expect(from).toHaveBeenCalledWith('entries')
-    expect(insertChain.insert).toHaveBeenCalledWith([{ ...EXTRACTED, user_id: 'user-1' }])
+    expect(insertChain.insert).toHaveBeenCalledWith([{ ...EXTRACTED, user_id: 'user-1', embedding: null }])
     expect(result).toEqual([SAVED_ENTRY])
   })
 
