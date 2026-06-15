@@ -58,9 +58,9 @@ export function CaptureLoopStep() {
 
   useEffect(() => {
     if (!currentPhase) return
-    setMsgIndex(0)
+    const reset = setTimeout(() => setMsgIndex(0), 0)
     const id = setInterval(() => setMsgIndex((i) => (i + 1) % 3), 3000)
-    return () => clearInterval(id)
+    return () => { clearTimeout(reset); clearInterval(id) }
   }, [currentPhase])
 
   async function handleCapture(formData: FormData) {
