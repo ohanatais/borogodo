@@ -42,12 +42,12 @@ export function ChatInput({ value, onChange, onSubmit, disabled, placeholder }: 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder ?? 'Pergunte algo sobre sua carreira...'}
+        placeholder={disabled ? 'Aguarde a resposta...' : (placeholder ?? 'Pergunte algo sobre sua carreira...')}
         rows={1}
         disabled={disabled}
         aria-label="Campo de pergunta sobre sua carreira"
-        className="flex-1 resize-none text-sm outline-none bg-transparent leading-snug min-h-[24px] max-h-[120px]"
-        style={{ color: 'var(--foreground)' }}
+        className="flex-1 resize-none text-sm outline-none bg-transparent leading-snug min-h-[24px] max-h-[120px] transition-opacity"
+        style={{ color: 'var(--foreground)', opacity: disabled ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'text' }}
       />
       <button
         type="button"

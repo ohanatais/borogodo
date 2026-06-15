@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { SendHorizonal, X } from 'lucide-react'
+import { SendHorizonal, X, Loader2, Check } from 'lucide-react'
 
 interface ProjectContext {
   name: string
@@ -24,6 +24,7 @@ export function CaptureInput({
 }: CaptureInputProps) {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -61,6 +62,8 @@ export function CaptureInput({
 
       setText('')
       onClearProjectContext?.()
+      setSent(true)
+      setTimeout(() => setSent(false), 2000)
       router.refresh()
     } catch {
       setError('Erro de conexão. Tenta de novo?')
@@ -122,15 +125,24 @@ export function CaptureInput({
           type="button"
           onClick={() => void handleSubmit()}
           disabled={!text.trim() || loading}
-          aria-label="Enviar"
-          className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-opacity disabled:opacity-40"
-          style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+          aria-label={loading ? 'Enviando...' : sent ? 'Registrado' : 'Enviar'}
+          className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-40"
+          style={{
+            background: sent ? 'var(--color-success, oklch(65% 0.2 145))' : 'var(--color-primary)',
+            color: 'var(--color-primary-fg)',
+          }}
         >
-          <SendHorizonal size={16} />
+          {loading ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : sent ? (
+            <Check size={16} />
+          ) : (
+            <SendHorizonal size={16} />
+          )}
         </button>
       </div>
       {error && (
-        <p role="alert" className="sr-only">
+        <p role="alert" className="text-xs mt-1 px-1" style={{ color: 'oklch(55% 0.22 25)' }}>
           {error}
         </p>
       )}

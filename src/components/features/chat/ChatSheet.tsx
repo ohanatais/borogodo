@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useCallback } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
-import { X } from 'lucide-react'
+import { X, Plus } from 'lucide-react'
 import { ChatMessage, type MessageData } from './ChatMessage'
 import { ChatInput } from './ChatInput'
 import { StarterPrompts } from './StarterPrompts'
@@ -33,6 +33,7 @@ type State = {
 type Action =
   | { type: 'OPEN'; payload: ChatOpenDetail }
   | { type: 'CLOSE' }
+  | { type: 'NEW_CONVERSATION' }
   | { type: 'SET_DRAFT'; text: string }
   | { type: 'USER_SENT'; id: string; content: string }
   | { type: 'ASSISTANT_STARTED'; id: string }
@@ -44,15 +45,35 @@ type Action =
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case 'OPEN':
+    case 'OPEN': {
+      const newContext = action.payload.context ?? state.context
+      const contextChanged =
+        newContext?.type !== state.context?.type ||
+        newContext?.entityId !== state.context?.entityId
+      const hasPrefill = !!action.payload.prefillMessage
+      const shouldReset = contextChanged || hasPrefill
       return {
         ...state,
         open: true,
-        context: action.payload.context ?? state.context,
+        context: newContext,
         draft: action.payload.prefillMessage ?? '',
+        messages: shouldReset ? [] : state.messages,
+        pendingCorrection: shouldReset ? null : state.pendingCorrection,
+        pendingMarco: shouldReset ? null : state.pendingMarco,
       }
+    }
     case 'CLOSE':
       return { ...state, open: false }
+    case 'NEW_CONVERSATION':
+      return {
+        ...state,
+        messages: [],
+        draft: '',
+        status: 'idle',
+        pendingCorrection: null,
+        pendingMarco: null,
+        context: null,
+      }
     case 'SET_DRAFT':
       return { ...state, draft: action.text }
     case 'USER_SENT':
@@ -270,23 +291,23 @@ export function ChatSheet() {
   return (
     <Dialog.Root open={state.open} onOpenChange={(open) => !open && dispatch({ type: 'CLOSE' })}>
       <Dialog.Portal>
+        {/* Mobile overlay full-screen; desktop overlay transparent (panel is floating, non-blocking) */}
         <Dialog.Overlay
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-40 lg:hidden"
           style={{ background: 'oklch(18% 0.02 260 / 0.4)', backdropFilter: 'blur(2px)' }}
         />
 
-        {/* Mobile: bottom sheet. Desktop: centered modal */}
+        {/* Mobile: bottom sheet. Desktop: floating panel bottom-right */}
         <Dialog.Content
           onInteractOutside={(e) => e.preventDefault()}
           aria-describedby={undefined}
           className="fixed z-50 flex flex-col focus:outline-none
             bottom-0 left-0 right-0 rounded-t-[16px] max-h-[90dvh]
-            lg:bottom-auto lg:left-1/2 lg:right-auto lg:top-1/2
-            lg:-translate-x-1/2 lg:-translate-y-1/2
-            lg:w-[640px] lg:max-h-[80dvh] lg:rounded-2xl"
+            lg:bottom-4 lg:right-6 lg:left-auto lg:top-auto
+            lg:w-[440px] lg:max-h-[76dvh] lg:rounded-2xl"
           style={{
             background: 'var(--color-creme)',
-            boxShadow: '0 0 40px oklch(18% 0.02 260 / 0.2)',
+            boxShadow: '0 8px 40px oklch(18% 0.02 260 / 0.25), 0 2px 8px oklch(18% 0.02 260 / 0.1)',
           }}
         >
           {/* Drag handle — mobile only */}
@@ -312,16 +333,30 @@ export function ChatSheet() {
                 </span>
               )}
             </div>
-            <Dialog.Close asChild>
-              <button
-                type="button"
-                aria-label="Fechar chat"
-                className="relative w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-70 after:absolute after:inset-[-10px] after:content-['']"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                <X size={16} />
-              </button>
-            </Dialog.Close>
+            <div className="flex items-center gap-1">
+              {state.messages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => dispatch({ type: 'NEW_CONVERSATION' })}
+                  aria-label="Nova conversa"
+                  title="Nova conversa"
+                  className="relative w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-70 after:absolute after:inset-[-10px] after:content-['']"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  <Plus size={16} />
+                </button>
+              )}
+              <Dialog.Close asChild>
+                <button
+                  type="button"
+                  aria-label="Fechar chat"
+                  className="relative w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-70 after:absolute after:inset-[-10px] after:content-['']"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  <X size={16} />
+                </button>
+              </Dialog.Close>
+            </div>
           </div>
 
           {/* Messages area */}
