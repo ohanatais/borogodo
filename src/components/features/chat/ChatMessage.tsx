@@ -1,5 +1,6 @@
 'use client'
 
+import { ThumbsUp, ThumbsDown } from 'lucide-react'
 import { CitationChip } from './CitationChip'
 import type { Citation } from '@/lib/ai/chat/answerCareerQuestion'
 
@@ -10,20 +11,23 @@ export interface MessageData {
   citations?: Citation[]
   suggestions?: string[]
   isStreaming?: boolean
+  helpful?: boolean | null
 }
 
 interface ChatMessageProps {
   message: MessageData
   onSuggestionClick: (suggestion: string) => void
+  onHelpful?: (helpful: boolean) => void
 }
 
-export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
+export function ChatMessage({ message, onSuggestionClick, onHelpful }: ChatMessageProps) {
   const isUser = message.role === 'user'
+  const showFeedback = !isUser && !message.isStreaming && message.content.length > 0
 
   return (
     <div className={`flex flex-col gap-1.5 ${isUser ? 'items-end' : 'items-start'}`}>
       <div
-        className="max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed"
+        className="max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
         style={
           isUser
             ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)', borderBottomRightRadius: '4px' }
@@ -64,6 +68,33 @@ export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
               {s}
             </button>
           ))}
+        </div>
+      )}
+
+      {showFeedback && onHelpful && (
+        <div className="flex items-center gap-1 pl-1">
+          <button
+            type="button"
+            onClick={() => onHelpful(true)}
+            aria-label="Útil"
+            className="p-1 rounded transition-opacity hover:opacity-70"
+            style={{
+              color: message.helpful === true ? 'var(--color-primary)' : 'var(--muted-foreground)',
+            }}
+          >
+            <ThumbsUp size={12} />
+          </button>
+          <button
+            type="button"
+            onClick={() => onHelpful(false)}
+            aria-label="Não útil"
+            className="p-1 rounded transition-opacity hover:opacity-70"
+            style={{
+              color: message.helpful === false ? 'oklch(55% 0.2 25)' : 'var(--muted-foreground)',
+            }}
+          >
+            <ThumbsDown size={12} />
+          </button>
         </div>
       )}
     </div>

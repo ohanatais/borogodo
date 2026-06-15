@@ -7,6 +7,7 @@ export interface CareerChatContext {
   latestMirror: MirrorSnapshot | null
   relevantEntries: Entry[]
   companyEntries: Entry[]
+  correctionEntry?: Entry | null
 }
 
 export function buildCareerChatSystemPrompt(ctx: CareerChatContext): string {
@@ -56,7 +57,7 @@ ESPELHO PROFISSIONAL DE ${name.toUpperCase()}:
       const role = e.role_title ? ` | ${e.role_title}` : ''
       const impact = e.impact ? ` → ${e.impact}` : ''
       const metric = e.metric ? ` (${e.metric})` : ''
-      lines.push(`[${i + 1}] (${date}${company}${role}) ${e.what_i_did}${impact}${metric}`)
+      lines.push(`[${i + 1}] id:${e.id} (${date}${company}${role}) ${e.what_i_did}${impact}${metric}`)
     })
   }
 
@@ -64,8 +65,28 @@ ESPELHO PROFISSIONAL DE ${name.toUpperCase()}:
     lines.push(`\nENTRADAS DA EMPRESA EM CONTEXTO:`)
     ctx.companyEntries.forEach((e, i) => {
       const date = e.entry_date ?? e.created_at.slice(0, 10)
-      lines.push(`[C${i + 1}] (${date}) ${e.what_i_did}`)
+      lines.push(`[C${i + 1}] id:${e.id} (${date}) ${e.what_i_did}`)
     })
+  }
+
+  if (ctx.correctionEntry) {
+    const e = ctx.correctionEntry
+    lines.push(`
+ENTRADA PARA CORREÇÃO (o usuário quer corrigir esta entrada específica):
+id: ${e.id}
+O que fiz: ${e.what_i_did}
+Empresa: ${e.company ?? 'não informada'}
+Cargo: ${e.role_title ?? 'não informado'}
+Data: ${e.entry_date ?? 'não informada'}
+Impacto: ${e.impact ?? 'não informado'}
+Métrica: ${e.metric ?? 'não informada'}
+
+Modo de correção ativo:
+1. Pergunte o que está incorreto.
+2. Confirme o que entendeu: "Então você quer que [campo X] mude para [valor Y]. Correto?"
+3. Quando o usuário confirmar, inclua "correction" no bloco BLOCKS com os campos atualizados.
+4. Use action:"delete" apenas se o usuário pedir para remover a entrada.
+5. Use action:"enrich" para adicionar contexto sem sobrescrever.`)
   }
 
   if (ctx.relevantEntries.length === 0 && !ctx.latestMirror) {
@@ -74,17 +95,31 @@ AVISO: Esta pessoa ainda não tem registros de carreira. Seja honesto e sugira q
   }
 
   lines.push(`
-No final da sua resposta, sempre adicione exatamente este bloco com 2 perguntas de follow-up relevantes (baseadas no que foi respondido):
-<FOLLOWUPS>["pergunta de acompanhamento 1?","pergunta de acompanhamento 2?"]</FOLLOWUPS>`)
+DETECÇÃO DE MARCO:
+Se o usuário mencionar uma conquista relevante ("fui promovido", "lançamos", "recebi um prêmio", "encerramos", "chegamos a X usuários"), mude para modo de marco guiado:
+1. Confirme o marco com entusiasmo conciso.
+2. Faça NO MÁXIMO 4 perguntas para completar: qual empresa/cargo, quando aconteceu, qual foi o impacto, algum número?
+3. Cada pergunta em mensagem separada — não interrogatório.
+4. Após coletar o suficiente (what_i_did obrigatório + pelo menos 1 outro campo), inclua "marco" no bloco BLOCKS.
+5. Nunca salve sem what_i_did.`)
+
+  lines.push(`
+BLOCO ESTRUTURADO (OBRIGATÓRIO ao final de CADA resposta):
+Encerre sempre com exatamente um bloco assim:
+<BLOCKS>{"followups":["pergunta 1?","pergunta 2?"]}</BLOCKS>
+
+Se identificou uma correção confirmada pelo usuário, adicione o campo "correction":
+<BLOCKS>{"followups":["q1?","q2?"],"correction":{"entryId":"ID_DA_ENTRADA","fields":{"campo":"valor"},"action":"update"}}</BLOCKS>
+
+Se coletou informações suficientes para um marco, adicione o campo "marco":
+<BLOCKS>{"followups":["q1?","q2?"],"marco":{"what_i_did":"descrição","company":"empresa","entry_date":"YYYY-MM-DD","impact":"impacto","metric":"número"}}</BLOCKS>
+
+Regras do bloco:
+- Sempre presente, nunca omitir.
+- "followups": exatamente 2 perguntas de acompanhamento relevantes.
+- Campos null ou desconhecidos: omita-os (não escreva null).
+- entryId em "correction" deve ser o id exato da entrada (formato uuid).
+- "action" em correction: "update" (corrigir campos), "delete" (remover entrada), "enrich" (adicionar contexto).`)
 
   return lines.join('\n')
-}
-
-export function buildSuggestionsPrompt(userMessage: string, assistantAnswer: string): string {
-  return `Dado que o usuário perguntou: "${userMessage}"
-
-E a resposta foi: "${assistantAnswer.slice(0, 300)}..."
-
-Gere exatamente 2 perguntas de acompanhamento naturais e relevantes que o usuário poderia fazer a seguir. Retorne apenas um array JSON com 2 strings, sem mais nada:
-["pergunta 1?","pergunta 2?"]`
 }

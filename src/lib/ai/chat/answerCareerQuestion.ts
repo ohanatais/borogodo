@@ -15,6 +15,21 @@ export interface Citation {
   date: string | null
 }
 
+export interface CorrectionAction {
+  entryId: string
+  fields: Record<string, string>
+  action: 'update' | 'delete' | 'enrich'
+}
+
+export interface MarcoPreview {
+  what_i_did: string
+  company?: string
+  role_title?: string
+  entry_date?: string
+  impact?: string
+  metric?: string
+}
+
 export interface ChatContext {
   type: 'espelho' | 'historico' | 'empresa' | 'entry'
   entityId?: string
@@ -28,8 +43,8 @@ const SEMANTIC_SEARCH_LIMIT = 200
 const TOP_K = 5
 const MODEL = 'claude-sonnet-4-6'
 const MAX_TOKENS = 1024
-const FOLLOWUP_START = '<FOLLOWUPS>'
-const FOLLOWUP_END = '</FOLLOWUPS>'
+const BLOCKS_START = '<BLOCKS>'
+const BLOCKS_END = '</BLOCKS>'
 
 function getAnthropicClient(): Anthropic {
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -79,6 +94,21 @@ async function fetchCompanyEntries(
   return (data ?? []) as Entry[]
 }
 
+async function fetchEntryById(
+  supabase: SupabaseServerClient,
+  userId: string,
+  entryId: string
+): Promise<Entry | null> {
+  const { data } = await supabase
+    .from('entries')
+    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at')
+    .eq('id', entryId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  return (data as Entry | null)
+}
+
 function buildCitations(entries: Entry[]): Citation[] {
   return entries.map((e) => ({
     label: e.what_i_did.slice(0, 60) + (e.what_i_did.length > 60 ? '...' : ''),
@@ -88,23 +118,29 @@ function buildCitations(entries: Entry[]): Citation[] {
   }))
 }
 
-function parseFollowups(buffer: string): string[] {
-  const endIdx = buffer.indexOf(FOLLOWUP_END)
+interface BlocksPayload {
+  followups?: string[]
+  correction?: CorrectionAction
+  marco?: MarcoPreview
+}
+
+function parseBlocks(buffer: string): BlocksPayload {
+  const endIdx = buffer.indexOf(BLOCKS_END)
   const json = endIdx !== -1 ? buffer.slice(0, endIdx).trim() : buffer.trim()
   try {
     const parsed: unknown = JSON.parse(json)
-    if (Array.isArray(parsed) && parsed.every((s) => typeof s === 'string')) {
-      return parsed as string[]
+    if (parsed !== null && typeof parsed === 'object') {
+      return parsed as BlocksPayload
     }
   } catch {
-    // ignore parse errors
+    // ignore
   }
-  return []
+  return {}
 }
 
 export interface StreamEvents {
   onDelta: (text: string) => void
-  onDone: (citations: Citation[], suggestions: string[]) => void
+  onDone: (citations: Citation[], suggestions: string[], correction?: CorrectionAction, marcoPreview?: MarcoPreview) => void
   onError: (message: string) => void
 }
 
@@ -129,11 +165,17 @@ export async function answerCareerQuestion(
     companyEntries = await fetchCompanyEntries(supabase, userId, context.entityId)
   }
 
+  let correctionEntry: Entry | null = null
+  if (context?.type === 'entry' && context.entityId) {
+    correctionEntry = await fetchEntryById(supabase, userId, context.entityId)
+  }
+
   const systemPrompt = buildCareerChatSystemPrompt({
     profile,
     latestMirror,
     relevantEntries,
     companyEntries,
+    correctionEntry,
   })
 
   const apiMessages: Anthropic.MessageParam[] = [
@@ -150,11 +192,10 @@ export async function answerCareerQuestion(
     messages: apiMessages,
   })
 
-  // Buffer to detect FOLLOWUPS marker across chunk boundaries
-  const SAFE_TAIL = FOLLOWUP_START.length
+  const SAFE_TAIL = BLOCKS_START.length
   let pending = ''
-  let inFollowups = false
-  let followupsBuffer = ''
+  let inBlocks = false
+  let blocksBuffer = ''
 
   try {
     for await (const event of stream) {
@@ -163,31 +204,29 @@ export async function answerCareerQuestion(
 
       const chunk = event.delta.text
 
-      if (inFollowups) {
-        followupsBuffer += chunk
+      if (inBlocks) {
+        blocksBuffer += chunk
         continue
       }
 
       pending += chunk
 
-      const markerIdx = pending.indexOf(FOLLOWUP_START)
+      const markerIdx = pending.indexOf(BLOCKS_START)
       if (markerIdx !== -1) {
         const toSend = pending.slice(0, markerIdx).trimEnd()
         if (toSend) events.onDelta(toSend)
-        followupsBuffer = pending.slice(markerIdx + FOLLOWUP_START.length)
-        inFollowups = true
+        blocksBuffer = pending.slice(markerIdx + BLOCKS_START.length)
+        inBlocks = true
         continue
       }
 
-      // Send everything except the last SAFE_TAIL chars (in case marker spans chunks)
       if (pending.length > SAFE_TAIL) {
         events.onDelta(pending.slice(0, pending.length - SAFE_TAIL))
         pending = pending.slice(pending.length - SAFE_TAIL)
       }
     }
 
-    // Flush remaining pending text (no marker found)
-    if (!inFollowups && pending) {
+    if (!inBlocks && pending) {
       events.onDelta(pending)
     }
   } catch (err: unknown) {
@@ -196,7 +235,11 @@ export async function answerCareerQuestion(
     return
   }
 
-  const suggestions = parseFollowups(followupsBuffer)
+  const blocks = parseBlocks(blocksBuffer)
+  const suggestions = Array.isArray(blocks.followups) ? blocks.followups.filter((s): s is string => typeof s === 'string') : []
+  const correction = blocks.correction
+  const marcoPreview = blocks.marco
   const citations = buildCitations(relevantEntries)
-  events.onDone(citations, suggestions)
+
+  events.onDone(citations, suggestions, correction, marcoPreview)
 }

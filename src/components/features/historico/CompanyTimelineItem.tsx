@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ArrowUpRight } from 'lucide-react'
+import { ChevronDown, ArrowUpRight, MessageSquare } from 'lucide-react'
 import type { HistoricoCompany, HistoricoProject } from '@/lib/historico/getHistoricoData'
 
 interface CompanyTimelineItemProps {
@@ -134,6 +134,29 @@ export function CompanyTimelineItem({
                   })}
                 </div>
               )}
+
+              {/* Ask about company */}
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(
+                    new CustomEvent('borogodo:chat-open', {
+                      detail: {
+                        context: { type: 'empresa', entityId: company.company },
+                        prefillMessage: `O que posso destacar do meu tempo em ${company.company}?`,
+                      },
+                    })
+                  )
+                }}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80 mt-1"
+                style={{
+                  color: 'var(--muted-foreground)',
+                  background: 'var(--muted)',
+                }}
+              >
+                <MessageSquare size={12} />
+                Perguntar sobre {company.company}
+              </button>
             </div>
           )}
         </div>

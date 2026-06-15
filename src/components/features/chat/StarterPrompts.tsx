@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
 const DEFAULT_STARTERS = [
   'Quais foram meus maiores projetos?',
   'Em que eu sou mais forte na minha área?',
@@ -8,10 +10,22 @@ const DEFAULT_STARTERS = [
 
 interface StarterPromptsProps {
   onSelect: (prompt: string) => void
-  starters?: string[]
 }
 
-export function StarterPrompts({ onSelect, starters = DEFAULT_STARTERS }: StarterPromptsProps) {
+export function StarterPrompts({ onSelect }: StarterPromptsProps) {
+  const [starters, setStarters] = useState<string[]>(DEFAULT_STARTERS)
+
+  useEffect(() => {
+    fetch('/api/chat/starters')
+      .then((r) => r.json())
+      .then((data: { starters?: string[] }) => {
+        if (Array.isArray(data.starters) && data.starters.length > 0) {
+          setStarters(data.starters)
+        }
+      })
+      .catch(() => { /* keep defaults */ })
+  }, [])
+
   return (
     <div className="flex flex-col items-center gap-5 py-8 px-4">
       <div className="text-center">

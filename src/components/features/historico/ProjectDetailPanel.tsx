@@ -1,4 +1,4 @@
-import { X, Plus } from 'lucide-react'
+import { X, Plus, Flag, Trophy } from 'lucide-react'
 import type { HistoricoProject } from '@/lib/historico/getHistoricoData'
 import { EvidenceSection } from './EvidenceSection'
 
@@ -7,6 +7,28 @@ interface ProjectDetailPanelProps {
   company: string
   onClose: () => void
   onStartCapture: () => void
+}
+
+function openCorrectionChat(entryId: string, whatIDid: string) {
+  window.dispatchEvent(
+    new CustomEvent('borogodo:chat-open', {
+      detail: {
+        context: { type: 'entry', entityId: entryId },
+        prefillMessage: `A entrada "${whatIDid.slice(0, 80)}${whatIDid.length > 80 ? '...' : ''}" está incorreta.`,
+      },
+    })
+  )
+}
+
+function openMarcoChat(company: string, projectName: string) {
+  window.dispatchEvent(
+    new CustomEvent('borogodo:chat-open', {
+      detail: {
+        context: { type: 'empresa', entityId: company },
+        prefillMessage: `Quero registrar um marco no projeto "${projectName}" em ${company}.`,
+      },
+    })
+  )
 }
 
 export function ProjectDetailPanel({
@@ -48,8 +70,8 @@ export function ProjectDetailPanel({
       {project.entries.length > 0 && (
         <ul className="space-y-5">
           {project.entries.map((entry) => (
-            <li key={entry.id} className="space-y-1">
-              <p className="text-[15px] leading-snug font-medium" style={{ color: 'var(--foreground)' }}>
+            <li key={entry.id} className="space-y-1 group relative">
+              <p className="text-[15px] leading-snug font-medium pr-6" style={{ color: 'var(--foreground)' }}>
                 {entry.what_i_did}
               </p>
               {entry.impact && (
@@ -66,27 +88,57 @@ export function ProjectDetailPanel({
                 </span>
               )}
               <EvidenceSection entryId={entry.id} initial={entry.evidences} />
+
+              {/* Correction button — visible on hover */}
+              <button
+                type="button"
+                onClick={() => openCorrectionChat(entry.id, entry.what_i_did)}
+                className="absolute top-0 right-0 flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
+                aria-label="Corrigir esta entrada"
+              >
+                <Flag size={11} />
+                corrigir
+              </button>
             </li>
           ))}
         </ul>
       )}
 
-      {/* Capture invite */}
-      <div
-        className="rounded-xl p-3 flex items-center justify-between gap-3 mt-1"
-        style={{ background: 'var(--muted)' }}
-      >
-        <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-          Tem mais sobre esse projeto?
-        </p>
+      {/* Action row */}
+      <div className="flex flex-col gap-2 mt-1">
+        {/* Capture invite */}
+        <div
+          className="rounded-xl p-3 flex items-center justify-between gap-3"
+          style={{ background: 'var(--muted)' }}
+        >
+          <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+            Tem mais sobre esse projeto?
+          </p>
+          <button
+            type="button"
+            onClick={onStartCapture}
+            className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+            style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+          >
+            <Plus size={12} />
+            Adicionar via captura
+          </button>
+        </div>
+
+        {/* Marco CTA */}
         <button
           type="button"
-          onClick={onStartCapture}
-          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+          onClick={() => openMarcoChat(company, project.name)}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm transition-opacity hover:opacity-80"
+          style={{
+            background: 'var(--color-lilas-nevoa)',
+            color: 'var(--color-primary)',
+            border: '1px solid var(--color-primary)',
+          }}
         >
-          <Plus size={12} />
-          Adicionar via captura
+          <Trophy size={13} />
+          Registrar marco neste projeto
         </button>
       </div>
     </div>

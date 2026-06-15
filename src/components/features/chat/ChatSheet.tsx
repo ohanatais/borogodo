@@ -6,7 +6,9 @@ import { X } from 'lucide-react'
 import { ChatMessage, type MessageData } from './ChatMessage'
 import { ChatInput } from './ChatInput'
 import { StarterPrompts } from './StarterPrompts'
-import type { Citation } from '@/lib/ai/chat/answerCareerQuestion'
+import { CorrectionConfirmCard } from './CorrectionConfirmCard'
+import { MarcoPreviewCard } from './MarcoPreviewCard'
+import type { Citation, CorrectionAction, MarcoPreview } from '@/lib/ai/chat/answerCareerQuestion'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -24,6 +26,8 @@ type State = {
   draft: string
   status: 'idle' | 'streaming' | 'error'
   context: ChatOpenDetail['context'] | null
+  pendingCorrection: CorrectionAction | null
+  pendingMarco: MarcoPreview | null
 }
 
 type Action =
@@ -33,8 +37,11 @@ type Action =
   | { type: 'USER_SENT'; id: string; content: string }
   | { type: 'ASSISTANT_STARTED'; id: string }
   | { type: 'ASSISTANT_DELTA'; id: string; text: string }
-  | { type: 'ASSISTANT_DONE'; id: string; citations: Citation[]; suggestions: string[] }
+  | { type: 'ASSISTANT_DONE'; id: string; citations: Citation[]; suggestions: string[]; correction?: CorrectionAction; marcoPreview?: MarcoPreview }
   | { type: 'ASSISTANT_ERROR'; id: string; message: string }
+  | { type: 'CORRECTION_DISMISSED' }
+  | { type: 'MARCO_DISMISSED' }
+  | { type: 'SET_HELPFUL'; id: string; helpful: boolean }
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -54,6 +61,8 @@ function reducer(state: State, action: Action): State {
         ...state,
         draft: '',
         status: 'streaming',
+        pendingCorrection: null,
+        pendingMarco: null,
         messages: [
           ...state.messages,
           { id: action.id, role: 'user', content: action.content },
@@ -78,6 +87,8 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         status: 'idle',
+        pendingCorrection: action.correction ?? null,
+        pendingMarco: action.marcoPreview ?? null,
         messages: state.messages.map((m) =>
           m.id === action.id
             ? { ...m, isStreaming: false, citations: action.citations, suggestions: action.suggestions }
@@ -94,6 +105,17 @@ function reducer(state: State, action: Action): State {
             : m
         ),
       }
+    case 'CORRECTION_DISMISSED':
+      return { ...state, pendingCorrection: null }
+    case 'MARCO_DISMISSED':
+      return { ...state, pendingMarco: null }
+    case 'SET_HELPFUL':
+      return {
+        ...state,
+        messages: state.messages.map((m) =>
+          m.id === action.id ? { ...m, helpful: action.helpful } : m
+        ),
+      }
     default:
       return state
   }
@@ -105,6 +127,8 @@ const initialState: State = {
   draft: '',
   status: 'idle',
   context: null,
+  pendingCorrection: null,
+  pendingMarco: null,
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -114,7 +138,6 @@ export function ChatSheet() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLDivElement>(null)
 
-  // Listen for custom open event from /espelho, /historico, etc.
   useEffect(() => {
     function handler(e: Event) {
       const detail = (e as CustomEvent<ChatOpenDetail>).detail
@@ -124,10 +147,9 @@ export function ChatSheet() {
     return () => window.removeEventListener('borogodo:chat-open', handler)
   }, [])
 
-  // Auto-scroll on new message / delta
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [state.messages])
+  }, [state.messages, state.pendingCorrection, state.pendingMarco])
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -140,7 +162,6 @@ export function ChatSheet() {
       dispatch({ type: 'USER_SENT', id: userMsgId, content: trimmed })
       dispatch({ type: 'ASSISTANT_STARTED', id: assistantMsgId })
 
-      // Build history from existing messages (exclude current streaming placeholder)
       const history = state.messages.map((m) => ({ role: m.role, content: m.content }))
 
       try {
@@ -177,7 +198,15 @@ export function ChatSheet() {
 
           for (const part of parts) {
             if (!part.startsWith('data: ')) continue
-            const json = JSON.parse(part.slice(6)) as { type: string; text?: string; citations?: Citation[]; suggestions?: string[]; message?: string }
+            const json = JSON.parse(part.slice(6)) as {
+              type: string
+              text?: string
+              citations?: Citation[]
+              suggestions?: string[]
+              correction?: CorrectionAction
+              marcoPreview?: MarcoPreview
+              message?: string
+            }
 
             if (json.type === 'delta' && json.text) {
               dispatch({ type: 'ASSISTANT_DELTA', id: assistantMsgId, text: json.text })
@@ -187,6 +216,8 @@ export function ChatSheet() {
                 id: assistantMsgId,
                 citations: json.citations ?? [],
                 suggestions: json.suggestions ?? [],
+                correction: json.correction,
+                marcoPreview: json.marcoPreview,
               })
             } else if (json.type === 'error') {
               dispatch({
@@ -221,24 +252,21 @@ export function ChatSheet() {
   }
 
   const isEmpty = state.messages.length === 0
+  const isCorrectionMode = state.context?.type === 'entry'
 
   return (
     <Dialog.Root open={state.open} onOpenChange={(open) => !open && dispatch({ type: 'CLOSE' })}>
       <Dialog.Portal>
-        {/* Overlay — semitransparent but still visible behind */}
         <Dialog.Overlay
           className="fixed inset-0 z-40"
           style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)' }}
         />
 
-        {/* Sheet content */}
         <Dialog.Content
           onInteractOutside={(e) => e.preventDefault()}
           aria-describedby={undefined}
           className="fixed z-50 flex flex-col focus:outline-none"
           style={{
-            // Mobile: bottom sheet full-width
-            // Desktop: right side panel
             right: 0,
             bottom: 0,
             left: 0,
@@ -249,8 +277,6 @@ export function ChatSheet() {
             background: 'var(--color-creme)',
             boxShadow: '0 -4px 32px rgba(0,0,0,0.12)',
           }}
-          // Desktop overrides via inline media breakpoints are not possible in pure Tailwind inline styles.
-          // We rely on CSS-in-JS approach below. For a quick solution we use a wrapper class with responsive tweaks.
         >
           {/* Drag handle (mobile) */}
           <div className="flex justify-center pt-3 pb-1 lg:hidden">
@@ -262,9 +288,19 @@ export function ChatSheet() {
             className="flex items-center justify-between px-4 py-3 border-b shrink-0"
             style={{ borderColor: 'var(--border)' }}
           >
-            <Dialog.Title className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-              Perguntar sobre minha carreira
-            </Dialog.Title>
+            <div className="flex items-center gap-2">
+              <Dialog.Title className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                {isCorrectionMode ? 'Corrigir entrada' : 'Perguntar sobre minha carreira'}
+              </Dialog.Title>
+              {isCorrectionMode && (
+                <span
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                  style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)' }}
+                >
+                  modo correção
+                </span>
+              )}
+            </div>
             <Dialog.Close asChild>
               <button
                 type="button"
@@ -292,8 +328,26 @@ export function ChatSheet() {
                     key={msg.id}
                     message={msg}
                     onSuggestionClick={handleSuggestionClick}
+                    onHelpful={(helpful) => dispatch({ type: 'SET_HELPFUL', id: msg.id, helpful })}
                   />
                 ))}
+
+                {/* Structured action cards after last assistant message */}
+                {state.pendingCorrection && (
+                  <CorrectionConfirmCard
+                    correction={state.pendingCorrection}
+                    onConfirm={() => dispatch({ type: 'CORRECTION_DISMISSED' })}
+                    onCancel={() => dispatch({ type: 'CORRECTION_DISMISSED' })}
+                  />
+                )}
+
+                {state.pendingMarco && (
+                  <MarcoPreviewCard
+                    marco={state.pendingMarco}
+                    onConfirm={() => dispatch({ type: 'MARCO_DISMISSED' })}
+                    onCancel={() => dispatch({ type: 'MARCO_DISMISSED' })}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -309,7 +363,7 @@ export function ChatSheet() {
               onChange={(text) => dispatch({ type: 'SET_DRAFT', text })}
               onSubmit={handleSubmit}
               disabled={state.status === 'streaming'}
-              placeholder="Pergunte algo sobre sua carreira..."
+              placeholder={isCorrectionMode ? 'O que está incorreto nesta entrada?' : 'Pergunte algo sobre sua carreira...'}
             />
           </div>
         </Dialog.Content>

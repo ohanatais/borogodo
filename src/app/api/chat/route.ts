@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/db/supabase/server'
-import { answerCareerQuestion, type ChatMessage, type ChatContext } from '@/lib/ai/chat/answerCareerQuestion'
+import { answerCareerQuestion, type ChatMessage, type ChatContext, type CorrectionAction, type MarcoPreview } from '@/lib/ai/chat/answerCareerQuestion'
 import { logger } from '@/lib/log'
 import { z } from 'zod'
 
@@ -59,8 +59,8 @@ export async function POST(request: Request): Promise<Response> {
             onDelta: (text) => {
               controller.enqueue(sseChunk({ type: 'delta', text }))
             },
-            onDone: (citations, suggestions) => {
-              controller.enqueue(sseChunk({ type: 'done', citations, suggestions }))
+            onDone: (citations, suggestions, correction?: CorrectionAction, marcoPreview?: MarcoPreview) => {
+              controller.enqueue(sseChunk({ type: 'done', citations, suggestions, correction, marcoPreview }))
               controller.close()
             },
             onError: (msg) => {
