@@ -52,20 +52,30 @@ const SAVED_ENTRY = { ...EXTRACTED, id: 'entry-1', user_id: 'user-1', created_at
 
 function buildSaveEntriesSupabase(
   existingItems: Array<{ what_i_did: string }>,
-  insertResult: { data: unknown; error: unknown }
+  insertResult: { data: unknown; error: unknown },
+  poolEmbeddings: number[][] = []
 ) {
-  // First from('entries') call: dedup SELECT → .select().eq() awaitable
-  const dedupChain = {
-    select: vi.fn(function(this: unknown) { return dedupChain }),
-    eq: vi.fn(async () => ({ data: existingItems, error: null })),
+  // Query "thenable": cada método encadeável devolve a si mesmo; await resolve `result`.
+  function thenable(result: { data: unknown; error: unknown }) {
+    const q: Record<string, unknown> = {}
+    for (const m of ['eq', 'not', 'is', 'order', 'limit'] as const) q[m] = vi.fn(() => q)
+    q.then = (resolve: (v: unknown) => unknown) => resolve(result)
+    return q
   }
-  // Second from('entries') call: INSERT → .insert().select() awaitable
+  // INSERT → .insert().select() awaitable
   const insertChain = {
-    insert: vi.fn(function(this: unknown) { return insertChain }),
+    insert: vi.fn(function (this: unknown) { return insertChain }),
     select: vi.fn(async () => insertResult),
   }
-  let call = 0
-  const from = vi.fn(() => (call++ === 0 ? dedupChain : insertChain))
+  const from = vi.fn(() => ({
+    // dedup exato (select what_i_did) e pool semântico (select embedding) usam o mesmo builder.
+    select: vi.fn((cols?: string) =>
+      cols === 'embedding'
+        ? thenable({ data: poolEmbeddings.map((e) => ({ embedding: e })), error: null })
+        : thenable({ data: existingItems, error: null })
+    ),
+    insert: insertChain.insert,
+  }))
   return { from, insertChain }
 }
 
@@ -79,7 +89,8 @@ describe('saveEntries', () => {
     const result = await saveEntries(supabase, 'user-1', [EXTRACTED])
 
     expect(from).toHaveBeenCalledWith('entries')
-    expect(insertChain.insert).toHaveBeenCalledWith([{ ...EXTRACTED, user_id: 'user-1', embedding: null }])
+    // O embedding agora é gerado para toda entrada (conserto da dedup); o que importa é o conteúdo + user_id.
+    expect(insertChain.insert).toHaveBeenCalledWith([expect.objectContaining({ ...EXTRACTED, user_id: 'user-1' })])
     expect(result).toEqual([SAVED_ENTRY])
   })
 

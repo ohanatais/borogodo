@@ -19,38 +19,50 @@ export const ENRICHABLE_FIELDS = ['metric', 'impact', 'decision', 'learning'] as
 export type EnrichableField = (typeof ENRICHABLE_FIELDS)[number]
 
 const SEMANTIC_DEDUP_THRESHOLD = 0.92
+// Quantas entradas recentes (com embedding) entram no pool de comparação semântica por captura.
+const DEDUP_COMPARE_LIMIT = 100
 
-async function isSemanticDuplicate(
-  supabase: SupabaseServerClient,
-  userId: string,
-  entry: ExtractedEntry,
-  embedding: number[]
-): Promise<boolean> {
-  if (!entry.company) return false
+/**
+ * Normaliza o texto para o dedup exato: minúsculas, espaços colapsados e sem pontuação. Faz "Saí de
+ * zero GitHub..., " e "Saí de zero GitHub..." colidirem — capturas iguais a menos de formatação não
+ * duplicam mais (não depende de embedding/IA).
+ */
+function normalizeForDedup(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[.,;:!?…"'`()[\]{}]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
 
-  let query = supabase
+/** Pool de embeddings das entradas recentes do usuário (qualquer empresa) para o dedup semântico. */
+async function loadRecentEmbeddings(supabase: SupabaseServerClient, userId: string): Promise<number[][]> {
+  const { data } = await supabase
     .from('entries')
     .select('embedding')
     .eq('user_id', userId)
-    .eq('company', entry.company)
     .not('embedding', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(DEDUP_COMPARE_LIMIT)
 
-  if (entry.project_name != null) {
-    query = query.eq('project_name', entry.project_name)
-  } else {
-    query = query.is('project_name', null)
-  }
-
-  const { data } = await query
-  if (!data || data.length === 0) return false
-
-  return data.some((row: { embedding: unknown }) => {
-    const existing = parseEmbedding(row.embedding)
-    if (!existing) return false
-    return cosineSimilarity(embedding, existing) > SEMANTIC_DEDUP_THRESHOLD
-  })
+  return (data ?? [])
+    .map((row: { embedding: unknown }) => parseEmbedding(row.embedding))
+    .filter((e: number[] | null): e is number[] => e !== null)
 }
 
+function isSemanticDuplicate(embedding: number[], pool: number[][]): boolean {
+  return pool.some((existing) => cosineSimilarity(embedding, existing) > SEMANTIC_DEDUP_THRESHOLD)
+}
+
+/**
+ * Persiste as entradas extraídas, deduplicando em três camadas (conserto: antes a dedup semântica só
+ * rodava com empresa e o dedup exato exigia texto idêntico, então capturas iguais/parecidas de um
+ * projeto próprio duplicavam):
+ *   1. **Exato normalizado** — contra o que já existe e dentro do próprio lote (sem IA).
+ *   2. **Semântico** — embedding comparado com as entradas recentes do usuário (qualquer empresa) e
+ *      com as já aceitas neste lote; pulado com elegância se o embedding não estiver disponível.
+ * Escopado por `user_id` (RLS reforça).
+ */
 export async function saveEntries(
   supabase: SupabaseServerClient,
   userId: string,
@@ -63,28 +75,32 @@ export async function saveEntries(
     .select('what_i_did')
     .eq('user_id', userId)
 
-  const existingTexts = new Set((existing ?? []).map((e: { what_i_did: string }) => e.what_i_did.trim()))
+  const seenTexts = new Set((existing ?? []).map((e: { what_i_did: string }) => normalizeForDedup(e.what_i_did)))
 
-  const afterTextDedup = entries.filter((e) => !existingTexts.has(e.what_i_did.trim()))
-
-  if (afterTextDedup.length === 0) return []
+  let semanticPool: number[][] = []
+  try {
+    semanticPool = await loadRecentEmbeddings(supabase, userId)
+  } catch (err) {
+    logger.error('failed to load embeddings for semantic dedup', { message: errorMessage(err) })
+  }
 
   const rowsWithEmbeddings: Array<ExtractedEntry & { user_id: string; embedding: number[] | null }> = []
 
-  for (const entry of afterTextDedup) {
-    let embedding: number[] | null = null
+  for (const entry of entries) {
+    const normalized = normalizeForDedup(entry.what_i_did)
+    if (seenTexts.has(normalized)) continue
 
-    if (entry.company) {
-      try {
-        embedding = await generateEmbedding(entry.what_i_did)
-        const isDuplicate = await isSemanticDuplicate(supabase, userId, entry, embedding)
-        if (isDuplicate) continue
-      } catch (err) {
-        logger.error('embedding generation failed — skipping semantic dedup', { message: errorMessage(err) })
-      }
+    let embedding: number[] | null = null
+    try {
+      embedding = await generateEmbedding(entry.what_i_did)
+      if (isSemanticDuplicate(embedding, semanticPool)) continue
+    } catch (err) {
+      logger.error('embedding generation failed — skipping semantic dedup', { message: errorMessage(err) })
     }
 
     rowsWithEmbeddings.push({ ...entry, user_id: userId, embedding })
+    seenTexts.add(normalized)
+    if (embedding) semanticPool.push(embedding)
   }
 
   if (rowsWithEmbeddings.length === 0) return []
