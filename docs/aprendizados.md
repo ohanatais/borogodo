@@ -322,3 +322,31 @@ libs de terceiros.
 fronteira layout↔page no App Router. Vale ter o padrão estabelecido e nomeado para não reinventar
 a cada vez — e para explicar para não-devs por que "mas não dá pra só passar como prop?" tem uma
 resposta de arquitetura, não de descuido.
+
+---
+
+## 2026-06-15 — "Implementar o plano" não era escrever o código — era reconhecer que ele coordena uma cadeia
+
+**O que aconteceu:** pedi para o Claude "pegar o `docs/conteudo-plano-de-acao.md` e implementar,
+seguindo todo o padrão que o claude.md exige". O reflexo natural seria começar a codar uma feature
+gigante. Em vez disso, ele parou e contrapôs: aquele documento não é uma feature, é um *epic plan*
+que ele mesmo declara (linha 18) que "não substitui os ciclos speckit por feature; ele os coordena".
+Ele orquestra uma cadeia de três features (013 motor de voz, 014 Presença, 015 refino), cada uma com
+seu próprio ciclo speckit + checkpoint de validação meu. Ou seja: "implementar tudo seguindo o
+padrão" era contraditório — o próprio padrão (speckit por feature, com checkpoint entre elas) proíbe
+achatar três features num passo só. O caminho fiel era começar a cadeia certo: re-validar a fundação
+depois que a 012 mergeou, resolver as decisões de kickoff (nome da nav, onde guardar a voz, número da
+migration) e então planejar a 013, parando antes de codar.
+
+**O que aprendi:** documentos têm "altitude". Um epic plan, uma spec de feature e uma task são camadas
+diferentes, e tratar um pelo outro gera erro caro: implementar um plano de bloco como se fosse uma
+feature teria virado um mega-PR sem checkpoints, sem validação por elo, sem os gates de constituição
+por feature — exatamente o que o processo existe para evitar. A pista estava no próprio documento
+("ele os coordena"), mas era fácil passar reto, animada para "ver código saindo". O instinto certo foi
+ler a *intenção do artefato* antes de executar o verbo "implementar".
+
+**Por que importa:** é material de `build-with-claude` e de `product-thinking`. Para quem usa IA para
+construir, o reflexo "implementa isso para mim" assume que todo documento é executável do mesmo jeito
+— e a IA prestativa demais obedece. O valor apareceu no Claude perguntando "isto é uma feature ou um
+plano de várias?" antes de teclar. Reforça a regra que já está no `.claude/CLAUDE.md`: contrapor vale
+mais que executar rápido — aqui, o "executar rápido" custaria reorganizar três features depois.
