@@ -2,7 +2,9 @@ import type { createServerClient } from '@/lib/db/supabase/server'
 import type {
   Draft,
   DraftFormat,
+  DraftListPage,
   DraftStatus,
+  DraftStatusFilter,
   LengthPref,
   SeedType,
   VoiceFeedback,
@@ -97,22 +99,91 @@ export async function insertDraft(
   return toDraft(data as DraftRow)
 }
 
-/** Lista os rascunhos do usuário, mais recentes primeiro (usa o índice `drafts_user_created_idx`). */
+/** Opções de listagem do hub (014): paginação por cursor + filtro de status/formato. */
+export interface ListDraftsOptions {
+  /** Cursor opaco (created_at do último item da página anterior). */
+  cursor?: string
+  /** Itens por página; com teto rígido (`MAX_DRAFTS_PAGE`) para nunca abrir query ilimitada. */
+  limit?: number
+  /** Recorte por status; `ativos` (default) exclui os arquivados. */
+  status?: DraftStatusFilter
+  /** Recorte por formato (post/resumo); sem filtro quando ausente. */
+  format?: DraftFormat
+}
+
+const DEFAULT_DRAFTS_PAGE = 20
+const MAX_DRAFTS_PAGE = 20
+
+function clampLimit(limit: number | undefined): number {
+  if (!limit || limit < 1) return DEFAULT_DRAFTS_PAGE
+  return Math.min(limit, MAX_DRAFTS_PAGE)
+}
+
+/**
+ * Lista paginada dos rascunhos do usuário, mais recentes primeiro (índice `drafts_user_created_idx`).
+ * Keyset por `created_at`: pede `limit + 1` para saber se há próxima página sem um count à parte.
+ * Por padrão (`ativos`) exclui os arquivados (`discarded`) — conserto do comportamento da 013.
+ * Escopo por `user_id` (a RLS reforça). Em erro devolve página vazia (o hub nunca quebra).
+ */
 export async function listDrafts(
   supabase: SupabaseServerClient,
   userId: string,
-  limit = 50
-): Promise<Draft[]> {
-  const { data, error } = await supabase
+  options: ListDraftsOptions = {}
+): Promise<DraftListPage> {
+  const limit = clampLimit(options.limit)
+
+  let query = supabase
     .from('drafts')
     .select(DRAFT_COLUMNS)
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
-    .limit(limit)
 
-  if (error || !data) return []
+  if (options.status === 'arquivados') query = query.eq('status', 'discarded')
+  else if (options.status === 'copiados') query = query.eq('status', 'copied')
+  else query = query.neq('status', 'discarded')
 
-  return (data as DraftRow[]).map(toDraft)
+  if (options.format) query = query.eq('format', options.format)
+  if (options.cursor) query = query.lt('created_at', options.cursor)
+
+  const { data, error } = await query.limit(limit + 1)
+
+  if (error || !data) return { items: [], nextCursor: null }
+
+  const rows = data as DraftRow[]
+  const hasMore = rows.length > limit
+  const items = (hasMore ? rows.slice(0, limit) : rows).map(toDraft)
+  const nextCursor = hasMore ? items[items.length - 1]?.createdAt ?? null : null
+
+  return { items, nextCursor }
+}
+
+/**
+ * Indica se o usuário tem ao menos um rascunho em qualquer status. Usado pelo hub para distinguir o
+ * vazio pristino (mostra os caminhos de entrada) do vazio de filtro (mostra "nada neste filtro").
+ * Count `head` — não traz linhas.
+ */
+export async function hasAnyDraft(supabase: SupabaseServerClient, userId: string): Promise<boolean> {
+  const { count } = await supabase
+    .from('drafts')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+
+  return (count ?? 0) > 0
+}
+
+/**
+ * Exclui definitivamente um rascunho do próprio usuário (FR-008). Filtra por `id` E `user_id`,
+ * apoiado na política RLS `delete` da 013: um id de outro usuário não apaga nada. Devolve `true`
+ * em sucesso, `false` em erro — a rota mapeia silêncio (204), nunca confirma existência alheia.
+ */
+export async function deleteDraft(
+  supabase: SupabaseServerClient,
+  userId: string,
+  draftId: string
+): Promise<boolean> {
+  const { error } = await supabase.from('drafts').delete().eq('id', draftId).eq('user_id', userId)
+
+  return !error
 }
 
 export interface UpdateDraftInput {

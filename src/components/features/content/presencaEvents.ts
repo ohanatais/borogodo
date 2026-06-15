@@ -18,3 +18,26 @@ export interface PresencaOpenDetail {
 export function openPresenca(detail: PresencaOpenDetail): void {
   window.dispatchEvent(new CustomEvent(PRESENCA_OPEN_EVENT, { detail }))
 }
+
+// ─── Retomar (014) ────────────────────────────────────────────────────────────
+// Reabrir um rascunho já salvo na superfície de edição, com body/ângulo preservados — sem regerar
+// (FR-004). Evento separado para o GenerateSheet distinguir "gerar do zero" de "editar o que existe".
+
+export const PRESENCA_RESUME_EVENT = 'borogodo:presenca-resume'
+
+export interface PresencaResumeDetail {
+  /** Id do rascunho existente — edições/cópia fazem PATCH neste id, sem criar linha nova. */
+  draftId: string
+  format: DraftFormat
+  seedType: SeedType
+  seedRef: string
+  angle: string
+  body: string
+  /** Texto curto da evidência base, mostrado como "Baseado em:". */
+  seedSummary: string
+}
+
+/** Reabre um rascunho salvo no fluxo de edição da 013, sem regeração automática. */
+export function resumePresenca(detail: PresencaResumeDetail): void {
+  window.dispatchEvent(new CustomEvent(PRESENCA_RESUME_EVENT, { detail }))
+}

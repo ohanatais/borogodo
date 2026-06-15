@@ -18,6 +18,11 @@ interface DraftCardProps {
   index: number
   format: DraftFormat
   seed: DraftSeed
+  /**
+   * Quando presente (modo "retomar" da 014), o card edita um rascunho já existente: editar/copiar
+   * fazem PATCH neste id em vez de criar uma linha nova. Ausente = card de geração fresca (013).
+   */
+  existingDraftId?: string
 }
 
 const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
@@ -31,14 +36,15 @@ const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
  * `edited` → `copied`) e o feedback "soa como você?" — tudo escopado ao próprio usuário pela rota.
  * A persistência é resiliente: uma falha mantém o texto na tela e só sinaliza discretamente.
  */
-export function DraftCard({ variant, index, format, seed }: DraftCardProps) {
+export function DraftCard({ variant, index, format, seed, existingDraftId }: DraftCardProps) {
   const t = useTranslations('presenca')
   const [body, setBody] = useState(variant.body)
   const [isEditing, setIsEditing] = useState(false)
   const [voiceFeedback, setVoiceFeedback] = useState<VoiceFeedback | null>(null)
   const [saveError, setSaveError] = useState(false)
 
-  const draftIdRef = useRef<string | null>(null)
+  // Em "retomar", já partimos do id existente: ensureSaved devolve-o sem criar nada novo.
+  const draftIdRef = useRef<string | null>(existingDraftId ?? null)
   const savePromiseRef = useRef<Promise<string | null> | null>(null)
   const editedRef = useRef(false)
   const labelId = `draft-${index}`

@@ -50,3 +50,13 @@ export async function patchDraft(id: string, input: PatchDraftInput): Promise<Dr
     return null
   }
 }
+
+/** Exclui definitivamente um rascunho (014). `true` em sucesso (204); `false` em falha → rollback na UI. */
+export async function deleteDraft(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/content/drafts/${id}`, { method: 'DELETE' })
+    return res.ok
+  } catch {
+    return false
+  }
+}
