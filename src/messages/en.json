@@ -260,5 +260,38 @@
       "retry": "Try again",
       "errorGeneric": "Something went wrong. Please try again."
     }
+  },
+  "presenca": {
+    "use": "Use",
+    "basedOn": "Based on: {source}",
+    "generating": "Writing in your voice...",
+    "regenerate": "Generate again",
+    "angleLabel": "Angle",
+    "formats": {
+      "post": "Post",
+      "impactSummary": "Impact summary"
+    },
+    "adjust": {
+      "shorter": "Shorter",
+      "lessFormal": "Less formal",
+      "removeJargon": "Drop the jargon"
+    },
+    "copy": "Copy",
+    "copied": "Copied",
+    "voice": {
+      "prompt": "Sounds like you?",
+      "yes": "It does",
+      "no": "It doesn't"
+    },
+    "calibration": {
+      "open": "Tune voice",
+      "hint": "Paste 1 or 2 of your own texts so I get the tone right",
+      "save": "Save voice"
+    },
+    "errors": {
+      "generationFailed": "I couldn't write this the right way. Try again?",
+      "seedNotFound": "I couldn't find that evidence.",
+      "generic": "Something went wrong. Try again?"
+    }
   }
 }
