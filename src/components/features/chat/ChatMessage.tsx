@@ -4,6 +4,31 @@ import { ThumbsUp, ThumbsDown } from 'lucide-react'
 import { CitationChip } from './CitationChip'
 import type { Citation } from '@/lib/ai/chat/answerCareerQuestion'
 
+function renderMarkdown(text: string): React.ReactNode[] {
+  // Split on **bold** and render each segment
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    }
+    return part
+  })
+}
+
+function MarkdownText({ content }: { content: string }) {
+  const lines = content.split('\n')
+  return (
+    <>
+      {lines.map((line, i) => (
+        <span key={i}>
+          {renderMarkdown(line)}
+          {i < lines.length - 1 && <br />}
+        </span>
+      ))}
+    </>
+  )
+}
+
 export interface MessageData {
   id: string
   role: 'user' | 'assistant'
@@ -76,8 +101,14 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful, showSuggest
               }
         }
       >
-        {message.content || (message.isStreaming && <span className="opacity-50">...</span>)}
-        {message.isStreaming && message.content && (
+        {isUser
+          ? message.content
+          : message.content
+            ? <MarkdownText content={message.content} />
+            : message.isStreaming
+              ? <span className="opacity-50">...</span>
+              : null}
+        {!isUser && message.isStreaming && message.content && (
           <span
             className="inline-block w-0.5 h-3.5 ml-0.5 rounded-sm motion-safe:animate-pulse align-text-bottom"
             style={{ background: 'var(--color-primary)' }}

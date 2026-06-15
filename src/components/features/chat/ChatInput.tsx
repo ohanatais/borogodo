@@ -30,12 +30,11 @@ export function ChatInput({ value, onChange, onSubmit, disabled, placeholder }: 
 
   return (
     <div
-      className="flex items-end gap-2 rounded-2xl px-3 py-2 focus-within:ring-2 focus-within:ring-offset-1 transition-shadow"
+      className="flex items-end gap-2 rounded-2xl px-3 py-2 transition-colors"
       style={{
         background: 'var(--card)',
         border: '1px solid var(--border)',
-        '--tw-ring-color': 'var(--color-primary)',
-      } as React.CSSProperties}
+      }}
     >
       <textarea
         ref={textareaRef}

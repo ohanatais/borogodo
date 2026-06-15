@@ -28,12 +28,14 @@ type State = {
   context: ChatOpenDetail['context'] | null
   pendingCorrection: CorrectionAction | null
   pendingMarco: MarcoPreview | null
+  pendingAutoSend: string | null
 }
 
 type Action =
   | { type: 'OPEN'; payload: ChatOpenDetail }
   | { type: 'CLOSE' }
   | { type: 'NEW_CONVERSATION' }
+  | { type: 'CLEAR_AUTO_SEND' }
   | { type: 'SET_DRAFT'; text: string }
   | { type: 'USER_SENT'; id: string; content: string }
   | { type: 'ASSISTANT_STARTED'; id: string }
@@ -50,18 +52,22 @@ function reducer(state: State, action: Action): State {
       const contextChanged =
         newContext?.type !== state.context?.type ||
         newContext?.entityId !== state.context?.entityId
-      const hasPrefill = !!action.payload.prefillMessage
+      const prefill = action.payload.prefillMessage ?? ''
+      const hasPrefill = !!prefill
       const shouldReset = contextChanged || hasPrefill
       return {
         ...state,
         open: true,
         context: newContext,
-        draft: action.payload.prefillMessage ?? '',
+        draft: '',
         messages: shouldReset ? [] : state.messages,
         pendingCorrection: shouldReset ? null : state.pendingCorrection,
         pendingMarco: shouldReset ? null : state.pendingMarco,
+        pendingAutoSend: hasPrefill ? prefill : null,
       }
     }
+    case 'CLEAR_AUTO_SEND':
+      return { ...state, pendingAutoSend: null }
     case 'CLOSE':
       return { ...state, open: false }
     case 'NEW_CONVERSATION':
@@ -147,6 +153,7 @@ const initialState: State = {
   context: null,
   pendingCorrection: null,
   pendingMarco: null,
+  pendingAutoSend: null,
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -155,29 +162,6 @@ export function ChatSheet() {
   const [state, dispatch] = useReducer(reducer, initialState)
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputAreaRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handler(e: Event) {
-      const detail = (e as CustomEvent<ChatOpenDetail>).detail
-      dispatch({ type: 'OPEN', payload: detail ?? {} })
-    }
-    window.addEventListener('borogodo:chat-open', handler)
-    return () => window.removeEventListener('borogodo:chat-open', handler)
-  }, [])
-
-  // Focus textarea when sheet opens
-  useEffect(() => {
-    if (state.open) {
-      requestAnimationFrame(() => {
-        const textarea = inputAreaRef.current?.querySelector('textarea')
-        textarea?.focus()
-      })
-    }
-  }, [state.open])
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [state.messages, state.pendingCorrection, state.pendingMarco])
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -273,6 +257,37 @@ export function ChatSheet() {
     [state.messages, state.status, state.context]
   )
 
+  useEffect(() => {
+    function handler(e: Event) {
+      const detail = (e as CustomEvent<ChatOpenDetail>).detail
+      dispatch({ type: 'OPEN', payload: detail ?? {} })
+    }
+    window.addEventListener('borogodo:chat-open', handler)
+    return () => window.removeEventListener('borogodo:chat-open', handler)
+  }, [])
+
+  // Auto-send prefill message when sheet opens with a pre-set context action
+  useEffect(() => {
+    if (state.open && state.pendingAutoSend) {
+      dispatch({ type: 'CLEAR_AUTO_SEND' })
+      void sendMessage(state.pendingAutoSend)
+    }
+  }, [state.open, state.pendingAutoSend, sendMessage])
+
+  // Focus textarea when sheet opens (only when no auto-send pending)
+  useEffect(() => {
+    if (state.open && !state.pendingAutoSend) {
+      requestAnimationFrame(() => {
+        const textarea = inputAreaRef.current?.querySelector('textarea')
+        textarea?.focus()
+      })
+    }
+  }, [state.open, state.pendingAutoSend])
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
+  }, [state.messages, state.pendingCorrection, state.pendingMarco])
+
   function handleSubmit() {
     void sendMessage(state.draft)
   }
@@ -297,14 +312,14 @@ export function ChatSheet() {
           style={{ background: 'oklch(18% 0.02 260 / 0.4)', backdropFilter: 'blur(2px)' }}
         />
 
-        {/* Mobile: bottom sheet. Desktop: floating panel bottom-right */}
+        {/* Mobile: bottom sheet (60dvh fixed). Desktop: right-side drawer fixed height */}
         <Dialog.Content
           onInteractOutside={(e) => e.preventDefault()}
           aria-describedby={undefined}
-          className="fixed z-50 flex flex-col focus:outline-none
-            bottom-0 left-0 right-0 rounded-t-[16px] max-h-[92dvh]
-            lg:bottom-4 lg:right-6 lg:left-auto lg:top-auto
-            lg:w-[460px] lg:max-h-[84dvh] lg:rounded-2xl"
+          className="fixed z-50 flex flex-col focus:outline-none overflow-hidden
+            bottom-0 left-0 right-0 rounded-t-[20px] h-[72dvh]
+            lg:bottom-4 lg:right-6 lg:left-auto lg:top-4
+            lg:w-[480px] lg:h-auto lg:max-h-[calc(100dvh-32px)] lg:rounded-2xl"
           style={{
             background: 'var(--color-creme)',
             boxShadow: '0 8px 40px oklch(18% 0.02 260 / 0.25), 0 2px 8px oklch(18% 0.02 260 / 0.1)',

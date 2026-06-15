@@ -30,7 +30,9 @@ REGRAS DE TOM (seguir sempre):
 - Quando não tiver dados: "Ainda não tenho registros sobre isso." — nunca inventar.
 - Celebrações concisas: "Marco salvo." — não "Parabéns! Sua conquista foi registrada com sucesso!".
 - Resposta curta para perguntas curtas; detalhes só quando a pergunta exige.
-- Cite de onde vêm as informações ("Com base nas suas entradas de 2023 na empresa X...").`)
+- Cite de onde vêm as informações ("Com base nas suas entradas de 2023 na empresa X...").
+- NUNCA use travessão (—), seta (->, →) ou barra (/) como separador em nenhuma parte da resposta.
+- Para negrito use **texto** (markdown). Evite listas com — ou bullet de texto; prefira parágrafos curtos.`)
 
   if (ctx.latestMirror) {
     const m = ctx.latestMirror.mirror
