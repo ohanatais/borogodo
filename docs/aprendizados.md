@@ -226,3 +226,99 @@ força, não falta de foco.
 
 **Por que importa:** é o fosso de marca (brasilidade de substância) e um princípio de produto que
 cruza espelho, captura e conteúdo. Bom pra `product-thinking`.
+
+---
+
+## 2026-06-14 — Extração é estruturação, não enriquecimento — e isso tem consequências de produto
+
+**O que aconteceu:** ao subir o Career Master Document e ver o resultado na linha do tempo, o
+conteúdo era essencialmente uma cópia do documento original — parágrafos longos, em inglês, no
+fraseado exato de como foram escritos. O sistema foi propositalmente instruído a "preservar a voz
+da pessoa e não reescrever em corporês." O resultado: quality in = quality out. Documentos bem
+escritos geram timeline boa. Documentos verbosos geram bullets de cinco linhas.
+
+**O que aprendi:** "capturar" e "melhorar" são dois produtos diferentes. Hoje o Borogodó captura
+com estrutura (company, role, project_name, metric extraído) mas não distila o conteúdo. O Espelho
+é a única camada que sintetiza — e ele opera sobre o conjunto, não sobre cada entrada individual.
+Existe uma decisão de produto não tomada conscientemente até aqui: o pipeline de extração poderia
+distilir o `what_i_did` para 1–2 frases enquanto preserva a voz, antes mesmo de chegar no Espelho.
+O trade-off é real: distilir sem aprovação da pessoa é arriscado (e se o modelo distilir errado?),
+mas não distilir deixa o valor do produto dependente da qualidade do documento que ela trouxe.
+
+**Por que importa:** se o produto promete "te devolver sua carreira mais clara do que você consegue
+ver", a timeline deveria ser mais clara do que o documento original, não uma cópia. É uma promessa
+que hoje o produto não cumpre na camada de entrada — só cumpre no Espelho. Bom material de
+`product-thinking`: a diferença entre um pipeline que estrutura e um pipeline que agrega valor.
+
+---
+
+## 2026-06-14 — Dois arquivos sobre a mesma carreira geram duplicatas que dedup textual não pega
+
+**O que aconteceu:** a usuária subiu dois PDFs sobre a mesma carreira — um em inglês (Career Master
+Document), outro em português (export de LinkedIn/portfólio). O pipeline extraiu entradas de ambos.
+A deduplicação implementada (comparar os primeiros 120 chars do `what_i_did`) não pegou porque o
+conteúdo era semanticamente idêntico mas textualmente diferente. Resultado: cada projeto aparecia
+duas vezes no painel, uma versão em cada idioma. Além disso, um dos PDFs extraiu "Cheesake Labs"
+(typo) em vez de "Cheesecake Labs", criando duas empresas separadas na timeline porque o
+agrupamento é por texto exato.
+
+**O que aprendi:** para um produto que aceita "suba o que você tiver", dedup textual é insuficiente.
+O mesmo `what_i_did` em inglês e português têm 0% de sobreposição de texto mas 100% de sobreposição
+semântica. A solução certa é embeddings: gerar um vetor para cada entrada e checar similaridade
+coseno contra entradas existentes do mesmo usuário+empresa+projeto antes de salvar. Modelos de
+embedding multilíngues capturam que "Led end-to-end Discovery & Definition" e "Liderou Discovery
+& Definition end-to-end" são a mesma coisa. Para nomes de empresa com typo, a solução é separada
+e mais simples: fuzzy match com distância de Levenshtein ≤ 2 no momento de agrupar.
+
+**Por que importa:** "o usuário pode subir mil coisas" é uma promessa de produto. Para honrá-la
+sem criar caos na timeline, o sistema precisa de dedup semântico, não só textual. Essa suposição
+implícita (dedup por texto é suficiente) só ficou visível quando uma usuária real subiu dois
+arquivos sobre o mesmo período. É o tipo de decisão de arquitetura que deveria ter sido feita
+antes da feature de captura, e que agora entra no backlog como dívida técnica com nome.
+
+---
+
+## 2026-06-14 — Corrigir lógica não limpa dados antigos — duas camadas, dois fixes
+
+**O que aconteceu:** corrigimos a deduplicação em `groupCompanies` para usar chave por ano em vez
+de data exata, evitando que o mesmo cargo aparecesse três vezes. Mas ao abrir o app, as duplicatas
+continuavam. A lógica estava certa — os dados já existiam no banco com os campos duplicados. A
+função `groupCompanies` opera sobre o que vem do SELECT; não tem como retroativamente limpar o que
+já foi inserido. A solução foi apagar as entradas do banco e reimportar.
+
+**O que aprendi:** lógica de display e dados persistidos são camadas independentes. Uma correção
+no agrupamento melhora como novos dados são apresentados, mas não toca o que já está armazenado.
+Para bugs que geraram dados inválidos, o fix precisa de duas partes: a correção na lógica E um
+script/migration que corrija (ou apague) os dados existentes. Quando o dado errado é simples
+demais para valer uma migration elaborada, "delete e reimporte de fonte limpa" é uma decisão
+válida — desde que a fonte limpa exista.
+
+**Por que importa:** parece óbvio, mas não é intuitivo quando você está desenvolvendo — você
+corrige o código, recarrega a página e espera que o problema suma. Não some, porque o dado ruim
+ainda está no banco. É um padrão de debugging importante para comunicar e um lembrete de que
+"corrigir o bug" e "corrigir os dados que o bug gerou" são duas tarefas distintas.
+
+---
+
+## 2026-06-14 — Componentes em árvores React separadas precisam de canal explícito de comunicação
+
+**O que aconteceu:** o botão "Adicionar via captura" dentro do `ProjectDetailPanel` (renderizado
+dentro de `HistoricoTimeline` dentro de `HistoricoPageClient`) precisava acionar a barra de captura
+no rodapé, que vive no `AppShellClient` — o componente de layout raiz. No App Router do Next.js,
+layout e page são renderizados como irmãos pelo mesmo nó, não como pai-filho no sentido de props.
+Não tem como passar callback de filho para cima atravessando um layout. O `AppShellClient` não
+conhece o `HistoricoPageClient` e vice-versa.
+
+A solução foi um custom event do browser: `window.dispatchEvent(new CustomEvent('borogodo:capture-context', { detail: { name, company } }))` no clique do botão, e `window.addEventListener('borogodo:capture-context', handler)` no `AppShellClient`. O layout escuta, atualiza seu estado e a barra de captura ganha o contexto do projeto — com foco automático no textarea.
+
+**O que aprendi:** quando dois client components precisam se comunicar mas não compartilham
+ancestral comum acessível via props (ou o ancestral comum é server component), um event bus via
+`window` é a solução mais simples e explícita. Alternativas — Context API global, estado no URL
+via query params, Zustand — têm mais cerimônia sem ganho real para casos pontuais como este.
+O padrão de nomear o evento com prefixo do produto (`borogodo:`) evita colisão com eventos de
+libs de terceiros.
+
+**Por que importa:** é um padrão que vai aparecer toda vez que uma feature precisar cruzar a
+fronteira layout↔page no App Router. Vale ter o padrão estabelecido e nomeado para não reinventar
+a cada vez — e para explicar para não-devs por que "mas não dá pra só passar como prop?" tem uma
+resposta de arquitetura, não de descuido.

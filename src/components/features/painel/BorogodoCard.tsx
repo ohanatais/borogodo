@@ -4,19 +4,19 @@ import type { PanelMirror } from '@/lib/panel/getPanelData'
 
 interface BorogodoCardProps {
   name: string
+  avatarUrl?: string | null
   mirror: PanelMirror | null
   entryCount: number
 }
 
 const MIRROR_READY_THRESHOLD = 3
 
-export function BorogodoCard({ name, mirror, entryCount }: BorogodoCardProps) {
+export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCardProps) {
   const t = useTranslations('panel.borogodoCard')
   const firstName = name.trim().split(' ')[0] || name
 
   const hasData = mirror !== null && entryCount >= MIRROR_READY_THRESHOLD
   const specialties = mirror?.strengthThemes?.slice(0, 5) ?? []
-  const skillPills = mirror?.strengthThemes?.slice(0, 3) ?? []
 
   return (
     <section
@@ -24,15 +24,23 @@ export function BorogodoCard({ name, mirror, entryCount }: BorogodoCardProps) {
       className="rounded-xl p-6 lg:p-8 mb-6"
       style={{ background: 'var(--color-primary)' }}
     >
-      {/* Avatar + name heading */}
+      {/* Avatar + heading */}
       <div className="flex items-center gap-4 mb-6">
-        <div
-          className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shrink-0"
-          style={{ background: 'var(--background)', color: 'var(--color-primary)' }}
-          aria-hidden="true"
-        >
-          {firstName[0]?.toUpperCase() ?? '?'}
-        </div>
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={name}
+            className="w-14 h-14 rounded-full shrink-0 object-cover"
+          />
+        ) : (
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shrink-0"
+            style={{ background: 'var(--background)', color: 'var(--color-primary)' }}
+            aria-hidden="true"
+          >
+            {firstName[0]?.toUpperCase() ?? '?'}
+          </div>
+        )}
         <div className="min-w-0">
           {hasData ? (
             <h2
@@ -49,12 +57,6 @@ export function BorogodoCard({ name, mirror, entryCount }: BorogodoCardProps) {
               {t('formingOf')} <em className="font-normal italic">{firstName}</em>{t('formingSuffix')}
             </h2>
           )}
-          <p
-            className="text-sm mt-1 opacity-70"
-            style={{ color: 'var(--color-primary-fg)' }}
-          >
-            {name}
-          </p>
         </div>
       </div>
 
@@ -62,7 +64,7 @@ export function BorogodoCard({ name, mirror, entryCount }: BorogodoCardProps) {
         <>
           {/* Specialty chips */}
           {specialties.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-2 mb-6">
               {specialties.map((theme) => (
                 <span
                   key={theme}
@@ -73,24 +75,6 @@ export function BorogodoCard({ name, mirror, entryCount }: BorogodoCardProps) {
                   }}
                 >
                   {theme}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Skill pills — outline style */}
-          {skillPills.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
-              {skillPills.map((skill) => (
-                <span
-                  key={`pill-${skill}`}
-                  className="px-3 py-1 rounded-full text-sm font-medium border whitespace-nowrap"
-                  style={{
-                    borderColor: 'oklch(98% 0.01 320 / 0.35)',
-                    color: 'var(--color-primary-fg)',
-                  }}
-                >
-                  {skill}
                 </span>
               ))}
             </div>

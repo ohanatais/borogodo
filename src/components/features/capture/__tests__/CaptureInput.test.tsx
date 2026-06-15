@@ -144,4 +144,67 @@ describe('CaptureInput', () => {
 
     expect(fetchMock).not.toHaveBeenCalled()
   })
+
+  it('shows project chip when projectContext is provided', () => {
+    render(
+      <CaptureInput
+        placeholder="Conta algo..."
+        mode="registrar"
+        projectContext={{ name: 'Alpha', company: 'Acme' }}
+      />
+    )
+    expect(screen.getByText('Alpha')).toBeInTheDocument()
+  })
+
+  it('calls onClearProjectContext when × in chip is clicked', () => {
+    const onClear = vi.fn()
+    render(
+      <CaptureInput
+        placeholder="Conta algo..."
+        mode="registrar"
+        projectContext={{ name: 'Alpha', company: 'Acme' }}
+        onClearProjectContext={onClear}
+      />
+    )
+    fireEvent.click(screen.getByRole('button', { name: /remover projeto/i }))
+    expect(onClear).toHaveBeenCalled()
+  })
+
+  it('passes project_name in FormData when projectContext is active', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true })
+    global.fetch = fetchMock
+
+    render(
+      <CaptureInput
+        placeholder="Conta algo..."
+        mode="registrar"
+        projectContext={{ name: 'Alpha', company: 'Acme' }}
+      />
+    )
+    fireEvent.change(screen.getByPlaceholderText('Conta algo...'), {
+      target: { value: 'Texto do projeto' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /enviar/i }))
+
+    await waitFor(() => {
+      const body = fetchMock.mock.calls[0][1].body as FormData
+      expect(body.get('project_name')).toBe('Alpha')
+    })
+  })
+
+  it('does not pass project_name when projectContext is null', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true })
+    global.fetch = fetchMock
+
+    render(<CaptureInput placeholder="Conta algo..." mode="registrar" />)
+    fireEvent.change(screen.getByPlaceholderText('Conta algo...'), {
+      target: { value: 'Texto normal' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /enviar/i }))
+
+    await waitFor(() => {
+      const body = fetchMock.mock.calls[0][1].body as FormData
+      expect(body.get('project_name')).toBeNull()
+    })
+  })
 })

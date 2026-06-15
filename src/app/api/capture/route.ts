@@ -102,10 +102,18 @@ async function handleTextCapture(
     return textInput.error
   }
 
+  const projectName = formData.get('project_name')
+  const overrideProjectName = typeof projectName === 'string' && projectName.trim()
+    ? projectName.trim()
+    : undefined
+
   try {
     const context = await buildCaptureContext(supabase, userId)
     const { entries, reflection } = await captureAndReflect(textInput.rawText, 'text', context)
-    const saved = await saveEntries(supabase, userId, entries)
+    const entriesWithProject = overrideProjectName
+      ? entries.map((e) => ({ ...e, project_name: overrideProjectName }))
+      : entries
+    const saved = await saveEntries(supabase, userId, entriesWithProject)
 
     dispatchAsyncJobs(userId)
 

@@ -28,6 +28,7 @@ export default async function PainelPage() {
           <div className="min-w-0">
             <BorogodoCard
               name={name}
+              avatarUrl={data.avatarUrl}
               mirror={data.mirror}
               entryCount={data.entryCount}
             />
