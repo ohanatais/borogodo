@@ -50,15 +50,16 @@ describe('golden set — casos ruins (o ruleset pega cada classe)', () => {
 })
 
 describe('golden set — cobertura do harness', () => {
-  it('tem ao menos 10 casos bons cobrindo post e resumo de impacto', () => {
-    expect(goodCases.length).toBeGreaterThanOrEqual(10)
+  it('tem ao menos 12 casos bons cobrindo os 3 formatos (post, resumo, mini-bio)', () => {
+    expect(goodCases.length).toBeGreaterThanOrEqual(12)
     expect(goodCases.some((c) => c.format === 'post')).toBe(true)
     expect(goodCases.some((c) => c.format === 'impact_summary')).toBe(true)
+    expect(goodCases.some((c) => c.format === 'mini_bio')).toBe(true)
   })
 
-  it('os casos ruins cobrem os 9 asserts', () => {
+  it('os casos ruins cobrem os 10 asserts (9 da 013 + clichê de bio da 015)', () => {
     const covered = new Set(badCases.map((c) => c.assert))
-    for (let assert = 1; assert <= 9; assert++) {
+    for (let assert = 1; assert <= 10; assert++) {
       expect(covered.has(assert)).toBe(true)
     }
   })

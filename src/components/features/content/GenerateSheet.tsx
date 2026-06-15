@@ -23,6 +23,7 @@ type Mode = 'generate' | 'resume'
 const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
   post: 'formats.post',
   impact_summary: 'formats.impactSummary',
+  mini_bio: 'formats.miniBio',
 }
 
 /** Linhas shimmer durante a geração — animação, não spinner (shape). */

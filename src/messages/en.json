@@ -269,7 +269,8 @@
     "angleLabel": "Angle",
     "formats": {
       "post": "Post",
-      "impactSummary": "Impact summary"
+      "impactSummary": "Impact summary",
+      "miniBio": "Mini-bio"
     },
     "adjust": {
       "label": "Adjust both drafts",
@@ -286,7 +287,15 @@
     "voice": {
       "prompt": "Sounds like you?",
       "yes": "It does",
-      "no": "It doesn't"
+      "no": "It doesn't",
+      "recalibrate": {
+        "suggestion": "I noticed some drafts didn't sound like you. Want me to tune your voice from your feedback?",
+        "accept": "Tune my voice",
+        "dismiss": "Not now",
+        "applying": "Tuning your voice...",
+        "done": "Done. I tuned your voice from your feedback, without touching your samples. New drafts already reflect it.",
+        "error": "I couldn't tune it right now. Your feedback is still saved, try again?"
+      }
     },
     "calibration": {
       "open": "Tune voice",

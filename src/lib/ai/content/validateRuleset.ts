@@ -3,6 +3,7 @@ import {
   AI_JARGON,
   ANTITHESIS_PATTERNS,
   BANNED_BUZZWORDS,
+  BIO_CLICHES,
   EMOJI_RE,
   EMPHASIS_ADVERBS,
   LINKEDIN_JARGON,
@@ -30,7 +31,8 @@ function checkPatterns(
 }
 
 /**
- * Valida o `body` de uma variante contra as 9 regras anti-IA da Geração de Conteúdo (013).
+ * Valida o `body` de uma variante contra as 10 regras anti-IA da Geração de Conteúdo
+ * (9 da 013 + assert 10 anti-clichê de bio da 015).
  * Determinístico, sem chamar IA — puro string matching e regex (espelha `validateMirrorRuleset`).
  * Retorna array de violações; vazio = passa. Resiliente a entrada vazia (não lança).
  */
@@ -72,6 +74,9 @@ export function validateContentRuleset(text: string, field = 'body'): ContentRul
   } else {
     checkPatterns(text, SILLY_BRAZILIANISM, 9, field, (p) => `"${field}" contém brasilidade boba (${p.source})`, violations)
   }
+
+  // Assert 10 (015): sem clichê de bio (apaixonado por tecnologia, movido a desafios, etc.)
+  checkPatterns(text, BIO_CLICHES, 10, field, (p) => `"${field}" contém clichê de bio (${p.source})`, violations)
 
   return violations
 }
