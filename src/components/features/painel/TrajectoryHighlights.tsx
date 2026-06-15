@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl'
 import type { HighlightEntry } from '@/lib/panel/getPanelData'
+import { SectionLabel } from '@/components/ui/SectionLabel'
 
 interface TrajectoryHighlightsProps {
   highlights: HighlightEntry[]
@@ -12,12 +13,7 @@ export function TrajectoryHighlights({ highlights }: TrajectoryHighlightsProps) 
 
   return (
     <section aria-label={t('title')} className="mb-4">
-      <p
-        className="text-xs font-semibold uppercase tracking-widest px-4 mb-2"
-        style={{ color: 'var(--muted-foreground)' }}
-      >
-        {t('title')}
-      </p>
+      <SectionLabel className="px-4">{t('title')}</SectionLabel>
       <div className="space-y-2">
         {highlights.map((entry) => (
           <div
@@ -34,7 +30,7 @@ export function TrajectoryHighlights({ highlights }: TrajectoryHighlightsProps) 
               </span>
             )}
             <p
-              className="text-sm font-semibold leading-snug line-clamp-2 mb-0.5"
+              className="text-sm font-semibold leading-snug mb-0.5"
               style={{ color: 'var(--foreground)' }}
             >
               {entry.what_i_did}

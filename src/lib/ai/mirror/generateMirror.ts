@@ -10,7 +10,7 @@ import type { Mirror, MirrorSnapshot, EvidenceItem } from '@/types/mirror'
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 
-const MAX_TOKENS = 2048
+const MAX_TOKENS = 4096
 const MAX_ENTRIES = 20
 const FALLBACK_NAME = 'você'
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Paperclip, Plus, ExternalLink, Link as LinkIcon, ImageIcon } from 'lucide-react'
+import { Paperclip, Plus, ExternalLink, Link as LinkIcon } from 'lucide-react'
 import type { EvidenceItem } from '@/lib/historico/getHistoricoData'
 
 interface EvidenceSectionProps {
@@ -75,23 +75,67 @@ export function EvidenceSection({ entryId, initial }: EvidenceSectionProps) {
 
   return (
     <div className="pt-1 space-y-2">
-      {/* Existing evidence chips */}
-      {evidences.length > 0 && (
+      {/* Image thumbnails — max 3 visible, +N overflow */}
+      {(() => {
+        const images = evidences.filter((ev) => ev.type === 'image')
+        if (images.length === 0) return null
+        const MAX_PREVIEW = 3
+        const visible = images.slice(0, MAX_PREVIEW)
+        const overflow = images.length - MAX_PREVIEW
+        return (
+          <div className="flex gap-2">
+            {visible.map((ev, i) => (
+              <a
+                key={i}
+                href={ev.value}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={ev.label || 'Abrir imagem'}
+                className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 block transition-opacity hover:opacity-80"
+                style={{ border: '1px solid var(--border)' }}
+              >
+                <img
+                  src={ev.value}
+                  alt={ev.label || 'Evidência'}
+                  className="w-full h-full object-cover"
+                />
+              </a>
+            ))}
+            {overflow > 0 && (
+              <a
+                href={images[MAX_PREVIEW]?.value}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Ver mais ${overflow} imagem${overflow > 1 ? 'ns' : ''}`}
+                className="w-16 h-16 rounded-lg flex items-center justify-center text-xs font-medium shrink-0 transition-opacity hover:opacity-80"
+                style={{ background: 'var(--muted)', color: 'var(--muted-foreground)', border: '1px solid var(--border)' }}
+              >
+                +{overflow}
+              </a>
+            )}
+          </div>
+        )
+      })()}
+
+      {/* URL chips */}
+      {evidences.some((ev) => ev.type === 'url') && (
         <div className="flex flex-wrap gap-1.5">
-          {evidences.map((ev, i) => (
-            <a
-              key={i}
-              href={ev.value}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs transition-opacity hover:opacity-70"
-              style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)' }}
-            >
-              {ev.type === 'image' ? <ImageIcon size={10} /> : <LinkIcon size={10} />}
-              <span>{ev.label || (ev.type === 'image' ? 'Imagem' : safeHostname(ev.value))}</span>
-              <ExternalLink size={9} />
-            </a>
-          ))}
+          {evidences
+            .filter((ev) => ev.type === 'url')
+            .map((ev, i) => (
+              <a
+                key={i}
+                href={ev.value}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs transition-opacity hover:opacity-70"
+                style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)' }}
+              >
+                <LinkIcon size={10} />
+                <span>{ev.label || safeHostname(ev.value)}</span>
+                <ExternalLink size={9} />
+              </a>
+            ))}
         </div>
       )}
 

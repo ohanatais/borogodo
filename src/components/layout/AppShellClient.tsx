@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip } from 'lucide-react'
+import { Home, Sparkles, GitCommitVertical, Paperclip } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
 import { FileButton } from '@/components/features/capture/FileButton'
@@ -20,10 +20,9 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'painel',    label: 'Painel',          icon: <Home size={20} />,              path: '/painel'    },
-  { id: 'espelho',   label: 'Espelho',          icon: <Sparkles size={20} />,          path: '/espelho'   },
-  { id: 'historico', label: 'Linha do Tempo',   icon: <GitCommitVertical size={20} />, path: '/historico' },
-  { id: 'conteudo',  label: 'Conteúdo',         icon: <PenLine size={20} />,           path: null,        disabled: true },
+  { id: 'painel',    label: 'Painel',        icon: <Home size={20} />,              path: '/painel'    },
+  { id: 'espelho',   label: 'Espelho',        icon: <Sparkles size={20} />,          path: '/espelho'   },
+  { id: 'historico', label: 'Linha do Tempo', icon: <GitCommitVertical size={20} />, path: '/historico' },
 ]
 
 interface AppShellClientProps {
@@ -35,6 +34,7 @@ interface AppShellClientProps {
 export function AppShellClient({ userName, captureHint, children }: AppShellClientProps) {
   const pathname = usePathname()
   const [captureMode, setCaptureMode] = useState<'registrar' | 'perguntar'>('registrar')
+  const [comingSoonVisible, setComingSoonVisible] = useState(false)
   const [activeCapture, setActiveCapture] = useState<CapturePayload | null>(null)
   const [projectContext, setProjectContext] = useState<{ name: string; company: string } | null>(null)
 
@@ -47,6 +47,15 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
     window.addEventListener('borogodo:capture-context', handler)
     return () => window.removeEventListener('borogodo:capture-context', handler)
   }, [])
+
+  function handleModeClick(m: 'registrar' | 'perguntar') {
+    if (m === 'perguntar') {
+      setComingSoonVisible(true)
+      setTimeout(() => setComingSoonVisible(false), 2500)
+      return
+    }
+    setCaptureMode(m)
+  }
 
   function isActive(path: string | null): boolean {
     if (!path) return false
@@ -165,6 +174,11 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
           }}
         >
           <div className="max-w-[980px] mx-auto px-6 pt-4 pb-5">
+            {comingSoonVisible && (
+              <p className="text-xs mb-2 text-center" style={{ color: 'var(--muted-foreground)' }}>
+                Em breve — estamos construindo isso.
+              </p>
+            )}
             <div className="flex items-center gap-3">
               {/* Toggle */}
               <div
@@ -175,7 +189,7 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
                   <button
                     key={m}
                     type="button"
-                    onClick={() => setCaptureMode(m)}
+                    onClick={() => handleModeClick(m)}
                     className="text-xs px-3 py-1.5 rounded-full capitalize transition-all"
                     style={
                       captureMode === m
@@ -224,7 +238,7 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
                 <button
                   key={m}
                   type="button"
-                  onClick={() => setCaptureMode(m)}
+                  onClick={() => handleModeClick(m)}
                   className="text-xs px-2.5 py-1 rounded-full transition-all"
                   style={
                     captureMode === m
@@ -254,31 +268,33 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
             )}
           </div>
 
-          {/* Row 2 — nav: 4 ícones igualmente espaçados */}
+          {/* Row 2 — nav icons com labels */}
           <nav
             className="flex items-center justify-around px-2 pb-2"
             aria-label="Navegação"
           >
             {NAV_ITEMS.map((item) => {
               const active = isActive(item.path)
-              return item.disabled || !item.path ? (
+              return !item.path ? (
                 <span
                   key={item.id}
                   aria-label={item.label}
-                  className="w-10 h-10 flex items-center justify-center rounded-lg opacity-30 cursor-not-allowed"
+                  className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg opacity-30 cursor-not-allowed"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
                   {item.icon}
+                  <span className="text-[10px] font-medium">{item.label}</span>
                 </span>
               ) : (
                 <Link
                   key={item.id}
                   href={item.path}
                   aria-label={item.label}
-                  className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
+                  className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors"
                   style={{ color: active ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
                 >
                   {item.icon}
+                  <span className="text-[10px] font-medium">{item.label}</span>
                 </Link>
               )
             })}

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
+import { Logo } from '@/components/ui/Logo'
 
 interface WelcomeStepProps {
   userName: string
@@ -20,6 +21,7 @@ export function WelcomeStep({ userName, onNext }: WelcomeStepProps) {
       className="flex flex-col items-center justify-center min-h-screen px-6 py-12 text-center gap-8"
       style={{ background: 'var(--color-primary)' }}
     >
+      <Logo variant="dark" size="sm" />
       <div className="flex flex-col gap-4 max-w-md">
         <h1
           className="text-4xl sm:text-5xl leading-tight"

@@ -1,11 +1,12 @@
-# PRD — Produto de Inteligência de Carreira (nome provisório)
+# PRD — Borogodó: Inteligência de Carreira
 
-**Versão:** 0.2 (pós-pivô)
-**Data:** 5 de junho de 2026
+**Versão:** 0.3 (produto em produção — jun/2026)
+**Data original:** 5 de junho de 2026 | **Última atualização:** 14 de junho de 2026
 **Autora:** Ohana
-**Nome:** Borogodó (provisório, escolhido em 05/jun) — domínio borogodo.io · ver seção 11
 
-> Esta versão substitui a v0.1. Mudanças principais: (1) o core deixa de ser "gerar post de LinkedIn" e passa a ser **inteligência de carreira** — entender onde a pessoa manda bem e onde pode crescer — **com geração de conteúdo como segunda superfície de igual peso**; (2) público ampliado de "tech AI native" para **white-collar brasileiro** (tech, vendas, finanças, administração, marketing, RH); (3) **captura multimodal** (arquivos, áudio, e MCP experimental), não só upload de logs; (4) forma de **app web (destino)**; (5) **identidade de marca brasileira** como diferencial, no espírito do que a Maritaca AI faz.
+> **Leitura rápida:** o produto está no ar. 9 features mergeadas em main (001–009),
+> polish de UX em andamento (010). O segundo core — geração de conteúdo — é a próxima
+> grande onda. Este PRD descreve o produto como existe hoje e onde ele vai.
 
 ---
 
@@ -13,7 +14,7 @@
 
 A maioria dos profissionais não consegue enxergar nem comunicar o próprio valor. O trabalho real se dilui em entregas esquecidas, e na hora que importa — uma promoção, uma vaga, um post, uma conversa de salário — falta clareza sobre o que se fez, onde se é forte e o que desenvolver.
 
-O produto é uma **camada de memória e inteligência de carreira**: a pessoa alimenta seu trabalho real de forma simples (escrevendo, falando, subindo arquivos) e recebe de volta duas coisas:
+O produto é uma **camada de memória e inteligência de carreira**: a pessoa alimenta seu trabalho real de forma simples (escrevendo, subindo arquivos) e recebe de volta duas coisas:
 
 1. **Um espelho:** um retrato claro e honesto de onde ela manda muito bem e onde pode crescer — a partir de evidência real, não de autoavaliação chutada nem de classificação boba de skills.
 2. **Presença:** quando ela quiser, esse mesmo histórico estruturado vira conteúdo (post, mini-bio, resumo de impacto) na voz dela — bom de verdade, porque parte do trabalho real e não de uma página em branco.
@@ -50,7 +51,7 @@ O produto é uma **camada de memória e inteligência de carreira**: a pessoa al
 
 **Diferenciais:**
 
-1. Parte do trabalho real, capturado em qualquer formato (texto, áudio, arquivo).
+1. Parte do trabalho real, capturado em qualquer formato (texto, arquivo).
 2. Revela forças e lacunas com evidência — resolve a cegueira do "meu trabalho é comum" e a dúvida "onde devo crescer".
 3. A inteligência é também o motor de qualidade do conteúdo: o histórico estruturado é o que faz o post não sair genérico.
 4. Marca e experiência genuinamente brasileiras, no espírito Maritaca: tecnologia de ponta com cara, língua e humor do Brasil.
@@ -68,7 +69,7 @@ A ampliação para white-collar exige personas além de tech. Mantemos uma de pr
 
 ### 3.2 Bruno, executivo de vendas
 - Bate (ou não) meta todo mês, troca de empresa com frequência, carreira movida a resultado e relacionamento.
-- **Dores:** não documenta as próprias vitórias (deals fechados, contas viradas, negociações difíceis); na hora da entrevista ou da revisão, não lembra dos números; sente que "só vendo", sem enxergar a competência por trás.
+- **Dores:** não documenta as próprias vitórias (deals fechados, contas viradas, negociações difíceis); na hora da entrevista ou da revisão, não lembra dos números; sente que "só vende", sem enxergar a competência por trás.
 - **Ganhos:** um histórico de conquistas com números, clareza das próprias forças (negociação? farming? hunting?), e presença que atrai oportunidade e clientes.
 
 ### 3.3 Clara, analista/coordenadora financeiro-administrativa
@@ -80,64 +81,162 @@ A ampliação para white-collar exige personas além de tech. Mantemos uma de pr
 
 ---
 
-## 4. Pilares do produto
+## 4. Pilares do produto — hoje e para onde vai
 
 ### 4.1 Captura sem atrito e multimodal
-Trazer o trabalho real para dentro do produto do jeito que for mais fácil pra pessoa: escrever, falar (áudio) ou subir arquivo. *Por que importa:* sem captura quase invisível, o hábito morre. O suporte a áudio e texto livre é o que permite atender quem **não** mantém logs — a chave pra ampliar além do nicho tech.
+
+Trazer o trabalho real para dentro do produto do jeito que for mais fácil pra pessoa.
+*Por que importa:* sem captura quase invisível, o hábito morre.
+
+**Hoje:**
+- Capture bar sempre visível no painel (texto livre), presente em desktop e mobile
+- Upload de PDF/LinkedIn processado via pipeline de extração IA
+- Capture bar acessível de qualquer tela do app (AppShell)
+- Contexto de captura: o composer sugere perguntas baseadas no tempo desde a última entrada e nos temas de força do espelho
+
+**Próxima onda:**
+- Captura por áudio com transcrição
+- MCP de captura (experimento paralelo — ver seção 7)
+
+---
 
 ### 4.2 Estruturação com detecção de sinal
-Transformar material bruto em entradas claras (o que fiz, decisão, aprendizado, impacto) e apontar o que tem valor. *Por que importa:* é a matéria-prima do espelho e do conteúdo.
+
+Transformar material bruto em entradas claras e apontar o que tem valor.
+*Por que importa:* é a matéria-prima do espelho e do conteúdo.
+
+**Hoje:**
+- Extração via claude-haiku-4-5 com esquema estruturado: `what_i_did`, `decision`, `learning`, `impact_metric`, `date`, `tags`, `role_title`, `company`
+- Reflexão imediata após captura (mini-resumo + pills do que foi identificado)
+- Enriquecimento de entrada posterior via botão "Responder" no ReflectionCard
+
+**Próxima onda:**
+- Detecção de padrões e sugestões proativas de enriquecimento
+
+---
 
 ### 4.3 Espelho de carreira (inteligência)
-Revelar, com evidência, onde a pessoa manda bem e onde pode crescer; agrupar por temas/forças; permitir perguntar em linguagem natural ("o que entreguei esse trimestre?"). *Por que importa:* é a dor mais profunda do mercado BR (enxergar e provar o próprio valor) e o primeiro core do v1.
+
+Revelar, com evidência, onde a pessoa manda bem e onde pode crescer.
+*Por que importa:* é a dor mais profunda do mercado BR e o primeiro core do produto.
+
+**Hoje:**
+- Onboarding WOW/AHA: ao cadastrar, usuário conta uma história; loop de captura + avaliação de suficiência (IA) + geração do espelho na primeira sessão
+- Geração via claude-sonnet-4-6; regeneração automática ao acumular 5 novas entradas desde o último snapshot
+- Página `/espelho` com 3 seções principais (força primária, skill invisível, padrão de contexto) + temas de força + categorias macro de skill com tiers (Emergente / Consistente / Comprovada)
+- Evidências vinculadas: cada afirmação aponta para entradas reais, expansíveis
+- Feedback "Resonou com você?" registrado para afinar futuras leituras
+- Botão "Pedir uma nova leitura" (regeneração manual)
+- Linha do Tempo em `/historico`: trajetória agrupada por empresa, projetos e entradas
+- Insights proativos gerados quando há novidade relevante no histórico
+- Modo "Perguntar" (chat sobre o histórico) planejado mas sem backend — sinalizado como "Em breve" na interface
+
+**Próxima onda:**
+- Backend do modo "Perguntar": respostas em linguagem natural sobre o próprio histórico ("o que entreguei esse trimestre?", "quais foram meus principais impactos?")
+- Comparação de espelhos ao longo do tempo (evolução)
+
+---
 
 ### 4.4 Geração na voz da pessoa
-A partir do histórico, produzir conteúdo (post, bio, resumo de impacto) que soa como a pessoa. *Por que importa:* é o segundo core e a ponte pra visibilidade. A qualidade vem de partir do histórico estruturado, não de tópico em branco.
+
+A partir do histórico, produzir conteúdo (post, bio, resumo de impacto) que soa como a pessoa.
+*Por que importa:* é o segundo core do produto e a ponte pra visibilidade.
+
+**Hoje:**
+- Não implementado. Item de navegação reservado na interface, marcado como "Em breve".
+
+**Próxima onda — próxima grande entrega:**
+- A partir de uma entrada ou tema, gerar rascunho na voz da pessoa
+- Formatos iniciais: post LinkedIn, mini-bio, resumo de impacto
+- A pessoa revisa, edita e copia — sem publicação automática
+
+---
 
 ### 4.5 Controle, confiança e brasilidade
-A pessoa revisa tudo, é dona dos dados (exporta/apaga), e a experiência é em português de verdade. *Por que importa:* sem confiança ninguém alimenta um registro da própria carreira; e a brasilidade é o moat de marca.
+
+A pessoa revisa tudo, é dona dos dados, e a experiência é em português de verdade.
+*Por que importa:* sem confiança ninguém alimenta um registro da própria carreira.
+
+**Hoje:**
+- Interface 100% em pt-BR via next-intl
+- Identidade visual Borogodó ativa: paleta roxo-jambo + coral-faísca + creme, tipografia Fraunces, símbolo do acento "ó" como faísca
+- Central de Configurações em `/configuracoes`: nome, avatar, links (LinkedIn, GitHub)
+- Auth com Google OAuth e e-mail/senha; middleware de sessão
+
+**Próxima onda:**
+- Exportação do histórico (entradas, espelho)
+- Exclusão de conta e dados
+- Revisão e edição de entradas individuais
 
 ---
 
-## 5. Escopo do v1
+## 5. Roadmap
 
-Fluxo fino, ponta a ponta, com dogfooding desde a semana 1. **App web (destino).**
+### Ativo hoje (main)
 
-1. **Captura multimodal:** upload de arquivos (md, pdf, docx, txt), **entrada por áudio com transcrição**, e captura rápida por texto. (MCP entra como experimento técnico, não como dependência do core — ver seção 7.)
-2. **Estruturação:** o modelo extrai entradas no esquema o que fiz / decisão / aprendizado / impacto-métrica / data / tags.
-3. **Espelho:** timeline navegável + agrupamento por temas/forças + busca em linguagem natural sobre o próprio histórico + uma leitura de "onde você manda bem / onde dá pra crescer" baseada em evidência.
-4. **Geração de conteúdo:** a partir de uma entrada/tema, rascunho na voz da pessoa, guiado por 2–3 perguntas (não cospe texto pronto).
-5. **Revisão e uso:** a pessoa edita, copia ou leva pro LinkedIn. Sem publicação automática.
+| # | Feature | O que entrega |
+|---|---|---|
+| 001 | Landing page | LP pública em pt-BR, design system Borogodó, i18n |
+| 002 | Auth | Google OAuth + e-mail/senha, sessão persistente, painel protegido |
+| 003 | Capture pipeline | Capture bar (texto), upload PDF/LinkedIn, extração IA estruturada |
+| 004 | Mirror generation | Geração do espelho via IA, regeneração automática |
+| 005 | Panel dashboard | Composer, indicadores, insight proativo, entradas recentes |
+| 006 | Espelho honesto | Página `/espelho` com categorias, evidências, feedback |
+| 007 | Painel redesign | BorogodoCard, trajetória em destaque, mini timeline |
+| 008 | Histórico/nav | AppShell responsivo, Linha do Tempo em `/historico` |
+| 009 | Perfil/onboarding | Central de Configurações, onboarding WOW/AHA com espelho na primeira sessão |
+| 010 | Produto polish | 17 itens de UX, bugs, identidade visual e consistência (em andamento) |
 
-**Os dois cores (espelho e conteúdo) têm peso igual no v1**, mas o espelho é construído primeiro na sequência técnica porque ele é o que torna a geração de conteúdo boa de verdade.
+### Próxima onda
+
+1. **Geração de conteúdo** — o segundo core: rascunhos de post/bio/resumo a partir do histórico
+2. **Modo "Perguntar"** — chat sobre o próprio histórico em linguagem natural
+3. **Exportação e exclusão de dados** — controle total da pessoa sobre seu histórico
+4. **Captura por áudio** — entrada por voz com transcrição
+
+### Ondas futuras
+
+- Currículo adaptado por vaga
+- Portfólio público
+- Histórias de entrevista estruturadas
+- Expansão global em inglês (onde o ARPU é em dólar)
+- App mobile dedicado
+- Integrações com ferramentas de trabalho (Jira, CRM etc.)
+- MCP de captura (experimento técnico)
 
 ---
 
-## 6. Fora de escopo no v1
+## 6. Fora de escopo
 
 1. Publicação automática no LinkedIn (sempre revisão humana; evita risco de plataforma).
-2. Outputs avançados: currículo por vaga, portfólio completo, artigo longo (ondas seguintes).
-3. Integrações automáticas pesadas com ferramentas de trabalho (Jira, CRM etc.).
+2. Currículo por vaga, portfólio completo, artigo longo (ondas futuras).
+3. Integrações automáticas pesadas com ferramentas de trabalho.
 4. Recursos de time/colaboração.
 5. Gamificação e relatórios visuais tipo retrospectiva anual.
 6. App mobile dedicado.
-7. Idiomas além de português (inglês fica pra expansão global futura).
+7. Idiomas além de português (inglês fica para expansão global futura).
+8. Captura por áudio (onda posterior).
+9. Exportação e exclusão de dados (próxima onda, ainda não implementado).
 
 ---
 
-## 7. MCP — papel no v1
+## 7. MCP — papel no produto
 
-A autora quer **aprender a criar um MCP** e testar a hipótese de captura conectada (ex.: puxar contexto do Claude/ferramentas que a pessoa já usa). Decisão: o MCP é um **experimento paralelo de aprendizado e um canal de captura opcional**, não um pré-requisito do core. Risco a observar: privacidade e governança de dados corporativos. Critério de sucesso do experimento: conseguir capturar ao menos uma entrada de trabalho via MCP de forma segura, e avaliar se o atrito/valor justifica investir mais.
+A autora quer **aprender a criar um MCP** e testar a hipótese de captura conectada (ex.: puxar contexto do Claude/ferramentas que a pessoa já usa). Decisão: o MCP é um **experimento paralelo de aprendizado e um canal de captura opcional**, não um pré-requisito do core. Risco a observar: privacidade e governança de dados corporativos.
+
+Critério de sucesso do experimento: conseguir capturar ao menos uma entrada de trabalho via MCP de forma segura, e avaliar se o atrito/valor justifica investir mais.
+
+**Estado atual:** não iniciado.
 
 ---
 
 ## 8. Métricas de sucesso
 
-**Discovery:** cadastros na lista de espera; % que captura ao menos 1 entrada; % que recebe ao menos 1 insight do espelho; % que gera ao menos 1 conteúdo.
+**Discovery:** cadastros; % que captura ao menos 1 entrada; % que recebe ao menos 1 insight do espelho; % que gera ao menos 1 conteúdo.
 
-**v1 (ativação e retenção):**
-1. Ativação A (espelho): primeira vez que a pessoa vê forças/lacunas a partir do próprio trabalho.
-2. Ativação B (conteúdo): primeira publicação a partir de um rascunho do produto.
+**Ativação e retenção:**
+1. Ativação A (espelho): primeira vez que a pessoa vê forças/lacunas a partir do próprio trabalho — **já mensurável hoje**.
+2. Ativação B (conteúdo): primeira publicação a partir de um rascunho do produto — **mensurável após geração de conteúdo**.
 3. Retenção: hábito de captura recorrente (semanal) e retorno pra consultar o espelho.
 4. Conversão free→pago: mais adiante.
 
@@ -147,7 +246,7 @@ A autora quer **aprender a criar um MCP** e testar a hipótese de captura conect
 
 1. O espelho (forças/lacunas) entrega valor percebido **acima** de um brag doc comum?
 2. A qualidade do conteúdo gerado é boa o bastante pra pessoa publicar com orgulho? (maior medo declarado)
-3. A captura por áudio/texto livre reduz atrito o suficiente pra atender quem não mantém logs?
+3. A captura por texto livre reduz atrito o suficiente pra atender quem não mantém logs?
 4. O público white-collar não-tech adota, ou o beachhead deve começar mais estreito?
 5. Disposição a pagar em real, no público amplo.
 6. A identidade brasileira ajuda a grudar e diferenciar, ou é só estética?
@@ -157,28 +256,66 @@ A autora quer **aprender a criar um MCP** e testar a hipótese de captura conect
 
 ## 10. Visão de expansão
 
-A mesma matéria-prima estruturada alimenta, em ondas: currículo adaptado por vaga, portfólio público, histórias de entrevista, e — caminho de receita real — expansão **global em inglês**, onde o ARPU é em dólar e o mercado é muito maior. No Brasil, a aposta é alcance e brasilidade; lá fora, é monetização.
+A mesma matéria-prima estruturada alimenta, em ondas: geração de conteúdo (post, bio), currículo adaptado por vaga, portfólio público, histórias de entrevista, e — caminho de receita real — **expansão global em inglês**, onde o ARPU é em dólar e o mercado é muito maior. No Brasil, a aposta é alcance e brasilidade; lá fora, é monetização.
 
 ---
 
-## 11. Marca e identidade (brasilidade)
+## 11. Marca e identidade
 
-Decisão estratégica: a marca será **genuinamente brasileira**, no espírito da Maritaca AI (que usa o nome de um papagaio brasileiro para humanizar tecnologia de ponta). Objetivos da marca: grudar, ser fácil de falar, carregar cultura/afeto brasileiro e arrancar um sorriso — sem ser brega.
+Decisão estratégica tomada em 05/jun/2026: a marca é **Borogodó** — palavra brasileira para o charme indefinível, "aquele quê". O produto revela o **borogodó profissional** da pessoa: onde ela brilha e nem sabia nomear.
 
-Critérios para o nome (a explorar em sessão dedicada):
-1. Curto, fácil de falar e escrever, bom de virar verbo/@ se possível.
-2. Evoca memória, trabalho, trajetória, voz ou crescimento — de forma leve.
-3. Som/referência brasileira (fauna, gíria, cultura, afeto), sem cair no clichê.
-4. Domínio e @ plausíveis de conseguir; sem conflito óbvio de marca.
+**Identidade visual ativa:**
+- Paleta: roxo-jambo (primário) + coral-faísca (acento) + creme (fundo) + lilás-névoa (superfície)
+- Tipografia display: Fraunces (serif)
+- Símbolo: o acento do "ó" vira uma faísca (instante da descoberta)
+- Tom de voz: brasileiro, espirituoso e caloroso — nunca corporativo
 
-O nome provisório anterior (Shippr) fica aposentado nesta direção, por ser anglófono e desalinhado da brasilidade.
+**A espinha de mensagem — os 4 verbos do borogodó:**
+
+| Verbo | Promessa | Tom na LP |
+|---|---|---|
+| **Descobrir** | revelar o seu borogodó | o espanto, o aha |
+| **Entender** | mapear, com evidência | clareza, mapa |
+| **Provar** | sustentar com evidência real | credibilidade |
+| **Usar** | mostrar onde a carreira pedir | poder, ação |
+
+**Domínio:** `borogodo.io` disponível (confirmado em 05/jun/2026). `borogodo.com.br` registrado por terceiro — não usar.
+
+**A verificar:** marca no INPI (classes 9/35/42) e @handles (Instagram/LinkedIn/X).
+
+O nome provisório anterior (Shippr) está aposentado por ser anglófono e desalinhado da brasilidade.
 
 ---
 
-## 12. Rastreabilidade das mudanças (v0.1 → v0.2)
+## 12. Stack técnica
 
+- Next.js 15 (App Router, Server Components por padrão)
+- TypeScript estrito, sem `any`
+- Tailwind CSS v4 + shadcn/ui
+- Supabase (PostgreSQL + Auth + Storage + RLS)
+- Anthropic API: claude-haiku-4-5 (extração), claude-sonnet-4-6 (espelho/geração)
+- next-intl (i18n — pt-BR como fallback global)
+- Framer Motion (animações de entrada e transições)
+- Lucide React (ícones)
+- Vitest + Testing Library (testes)
+- Vercel (deploy)
+
+---
+
+## 13. Rastreabilidade das mudanças
+
+**v0.1 → v0.2:**
 1. Core único "post de LinkedIn" → **core duplo de peso igual**: espelho (inteligência) + conteúdo.
 2. Público "tech AI native" → **white-collar brasileiro amplo** (tech, vendas, finanças, admin, marketing, RH).
-3. Captura por upload de logs → **multimodal** (arquivos, áudio, texto, MCP experimental).
+3. Captura por upload de logs → **multimodal** (arquivos, texto; áudio e MCP em ondas seguintes).
 4. Forma indefinida → **app web (destino)**.
 5. Marca anglófona (Shippr) → **identidade brasileira** a definir.
+
+**v0.2 → v0.3:**
+1. Produto no ar — 9 features mergeadas (001–009), 010 polish em andamento.
+2. Marca finalizada: Borogodó, identidade visual ativa, 4 verbos de mensagem definidos.
+3. Seção de pilares (4) reescrita com estado atual + próxima onda por pilar.
+4. Escopo reorganizado em roadmap: ativo hoje / próxima onda / ondas futuras.
+5. Stack técnica documentada (seção 12).
+6. Modo "Perguntar" sinalizado como planejado, sem backend ativo.
+7. Geração de conteúdo confirmada como próxima grande onda.

@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { PanelMirror } from '@/lib/panel/getPanelData'
@@ -9,13 +11,11 @@ interface BorogodoCardProps {
   entryCount: number
 }
 
-const MIRROR_READY_THRESHOLD = 3
-
 export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCardProps) {
   const t = useTranslations('panel.borogodoCard')
   const firstName = name.trim().split(' ')[0] || name
 
-  const hasData = mirror !== null && entryCount >= MIRROR_READY_THRESHOLD
+  const hasData = mirror !== null
   const specialties = mirror?.strengthThemes?.slice(0, 5) ?? []
 
   return (
@@ -107,6 +107,14 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
           >
             {t('formingSubtitle')}
           </p>
+          <button
+            type="button"
+            onClick={() => document.querySelector('textarea')?.focus()}
+            className="mt-3 flex items-center gap-1.5 text-sm font-medium opacity-80 hover:opacity-100"
+            style={{ color: 'var(--color-primary-fg)' }}
+          >
+            Contar uma história agora ↓
+          </button>
         </div>
       )}
     </section>

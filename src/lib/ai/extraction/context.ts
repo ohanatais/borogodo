@@ -11,7 +11,7 @@ async function loadStrengthThemes(supabase: SupabaseServerClient, userId: string
     .from('mirror_snapshots')
     .select('strength_themes')
     .eq('user_id', userId)
-    .order('created_at', { ascending: false })
+    .order('generated_at', { ascending: false })
     .limit(1)
     .maybeSingle()
 

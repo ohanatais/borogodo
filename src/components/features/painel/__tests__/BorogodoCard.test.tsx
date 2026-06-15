@@ -47,15 +47,15 @@ describe('BorogodoCard', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
   })
 
-  it('shows empty state when entryCount < 3 even with mirror', () => {
+  it('shows mirror content when mirror is present, regardless of entryCount', () => {
     render(<BorogodoCard name="Ana" mirror={MIRROR} entryCount={2} />)
     const heading = screen.getByRole('heading', { level: 2 })
-    expect(heading.textContent).toMatch(/formingOf/)
+    expect(heading.textContent).not.toMatch(/formingOf/)
   })
 
-  it('shows empty state when entryCount is exactly 2', () => {
+  it('shows view-mirror link when mirror is present, regardless of entryCount', () => {
     render(<BorogodoCard name="Ana" mirror={MIRROR} entryCount={2} />)
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.getByRole('link')).toBeInTheDocument()
   })
 
   it('renders content when entryCount is exactly 3', () => {

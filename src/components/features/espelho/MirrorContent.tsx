@@ -4,10 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
+import { RefreshCw } from 'lucide-react'
 import type { MirrorSnapshot } from '@/types/mirror'
 import { MirrorFeedback } from './MirrorFeedback'
 import { EvidenceText } from './EvidenceText'
 import { MacroCategoryTabs } from './MacroCategoryTabs'
+import { SectionLabel } from '@/components/ui/SectionLabel'
 
 interface MirrorContentProps {
   snapshot: MirrorSnapshot
@@ -30,25 +32,24 @@ interface SectionProps {
   headline: string
   evidence: unknown
   warm?: boolean
+  primary?: boolean
 }
 
-function MirrorSection({ label, headline, evidence, warm = false }: SectionProps) {
+function MirrorSection({ label, headline, evidence, warm = false, primary = false }: SectionProps) {
   return (
     <motion.div
       variants={item}
-      className="py-6 border-b rounded-lg px-4 mb-2"
+      className={`py-6 rounded-lg px-4 mb-2 ${primary ? 'border-b border-l-2' : 'border-b'}`}
       style={{
-        borderColor: warm ? 'transparent' : 'var(--border)',
+        borderBottomColor: warm ? 'transparent' : 'var(--border)',
+        borderLeftColor: primary ? 'var(--color-primary)' : undefined,
         background: warm ? 'oklch(74% 0.12 75 / 0.12)' : 'transparent',
       }}
     >
-      <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--muted-foreground)' }}>
-        {label}
-      </p>
-      <p className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+      <SectionLabel className="mb-2">{label}</SectionLabel>
+      <p className={`${primary ? 'text-2xl' : 'text-xl'} font-semibold mb-2`} style={{ color: 'var(--foreground)' }}>
         {headline}
       </p>
-      {/* EvidenceText normalizes internally via toEvidenceItem — no pre-normalization needed here */}
       <EvidenceText evidence={evidence} />
     </motion.div>
   )
@@ -120,7 +121,7 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
         <motion.p
           variants={item}
           className="text-2xl font-medium mb-8 leading-relaxed"
-          style={{ color: 'var(--foreground)', textAlign: 'justify' }}
+          style={{ color: 'var(--foreground)' }}
         >
           {mirror.intro}
         </motion.p>
@@ -129,6 +130,7 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
           label={t('sections.primaryStrength')}
           headline={mirror.primary_strength.headline}
           evidence={mirror.primary_strength.evidence}
+          primary
         />
 
         <MirrorSection
@@ -154,9 +156,7 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
 
         {mirror.strength_themes.length > 0 && (
           <motion.div variants={item} className="pb-8">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--muted-foreground)' }}>
-              {t('themes')}
-            </p>
+            <SectionLabel>{t('themes')}</SectionLabel>
             <div className="flex flex-wrap gap-2">
               {mirror.strength_themes.map((theme) => (
                 <span
@@ -180,16 +180,22 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
         <motion.div variants={item} className="pt-6 space-y-6 border-t" style={{ borderColor: 'var(--border)' }}>
           <MirrorFeedback snapshotId={snapshot.id} initialResonated={snapshot.resonated} />
 
-          <div className="text-center space-y-2">
+          <div className="flex flex-col items-center gap-1">
             <button
               type="button"
               onClick={handleRegenerate}
               disabled={loading}
-              className="text-sm underline disabled:opacity-50"
-              style={{ color: 'var(--muted-foreground)' }}
+              className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
+              style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
             >
+              <RefreshCw size={13} />
               {loading ? t('regenerating') : t('regenerate')}
             </button>
+            {!loading && !regenerateError && (
+              <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                Usa suas entradas mais recentes
+              </p>
+            )}
             {regenerateError && (
               <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                 {regenerateError}

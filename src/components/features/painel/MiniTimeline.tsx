@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { TimelineEntry } from '@/lib/panel/getPanelData'
+import { SectionLabel } from '@/components/ui/SectionLabel'
 
 interface MiniTimelineProps {
   entries: TimelineEntry[]
@@ -20,12 +21,7 @@ export function MiniTimeline({ entries, showLink = true }: MiniTimelineProps) {
 
   return (
     <aside aria-label={t('title')} className="md:pl-4">
-      <p
-        className="text-xs font-semibold uppercase tracking-widest mb-3"
-        style={{ color: 'var(--muted-foreground)' }}
-      >
-        {t('title')}
-      </p>
+      <SectionLabel>{t('title')}</SectionLabel>
 
       <div className="space-y-3">
         {entries.map((entry, i) => {

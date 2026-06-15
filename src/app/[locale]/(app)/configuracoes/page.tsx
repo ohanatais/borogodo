@@ -19,15 +19,17 @@ export default async function ConfiguracoesPage() {
   ])
 
   return (
-    <div className="max-w-[640px] mx-auto px-6 py-8 space-y-6">
+    <div className="max-w-[860px] mx-auto px-6 py-8 pb-32 lg:pb-8">
       <h1
-        className="text-2xl font-semibold"
+        className="text-2xl font-semibold mb-6"
         style={{ fontFamily: 'Fraunces, serif', color: 'var(--foreground)' }}
       >
         {t('title')}
       </h1>
-      <IdentityCard profile={profile} />
-      <LinksCard profile={profile} />
+      <div className="lg:grid lg:grid-cols-2 lg:gap-8 space-y-6 lg:space-y-0">
+        <IdentityCard profile={profile} />
+        <LinksCard profile={profile} />
+      </div>
     </div>
   )
 }
