@@ -383,13 +383,17 @@
       "impactSummary": "Resumo de impacto"
     },
     "adjust": {
+      "label": "Ajustar os dois rascunhos",
       "shorter": "Mais curto",
       "lessFormal": "Menos formal",
       "removeJargon": "Tira o jargão"
     },
     "close": "Fechar",
+    "edit": "Editar",
+    "editDone": "Concluir",
     "copy": "Copiar",
     "copied": "Copiado",
+    "copyFallback": "Selecione o texto e copie com Ctrl ou Cmd + C.",
     "voice": {
       "prompt": "Soa como você?",
       "yes": "Soa",
@@ -403,7 +407,31 @@
     "errors": {
       "generationFailed": "Não consegui escrever isso do jeito certo. Tenta de novo?",
       "seedNotFound": "Não encontrei essa evidência.",
-      "generic": "Algo deu errado. Tenta de novo?"
+      "generic": "Algo deu errado. Tenta de novo?",
+      "save": "Não consegui salvar agora. O texto continua aqui."
+    },
+    "create": {
+      "open": "Gerar conteúdo",
+      "title": "Gerar a partir de quê?",
+      "hint": "Todo conteúdo nasce de uma evidência sua, nunca de uma página em branco.",
+      "themesLabel": "Temas do seu espelho",
+      "entriesLabel": "Suas entradas recentes",
+      "empty": "Você ainda não tem temas nem entradas. Registre um feito primeiro e ele vira matéria-prima aqui.",
+      "goRegister": "Ir para o Painel"
+    },
+    "page": {
+      "title": "Presença",
+      "subtitle": "Os rascunhos que você gerou a partir do seu trabalho.",
+      "empty": {
+        "title": "Nenhum rascunho por aqui ainda",
+        "description": "Gere seu primeiro rascunho a partir de um tema do seu Espelho ou de uma entrada sua, na sua voz."
+      },
+      "status": {
+        "generated": "Gerado",
+        "edited": "Editado",
+        "copied": "Copiado",
+        "discarded": "Descartado"
+      }
     }
   }
 }

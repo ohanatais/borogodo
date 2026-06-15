@@ -97,6 +97,24 @@ export async function insertDraft(
   return toDraft(data as DraftRow)
 }
 
+/** Lista os rascunhos do usuário, mais recentes primeiro (usa o índice `drafts_user_created_idx`). */
+export async function listDrafts(
+  supabase: SupabaseServerClient,
+  userId: string,
+  limit = 50
+): Promise<Draft[]> {
+  const { data, error } = await supabase
+    .from('drafts')
+    .select(DRAFT_COLUMNS)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error || !data) return []
+
+  return (data as DraftRow[]).map(toDraft)
+}
+
 export interface UpdateDraftInput {
   body?: string
   status?: DraftStatus

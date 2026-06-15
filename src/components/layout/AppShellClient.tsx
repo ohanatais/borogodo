@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Sparkles, GitCommitVertical, Paperclip } from 'lucide-react'
+import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
 import { FileButton } from '@/components/features/capture/FileButton'
@@ -22,9 +22,10 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'painel',    label: 'Painel',        icon: <Home size={20} />,              path: '/painel'    },
+  { id: 'painel',    label: 'Painel',         icon: <Home size={20} />,              path: '/painel'    },
   { id: 'espelho',   label: 'Espelho',        icon: <Sparkles size={20} />,          path: '/espelho'   },
   { id: 'historico', label: 'Linha do Tempo', icon: <GitCommitVertical size={20} />, path: '/historico' },
+  { id: 'presenca',  label: 'Presença',       icon: <PenLine size={20} />,           path: '/presenca'  },
 ]
 
 interface AppShellClientProps {

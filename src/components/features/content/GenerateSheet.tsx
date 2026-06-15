@@ -5,8 +5,9 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { motion } from 'framer-motion'
 import { X, RefreshCw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import type { DraftFormat, DraftVariant } from '@/types/content'
+import type { AdjustKind, DraftFormat, DraftVariant } from '@/types/content'
 import { DraftCard } from './DraftCard'
+import { AdjustChips } from './AdjustChips'
 import { VoiceCalibration } from './VoiceCalibration'
 import { PRESENCA_OPEN_EVENT, type PresencaOpenDetail } from './presencaEvents'
 
@@ -50,13 +51,18 @@ export function GenerateSheet() {
   const [errorKind, setErrorKind] = useState<ErrorKind>('generic')
 
   const generate = useCallback(
-    async (seed: PresencaOpenDetail, fmt: DraftFormat) => {
+    async (seed: PresencaOpenDetail, fmt: DraftFormat, adjust?: AdjustKind) => {
       setStatus('generating')
       try {
         const res = await fetch('/api/content/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ format: fmt, seedType: seed.seedType, seedRef: seed.seedRef }),
+          body: JSON.stringify({
+            format: fmt,
+            seedType: seed.seedType,
+            seedRef: seed.seedRef,
+            ...(adjust ? { adjust } : {}),
+          }),
         })
 
         if (!res.ok) {
@@ -99,6 +105,10 @@ export function GenerateSheet() {
 
   function handleRegenerate() {
     if (detail) void generate(detail, format)
+  }
+
+  function handleAdjust(adjust: AdjustKind) {
+    if (detail) void generate(detail, format, adjust)
   }
 
   if (!detail) return null
@@ -194,10 +204,20 @@ export function GenerateSheet() {
                 </div>
               )}
 
-              {status === 'done' &&
-                variants.map((variant, i) => (
-                  <DraftCard key={i} variant={variant} index={i} format={format} />
-                ))}
+              {status === 'done' && (
+                <>
+                  {variants.map((variant, i) => (
+                    <DraftCard
+                      key={i}
+                      variant={variant}
+                      index={i}
+                      format={format}
+                      seed={{ seedType: detail.seedType, seedRef: detail.seedRef }}
+                    />
+                  ))}
+                  <AdjustChips onAdjust={handleAdjust} />
+                </>
+              )}
             </div>
 
             {/* Rodapé: regerar + afinar voz (refino discreto) */}

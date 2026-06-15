@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, waitFor } from '@testing-library/react'
 import { GenerateSheet } from '../GenerateSheet'
 import { PRESENCA_OPEN_EVENT } from '../presencaEvents'
 
@@ -82,5 +82,25 @@ describe('GenerateSheet', () => {
     // i18n mockado devolve a chave; o estado de erro renderiza a chave de erro específica.
     expect(await screen.findByText('errors.generationFailed')).toBeInTheDocument()
     expect(screen.queryAllByTestId('draft-card')).toHaveLength(0)
+  })
+
+  it('US3: aplicar um chip de ajuste regera o par enviando o adjust', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ variants: VARIANTS }),
+    })
+    global.fetch = fetchMock as unknown as typeof fetch
+
+    render(<GenerateSheet />)
+    await openWith()
+    await screen.findAllByTestId('draft-card')
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'adjust.shorter' }).click()
+    })
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    const lastBody = JSON.parse((fetchMock.mock.calls[1][1] as RequestInit).body as string)
+    expect(lastBody.adjust).toBe('mais_curto')
   })
 })
