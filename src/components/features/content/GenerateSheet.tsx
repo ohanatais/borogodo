@@ -139,7 +139,7 @@ export function GenerateSheet() {
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  aria-label={t('errors.generic')}
+                  aria-label={t('close')}
                   className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
@@ -195,7 +195,9 @@ export function GenerateSheet() {
               )}
 
               {status === 'done' &&
-                variants.map((variant, i) => <DraftCard key={i} variant={variant} index={i} />)}
+                variants.map((variant, i) => (
+                  <DraftCard key={i} variant={variant} index={i} format={format} />
+                ))}
             </div>
 
             {/* Rodapé: regerar + afinar voz (refino discreto) */}
