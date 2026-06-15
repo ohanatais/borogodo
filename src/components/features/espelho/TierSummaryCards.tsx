@@ -45,39 +45,35 @@ export function TierSummaryCards({ comprovadas, consistentes, emergentes }: Tier
   const toggle = (tier: SkillTier) => setOpenTier((prev) => (prev === tier ? null : tier))
 
   return (
-    <div className="mb-6">
-      {/* Three cards — fixed height, no expanding content inside */}
-      <div className={`grid grid-cols-3 gap-2 sm:gap-3 ${openTier ? 'mb-0' : ''}`}>
-        {TIERS.map((tier) => {
+    <div
+      className="rounded-xl border overflow-hidden mb-6"
+      style={{ borderColor: 'var(--border)' }}
+    >
+      {/* Three tier sections side by side, no gap */}
+      <div className="grid grid-cols-3">
+        {TIERS.map((tier, idx) => {
           const style = TIER_STYLE[tier]
-          const count = counts[tier]
           const isOpen = openTier === tier
 
           return (
             <div
               key={tier}
-              className="rounded-xl border flex flex-col overflow-hidden"
-              style={{
-                borderColor: style.border,
-                background: style.cardBg,
-                borderBottomLeftRadius: isOpen ? 0 : undefined,
-                borderBottomRightRadius: isOpen ? 0 : undefined,
-                borderBottom: isOpen ? 'none' : undefined,
-              }}
+              className={`flex flex-col${idx > 0 ? ' border-l' : ''}`}
+              style={{ borderColor: 'var(--border)', background: style.cardBg }}
             >
-              <div className="px-2.5 py-2.5 sm:px-3 sm:py-3 flex-1">
+              <div className="px-2.5 py-3 sm:px-3 flex-1">
                 <div className="flex items-start justify-between gap-1 mb-1.5">
                   <p
                     className="text-2xl sm:text-3xl font-bold leading-none"
                     style={{ color: style.text }}
                   >
-                    {count}
+                    {counts[tier]}
                   </p>
                   {tier === 'Comprovada' && (
                     <CheckCircle2
-                      size={16}
+                      size={15}
                       aria-hidden="true"
-                      style={{ color: style.text, marginTop: 2, flexShrink: 0 }}
+                      style={{ color: style.text, marginTop: 3, flexShrink: 0 }}
                     />
                   )}
                 </div>
@@ -86,7 +82,7 @@ export function TierSummaryCards({ comprovadas, consistentes, emergentes }: Tier
                 </p>
                 <p
                   className="text-[11px] mt-0.5 leading-tight"
-                  style={{ color: style.text, opacity: 0.75 }}
+                  style={{ color: style.text, opacity: 0.7 }}
                 >
                   {descriptions[tier]}
                 </p>
@@ -97,7 +93,7 @@ export function TierSummaryCards({ comprovadas, consistentes, emergentes }: Tier
                 onClick={() => toggle(tier)}
                 className="w-full flex items-center justify-between px-2.5 sm:px-3 py-2 text-[11px] sm:text-xs font-medium border-t transition-opacity hover:opacity-80"
                 style={{
-                  borderColor: style.border,
+                  borderColor: 'var(--border)',
                   color: style.text,
                   background: style.badgeBg,
                 }}
@@ -113,13 +109,13 @@ export function TierSummaryCards({ comprovadas, consistentes, emergentes }: Tier
         })}
       </div>
 
-      {/* Criteria panel — full-width below the grid, visually connected */}
+      {/* Criteria panel — inside the same container, full-width */}
       {openTier && (
         <div
-          className="rounded-b-xl border border-t-0 px-4 py-3"
+          className="border-t px-4 py-3"
           style={{
             background: TIER_STYLE[openTier].hintBg,
-            borderColor: TIER_STYLE[openTier].border,
+            borderColor: 'var(--border)',
           }}
         >
           <p
