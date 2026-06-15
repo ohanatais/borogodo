@@ -1,16 +1,12 @@
 # PRD — Borogodó: Inteligência de Carreira
 
-**Versão:** 0.3 (estado do produto — jun/2026)
+**Versão:** 0.3 (produto em produção — jun/2026)
 **Data original:** 5 de junho de 2026 | **Última atualização:** 14 de junho de 2026
 **Autora:** Ohana
-**Nome:** Borogodó — domínio borogodo.io · ver seção 11
 
-> Esta versão substitui a v0.2. Mudanças principais: (1) atualização do estado de
-> implementação — 9 features mergeadas em main (001–009) e polish em andamento (010);
-> (2) seção nova de estado atual do produto (seção 13) documentando o que está
-> implementado, o que está em andamento e o que ainda falta; (3) marca definida —
-> "Borogodó" com identidade visual ativa. As seções de visão, posicionamento, personas e
-> pilares permanecem válidas.
+> **Leitura rápida:** o produto está no ar. 9 features mergeadas em main (001–009),
+> polish de UX em andamento (010). O segundo core — geração de conteúdo — é a próxima
+> grande onda. Este PRD descreve o produto como existe hoje e onde ele vai.
 
 ---
 
@@ -85,66 +81,150 @@ A ampliação para white-collar exige personas além de tech. Mantemos uma de pr
 
 ---
 
-## 4. Pilares do produto
+## 4. Pilares do produto — hoje e para onde vai
 
 ### 4.1 Captura sem atrito e multimodal
-Trazer o trabalho real para dentro do produto do jeito que for mais fácil pra pessoa: escrever ou subir arquivo (texto, PDF, docx). *Por que importa:* sem captura quase invisível, o hábito morre.
 
-**Estado atual:** captura por texto (capture bar sempre presente no painel) e upload de PDF/LinkedIn implementados. Áudio está fora de escopo do v1 atual.
+Trazer o trabalho real para dentro do produto do jeito que for mais fácil pra pessoa.
+*Por que importa:* sem captura quase invisível, o hábito morre.
+
+**Hoje:**
+- Capture bar sempre visível no painel (texto livre), presente em desktop e mobile
+- Upload de PDF/LinkedIn processado via pipeline de extração IA
+- Capture bar acessível de qualquer tela do app (AppShell)
+- Contexto de captura: o composer sugere perguntas baseadas no tempo desde a última entrada e nos temas de força do espelho
+
+**Próxima onda:**
+- Captura por áudio com transcrição
+- MCP de captura (experimento paralelo — ver seção 7)
+
+---
 
 ### 4.2 Estruturação com detecção de sinal
-Transformar material bruto em entradas claras (o que fiz, decisão, aprendizado, impacto) e apontar o que tem valor. *Por que importa:* é a matéria-prima do espelho e do conteúdo.
 
-**Estado atual:** extração via IA (claude-haiku-4-5) com esquema estruturado (what_i_did, decision, learning, impact_metric, date, tags) implementada e em produção.
+Transformar material bruto em entradas claras e apontar o que tem valor.
+*Por que importa:* é a matéria-prima do espelho e do conteúdo.
+
+**Hoje:**
+- Extração via claude-haiku-4-5 com esquema estruturado: `what_i_did`, `decision`, `learning`, `impact_metric`, `date`, `tags`, `role_title`, `company`
+- Reflexão imediata após captura (mini-resumo + pills do que foi identificado)
+- Enriquecimento de entrada posterior via botão "Responder" no ReflectionCard
+
+**Próxima onda:**
+- Detecção de padrões e sugestões proativas de enriquecimento
+
+---
 
 ### 4.3 Espelho de carreira (inteligência)
-Revelar, com evidência, onde a pessoa manda bem e onde pode crescer; agrupar por temas/forças; permitir perguntar em linguagem natural. *Por que importa:* é a dor mais profunda do mercado BR e o primeiro core do v1.
 
-**Estado atual:** geração do espelho via claude-sonnet-4-6 implementada, com regeneração automática ao acumular novas entradas. Página do espelho com categorias macro, evidências, seções "onde você manda bem / sem borogodó / o fio da sua carreira". Modo "Perguntar" (chat sobre o histórico) planejado mas sem backend — sinalizado como "Em breve" na interface.
+Revelar, com evidência, onde a pessoa manda bem e onde pode crescer.
+*Por que importa:* é a dor mais profunda do mercado BR e o primeiro core do produto.
+
+**Hoje:**
+- Onboarding WOW/AHA: ao cadastrar, usuário conta uma história; loop de captura + avaliação de suficiência (IA) + geração do espelho na primeira sessão
+- Geração via claude-sonnet-4-6; regeneração automática ao acumular 5 novas entradas desde o último snapshot
+- Página `/espelho` com 3 seções principais (força primária, skill invisível, padrão de contexto) + temas de força + categorias macro de skill com tiers (Emergente / Consistente / Comprovada)
+- Evidências vinculadas: cada afirmação aponta para entradas reais, expansíveis
+- Feedback "Resonou com você?" registrado para afinar futuras leituras
+- Botão "Pedir uma nova leitura" (regeneração manual)
+- Linha do Tempo em `/historico`: trajetória agrupada por empresa, projetos e entradas
+- Insights proativos gerados quando há novidade relevante no histórico
+- Modo "Perguntar" (chat sobre o histórico) planejado mas sem backend — sinalizado como "Em breve" na interface
+
+**Próxima onda:**
+- Backend do modo "Perguntar": respostas em linguagem natural sobre o próprio histórico ("o que entreguei esse trimestre?", "quais foram meus principais impactos?")
+- Comparação de espelhos ao longo do tempo (evolução)
+
+---
 
 ### 4.4 Geração na voz da pessoa
-A partir do histórico, produzir conteúdo (post, bio, resumo de impacto) que soa como a pessoa. *Por que importa:* é o segundo core e a ponte pra visibilidade.
 
-**Estado atual:** item de navegação "Conteúdo" existe no app mas está desabilitado (feature não implementada). Previsto para onda seguinte.
+A partir do histórico, produzir conteúdo (post, bio, resumo de impacto) que soa como a pessoa.
+*Por que importa:* é o segundo core do produto e a ponte pra visibilidade.
+
+**Hoje:**
+- Não implementado. Item de navegação reservado na interface, marcado como "Em breve".
+
+**Próxima onda — próxima grande entrega:**
+- A partir de uma entrada ou tema, gerar rascunho na voz da pessoa
+- Formatos iniciais: post LinkedIn, mini-bio, resumo de impacto
+- A pessoa revisa, edita e copia — sem publicação automática
+
+---
 
 ### 4.5 Controle, confiança e brasilidade
-A pessoa revisa tudo, é dona dos dados (exporta/apaga), e a experiência é em português de verdade. *Por que importa:* sem confiança ninguém alimenta um registro da própria carreira.
 
-**Estado atual:** i18n em pt-BR implementado (next-intl). Identidade visual Borogodó ativa (paleta roxo-jambo + coral-faísca + creme, tipografia Fraunces, acento do "ó" como faísca). Exportação/exclusão de dados ainda não implementada.
+A pessoa revisa tudo, é dona dos dados, e a experiência é em português de verdade.
+*Por que importa:* sem confiança ninguém alimenta um registro da própria carreira.
 
----
+**Hoje:**
+- Interface 100% em pt-BR via next-intl
+- Identidade visual Borogodó ativa: paleta roxo-jambo + coral-faísca + creme, tipografia Fraunces, símbolo do acento "ó" como faísca
+- Central de Configurações em `/configuracoes`: nome, avatar, links (LinkedIn, GitHub)
+- Auth com Google OAuth e e-mail/senha; middleware de sessão
 
-## 5. Escopo do v1
-
-Fluxo fino, ponta a ponta, com dogfooding desde a semana 1. **App web (destino).**
-
-1. **Captura multimodal:** upload de arquivos (md, pdf, docx, txt) e captura rápida por texto. (Áudio entra em onda seguinte; MCP é experimento paralelo — ver seção 7.)
-2. **Estruturação:** o modelo extrai entradas no esquema o que fiz / decisão / aprendizado / impacto-métrica / data / tags.
-3. **Espelho:** timeline navegável + agrupamento por temas/forças + uma leitura de "onde você manda bem / onde dá pra crescer" baseada em evidência.
-4. **Geração de conteúdo:** a partir de uma entrada/tema, rascunho na voz da pessoa — previsto para onda seguinte ao polish atual.
-5. **Revisão e uso:** a pessoa edita, copia ou leva pro LinkedIn. Sem publicação automática.
-
-**Os dois cores (espelho e conteúdo) têm peso igual na visão**, mas o espelho foi construído primeiro e está ativo. A geração de conteúdo é a próxima grande onda.
+**Próxima onda:**
+- Exportação do histórico (entradas, espelho)
+- Exclusão de conta e dados
+- Revisão e edição de entradas individuais
 
 ---
 
-## 6. Fora de escopo no v1
+## 5. Roadmap
+
+### Ativo hoje (main)
+
+| # | Feature | O que entrega |
+|---|---|---|
+| 001 | Landing page | LP pública em pt-BR, design system Borogodó, i18n |
+| 002 | Auth | Google OAuth + e-mail/senha, sessão persistente, painel protegido |
+| 003 | Capture pipeline | Capture bar (texto), upload PDF/LinkedIn, extração IA estruturada |
+| 004 | Mirror generation | Geração do espelho via IA, regeneração automática |
+| 005 | Panel dashboard | Composer, indicadores, insight proativo, entradas recentes |
+| 006 | Espelho honesto | Página `/espelho` com categorias, evidências, feedback |
+| 007 | Painel redesign | BorogodoCard, trajetória em destaque, mini timeline |
+| 008 | Histórico/nav | AppShell responsivo, Linha do Tempo em `/historico` |
+| 009 | Perfil/onboarding | Central de Configurações, onboarding WOW/AHA com espelho na primeira sessão |
+| 010 | Produto polish | 17 itens de UX, bugs, identidade visual e consistência (em andamento) |
+
+### Próxima onda
+
+1. **Geração de conteúdo** — o segundo core: rascunhos de post/bio/resumo a partir do histórico
+2. **Modo "Perguntar"** — chat sobre o próprio histórico em linguagem natural
+3. **Exportação e exclusão de dados** — controle total da pessoa sobre seu histórico
+4. **Captura por áudio** — entrada por voz com transcrição
+
+### Ondas futuras
+
+- Currículo adaptado por vaga
+- Portfólio público
+- Histórias de entrevista estruturadas
+- Expansão global em inglês (onde o ARPU é em dólar)
+- App mobile dedicado
+- Integrações com ferramentas de trabalho (Jira, CRM etc.)
+- MCP de captura (experimento técnico)
+
+---
+
+## 6. Fora de escopo
 
 1. Publicação automática no LinkedIn (sempre revisão humana; evita risco de plataforma).
-2. Outputs avançados: currículo por vaga, portfólio completo, artigo longo (ondas seguintes).
-3. Integrações automáticas pesadas com ferramentas de trabalho (Jira, CRM etc.).
+2. Currículo por vaga, portfólio completo, artigo longo (ondas futuras).
+3. Integrações automáticas pesadas com ferramentas de trabalho.
 4. Recursos de time/colaboração.
 5. Gamificação e relatórios visuais tipo retrospectiva anual.
 6. App mobile dedicado.
-7. Idiomas além de português (inglês fica pra expansão global futura).
-8. Captura por áudio com transcrição (removida do escopo imediato; entra em onda posterior).
-9. Exportação e exclusão de dados pelo usuário (previsto, ainda não implementado).
+7. Idiomas além de português (inglês fica para expansão global futura).
+8. Captura por áudio (onda posterior).
+9. Exportação e exclusão de dados (próxima onda, ainda não implementado).
 
 ---
 
-## 7. MCP — papel no v1
+## 7. MCP — papel no produto
 
-A autora quer **aprender a criar um MCP** e testar a hipótese de captura conectada (ex.: puxar contexto do Claude/ferramentas que a pessoa já usa). Decisão: o MCP é um **experimento paralelo de aprendizado e um canal de captura opcional**, não um pré-requisito do core. Risco a observar: privacidade e governança de dados corporativos. Critério de sucesso do experimento: conseguir capturar ao menos uma entrada de trabalho via MCP de forma segura, e avaliar se o atrito/valor justifica investir mais.
+A autora quer **aprender a criar um MCP** e testar a hipótese de captura conectada (ex.: puxar contexto do Claude/ferramentas que a pessoa já usa). Decisão: o MCP é um **experimento paralelo de aprendizado e um canal de captura opcional**, não um pré-requisito do core. Risco a observar: privacidade e governança de dados corporativos.
+
+Critério de sucesso do experimento: conseguir capturar ao menos uma entrada de trabalho via MCP de forma segura, e avaliar se o atrito/valor justifica investir mais.
 
 **Estado atual:** não iniciado.
 
@@ -152,11 +232,11 @@ A autora quer **aprender a criar um MCP** e testar a hipótese de captura conect
 
 ## 8. Métricas de sucesso
 
-**Discovery:** cadastros na lista de espera; % que captura ao menos 1 entrada; % que recebe ao menos 1 insight do espelho; % que gera ao menos 1 conteúdo.
+**Discovery:** cadastros; % que captura ao menos 1 entrada; % que recebe ao menos 1 insight do espelho; % que gera ao menos 1 conteúdo.
 
-**v1 (ativação e retenção):**
-1. Ativação A (espelho): primeira vez que a pessoa vê forças/lacunas a partir do próprio trabalho.
-2. Ativação B (conteúdo): primeira publicação a partir de um rascunho do produto.
+**Ativação e retenção:**
+1. Ativação A (espelho): primeira vez que a pessoa vê forças/lacunas a partir do próprio trabalho — **já mensurável hoje**.
+2. Ativação B (conteúdo): primeira publicação a partir de um rascunho do produto — **mensurável após geração de conteúdo**.
 3. Retenção: hábito de captura recorrente (semanal) e retorno pra consultar o espelho.
 4. Conversão free→pago: mais adiante.
 
@@ -176,16 +256,16 @@ A autora quer **aprender a criar um MCP** e testar a hipótese de captura conect
 
 ## 10. Visão de expansão
 
-A mesma matéria-prima estruturada alimenta, em ondas: geração de conteúdo (post, bio), currículo adaptado por vaga, portfólio público, histórias de entrevista, e — caminho de receita real — expansão **global em inglês**, onde o ARPU é em dólar e o mercado é muito maior. No Brasil, a aposta é alcance e brasilidade; lá fora, é monetização.
+A mesma matéria-prima estruturada alimenta, em ondas: geração de conteúdo (post, bio), currículo adaptado por vaga, portfólio público, histórias de entrevista, e — caminho de receita real — **expansão global em inglês**, onde o ARPU é em dólar e o mercado é muito maior. No Brasil, a aposta é alcance e brasilidade; lá fora, é monetização.
 
 ---
 
-## 11. Marca e identidade (brasilidade)
+## 11. Marca e identidade
 
 Decisão estratégica tomada em 05/jun/2026: a marca é **Borogodó** — palavra brasileira para o charme indefinível, "aquele quê". O produto revela o **borogodó profissional** da pessoa: onde ela brilha e nem sabia nomear.
 
 **Identidade visual ativa:**
-- Paleta: roxo-jambo + coral-faísca + creme + lilás-névoa
+- Paleta: roxo-jambo (primário) + coral-faísca (acento) + creme (fundo) + lilás-névoa (superfície)
 - Tipografia display: Fraunces (serif)
 - Símbolo: o acento do "ó" vira uma faísca (instante da descoberta)
 - Tom de voz: brasileiro, espirituoso e caloroso — nunca corporativo
@@ -207,91 +287,35 @@ O nome provisório anterior (Shippr) está aposentado por ser anglófono e desal
 
 ---
 
-## 12. Rastreabilidade das mudanças (v0.1 → v0.2 → v0.3)
+## 12. Stack técnica
+
+- Next.js 15 (App Router, Server Components por padrão)
+- TypeScript estrito, sem `any`
+- Tailwind CSS v4 + shadcn/ui
+- Supabase (PostgreSQL + Auth + Storage + RLS)
+- Anthropic API: claude-haiku-4-5 (extração), claude-sonnet-4-6 (espelho/geração)
+- next-intl (i18n — pt-BR como fallback global)
+- Framer Motion (animações de entrada e transições)
+- Lucide React (ícones)
+- Vitest + Testing Library (testes)
+- Vercel (deploy)
+
+---
+
+## 13. Rastreabilidade das mudanças
 
 **v0.1 → v0.2:**
 1. Core único "post de LinkedIn" → **core duplo de peso igual**: espelho (inteligência) + conteúdo.
 2. Público "tech AI native" → **white-collar brasileiro amplo** (tech, vendas, finanças, admin, marketing, RH).
-3. Captura por upload de logs → **multimodal** (arquivos, áudio, texto, MCP experimental).
+3. Captura por upload de logs → **multimodal** (arquivos, texto; áudio e MCP em ondas seguintes).
 4. Forma indefinida → **app web (destino)**.
 5. Marca anglófona (Shippr) → **identidade brasileira** a definir.
 
 **v0.2 → v0.3:**
-1. Estado do produto documentado — 9 features implementadas e mergeadas, polish em andamento.
+1. Produto no ar — 9 features mergeadas (001–009), 010 polish em andamento.
 2. Marca finalizada: Borogodó, identidade visual ativa, 4 verbos de mensagem definidos.
-3. Captura por áudio movida para fora de escopo imediato (ondas seguintes).
-4. Modo "Perguntar" (chat sobre histórico) sinalizado como planejado mas sem backend ativo.
-5. Geração de conteúdo confirmada como próxima grande onda após polish.
-
----
-
-## 13. Estado atual do produto (14/jun/2026)
-
-### 13.1 O que está implementado e mergeado
-
-| Feature | O que entrega |
-|---|---|
-| **001 — Landing page** | LP pública em pt-BR, design system Borogodó (paleta, tipografia, tokens), i18n com next-intl |
-| **002 — Auth** | Login/cadastro com Google OAuth e e-mail/senha, painel protegido por middleware, sessão persistente |
-| **003 — Capture pipeline** | Capture bar no painel (texto livre), upload de PDF/LinkedIn, extração estruturada via IA (haiku-4-5), armazenamento no Supabase |
-| **004 — Mirror generation** | Geração do espelho via claude-sonnet-4-6 a partir das entradas, regeneração automática ao acumular novas capturas |
-| **005 — Panel dashboard** | Painel com composer, indicadores de progresso, insight proativo, entradas recentes |
-| **006 — Espelho honesto** | Página `/espelho` com categorias macro (MacroCategoryTabs), evidências por seção, feedback "resonou com você?" |
-| **007 — Painel redesign** | BorogodoCard (estado "em formação" / "ativo"), TrajectoryHighlights, MiniTimeline |
-| **008 — Histórico/nav** | AppShell com navegação desktop (sidebar) e mobile (bottom nav), Linha do Tempo em `/historico` |
-| **009 — Perfil/onboarding** | Central de Configurações em `/configuracoes` (IdentityCard, LinksCard), onboarding WOW/AHA (WelcomeStep, CaptureLoopStep com fases reading/evaluating/generating/revealed) |
-
-### 13.2 Em andamento — 010 Produto Polish
-
-Branch `010-produto-polish`. 17 itens de refinamento resultantes de audit completo (14/jun/2026), organizados em 5 fases:
-
-**Fase 1 — Bugs críticos (T01–T03):**
-- T01: Fix middleware — landing page inacessível para visitantes não autenticados (prefixo de locale /pt não mapeado em PUBLIC_ROUTES)
-- T02: Remover `textAlign: justify` do intro do Espelho (causa "rios" em PT-BR)
-- T03: Desabilitar/sinalizar modo "Perguntar" (backend retorna 501, usuário recebe erro silencioso)
-
-**Fase 2 — Identidade visual (T04–T06):**
-- T04: Eliminar padrão ALL CAPS / tiny-eyebrow de todas as seções (anti-referência no PRODUCT.md), substituir por componente `SectionLabel` com traço colorido
-- T05: Nav mobile — adicionar labels de texto abaixo dos ícones (Sparkles e GitCommitVertical não comunicam função sozinhos)
-- T06: Remover item "Conteúdo" desabilitado da nav principal (sinaliza produto incompleto)
-
-**Fase 3 — UX e empty states (T07–T10):**
-- T07: BorogodoCard em formação — adicionar CTA explícito ("Contar uma história agora")
-- T08: TrajectoryHighlights — remover `line-clamp-2` do texto principal (trunca o destaque)
-- T09: Empty state da Linha do Tempo — copy com personalidade + representação visual do "fio" + CTA
-- T10: MirrorFeedback — adicionar contexto ao "Resonou com você?" (linha explicativa antes dos botões)
-
-**Fase 4 — Onboarding (T11–T14):**
-- T11: WelcomeStep — adicionar logo na tela roxa de boas-vindas
-- T12: CaptureLoopStep — suavizar transição abrupta do fundo roxo intenso para creme entre steps
-- T13: CaptureLoopStep — enriquecer estados de loading com copy rotativo (processo leva 15–30s)
-- T14: Mirror revealed — tornar o momento mais dramático (animação e header "Aqui está o que eu vi em você")
-
-**Fase 5 — Polimento (T15–T17):**
-- T15: Espelho — hierarquia visual entre seções (primary_strength visualmente dominante)
-- T16: "Gerar novo espelho" — substituir link apagado por botão com ícone e microcopy
-- T17: Configurações — layout two-column no desktop, padding-bottom mobile (capture bar sobrepõe botão Salvar)
-
-### 13.3 Ainda não implementado (próximas ondas)
-
-| Item | Descrição |
-|---|---|
-| **Geração de conteúdo** | Rascunho de post/bio/resumo a partir do histórico — o segundo core do produto; próxima grande onda após o polish |
-| **Modo "Perguntar"** | Chat em linguagem natural sobre o próprio histórico ("o que entreguei esse trimestre?") — planejado, sem backend |
-| **Captura por áudio** | Entrada por voz com transcrição automática — movida para onda posterior |
-| **Exportação de dados** | Pessoa exporta ou apaga o próprio histórico |
-| **MCP de captura** | Experimento técnico de captura conectada — não iniciado |
-| **Publicação automática** | Fora de escopo do v1 (revisão humana sempre) |
-| **Integrações (Jira, CRM)** | Fora de escopo do v1 |
-| **App mobile dedicado** | Fora de escopo do v1 |
-
-### 13.4 Stack técnica atual
-
-- Next.js 15 (App Router, Server Components por padrão)
-- TypeScript estrito
-- Tailwind CSS v4 + shadcn/ui
-- Supabase (PostgreSQL + Auth + Storage + RLS)
-- Anthropic API: claude-haiku-4-5 (extração), claude-sonnet-4-6 (espelho/geração)
-- next-intl (i18n — pt-BR)
-- Framer Motion (animações)
-- Lucide React (ícones)
+3. Seção de pilares (4) reescrita com estado atual + próxima onda por pilar.
+4. Escopo reorganizado em roadmap: ativo hoje / próxima onda / ondas futuras.
+5. Stack técnica documentada (seção 12).
+6. Modo "Perguntar" sinalizado como planejado, sem backend ativo.
+7. Geração de conteúdo confirmada como próxima grande onda.
