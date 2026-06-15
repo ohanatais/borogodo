@@ -19,25 +19,36 @@ export function TrajectoryHighlights({ highlights }: TrajectoryHighlightsProps) 
         {t('title')}
       </p>
       <div className="space-y-2">
-        {highlights.map((entry) => {
-          const resultLine = [entry.impact, entry.metric].filter(Boolean).join(' · ')
-          return (
-            <div
-              key={entry.id}
-              className="px-4 py-3 rounded-lg border"
-              style={{ borderColor: 'var(--border)', background: 'var(--background)' }}
+        {highlights.map((entry) => (
+          <div
+            key={entry.id}
+            className="px-4 py-3 rounded-lg border"
+            style={{ borderColor: 'var(--border)', background: 'var(--background)' }}
+          >
+            {entry.metric && (
+              <span
+                className="inline-block px-2 py-0.5 rounded text-xs font-semibold mb-1.5"
+                style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)' }}
+              >
+                {entry.metric}
+              </span>
+            )}
+            <p
+              className="text-sm font-semibold leading-snug line-clamp-2 mb-0.5"
+              style={{ color: 'var(--foreground)' }}
             >
-              {resultLine && (
-                <p className="text-sm font-semibold mb-0.5" style={{ color: 'var(--foreground)' }}>
-                  {resultLine}
-                </p>
-              )}
-              <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                {entry.what_i_did}
+              {entry.what_i_did}
+            </p>
+            {entry.impact && (
+              <p
+                className="text-xs leading-snug line-clamp-2"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                {entry.impact}
               </p>
-            </div>
-          )
-        })}
+            )}
+          </div>
+        ))}
       </div>
     </section>
   )

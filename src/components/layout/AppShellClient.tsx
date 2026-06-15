@@ -2,9 +2,12 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Sparkles, GitCommitVertical, PenLine, Settings } from 'lucide-react'
-import { useState } from 'react'
+import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
+import { FileButton } from '@/components/features/capture/FileButton'
+import { CaptureConversation } from '@/components/features/capture/CaptureConversation'
+import type { CaptureInput as CapturePayload } from '@/types/capture'
 import { Logo } from '@/components/ui/Logo'
 import { LogoutButton } from '@/components/features/auth/LogoutButton'
 
@@ -32,6 +35,18 @@ interface AppShellClientProps {
 export function AppShellClient({ userName, captureHint, children }: AppShellClientProps) {
   const pathname = usePathname()
   const [captureMode, setCaptureMode] = useState<'registrar' | 'perguntar'>('registrar')
+  const [activeCapture, setActiveCapture] = useState<CapturePayload | null>(null)
+  const [projectContext, setProjectContext] = useState<{ name: string; company: string } | null>(null)
+
+  useEffect(() => {
+    function handler(e: Event) {
+      const detail = (e as CustomEvent<{ name: string; company: string }>).detail
+      setProjectContext(detail)
+      setCaptureMode('registrar')
+    }
+    window.addEventListener('borogodo:capture-context', handler)
+    return () => window.removeEventListener('borogodo:capture-context', handler)
+  }, [])
 
   function isActive(path: string | null): boolean {
     if (!path) return false
@@ -149,7 +164,7 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
             background: 'linear-gradient(to top, var(--color-creme) 72%, transparent)',
           }}
         >
-          <div className="max-w-[720px] mx-auto px-6 pt-4 pb-5">
+          <div className="max-w-[980px] mx-auto px-6 pt-4 pb-5">
             <div className="flex items-center gap-3">
               {/* Toggle */}
               <div
@@ -172,7 +187,20 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
                   </button>
                 ))}
               </div>
-              <CaptureInput placeholder={inputPlaceholder} mode={captureMode} />
+              <CaptureInput
+                placeholder={inputPlaceholder}
+                mode={captureMode}
+                projectContext={projectContext}
+                onClearProjectContext={() => setProjectContext(null)}
+              />
+              {captureMode === 'registrar' && (
+                <FileButton
+                  accept=".pdf"
+                  icon={Paperclip}
+                  ariaLabel="Carregar PDF ou CV"
+                  onFile={(file) => setActiveCapture({ kind: 'file', file })}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -209,8 +237,21 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
               ))}
             </div>
             <div className="flex-1 min-w-0">
-              <CaptureInput placeholder={inputPlaceholder} mode={captureMode} />
+              <CaptureInput
+                placeholder={inputPlaceholder}
+                mode={captureMode}
+                projectContext={projectContext}
+                onClearProjectContext={() => setProjectContext(null)}
+              />
             </div>
+            {captureMode === 'registrar' && (
+              <FileButton
+                accept=".pdf"
+                icon={Paperclip}
+                ariaLabel="Carregar PDF ou CV"
+                onFile={(file) => setActiveCapture({ kind: 'file', file })}
+              />
+            )}
           </div>
 
           {/* Row 2 — nav: 4 ícones igualmente espaçados */}
@@ -244,6 +285,13 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
           </nav>
         </div>
       </div>
+
+      {activeCapture && (
+        <CaptureConversation
+          input={activeCapture}
+          onResolved={() => setActiveCapture(null)}
+        />
+      )}
     </div>
   )
 }

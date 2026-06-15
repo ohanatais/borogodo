@@ -14,11 +14,13 @@ export default async function EspelhoPage() {
 
   const [snapshot, profileRes, t] = await Promise.all([
     getLatestSnapshot(supabase, user.id),
-    supabase.from('profiles').select('name').eq('id', user.id).maybeSingle(),
+    supabase.from('profiles').select('name, avatar_url').eq('id', user.id).maybeSingle(),
     getTranslations('espelho'),
   ])
 
-  const profileName = (profileRes.data as { name?: string | null } | null)?.name ?? ''
+  const profile = profileRes.data as { name?: string | null; avatar_url?: string | null } | null
+  const profileName = profile?.name ?? ''
+  const avatarUrl = profile?.avatar_url ?? null
 
   if (!snapshot) {
     return (
@@ -45,7 +47,7 @@ export default async function EspelhoPage() {
 
   return (
     <div>
-      <MirrorContent snapshot={snapshot} userName={profileName} />
+      <MirrorContent snapshot={snapshot} userName={profileName} avatarUrl={avatarUrl} />
     </div>
   )
 }

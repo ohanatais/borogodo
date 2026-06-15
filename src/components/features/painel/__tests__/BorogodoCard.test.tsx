@@ -15,17 +15,15 @@ describe('BorogodoCard', () => {
     expect(screen.getByText('A')).toBeInTheDocument()
   })
 
-  it('renders first name in heading, full name as subtitle', () => {
+  it('renders first name in heading', () => {
     render(<BorogodoCard name="Ana Silva" mirror={MIRROR} entryCount={5} />)
-    // heading shows first name inside em; full name shown as subtitle paragraph
     const heading = screen.getByRole('heading', { level: 2 })
     expect(heading.textContent).toContain('Ana')
-    expect(screen.getByText('Ana Silva')).toBeInTheDocument()
   })
 
   it('renders specialty chips from strengthThemes when hasData', () => {
     render(<BorogodoCard name="Ana" mirror={MIRROR} entryCount={5} />)
-    expect(screen.getAllByText('liderança')).toHaveLength(2) // chip + skill pill (both lists use same themes)
+    expect(screen.getByText('liderança')).toBeInTheDocument()
   })
 
   it('renders the career pattern headline', () => {
@@ -71,7 +69,7 @@ describe('BorogodoCard', () => {
       strengthThemes: ['a', 'b', 'c', 'd', 'e', 'f'],
     }
     render(<BorogodoCard name="Ana" mirror={mirror} entryCount={5} />)
-    // chips: slice(0,5) → a–e visible; skill pills: slice(0,3) → a–c; 'f' not shown anywhere
+    // specialty chips: slice(0,5) → a–e visible; 'f' not shown
     expect(screen.getByText('e')).toBeInTheDocument()
     expect(screen.queryByText('f')).not.toBeInTheDocument()
   })

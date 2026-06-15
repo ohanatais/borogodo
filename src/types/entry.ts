@@ -12,6 +12,7 @@ export interface ExtractedEntry {
   role_title?: string | null
   role_start?: string | null
   role_end?: string | null
+  project_name?: string | null
   raw_content: string
   source: EntrySource
 }

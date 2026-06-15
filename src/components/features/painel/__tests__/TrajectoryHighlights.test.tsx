@@ -27,9 +27,10 @@ describe('TrajectoryHighlights', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders impact and metric joined by ·', () => {
+  it('renders metric as badge and impact separately', () => {
     render(<TrajectoryHighlights highlights={[HIGHLIGHTS[0]]} />)
-    expect(screen.getByText('Zero incidentes em 6 meses · 99.99% uptime')).toBeInTheDocument()
+    expect(screen.getByText('99.99% uptime')).toBeInTheDocument()
+    expect(screen.getByText('Zero incidentes em 6 meses')).toBeInTheDocument()
   })
 
   it('renders impact only when metric is null', () => {
@@ -64,8 +65,8 @@ describe('TrajectoryHighlights', () => {
 
   it('renders all highlight items', () => {
     render(<TrajectoryHighlights highlights={HIGHLIGHTS} />)
-    expect(screen.getAllByRole('generic').length).toBeGreaterThan(0)
-    expect(screen.getByText('Zero incidentes em 6 meses · 99.99% uptime')).toBeInTheDocument()
+    expect(screen.getByText('99.99% uptime')).toBeInTheDocument()
+    expect(screen.getByText('Zero incidentes em 6 meses')).toBeInTheDocument()
     expect(screen.getByText('Reduziu latência em 40%')).toBeInTheDocument()
   })
 })

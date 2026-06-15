@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import {
-  groupPositions,
+  groupCompanies,
   getCompanyInitials,
   getCompanyTint,
+  levenshtein,
 } from '../getHistoricoData'
 
 const BASE_ENTRY = {
+  id: 'entry-1',
   role_title: 'Product Manager',
   company: 'Acme Corp',
   role_start: '2022-01-01',
@@ -13,6 +15,8 @@ const BASE_ENTRY = {
   what_i_did: 'Liderou o roadmap',
   impact: 'Aumentou retention 20%',
   metric: '20%',
+  project_name: null,
+  evidences: [],
 }
 
 describe('getCompanyInitials', () => {
@@ -53,83 +57,217 @@ describe('getCompanyTint', () => {
   })
 })
 
-describe('groupPositions', () => {
+describe('groupCompanies', () => {
   it('returns empty array for empty input', () => {
-    expect(groupPositions([])).toEqual([])
+    expect(groupCompanies([])).toEqual([])
   })
 
   it('skips entries without company', () => {
-    const result = groupPositions([
-      { ...BASE_ENTRY, company: null },
-    ])
+    const result = groupCompanies([{ ...BASE_ENTRY, company: null }])
     expect(result).toHaveLength(0)
   })
 
-  it('includes entries with null role_title when company is present', () => {
-    const result = groupPositions([{ ...BASE_ENTRY, role_title: null }])
+  it('includes entries with null role_title', () => {
+    const result = groupCompanies([{ ...BASE_ENTRY, role_title: null }])
     expect(result).toHaveLength(1)
   })
 
-  it('groups entries with same company regardless of role_title', () => {
+  it('groups entries with same company into one HistoricoCompany', () => {
     const entries = [
-      { ...BASE_ENTRY, role_title: 'PM', what_i_did: 'Tarefa A', impact: null, metric: null },
-      { ...BASE_ENTRY, role_title: 'Designer', what_i_did: 'Tarefa B', impact: 'Impacto B', metric: null },
+      { ...BASE_ENTRY, id: 'e1', role_title: 'PM', what_i_did: 'Tarefa A', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', role_title: 'Designer', what_i_did: 'Tarefa B', impact: null, metric: null },
     ]
-    const result = groupPositions(entries)
+    const result = groupCompanies(entries)
     expect(result).toHaveLength(1)
-    expect(result[0].entries).toHaveLength(2)
-    expect(result[0].entries[0].what_i_did).toBe('Tarefa A')
-    expect(result[0].entries[1].what_i_did).toBe('Tarefa B')
   })
 
-  it('keeps entries from different companies separate', () => {
+  it('keeps different companies separate', () => {
     const entries = [
-      { ...BASE_ENTRY, company: 'Acme', what_i_did: 'A', impact: null, metric: null },
-      { ...BASE_ENTRY, company: 'Beta Corp', what_i_did: 'B', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e1', company: 'Acme', what_i_did: 'A', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', company: 'Beta Corp', what_i_did: 'B', impact: null, metric: null },
     ]
-    const result = groupPositions(entries)
+    const result = groupCompanies(entries)
     expect(result).toHaveLength(2)
   })
 
-  it('limits entries to 8 per company', () => {
-    const entries = Array.from({ length: 10 }, (_, i) => ({
+  it('groups entries with same role title and year into a single RolePeriod', () => {
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', role_title: 'PM', role_start: '2022-06-01', role_end: '2024-06-01', what_i_did: 'A', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', role_title: 'PM', role_start: '2022-06-15', role_end: '2024-06-01', what_i_did: 'B', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    expect(result[0].roles).toHaveLength(1)
+    expect(result[0].roles[0]).toHaveProperty('year_label')
+  })
+
+  it('deduplicates same role repeated with slightly different start dates in same year', () => {
+    // Simulates multiple entries from same job where AI assigned different role_start dates
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', role_title: 'PM', role_start: '2024-01-01', role_end: null, what_i_did: 'A', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', role_title: 'PM', role_start: '2024-06-01', role_end: null, what_i_did: 'B', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e3', role_title: 'PM', role_start: '2024-11-01', role_end: null, what_i_did: 'C', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    // All three entries share "PM|||2024|||current" key → single role
+    expect(result[0].roles).toHaveLength(1)
+  })
+
+  it('creates separate RolePeriods for different role titles', () => {
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', role_title: 'Junior PM', role_start: '2021-06-01', role_end: '2022-12-31', what_i_did: 'A', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', role_title: 'Senior PM', role_start: '2023-06-01', role_end: null, what_i_did: 'B', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    expect(result[0].roles).toHaveLength(2)
+  })
+
+  it('puts entry with project_name into projects, not highlight_bullets', () => {
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', what_i_did: 'Feature X', project_name: 'Alpha', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    expect(result[0].projects).toHaveLength(1)
+    expect(result[0].projects[0].name).toBe('Alpha')
+    expect(result[0].highlight_bullets).toHaveLength(0)
+  })
+
+  it('groups multiple entries under the same project', () => {
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', what_i_did: 'Tarefa A', project_name: 'Alpha', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', what_i_did: 'Tarefa B', project_name: 'Alpha', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    expect(result[0].projects[0].entries).toHaveLength(2)
+  })
+
+  it('deduplicates project entries with the same what_i_did', () => {
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', what_i_did: 'Mesmo conteúdo', project_name: 'Alpha', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', what_i_did: 'Mesmo conteúdo', project_name: 'Alpha', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    expect(result[0].projects[0].entries).toHaveLength(1)
+  })
+
+  it('deduplicates standalone entries with the same what_i_did', () => {
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', what_i_did: 'Mesmo bullet', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', what_i_did: 'Mesmo bullet', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    expect(result[0].highlight_bullets).toHaveLength(1)
+  })
+
+  it('preserves entry id and evidences in project entries', () => {
+    const evidences = [{ type: 'url' as const, value: 'https://example.com', label: 'Demo' }]
+    const entries = [
+      { ...BASE_ENTRY, id: 'e-unique', what_i_did: 'Feature X', project_name: 'Alpha', impact: null, metric: null, evidences },
+    ]
+    const result = groupCompanies(entries)
+    expect(result[0].projects[0].entries[0].id).toBe('e-unique')
+    expect(result[0].projects[0].entries[0].evidences).toEqual(evidences)
+  })
+
+  it('limits highlight_bullets to 3', () => {
+    const entries = Array.from({ length: 5 }, (_, i) => ({
       ...BASE_ENTRY,
+      id: `e${i}`,
       what_i_did: `Tarefa ${i}`,
       impact: null,
       metric: null,
     }))
-    const result = groupPositions(entries)
-    expect(result[0].entries).toHaveLength(8)
+    const result = groupCompanies(entries)
+    expect(result[0].highlight_bullets).toHaveLength(3)
   })
 
-  it('tracks earliest role_start across all entries for the company', () => {
+  it('sorts highlight_bullets metric-first', () => {
     const entries = [
-      { ...BASE_ENTRY, role_start: '2022-03-01', what_i_did: 'First', impact: null, metric: null },
-      { ...BASE_ENTRY, role_start: '2021-01-01', what_i_did: 'Second', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e1', what_i_did: 'Sem métrica', metric: null, impact: null },
+      { ...BASE_ENTRY, id: 'e2', what_i_did: 'Com métrica', metric: '20%', impact: null },
     ]
-    const result = groupPositions(entries)
-    expect(result[0].role_start).toBe('2021-01-01')
+    const result = groupCompanies(entries)
+    expect(result[0].highlight_bullets[0]).toBe('Com métrica')
   })
 
-  it('handles position with null role_start', () => {
-    const entry = { ...BASE_ENTRY, role_start: null, what_i_did: 'Sem data', impact: null, metric: null }
-    const result = groupPositions([entry])
+  it('tracks earliest role_start for year_label', () => {
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', role_start: '2022-06-01', what_i_did: 'First', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', role_start: '2021-06-01', what_i_did: 'Second', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    expect(result[0].year_label).toMatch(/2021/)
+  })
+
+  it('handles null role_start gracefully', () => {
+    const entry = { ...BASE_ENTRY, id: 'e1', role_start: null, what_i_did: 'Sem data', impact: null, metric: null }
+    const result = groupCompanies([entry])
     expect(result).toHaveLength(1)
-    expect(result[0].period_label).toBe('?')
     expect(result[0].year_label).toBe('?')
   })
 
-  it('marks current position when role_end is null', () => {
-    const entry = { ...BASE_ENTRY, role_end: null, what_i_did: 'Atual', impact: null, metric: null }
-    const result = groupPositions([entry])
-    expect(result[0].period_label).toContain('atual')
+  it('marks year_label as current when role_end is null', () => {
+    const entry = { ...BASE_ENTRY, id: 'e1', role_end: null, what_i_did: 'Atual', impact: null, metric: null }
+    const result = groupCompanies([entry])
     expect(result[0].year_label).toContain('hoje')
   })
 
   it('populates company_initials and company_tint', () => {
-    const result = groupPositions([BASE_ENTRY])
+    const result = groupCompanies([BASE_ENTRY])
     expect(result[0].company_initials).toBe('AC')
     expect(result[0].company_tint).toHaveProperty('bg')
     expect(result[0].company_tint).toHaveProperty('fg')
+  })
+
+  it('merges company with typo (Levenshtein ≤ 2) into canonical name', () => {
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', company: 'Cheesecake Labs', what_i_did: 'Criou feature', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', company: 'Cheesake Labs', what_i_did: 'Corrigiu bug', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    expect(result).toHaveLength(1)
+    expect(result[0].company).toBe('Cheesecake Labs')
+  })
+
+  it('keeps companies separate when Levenshtein distance > 2', () => {
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', company: 'Acme Corp', what_i_did: 'Tarefa A', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', company: 'Beta Corp', what_i_did: 'Tarefa B', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    expect(result).toHaveLength(2)
+  })
+
+  it('merges company with one char typo (e.g. missing letter)', () => {
+    const entries = [
+      { ...BASE_ENTRY, id: 'e1', company: 'Nubank', what_i_did: 'Produto A', impact: null, metric: null },
+      { ...BASE_ENTRY, id: 'e2', company: 'Nubak', what_i_did: 'Produto B', impact: null, metric: null },
+    ]
+    const result = groupCompanies(entries)
+    expect(result).toHaveLength(1)
+  })
+})
+
+describe('levenshtein', () => {
+  it('returns 0 for identical strings', () => {
+    expect(levenshtein('acme', 'acme')).toBe(0)
+  })
+
+  it('returns 1 for single insertion', () => {
+    expect(levenshtein('acme', 'acmee')).toBe(1)
+  })
+
+  it('returns 1 for single deletion', () => {
+    expect(levenshtein('abc', 'ac')).toBe(1)
+    expect(levenshtein('cheesecake', 'cheesake')).toBe(2)
+  })
+
+  it('returns correct distance for transposition', () => {
+    expect(levenshtein('nubank', 'nubnak')).toBe(2)
+  })
+
+  it('handles empty strings', () => {
+    expect(levenshtein('', 'abc')).toBe(3)
+    expect(levenshtein('abc', '')).toBe(3)
+    expect(levenshtein('', '')).toBe(0)
   })
 })

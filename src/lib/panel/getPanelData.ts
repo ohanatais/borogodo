@@ -46,6 +46,7 @@ export interface PanelMirror {
 
 export interface PanelData {
   name: string
+  avatarUrl: string | null
   status: MirrorStatus
   entryCount: number
   monthsSpan: number | null
@@ -84,7 +85,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     timelineRes,
     highlightsRes,
   ] = await Promise.all([
-    supabase.from('profiles').select('name').eq('id', userId).single(),
+    supabase.from('profiles').select('name, avatar_url').eq('id', userId).single(),
     supabase.from('entries').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase
       .from('entries')
@@ -129,7 +130,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .eq('user_id', userId)
       .not('role_title', 'is', null)
       .order('entry_date', { ascending: false })
-      .limit(3),
+      .limit(10),
     supabase
       .from('entries')
       .select('id, what_i_did, impact, metric, entry_date')
@@ -157,14 +158,23 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
   const t = await getTranslations('capture.composer.prompt')
   const prompt = getCapturePrompt(daysSince, mirror?.strengthThemes)
 
+  const seenCompanies = new Set<string>()
+  const timelineEntries = ((timelineRes.data ?? []) as TimelineEntry[]).filter((e) => {
+    if (!e.company) return true
+    if (seenCompanies.has(e.company)) return false
+    seenCompanies.add(e.company)
+    return true
+  })
+
   return {
     name: profileRes.data?.name ?? '',
+    avatarUrl: (profileRes.data as { avatar_url?: string | null } | null)?.avatar_url ?? null,
     status: getMirrorStatus(entryCount),
     entryCount,
     monthsSpan: calculateMonthsSpan(oldestEntryDate, newestEntryDate),
     daysSince,
     recentEntries,
-    timelineEntries: (timelineRes.data ?? []) as TimelineEntry[],
+    timelineEntries,
     highlights: (highlightsRes.data ?? []) as HighlightEntry[],
     mirror,
     insight: (insightRes.data as ProactiveInsight | null) ?? null,

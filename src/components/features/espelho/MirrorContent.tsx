@@ -12,6 +12,7 @@ import { MacroCategoryTabs } from './MacroCategoryTabs'
 interface MirrorContentProps {
   snapshot: MirrorSnapshot
   userName?: string
+  avatarUrl?: string | null
 }
 
 const container = {
@@ -53,17 +54,25 @@ function MirrorSection({ label, headline, evidence, warm = false }: SectionProps
   )
 }
 
-function MirrorHeader({ name, label }: { name: string; label: string }) {
+function MirrorHeader({ name, label, avatarUrl }: { name: string; label: string; avatarUrl?: string | null }) {
   const initial = name?.trim()?.[0]?.toUpperCase() ?? '?'
 
   return (
     <div className="flex items-center gap-4 mb-8">
-      <div
-        className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
-        style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-      >
-        {initial}
-      </div>
+      {avatarUrl ? (
+        <img
+          src={avatarUrl}
+          alt={name}
+          className="flex-shrink-0 w-14 h-14 rounded-full object-cover"
+        />
+      ) : (
+        <div
+          className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
+          style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+        >
+          {initial}
+        </div>
+      )}
       <div className="min-w-0">
         <p className="text-sm font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
           {label}
@@ -76,7 +85,7 @@ function MirrorHeader({ name, label }: { name: string; label: string }) {
   )
 }
 
-export function MirrorContent({ snapshot, userName = '' }: MirrorContentProps) {
+export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorContentProps) {
   const t = useTranslations('espelho')
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -104,8 +113,8 @@ export function MirrorContent({ snapshot, userName = '' }: MirrorContentProps) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
-      {personName && <MirrorHeader name={personName} label={t('mirrorOf')} />}
+    <div className="max-w-[980px] mx-auto px-6 py-8">
+      {personName && <MirrorHeader name={personName} label={t('mirrorOf')} avatarUrl={avatarUrl} />}
 
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-0">
         <motion.p
