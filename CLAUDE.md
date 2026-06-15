@@ -34,7 +34,7 @@ separadas). Kickoff resolvido: nav "Presença" (rota `/presenca` entra na 014),
 
 **Bloco inteiro planejado** (a cadeia da Presença):
 - **013-motor-de-voz** — fundação + post + resumo de impacto (migration `009`).
-- **014-presenca** — hub `/presenca` + nav + "Usar" no projeto + nudge proativo (sem migration).
+- **014-presenca** — hub `/presenca` + nav + **gestão total do rascunho** (editar/arquivar/excluir/restaurar/filtrar) + "Usar" no projeto + **sugestões no Painel e na Presença** (nudge + faixa). Sem migration (usa `status='discarded'` e a RLS de `delete` da 013).
 - **015-refino-voz** — recalibração de voz + golden set como gate de CI + mini-bio (migration `010`).
 
 Dependência: 013 → 014 → 015. Ohana pretende implementar em batch; respeitar a ordem
