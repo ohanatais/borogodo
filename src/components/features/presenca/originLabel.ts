@@ -1,12 +1,5 @@
 import type { Draft } from '@/types/content'
-
-// Decodifica a chave de um seed de projeto ("company:::project") para o nome legível do projeto.
-const PROJECT_SEED_SEPARATOR = ':::'
-
-export function projectNameFromSeedRef(seedRef: string): string {
-  const parts = seedRef.split(PROJECT_SEED_SEPARATOR)
-  return parts[parts.length - 1] || seedRef
-}
+import { projectNameFromSeedRef } from '@/lib/content/projectSeed'
 
 /**
  * Texto da evidência de origem mostrado como "Baseado em: {origem}" no hub e reaproveitado como

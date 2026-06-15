@@ -2,6 +2,7 @@ import type { createServerClient } from '@/lib/db/supabase/server'
 import { getLatestSnapshot } from '@/lib/db/mirror'
 import type { EvidenceItem } from '@/lib/ai/content/prompts/discipline'
 import type { SeedType } from '@/types/content'
+import { parseProjectSeedRef } from '@/lib/content/projectSeed'
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 
@@ -78,9 +79,39 @@ async function loadEntrySeed(
 }
 
 /**
+ * Projeto inteiro (014, US3): agrega a evidência de todas as entradas de uma empresa+projeto. A chave
+ * vem codificada em `seedRef` (company:::project). Isolado por `user_id` E empresa E projeto — sem
+ * vazar evidência de outro projeto (FR-012). 1 entrada se comporta como o seed de entrada (mesmo motor).
+ */
+async function loadProjectSeed(
+  supabase: SupabaseServerClient,
+  userId: string,
+  seedRef: string
+): Promise<SeedEvidence | null> {
+  const parsed = parseProjectSeedRef(seedRef)
+  if (!parsed) return null
+
+  const { data } = await supabase
+    .from('entries')
+    .select(ENTRY_EVIDENCE_COLUMNS)
+    .eq('user_id', userId)
+    .eq('company', parsed.company)
+    .eq('project_name', parsed.projectName)
+
+  if (!data || data.length === 0) return null
+
+  const evidence = (data as EntryEvidenceRow[]).map((e, i) => ({
+    label: `E${i + 1}`,
+    text: formatEntryEvidence(e),
+  }))
+
+  return { seedSummary: parsed.projectName, evidence }
+}
+
+/**
  * Carrega a evidência de um seed, sempre escopada ao usuário (constituição I: seedRef validado como
  * dele antes de qualquer chamada ao LLM). Retorna `null` quando o seed não é do usuário / não existe
- * (a rota mapeia 404). `project` não tem ponto de entrada na 013.
+ * (a rota mapeia 404).
  */
 export async function loadSeedEvidence(
   supabase: SupabaseServerClient,
@@ -90,5 +121,5 @@ export async function loadSeedEvidence(
 ): Promise<SeedEvidence | null> {
   if (seedType === 'theme') return loadThemeSeed(supabase, userId, seedRef)
   if (seedType === 'entry') return loadEntrySeed(supabase, userId, seedRef)
-  return null
+  return loadProjectSeed(supabase, userId, seedRef)
 }
