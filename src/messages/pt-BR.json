@@ -242,7 +242,7 @@
       "tierCriteria": {
         "Emergente": "O Borogodó identificou esse padrão nas suas histórias, mas sem recorrência estabelecida ainda. Para avançar para Consistente: registre mais 2 ou 3 situações com resultado claro.",
         "Consistente": "Padrão recorrente com resultados. Para chegar a Comprovada: adicione uma evidência externa — número com impacto, nome de empresa ou reconhecimento formal documentado.",
-        "Comprovada": "Nível máximo. Evidência externa validada por fora de você — resultado com número, empresa ou reconhecimento formal. Nada mais a provar aqui."
+        "Comprovada": "Nível máximo. Evidência externa validada por fora de você: resultado com número, empresa ou reconhecimento formal. Nada mais a provar aqui."
       },
       "skillProgress": {
         "Emergente": "Mais situações como essa elevam para Consistente.",

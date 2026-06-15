@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { SkillItem } from '@/types/mirror'
@@ -43,13 +42,14 @@ export function SkillTierItem({ skill, tierLabel }: SkillTierItemProps) {
           <p className="text-xs leading-snug" style={{ color: style.text }}>
             {t('skillProgress.Emergente')}
           </p>
-          <Link
-            href="/painel"
-            className="text-xs font-semibold mt-1.5 block hover:opacity-80 transition-opacity"
+          <button
+            type="button"
+            onClick={() => document.querySelector('textarea')?.focus()}
+            className="text-xs font-semibold mt-1.5 block hover:opacity-80 transition-opacity text-left"
             style={{ color: style.text, textDecoration: 'underline', textUnderlineOffset: '2px' }}
           >
             {t('skillProgressCta')} →
-          </Link>
+          </button>
         </div>
       )}
       {skill.tier === 'Consistente' && (
@@ -60,13 +60,14 @@ export function SkillTierItem({ skill, tierLabel }: SkillTierItemProps) {
           <p className="text-xs leading-snug" style={{ color: style.text }}>
             {t('skillProgress.Consistente')}
           </p>
-          <Link
-            href="/painel"
-            className="text-xs font-semibold mt-1.5 block hover:opacity-80 transition-opacity"
+          <button
+            type="button"
+            onClick={() => document.querySelector('textarea')?.focus()}
+            className="text-xs font-semibold mt-1.5 block hover:opacity-80 transition-opacity text-left"
             style={{ color: style.text, textDecoration: 'underline', textUnderlineOffset: '2px' }}
           >
             {t('skillProgressCta')} →
-          </Link>
+          </button>
         </div>
       )}
     </div>
