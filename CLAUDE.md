@@ -31,4 +31,12 @@ Primeiro elo do bloco de Geração de Conteúdo (Presença) — epic plan em
 prontos; **implementação ainda não iniciada** (decisão: planejar e codar em sessões
 separadas). Kickoff resolvido: nav "Presença" (rota `/presenca` entra na 014),
 `voice_profile` como JSONB, próxima migration `009`.
+
+**Bloco inteiro planejado** (a cadeia da Presença):
+- **013-motor-de-voz** — fundação + post + resumo de impacto (migration `009`).
+- **014-presenca** — hub `/presenca` + nav + "Usar" no projeto + nudge proativo (sem migration).
+- **015-refino-voz** — recalibração de voz + golden set como gate de CI + mini-bio (migration `010`).
+
+Dependência: 013 → 014 → 015. Ohana pretende implementar em batch; respeitar a ordem
+(fundação da 013 antes de 014; `009` antes de `010`).
 <!-- SPECKIT END -->
