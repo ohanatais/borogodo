@@ -354,9 +354,6 @@
       "confirm": "Delete permanently",
       "cancel": "Cancel"
     },
-    "suggestions": {
-      "title": "Suggestions for you"
-    },
     "nudge": {
       "label": "✦ This would make a good post",
       "cta": "Use"

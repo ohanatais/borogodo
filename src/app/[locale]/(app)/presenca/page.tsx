@@ -5,7 +5,6 @@ import { createServerClient } from '@/lib/db/supabase/server'
 import { listDrafts, hasAnyDraft } from '@/lib/db/drafts'
 import { getLatestSnapshot } from '@/lib/db/mirror'
 import { getRecentEntries } from '@/lib/db/entries'
-import { getSuggestions } from '@/lib/presenca/getSuggestions'
 import { PresencaCreate, type PresencaSeedEntry } from '@/components/features/content/PresencaCreate'
 import { PresencaHub } from '@/components/features/presenca/PresencaHub'
 
@@ -30,12 +29,11 @@ export default async function PresencaPage() {
 
   if (!user) redirect('/login')
 
-  const [page, anyDrafts, snapshot, recentEntries, suggestions, t] = await Promise.all([
+  const [page, anyDrafts, snapshot, recentEntries, t] = await Promise.all([
     listDrafts(supabase, user.id, { limit: HUB_PAGE_SIZE }),
     hasAnyDraft(supabase, user.id),
     getLatestSnapshot(supabase, user.id),
     getRecentEntries(supabase, user.id, RECENT_ENTRY_SEEDS),
-    getSuggestions(supabase, user.id),
     getTranslations('presenca.page'),
   ])
 
@@ -61,13 +59,7 @@ export default async function PresencaPage() {
         </div>
       </header>
 
-      <PresencaHub
-        initialPage={page}
-        hasAnyDrafts={anyDrafts}
-        themes={themes}
-        entries={entrySeeds}
-        suggestions={suggestions}
-      />
+      <PresencaHub initialPage={page} hasAnyDrafts={anyDrafts} themes={themes} entries={entrySeeds} />
     </div>
   )
 }

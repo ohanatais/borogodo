@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 import React from 'react'
 import { render, screen, act, waitFor } from '@testing-library/react'
 import { PresencaHub } from '../PresencaHub'
-import { PRESENCA_RESUME_EVENT, type PresencaResumeDetail } from '@/components/features/content/presencaEvents'
+import {
+  PRESENCA_RESUME_EVENT,
+  PRESENCA_DRAFT_UPDATED_EVENT,
+  type PresencaResumeDetail,
+} from '@/components/features/content/presencaEvents'
 import type { Draft, DraftListPage } from '@/types/content'
 
 vi.mock('next-intl', () => ({
@@ -162,6 +166,41 @@ describe('PresencaHub', () => {
 
     expect(mockDeleteDraft).not.toHaveBeenCalled()
     expect(screen.getByText('Corpo do rascunho salvo.')).toBeInTheDocument()
+  })
+
+  it('sincroniza o preview quando o editor avisa que o rascunho mudou (conserto do editar)', () => {
+    render(<PresencaHub initialPage={page([draft()])} hasAnyDrafts themes={[]} entries={[]} />)
+    expect(screen.getByText('Corpo do rascunho salvo.')).toBeInTheDocument()
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent(PRESENCA_DRAFT_UPDATED_EVENT, {
+          detail: { id: 'd1', body: 'Novo corpo editado', status: 'edited' },
+        })
+      )
+    })
+
+    expect(screen.getByText('Novo corpo editado')).toBeInTheDocument()
+    expect(screen.queryByText('Corpo do rascunho salvo.')).not.toBeInTheDocument()
+  })
+
+  it('retomar após edição reabre com o corpo atualizado', () => {
+    render(<PresencaHub initialPage={page([draft()])} hasAnyDrafts themes={[]} entries={[]} />)
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent(PRESENCA_DRAFT_UPDATED_EVENT, { detail: { id: 'd1', body: 'Novo corpo editado' } })
+      )
+    })
+
+    let received: PresencaResumeDetail | null = null
+    const handler = (e: Event) => {
+      received = (e as CustomEvent<PresencaResumeDetail>).detail
+    }
+    window.addEventListener(PRESENCA_RESUME_EVENT, handler)
+    act(() => screen.getByRole('button', { name: /actions\.resume/ }).click())
+    window.removeEventListener(PRESENCA_RESUME_EVENT, handler)
+
+    expect(received!.body).toBe('Novo corpo editado')
   })
 
   it('falha ao arquivar faz rollback (o item volta para a lista)', async () => {

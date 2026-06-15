@@ -67,31 +67,3 @@ export interface DraftListPage {
   /** Cursor opaco para a próxima página, ou `null` quando não há mais. */
   nextCursor: string | null
 }
-
-/** De onde nasce um item da faixa "Sugestões pra você" (para UI e analytics; a geração usa seedType/seedRef). */
-export type ContentSuggestionKind = 'nudge' | 'theme' | 'entry'
-
-/**
- * Projeção **não persistida** de um item da faixa "Sugestões pra você": unifica um nudge pendente
- * (`content_opportunity`) ou um ponto de partida determinístico (tema/entrada) numa forma que abre a
- * geração da 013 com a evidência carregada.
- */
-export interface ContentSuggestion {
-  /** Chave estável para React e dedupe na faixa. */
-  id: string
-  kind: ContentSuggestionKind
-  seedType: SeedType
-  seedRef: string
-  seedSummary: string
-  formats: DraftFormat[]
-  /** Presente só em `kind:'nudge'`: id do `content_opportunity` para marcar `seen` ao interagir. */
-  insightId?: string
-}
-
-/** Projeção de um `ProactiveInsight` do tipo `content_opportunity`, carregando a entrada-origem do nudge. */
-export interface ContentOpportunityInsight {
-  id: string
-  headline: string
-  body: string
-  entryIds: string[]
-}

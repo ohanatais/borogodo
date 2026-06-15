@@ -3,17 +3,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useTranslations } from 'next-intl'
-import type { ContentSuggestion, Draft, DraftFormat, DraftListPage, DraftStatusFilter } from '@/types/content'
+import type { Draft, DraftFormat, DraftListPage, DraftStatusFilter } from '@/types/content'
 import {
   PresencaCreate,
   type PresencaSeedEntry,
 } from '@/components/features/content/PresencaCreate'
-import { resumePresenca } from '@/components/features/content/presencaEvents'
+import {
+  resumePresenca,
+  PRESENCA_DRAFT_UPDATED_EVENT,
+  type DraftUpdatedDetail,
+} from '@/components/features/content/presencaEvents'
 import { patchDraft, deleteDraft } from '@/components/features/content/draftsClient'
 import { DraftListItem } from './DraftListItem'
 import { StatusFilter } from './StatusFilter'
 import { DeleteConfirm } from './DeleteConfirm'
-import { SuggestionsStrip } from './SuggestionsStrip'
 import { originLabel } from './originLabel'
 
 interface PresencaHubProps {
@@ -21,7 +24,6 @@ interface PresencaHubProps {
   hasAnyDrafts: boolean
   themes: string[]
   entries: PresencaSeedEntry[]
-  suggestions?: ContentSuggestion[]
 }
 
 function buildQuery(cursor: string | null, status: DraftStatusFilter, format: DraftFormat | null): string {
@@ -39,7 +41,7 @@ function buildQuery(cursor: string | null, status: DraftStatusFilter, format: Dr
  * restaurar e excluir saem da lista de forma otimista, com rollback se a escrita falhar e transição
  * suave (Framer). Reusa o motor da 013 (retomar → `GenerateSheet`). Nunca mostra página em branco.
  */
-export function PresencaHub({ initialPage, hasAnyDrafts, themes, entries, suggestions = [] }: PresencaHubProps) {
+export function PresencaHub({ initialPage, hasAnyDrafts, themes, entries }: PresencaHubProps) {
   const t = useTranslations('presenca')
   const [items, setItems] = useState<Draft[]>(initialPage.items)
   const [cursor, setCursor] = useState<string | null>(initialPage.nextCursor)
@@ -71,6 +73,24 @@ export function PresencaHub({ initialPage, hasAnyDrafts, themes, entries, sugges
     }
     void reload()
   }, [reload])
+
+  // Sincroniza com edições/cópias feitas no editor (GenerateSheet/DraftCard, fora do hub): atualiza
+  // o item para o preview e o "retomar" refletirem na hora, sem reload.
+  useEffect(() => {
+    function handler(e: Event) {
+      const d = (e as CustomEvent<DraftUpdatedDetail>).detail
+      if (!d) return
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === d.id
+            ? { ...item, ...(d.body !== undefined && { body: d.body }), ...(d.status !== undefined && { status: d.status }) }
+            : item
+        )
+      )
+    }
+    window.addEventListener(PRESENCA_DRAFT_UPDATED_EVENT, handler)
+    return () => window.removeEventListener(PRESENCA_DRAFT_UPDATED_EVENT, handler)
+  }, [])
 
   async function loadMore() {
     if (!cursor || loading) return
@@ -130,8 +150,6 @@ export function PresencaHub({ initialPage, hasAnyDrafts, themes, entries, sugges
 
   return (
     <div className="flex flex-col gap-4">
-      <SuggestionsStrip suggestions={suggestions} />
-
       {hasAnyDrafts && (
         <StatusFilter
           status={status}

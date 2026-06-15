@@ -1,4 +1,4 @@
-import type { DraftFormat, SeedType } from '@/types/content'
+import type { DraftFormat, DraftStatus, SeedType } from '@/types/content'
 
 // Contrato do evento que abre a superfície de geração. Mantido num módulo sem JSX para que o ponto
 // de entrada (UsarButton) e a superfície (GenerateSheet) compartilhem o tipo sem acoplar bundles.
@@ -40,4 +40,22 @@ export interface PresencaResumeDetail {
 /** Reabre um rascunho salvo no fluxo de edição da 013, sem regeração automática. */
 export function resumePresenca(detail: PresencaResumeDetail): void {
   window.dispatchEvent(new CustomEvent(PRESENCA_RESUME_EVENT, { detail }))
+}
+
+// ─── Rascunho atualizado (014) ─────────────────────────────────────────────────
+// O editor (GenerateSheet/DraftCard) é montado fora do hub e grava no banco direto. Este evento
+// avisa o hub para sincronizar a lista (preview) e o que o "retomar" reabre — sem isso, editar um
+// rascunho não refletia até um reload completo.
+
+export const PRESENCA_DRAFT_UPDATED_EVENT = 'borogodo:presenca-draft-updated'
+
+export interface DraftUpdatedDetail {
+  id: string
+  body?: string
+  status?: DraftStatus
+}
+
+/** Notifica o hub que um rascunho foi editado/copiado, para ele atualizar o item correspondente. */
+export function notifyDraftUpdated(detail: DraftUpdatedDetail): void {
+  window.dispatchEvent(new CustomEvent(PRESENCA_DRAFT_UPDATED_EVENT, { detail }))
 }

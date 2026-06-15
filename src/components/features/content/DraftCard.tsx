@@ -6,6 +6,7 @@ import { Pencil } from 'lucide-react'
 import type { DraftFormat, DraftVariant, SeedType, VoiceFeedback } from '@/types/content'
 import { CopyButton } from './CopyButton'
 import { createDraft, patchDraft } from './draftsClient'
+import { notifyDraftUpdated } from './presencaEvents'
 
 /** Evidência base, necessária para persistir o rascunho escolhido (US4). */
 export interface DraftSeed {
@@ -93,14 +94,22 @@ export function DraftCard({ variant, index, format, seed, existingDraftId }: Dra
       return
     }
     const updated = await patchDraft(id, { body, status: 'edited' })
-    if (!updated) setSaveError(true)
+    if (!updated) {
+      setSaveError(true)
+      return
+    }
+    notifyDraftUpdated({ id, body, status: 'edited' })
   }
 
   async function handleCopied() {
     const id = await ensureSaved(body)
     if (!id) return
     const updated = await patchDraft(id, { status: 'copied' })
-    if (!updated) setSaveError(true)
+    if (!updated) {
+      setSaveError(true)
+      return
+    }
+    notifyDraftUpdated({ id, status: 'copied' })
   }
 
   /** "Soa como você?" — persiste o sinal de voz sem regerar nada no v1 (FR-016). */
