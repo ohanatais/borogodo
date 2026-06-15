@@ -10,6 +10,7 @@ import { MirrorFeedback } from './MirrorFeedback'
 import { EvidenceText } from './EvidenceText'
 import { MacroCategoryTabs } from './MacroCategoryTabs'
 import { SectionLabel } from '@/components/ui/SectionLabel'
+import { UsarButton } from '@/components/features/content/UsarButton'
 
 interface MirrorContentProps {
   snapshot: MirrorSnapshot
@@ -220,10 +221,11 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
               {mirror.strength_themes.map((theme) => (
                 <span
                   key={theme}
-                  className="px-3 py-1 rounded-full text-sm font-medium border"
+                  className="inline-flex items-center gap-2 pl-3 pr-1.5 py-1 rounded-full text-sm font-medium border"
                   style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
                 >
                   {theme}
+                  <UsarButton seedType="theme" seedRef={theme} seedSummary={theme} formats={['post']} />
                 </span>
               ))}
             </div>

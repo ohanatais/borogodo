@@ -260,5 +260,67 @@
       "retry": "Try again",
       "errorGeneric": "Something went wrong. Please try again."
     }
+  },
+  "presenca": {
+    "use": "Use",
+    "basedOn": "Based on:",
+    "generating": "Writing in your voice...",
+    "regenerate": "Generate again",
+    "angleLabel": "Angle",
+    "formats": {
+      "post": "Post",
+      "impactSummary": "Impact summary"
+    },
+    "adjust": {
+      "label": "Adjust both drafts",
+      "shorter": "Shorter",
+      "lessFormal": "Less formal",
+      "removeJargon": "Drop the jargon"
+    },
+    "close": "Close",
+    "edit": "Edit",
+    "editDone": "Done",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyFallback": "Select the text and copy with Ctrl or Cmd + C.",
+    "voice": {
+      "prompt": "Sounds like you?",
+      "yes": "It does",
+      "no": "It doesn't"
+    },
+    "calibration": {
+      "open": "Tune voice",
+      "hint": "Paste 1 or 2 of your own texts so I get the tone right",
+      "save": "Save voice"
+    },
+    "errors": {
+      "generationFailed": "I couldn't write this the right way. Try again?",
+      "seedNotFound": "I couldn't find that evidence.",
+      "generic": "Something went wrong. Try again?",
+      "save": "I couldn't save right now. Your text is still here."
+    },
+    "create": {
+      "open": "Generate content",
+      "title": "Generate from what?",
+      "hint": "Every piece starts from your own evidence, never from a blank page.",
+      "themesLabel": "Themes from your mirror",
+      "entriesLabel": "Your recent entries",
+      "empty": "You don't have themes or entries yet. Register something first and it becomes raw material here.",
+      "goRegister": "Go to the Panel"
+    },
+    "page": {
+      "title": "Presence",
+      "subtitle": "The drafts you generated from your own work.",
+      "empty": {
+        "title": "No drafts here yet",
+        "description": "Generate your first draft from a theme in your Mirror or one of your entries, in your voice."
+      },
+      "status": {
+        "generated": "Generated",
+        "edited": "Edited",
+        "copied": "Copied",
+        "discarded": "Discarded"
+      }
+    }
   }
 }

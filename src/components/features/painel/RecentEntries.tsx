@@ -29,7 +29,13 @@ export function RecentEntries({ entries }: RecentEntriesProps) {
       </h2>
       <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
         {visibleEntries.map((entry) => (
-          <EntryItem key={entry.id} whatIDid={entry.what_i_did} source={entry.source} createdAt={entry.created_at} />
+          <EntryItem
+            key={entry.id}
+            id={entry.id}
+            whatIDid={entry.what_i_did}
+            source={entry.source}
+            createdAt={entry.created_at}
+          />
         ))}
       </ul>
     </section>

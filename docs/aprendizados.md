@@ -322,3 +322,60 @@ libs de terceiros.
 fronteira layout↔page no App Router. Vale ter o padrão estabelecido e nomeado para não reinventar
 a cada vez — e para explicar para não-devs por que "mas não dá pra só passar como prop?" tem uma
 resposta de arquitetura, não de descuido.
+
+---
+
+## 2026-06-15 — "Implementar o plano" não era escrever o código — era reconhecer que ele coordena uma cadeia
+
+**O que aconteceu:** pedi para o Claude "pegar o `docs/conteudo-plano-de-acao.md` e implementar,
+seguindo todo o padrão que o claude.md exige". O reflexo natural seria começar a codar uma feature
+gigante. Em vez disso, ele parou e contrapôs: aquele documento não é uma feature, é um *epic plan*
+que ele mesmo declara (linha 18) que "não substitui os ciclos speckit por feature; ele os coordena".
+Ele orquestra uma cadeia de três features (013 motor de voz, 014 Presença, 015 refino), cada uma com
+seu próprio ciclo speckit + checkpoint de validação meu. Ou seja: "implementar tudo seguindo o
+padrão" era contraditório — o próprio padrão (speckit por feature, com checkpoint entre elas) proíbe
+achatar três features num passo só. O caminho fiel era começar a cadeia certo: re-validar a fundação
+depois que a 012 mergeou, resolver as decisões de kickoff (nome da nav, onde guardar a voz, número da
+migration) e então planejar a 013, parando antes de codar.
+
+**O que aprendi:** documentos têm "altitude". Um epic plan, uma spec de feature e uma task são camadas
+diferentes, e tratar um pelo outro gera erro caro: implementar um plano de bloco como se fosse uma
+feature teria virado um mega-PR sem checkpoints, sem validação por elo, sem os gates de constituição
+por feature — exatamente o que o processo existe para evitar. A pista estava no próprio documento
+("ele os coordena"), mas era fácil passar reto, animada para "ver código saindo". O instinto certo foi
+ler a *intenção do artefato* antes de executar o verbo "implementar".
+
+**Por que importa:** é material de `build-with-claude` e de `product-thinking`. Para quem usa IA para
+construir, o reflexo "implementa isso para mim" assume que todo documento é executável do mesmo jeito
+— e a IA prestativa demais obedece. O valor apareceu no Claude perguntando "isto é uma feature ou um
+plano de várias?" antes de teclar. Reforça a regra que já está no `.claude/CLAUDE.md`: contrapor vale
+mais que executar rápido — aqui, o "executar rápido" custaria reorganizar três features depois.
+
+---
+
+## 2026-06-15 — Uma régua "anti-IA" determinística troca cobertura por precisão (e o trade-off é a decisão)
+
+**O que aconteceu:** a fundação da 013 (motor de geração de conteúdo) precisava de um validador que
+reprova texto "com cara de IA" sem chamar IA, para rodar barato em teste e travar regressão de voz. A
+forma é regex determinística (sem travessão, sem antítese, sem jargão de LinkedIn, número sempre com
+janela de tempo). Ao implementar a regra "número sempre com janela de tempo", percebi a armadilha: uma
+regex agressiva o bastante para pegar todo número solto também reprova texto legítimo, tipo "9 produtos
+em 3 países" ou "100% remoto". Em vez de tentar uma regra perfeita, escopei estreito de propósito: só
+pega percentual ou "de X para Y" sem janela de tempo (o caso canônico da marca, "de 41% para 58% em 4
+trimestres"). Contagens comuns passam. O golden set de 10 casos bons virou a rede: se a régua começasse
+a reprovar texto bom, esses testes ficariam vermelhos na hora.
+
+**O que aprendi:** um validador determinístico de qualidade subjetiva ("soa como IA?") nunca tem
+recall e precisão ao mesmo tempo. A escolha real não é "como pego tudo", é "qual erro eu prefiro". Aqui,
+falso-positivo (reprovar texto bom da pessoa) é pior que falso-negativo (deixar passar um número solto):
+o primeiro quebra a confiança e bloqueia geração legítima; o segundo é pego depois pela regeneração ou
+pelo olho humano. Então a régua é deliberadamente conservadora, e o golden set documenta o que ela
+promete pegar. "Anti-IA" virou propriedade verificável e honesta sobre os próprios limites, não uma
+promessa de que nada ruim passa.
+
+**Por que importa:** é material de `build-with-claude`. Todo mundo que constrói com IA acaba querendo um
+"guard rail barato" que valide a saída do modelo sem outra chamada de modelo. O reflexo é tentar a regra
+abrangente e descobrir em produção que ela reprova o output bom. A lição que vale conteúdo: comece pela
+pergunta "qual falha eu tolero?", escope a regra para alta precisão, e deixe uma suíte de exemplos bons
+ser a rede que avisa quando você apertou demais. Guard rail determinístico é um contrato sobre o que ele
+garante, não uma muralha.
