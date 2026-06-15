@@ -48,8 +48,9 @@ const reflectionSchema = z.object({
   move: z.object({
     type: z.enum(['question', 'affirmation', 'suggestion']),
     text: z.string().min(1),
-    // nullish: LLMs sometimes return null for optional enums in Zod v4
-    field: z.enum(['metric', 'impact', 'decision', 'learning']).nullish().transform(v => v ?? undefined),
+    // .catch: LLMs sometimes return field names outside the enum (e.g. "feedback", "role").
+    // Fall back to undefined rather than throwing, so the whole reflection isn't lost.
+    field: z.enum(['metric', 'impact', 'decision', 'learning']).nullish().catch(undefined).transform(v => v ?? undefined),
   }),
 })
 

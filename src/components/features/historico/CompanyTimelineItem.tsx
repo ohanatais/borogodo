@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ArrowUpRight } from 'lucide-react'
+import { ChevronDown, ArrowUpRight, MessageSquare } from 'lucide-react'
 import type { HistoricoCompany, HistoricoProject } from '@/lib/historico/getHistoricoData'
 
 interface CompanyTimelineItemProps {
@@ -18,6 +18,8 @@ export function CompanyTimelineItem({
   isLast,
 }: CompanyTimelineItemProps) {
   const [expanded, setExpanded] = useState(false)
+
+  const companyId = `company-${company.company.replace(/\s+/g, '-').toLowerCase()}`
 
   const collapsedLabel =
     company.roles.length === 1
@@ -54,6 +56,7 @@ export function CompanyTimelineItem({
             onClick={() => setExpanded((v) => !v)}
             className="w-full text-left flex items-start justify-between gap-2"
             aria-expanded={expanded}
+            aria-controls={companyId}
           >
             <div className="min-w-0">
               <h3
@@ -74,7 +77,7 @@ export function CompanyTimelineItem({
           </button>
 
           {expanded && (
-            <div className="mt-3 space-y-3">
+            <div id={companyId} className="mt-3 space-y-3">
               {/* Role progression (only if 2+ roles) */}
               {company.roles.length >= 2 && (
                 <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
@@ -134,6 +137,30 @@ export function CompanyTimelineItem({
                   })}
                 </div>
               )}
+
+              {/* Ask about company */}
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(
+                    new CustomEvent('borogodo:chat-open', {
+                      detail: {
+                        context: { type: 'empresa', entityId: company.company },
+                        prefillMessage: `O que posso destacar do meu tempo em ${company.company}?`,
+                      },
+                    })
+                  )
+                }}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-2.5 min-h-[44px] rounded-lg transition-opacity hover:opacity-80 mt-1"
+                style={{
+                  background: 'var(--color-lilas-nevoa)',
+                  color: 'var(--color-primary)',
+                  border: '1px solid transparent',
+                }}
+              >
+                <MessageSquare size={12} />
+                Perguntar sobre {company.company}
+              </button>
             </div>
           )}
         </div>
