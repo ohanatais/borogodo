@@ -43,7 +43,7 @@ const BASE_DATA: PanelData = {
   recentEntries: [],
   timelineEntries: [],
   highlights: [],
-  mirror: { headline: 'Você media conflitos com leveza.', strengthThemes: ['mediação'] },
+  mirror: { headline: 'Você media conflitos com leveza.', strengthThemes: ['mediação'], skillSummary: null },
   insight: null,
   composerPlaceholder: 'O que aconteceu no trabalho ontem?',
 }

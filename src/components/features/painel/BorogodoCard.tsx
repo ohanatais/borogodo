@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { CheckCircle2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { PanelMirror } from '@/lib/panel/getPanelData'
 
@@ -82,31 +83,34 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
 
           {/* Skill summary strip */}
           {mirror?.skillSummary && (
-            <div className="flex flex-wrap gap-2 mb-6 pt-2 border-t" style={{ borderColor: 'oklch(98% 0.01 320 / 0.15)' }}>
-              {mirror.skillSummary.comprovadas > 0 && (
-                <span
-                  className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: 'oklch(98% 0.01 320 / 0.2)', color: 'var(--color-primary-fg)' }}
-                >
-                  {t('skills.comprovadas', { count: mirror.skillSummary.comprovadas })}
-                </span>
-              )}
-              {mirror.skillSummary.consistentes > 0 && (
-                <span
-                  className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: 'oklch(98% 0.01 320 / 0.2)', color: 'var(--color-primary-fg)' }}
-                >
-                  {t('skills.consistentes', { count: mirror.skillSummary.consistentes })}
-                </span>
-              )}
-              {mirror.skillSummary.emergentes > 0 && (
-                <span
-                  className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: 'oklch(98% 0.01 320 / 0.2)', color: 'var(--color-primary-fg)' }}
-                >
-                  {t('skills.emergentes', { count: mirror.skillSummary.emergentes })}
-                </span>
-              )}
+            <div className="mb-6 pt-2 border-t" style={{ borderColor: 'oklch(98% 0.01 320 / 0.15)' }}>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {mirror.skillSummary.comprovadas > 0 && (
+                  <span
+                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium"
+                    style={{ background: 'oklch(98% 0.01 320 / 0.3)', color: 'var(--color-primary-fg)' }}
+                  >
+                    <CheckCircle2 size={10} aria-hidden="true" />
+                    {t('skills.comprovadas', { count: mirror.skillSummary.comprovadas })}
+                  </span>
+                )}
+                {mirror.skillSummary.consistentes > 0 && (
+                  <span
+                    className="text-xs px-2 py-0.5 rounded-full font-medium"
+                    style={{ background: 'oklch(98% 0.01 320 / 0.18)', color: 'var(--color-primary-fg)' }}
+                  >
+                    {t('skills.consistentes', { count: mirror.skillSummary.consistentes })}
+                  </span>
+                )}
+                {mirror.skillSummary.emergentes > 0 && (
+                  <span
+                    className="text-xs px-2 py-0.5 rounded-full font-medium"
+                    style={{ background: 'oklch(98% 0.01 320 / 0.1)', color: 'var(--color-primary-fg)', opacity: 0.8 }}
+                  >
+                    {t('skills.emergentes', { count: mirror.skillSummary.emergentes })}
+                  </span>
+                )}
+              </div>
             </div>
           )}
 

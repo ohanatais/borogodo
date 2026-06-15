@@ -228,10 +228,16 @@
         "Consistente": "Consistente",
         "Comprovada": "Comprovada"
       },
+      "legend": {
+        "emergente": "tá aparecendo",
+        "consistente": "virou padrão",
+        "comprovada": "tem prova externa"
+      },
       "skillProgress": {
         "Emergente": "Mais situações como essa elevam para Consistente.",
-        "Consistente": "Um resultado externo comprovado eleva para Comprovada."
-      }
+        "Consistente": "Um resultado externo (número, reconhecimento, empresa) eleva para Comprovada."
+      },
+      "skillProgressCta": "Registrar mais"
     },
     "empty": {
       "title": "Seu espelho está se formando.",

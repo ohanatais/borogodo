@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { SkillItem, SkillTier } from '@/types/mirror'
@@ -41,9 +42,19 @@ export function SkillTierItem({ skill, tierLabel }: SkillTierItemProps) {
           evidence={{ text: skill.evidence_text, entry_ids: skill.entry_ids }}
         />
       )}
-      {skill.tier !== 'Comprovada' && (
+      {(skill.tier === 'Emergente' || skill.tier === 'Consistente') && (
         <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-          {t(`skillProgress.${skill.tier}`)}
+          {skill.tier === 'Emergente'
+            ? t('skillProgress.Emergente')
+            : t('skillProgress.Consistente')}
+          {' '}
+          <Link
+            href="/painel"
+            className="underline underline-offset-2 font-medium hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            {t('skillProgressCta')}
+          </Link>
         </p>
       )}
     </div>

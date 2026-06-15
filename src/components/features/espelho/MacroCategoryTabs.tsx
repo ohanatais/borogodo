@@ -5,7 +5,16 @@ import { ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { MacroCategory, SkillTier } from '@/types/mirror'
 import { SkillTierItem } from './SkillTierItem'
+import { TierLegend } from './TierLegend'
 import { SectionLabel } from '@/components/ui/SectionLabel'
+
+const RECRUITER_CONTEXT: Partial<Record<string, string>> = {
+  'Execução': 'delivery · ship product',
+  'Insight e Diagnóstico': 'product sense · analytical',
+  'Estratégia e Visão': 'strategy · business impact',
+  'Influência e Liderança': 'leadership · stakeholders',
+  'Domínio': 'market fit · especialização',
+}
 
 interface MacroCategoryTabsProps {
   categories: MacroCategory[]
@@ -29,7 +38,8 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
     )
   }
 
-  const active = visibleCategories[activeIndex] ?? visibleCategories[0]
+  const safeActiveIndex = Math.min(Math.max(activeIndex, 0), visibleCategories.length - 1)
+  const active = visibleCategories[safeActiveIndex]
 
   function handleKeyDown(e: React.KeyboardEvent, i: number) {
     const last = visibleCategories.length - 1
@@ -48,6 +58,7 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
   return (
     <div>
       <SectionLabel>{t('title')}</SectionLabel>
+      <TierLegend />
 
       {/* Desktop lg+: horizontal tabs */}
       <div className="hidden lg:block">
@@ -61,17 +72,17 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
               key={cat.name}
               ref={(el) => { tabRefs.current[i] = el }}
               role="tab"
-              aria-selected={i === activeIndex}
+              aria-selected={i === safeActiveIndex}
               aria-controls={`tabpanel-${i}`}
               id={`tab-${i}`}
-              tabIndex={i === activeIndex ? 0 : -1}
+              tabIndex={i === safeActiveIndex ? 0 : -1}
               type="button"
               onClick={() => setActiveIndex(i)}
               onKeyDown={(e) => handleKeyDown(e, i)}
               className="shrink-0 px-3.5 py-2.5 min-h-[44px] text-sm font-medium transition-colors duration-200"
               style={{
-                color: i === activeIndex ? 'var(--color-primary)' : 'var(--muted-foreground)',
-                borderBottom: i === activeIndex ? '2px solid var(--color-primary)' : '2px solid transparent',
+                color: i === safeActiveIndex ? 'var(--color-primary)' : 'var(--muted-foreground)',
+                borderBottom: i === safeActiveIndex ? '2px solid var(--color-primary)' : '2px solid transparent',
                 marginBottom: '-1px',
                 background: 'transparent',
               }}
@@ -80,7 +91,7 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
               {cat.skills.length > 0 && (
                 <span
                   className="ml-1.5 text-xs"
-                  style={{ color: i === activeIndex ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
+                  style={{ color: i === safeActiveIndex ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
                 >
                   · {cat.skills.length}
                 </span>
@@ -91,9 +102,14 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
 
         <div
           role="tabpanel"
-          id={`tabpanel-${activeIndex}`}
-          aria-labelledby={`tab-${activeIndex}`}
+          id={`tabpanel-${safeActiveIndex}`}
+          aria-labelledby={`tab-${safeActiveIndex}`}
         >
+          {RECRUITER_CONTEXT[active.name] && (
+            <p className="text-xs mb-3 opacity-60" style={{ color: 'var(--muted-foreground)' }}>
+              {RECRUITER_CONTEXT[active.name]}
+            </p>
+          )}
           {active.skills.map((skill) => (
             <SkillTierItem
               key={skill.name}
@@ -149,6 +165,11 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
                   aria-labelledby={`accordion-header-${i}`}
                   className="px-4 pb-2"
                 >
+                  {RECRUITER_CONTEXT[cat.name] && (
+                    <p className="text-xs pt-1 pb-2 opacity-60" style={{ color: 'var(--muted-foreground)' }}>
+                      {RECRUITER_CONTEXT[cat.name]}
+                    </p>
+                  )}
                   {cat.skills.map((skill) => (
                     <SkillTierItem
                       key={skill.name}

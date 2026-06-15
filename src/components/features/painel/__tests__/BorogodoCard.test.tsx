@@ -7,6 +7,7 @@ import { BorogodoCard } from '../BorogodoCard'
 const MIRROR: PanelMirror = {
   headline: 'Você estabiliza times em momentos críticos.',
   strengthThemes: ['liderança', 'calma sob pressão', 'mentoria'],
+  skillSummary: null,
 }
 
 describe('BorogodoCard', () => {
@@ -67,6 +68,7 @@ describe('BorogodoCard', () => {
     const mirror: PanelMirror = {
       headline: null,
       strengthThemes: ['a', 'b', 'c', 'd', 'e', 'f'],
+      skillSummary: null,
     }
     render(<BorogodoCard name="Ana" mirror={mirror} entryCount={5} />)
     // specialty chips: slice(0,5) → a–e visible; 'f' not shown
