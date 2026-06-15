@@ -28,15 +28,13 @@ export function MarcoPreviewCard({ marco, onDismiss }: MarcoPreviewCardProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          kind: 'text',
-          content: [
-            marco.what_i_did,
-            marco.impact && `Impacto: ${marco.impact}`,
-            marco.metric && `Métrica: ${marco.metric}`,
-          ].filter(Boolean).join('\n'),
-          company: marco.company,
-          role_title: marco.role_title,
-          entry_date: marco.entry_date,
+          kind: 'marco',
+          what_i_did: marco.what_i_did,
+          company: marco.company ?? null,
+          role_title: marco.role_title ?? null,
+          entry_date: marco.entry_date ?? null,
+          impact: marco.impact ?? null,
+          metric: marco.metric ?? null,
         }),
       })
       if (!res.ok) throw new Error('Erro ao salvar')

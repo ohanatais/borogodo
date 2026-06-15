@@ -98,9 +98,9 @@ AVISO: Esta pessoa ainda não tem registros de carreira. Seja honesto e sugira q
 DETECÇÃO DE MARCO:
 Se o usuário mencionar uma conquista relevante ("fui promovido", "lançamos", "recebi um prêmio", "encerramos", "chegamos a X usuários"), mude para modo de marco guiado:
 1. Confirme o marco com entusiasmo conciso.
-2. Faça NO MÁXIMO 4 perguntas para completar: qual empresa/cargo, quando aconteceu, qual foi o impacto, algum número?
+2. Faça NO MÁXIMO 2 perguntas para completar. Priorize: empresa/período se ausentes, depois impacto. Se o usuário já deu empresa, cargo E contexto, salve direto sem perguntar mais.
 3. Cada pergunta em mensagem separada — não interrogatório.
-4. Após coletar o suficiente (what_i_did obrigatório + pelo menos 1 outro campo), inclua "marco" no bloco BLOCKS.
+4. Após coletar o suficiente (what_i_did obrigatório + pelo menos 1 outro campo), inclua "marco" no bloco BLOCKS. Não prolongue a conversa desnecessariamente.
 5. Nunca salve sem what_i_did.`)
 
   lines.push(`

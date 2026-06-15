@@ -302,9 +302,9 @@ export function ChatSheet() {
           onInteractOutside={(e) => e.preventDefault()}
           aria-describedby={undefined}
           className="fixed z-50 flex flex-col focus:outline-none
-            bottom-0 left-0 right-0 rounded-t-[16px] max-h-[90dvh]
+            bottom-0 left-0 right-0 rounded-t-[16px] max-h-[92dvh]
             lg:bottom-4 lg:right-6 lg:left-auto lg:top-auto
-            lg:w-[440px] lg:max-h-[76dvh] lg:rounded-2xl"
+            lg:w-[460px] lg:max-h-[84dvh] lg:rounded-2xl"
           style={{
             background: 'var(--color-creme)',
             boxShadow: '0 8px 40px oklch(18% 0.02 260 / 0.25), 0 2px 8px oklch(18% 0.02 260 / 0.1)',
@@ -369,14 +369,21 @@ export function ChatSheet() {
               <StarterPrompts onSelect={handleStarterClick} />
             ) : (
               <div className="flex flex-col gap-4">
-                {state.messages.map((msg) => (
-                  <ChatMessage
-                    key={msg.id}
-                    message={msg}
-                    onSuggestionClick={handleSuggestionClick}
-                    onHelpful={(helpful) => dispatch({ type: 'SET_HELPFUL', id: msg.id, helpful })}
-                  />
-                ))}
+                {(() => {
+                  const lastAssistantIdx = state.messages.reduce(
+                    (acc, m, i) => (m.role === 'assistant' ? i : acc),
+                    -1
+                  )
+                  return state.messages.map((msg, i) => (
+                    <ChatMessage
+                      key={msg.id}
+                      message={msg}
+                      onSuggestionClick={handleSuggestionClick}
+                      onHelpful={(helpful) => dispatch({ type: 'SET_HELPFUL', id: msg.id, helpful })}
+                      showSuggestions={i === lastAssistantIdx}
+                    />
+                  ))
+                })()}
 
                 {state.pendingCorrection && (
                   <CorrectionConfirmCard

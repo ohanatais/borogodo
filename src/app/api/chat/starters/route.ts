@@ -50,11 +50,16 @@ export async function GET(): Promise<NextResponse> {
     starters.push(`Quais projetos de ${topTag} tiveram mais impacto?`)
   }
 
-  // Starter based on recency
+  // Starter based on recency — use company name rather than embedding raw text
+  // to avoid sending a truncated mid-word snippet as a literal chat message.
   const recentEntry = entries[0]
-  if (recentEntry?.what_i_did && starters.length < 3) {
-    const snippet = recentEntry.what_i_did.slice(0, 60)
-    starters.push(`Me conta mais sobre "${snippet}${recentEntry.what_i_did.length > 60 ? '...' : ''}"`)
+  if (recentEntry && starters.length < 3) {
+    const ref = recentEntry.company ?? null
+    starters.push(
+      ref
+        ? `O que aprendi de mais importante na ${ref}?`
+        : 'O que minha trajetória mais recente diz sobre mim?'
+    )
   }
 
   // Fill with statics if we don't have 3

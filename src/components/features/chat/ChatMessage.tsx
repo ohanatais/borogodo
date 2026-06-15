@@ -19,12 +19,36 @@ interface ChatMessageProps {
   message: MessageData
   onSuggestionClick: (suggestion: string) => void
   onHelpful?: (helpful: boolean) => void
+  showSuggestions?: boolean
 }
 
-export function ChatMessage({ message, onSuggestionClick, onHelpful }: ChatMessageProps) {
+export function ChatMessage({ message, onSuggestionClick, onHelpful, showSuggestions = true }: ChatMessageProps) {
   const isUser = message.role === 'user'
   const isError = !isUser && !!message.isError
   const showFeedback = !isUser && !message.isStreaming && !isError && message.content.length > 0
+
+  // Collapse citations from the same company: show one chip per company with entry count
+  const collapsedCitations = (() => {
+    if (!message.citations) return []
+    const byCompany = new Map<string, { count: number; date: string | null; label: string; entryId: string; firstIndex: number }>()
+    message.citations.forEach((c, i) => {
+      const key = c.company ?? `entry-${i}`
+      const existing = byCompany.get(key)
+      if (existing) {
+        existing.count++
+      } else {
+        byCompany.set(key, { count: 1, date: c.date ?? null, label: c.label, entryId: c.entryId, firstIndex: i })
+      }
+    })
+    return Array.from(byCompany.entries()).map(([company, meta]) => ({
+      entryId: meta.entryId,
+      company: company.startsWith('entry-') ? null : company,
+      date: meta.date,
+      label: meta.label,
+      count: meta.count,
+      firstIndex: meta.firstIndex,
+    }))
+  })()
 
   return (
     <div className={`flex flex-col gap-1.5 ${isUser ? 'items-end' : 'items-start'}`}>
@@ -61,15 +85,20 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful }: ChatMessa
         )}
       </div>
 
-      {!isUser && message.citations && message.citations.length > 0 && !message.isStreaming && (
+      {!isUser && collapsedCitations.length > 0 && !message.isStreaming && (
         <div className="flex flex-wrap gap-1 pl-1 max-w-[85%]">
-          {message.citations.map((c, i) => (
-            <CitationChip key={c.entryId} citation={c} index={i} />
+          {collapsedCitations.map((c, i) => (
+            <CitationChip
+              key={c.entryId}
+              citation={c}
+              index={i}
+              count={c.count}
+            />
           ))}
         </div>
       )}
 
-      {!isUser && message.suggestions && message.suggestions.length > 0 && !message.isStreaming && (
+      {!isUser && showSuggestions && message.suggestions && message.suggestions.length > 0 && !message.isStreaming && (
         <div className="flex flex-col gap-1 pl-1 mt-1 max-w-[90%]">
           {message.suggestions.map((s) => (
             <button

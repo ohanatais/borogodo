@@ -73,6 +73,16 @@ export async function POST(request: Request): Promise<NextResponse> {
     return jsonError(t('unauthorized'), 401)
   }
 
+  const contentType = request.headers.get('content-type') ?? ''
+
+  if (contentType.includes('application/json')) {
+    const body = await request.json() as Record<string, unknown>
+    if (body.kind === 'marco') {
+      return handleMarcoCapture(supabase, user.id, body, t)
+    }
+    return jsonError(t('invalidKind'), 400)
+  }
+
   const formData = await request.formData()
   const kind = formData.get('kind')
 
@@ -89,6 +99,38 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   return handleTextCapture(supabase, user.id, formData, t)
+}
+
+async function handleMarcoCapture(
+  supabase: SupabaseServerClient,
+  userId: string,
+  body: Record<string, unknown>,
+  t: ApiErrors
+): Promise<NextResponse> {
+  const what_i_did = typeof body.what_i_did === 'string' ? body.what_i_did.trim() : ''
+  if (!what_i_did) return jsonError(t('textTooShort'), 400)
+
+  const entry = {
+    what_i_did,
+    company: typeof body.company === 'string' ? body.company : null,
+    role_title: typeof body.role_title === 'string' ? body.role_title : null,
+    entry_date: typeof body.entry_date === 'string' ? body.entry_date : null,
+    impact: typeof body.impact === 'string' ? body.impact : null,
+    metric: typeof body.metric === 'string' ? body.metric : null,
+    tags: [],
+    raw_content: what_i_did,
+    source: 'text' as const,
+  }
+
+  try {
+    const saved = await saveEntries(supabase, userId, [entry])
+    dispatchAsyncJobs(userId)
+    return NextResponse.json({ entries: saved, reflection: null }, { status: 200 })
+  } catch (error: unknown) {
+    const message = errorMessage(error)
+    logger.error('marco capture failed', { message })
+    return jsonError(t('generic'), 500)
+  }
 }
 
 async function handleTextCapture(
