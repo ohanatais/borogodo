@@ -82,7 +82,7 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
 
           {/* Skill summary strip */}
           {mirror?.skillSummary && (
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex flex-wrap gap-2 mb-6 pt-2 border-t" style={{ borderColor: 'oklch(98% 0.01 320 / 0.15)' }}>
               {mirror.skillSummary.comprovadas > 0 && (
                 <span
                   className="text-xs px-2 py-0.5 rounded-full font-medium"

@@ -40,6 +40,16 @@ describe('MacroCategoryTabs', () => {
     expect(tabs).toHaveLength(2) // only the 2 non-empty ones
   })
 
+  it('renders empty state when all categories have empty skills', () => {
+    const allEmpty: MacroCategory[] = [
+      { name: 'Execução', skills: [] },
+      { name: 'Domínio', skills: [] },
+    ]
+    render(<MacroCategoryTabs categories={allEmpty} />)
+    expect(screen.getByText('emptyState')).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).toBeNull()
+  })
+
   it('renders all category tab buttons', () => {
     render(<MacroCategoryTabs categories={CATEGORIES} />)
     expect(screen.getAllByRole('tab')).toHaveLength(2)

@@ -31,7 +31,7 @@ export function SkillTierItem({ skill, tierLabel }: SkillTierItemProps) {
           style={{ background: tierStyle.bg, color: tierStyle.text }}
         >
           {skill.tier === 'Comprovada' && (
-            <CheckCircle2 size={10} aria-hidden="true" className="mr-0.5" />
+            <CheckCircle2 size={12} aria-hidden="true" className="mr-1" />
           )}
           {tierLabel}
         </span>
@@ -42,7 +42,7 @@ export function SkillTierItem({ skill, tierLabel }: SkillTierItemProps) {
         />
       )}
       {skill.tier !== 'Comprovada' && (
-        <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+        <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
           {t(`skillProgress.${skill.tier}`)}
         </p>
       )}

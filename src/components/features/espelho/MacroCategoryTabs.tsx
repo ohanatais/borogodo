@@ -18,11 +18,11 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
 
   const visibleCategories = categories.filter((cat) => cat.skills.length > 0)
 
-  if (categories.length === 0) {
+  if (visibleCategories.length === 0) {
     return (
       <div>
         <SectionLabel>{t('title')}</SectionLabel>
-        <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+        <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
           {t('emptyState')}
         </p>
       </div>
@@ -80,7 +80,7 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
               {cat.skills.length > 0 && (
                 <span
                   className="ml-1.5 text-xs"
-                  style={{ color: i === activeIndex ? 'var(--color-primary)' : 'var(--muted-foreground)', opacity: 0.7 }}
+                  style={{ color: i === activeIndex ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
                 >
                   · {cat.skills.length}
                 </span>
