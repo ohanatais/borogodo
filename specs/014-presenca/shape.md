@@ -8,6 +8,14 @@ shape da 013 (`GenerateSheet`, `DraftCard`, `UsarButton`, `AdjustChips`, `VoiceC
 
 **Fonte**: `docs/conteudo-plano-de-acao.md`, `spec.md`, shape da 013, `.impeccable/design.json`.
 
+> **Decisão pós-implementação (sessão 2026-06-15, Ohana):** a faixa **"Sugestões pra você"
+> (`SuggestionsStrip`)** na Presença foi **removida** — os pontos de partida (temas do espelho)
+> repetiam o que o botão **"Gerar conteúdo"** já oferece e poluíam o topo do hub. As sugestões de
+> conteúdo (US4) ficam **só no Painel**, como o **nudge** `content_opportunity` ("✦ Isso daria um
+> post"), que é proativo e contextual. As menções a `SuggestionsStrip` nas seções 3/5/9 e no checklist
+> §10 abaixo ficam como histórico do shape original; valem para o nudge do Painel, não para uma faixa
+> na Presença.
+
 ---
 
 ## 1. Feature Summary

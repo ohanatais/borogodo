@@ -228,6 +228,10 @@ fracas → confirmar que o nudge **não** dispara toda hora.
   `content_opportunity` pendentes e/ou pontos de partida determinísticos: temas do espelho e entradas
   fortes sem rascunho ainda). Sem material, a faixa MUST sumir (sem placeholder vazio). As sugestões da
   Presença MUST NOT exigir chamada de IA no caminho de leitura do hub.
+  > **Descopado na implementação (2026-06-15, decisão de Ohana):** a faixa na Presença foi **removida** —
+  > os pontos de partida (temas) duplicavam o "Gerar conteúdo" e poluíam o hub. As sugestões de conteúdo
+  > (US4) ficam **só no Painel**, via o nudge `content_opportunity`. Ajusta SC-005/SC-006 de acordo (a
+  > parte "faixa aparece com material e some sem material" não se aplica; o nudge do Painel permanece).
 
 #### Plataforma (constituição)
 - **FR-017**: Toda string de UI MUST viver em `pt-BR.json` (`presenca.*`), `en.json` espelhando. Zero

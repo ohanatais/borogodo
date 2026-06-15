@@ -358,10 +358,6 @@
       "label": "✦ This would make a good post",
       "cta": "Use"
     },
-    "paths": {
-      "theme": "Start from a theme in your mirror",
-      "project": "Use a project from your timeline"
-    },
     "resumeTitle": "Resume draft",
     "useProject": "Use this project",
     "projectSeed": "project {name} ({count, plural, one {# entry} other {# entries}})"

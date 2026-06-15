@@ -28,7 +28,7 @@ function Pill({ active, label, onClick }: { active: boolean; label: string; onCl
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className="inline-flex items-center justify-center text-xs font-medium px-3 min-h-[36px] rounded-full border transition-colors"
+      className="inline-flex items-center justify-center text-xs font-medium px-3 min-h-[48px] md:min-h-[36px] rounded-full border transition-colors"
       style={{
         background: active ? 'var(--color-primary)' : 'var(--card)',
         borderColor: active ? 'var(--color-primary)' : 'var(--border)',
@@ -51,8 +51,8 @@ export function StatusFilter({ status, format, onStatusChange, onFormatChange }:
 
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-      <div role="group" aria-label={t('filter.statusLabel')} className="flex items-center gap-1.5">
-        <span className="text-xs font-medium mr-0.5" style={{ color: 'var(--muted-foreground)' }}>
+      <div role="group" aria-labelledby="presenca-filter-status" className="flex items-center gap-1.5">
+        <span id="presenca-filter-status" className="text-xs font-medium mr-0.5" style={{ color: 'var(--muted-foreground)' }}>
           {t('filter.statusLabel')}
         </span>
         {STATUS_OPTIONS.map((opt) => (
@@ -64,8 +64,8 @@ export function StatusFilter({ status, format, onStatusChange, onFormatChange }:
           />
         ))}
       </div>
-      <div role="group" aria-label={t('filter.formatLabel')} className="flex items-center gap-1.5">
-        <span className="text-xs font-medium mr-0.5" style={{ color: 'var(--muted-foreground)' }}>
+      <div role="group" aria-labelledby="presenca-filter-format" className="flex items-center gap-1.5">
+        <span id="presenca-filter-format" className="text-xs font-medium mr-0.5" style={{ color: 'var(--muted-foreground)' }}>
           {t('filter.formatLabel')}
         </span>
         {FORMAT_OPTIONS.map((opt) => (

@@ -82,7 +82,7 @@ export function CopyButton({ text, onCopied, className = '', variant = 'solid', 
           onClick={() => void handleCopy()}
           aria-label={copied ? t('copied') : t('copy')}
           title={copied ? t('copied') : t('copy')}
-          className={`inline-flex items-center justify-center min-w-[40px] min-h-[40px] rounded-lg transition-colors hover:bg-[var(--muted)] ${className}`}
+          className={`inline-flex items-center justify-center min-w-[48px] min-h-[48px] md:min-w-[40px] md:min-h-[40px] rounded-lg transition-colors hover:bg-[var(--muted)] ${className}`}
           style={{ color: copied ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
         >
           {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}

@@ -469,10 +469,6 @@
       "label": "✦ Isso daria um bom post",
       "cta": "Usar"
     },
-    "paths": {
-      "theme": "Comece por um tema do seu espelho",
-      "project": "Use um projeto da sua linha do tempo"
-    },
     "resumeTitle": "Retomar rascunho",
     "useProject": "Usar este projeto",
     "projectSeed": "projeto {name} ({count, plural, one {# entrada} other {# entradas}})"

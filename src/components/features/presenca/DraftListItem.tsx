@@ -46,7 +46,7 @@ function IconAction({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="inline-flex items-center justify-center min-w-[40px] min-h-[40px] rounded-lg transition-colors hover:bg-[var(--muted)]"
+      className="inline-flex items-center justify-center min-w-[48px] min-h-[48px] md:min-w-[40px] md:min-h-[40px] rounded-lg transition-colors hover:bg-[var(--muted)]"
       style={{ color: destructive ? 'var(--destructive)' : 'var(--muted-foreground)' }}
     >
       {children}
@@ -81,7 +81,7 @@ export function DraftListItem({ draft, onResume, onCopied, onArchive, onRestore,
           type="button"
           onClick={onResume}
           aria-label={`${t('actions.resume')}: ${title}`}
-          className="flex-1 min-w-0 text-left px-4 py-3 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
+          className="flex-1 min-w-0 min-h-[48px] text-left px-4 py-3 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
         >
           <span className="flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
             <span

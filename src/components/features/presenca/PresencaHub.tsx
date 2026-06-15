@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useTranslations } from 'next-intl'
-import type { Draft, DraftFormat, DraftListPage, DraftStatusFilter } from '@/types/content'
+import type { Draft, DraftFormat, DraftListPage, DraftStatus, DraftStatusFilter } from '@/types/content'
 import {
   PresencaCreate,
   type PresencaSeedEntry,
@@ -33,6 +33,13 @@ function buildQuery(cursor: string | null, status: DraftStatusFilter, format: Dr
   if (format) params.set('format', format)
   const qs = params.toString()
   return qs ? `?${qs}` : ''
+}
+
+/** Mesma regra do servidor (listDrafts): "ativos" = não-arquivados; os outros são recortes exatos. */
+function matchesStatusFilter(status: DraftStatus, filter: DraftStatusFilter): boolean {
+  if (filter === 'arquivados') return status === 'discarded'
+  if (filter === 'copiados') return status === 'copied'
+  return status !== 'discarded'
 }
 
 /**
@@ -80,6 +87,12 @@ export function PresencaHub({ initialPage, hasAnyDrafts, themes, entries }: Pres
     function handler(e: Event) {
       const d = (e as CustomEvent<DraftUpdatedDetail>).detail
       if (!d) return
+      // Se a edição mudou o status para fora do filtro atual (ex.: editar um arquivado → 'edited'),
+      // o item sai da lista; senão, atualiza no lugar (preview + retomar refletem na hora).
+      if (d.status !== undefined && !matchesStatusFilter(d.status, status)) {
+        setItems((prev) => prev.filter((item) => item.id !== d.id))
+        return
+      }
       setItems((prev) =>
         prev.map((item) =>
           item.id === d.id
@@ -90,7 +103,7 @@ export function PresencaHub({ initialPage, hasAnyDrafts, themes, entries }: Pres
     }
     window.addEventListener(PRESENCA_DRAFT_UPDATED_EVENT, handler)
     return () => window.removeEventListener(PRESENCA_DRAFT_UPDATED_EVENT, handler)
-  }, [])
+  }, [status])
 
   async function loadMore() {
     if (!cursor || loading) return
@@ -107,12 +120,16 @@ export function PresencaHub({ initialPage, hasAnyDrafts, themes, entries }: Pres
     }
   }
 
-  /** Remove o item da lista na hora; desfaz (rollback) se a escrita no servidor falhar. */
+  /**
+   * Remove o item da lista na hora; em falha, reinsere só ele (rollback funcional, reordenado por
+   * data) — não restaura um snapshot inteiro, para não ressuscitar irmãos removidos em paralelo.
+   */
   async function removeOptimistic(draft: Draft, action: () => Promise<boolean>) {
-    const snapshot = items
     setItems((prev) => prev.filter((d) => d.id !== draft.id))
     const ok = await action()
-    if (!ok) setItems(snapshot)
+    if (!ok) {
+      setItems((prev) => [draft, ...prev].sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
+    }
   }
 
   function handleResume(draft: Draft) {
@@ -129,7 +146,11 @@ export function PresencaHub({ initialPage, hasAnyDrafts, themes, entries }: Pres
 
   function handleCopied(draft: Draft) {
     void patchDraft(draft.id, { status: 'copied' })
-    setItems((prev) => prev.map((d) => (d.id === draft.id ? { ...d, status: 'copied' } : d)))
+    setItems((prev) =>
+      matchesStatusFilter('copied', status)
+        ? prev.map((d) => (d.id === draft.id ? { ...d, status: 'copied' } : d))
+        : prev.filter((d) => d.id !== draft.id)
+    )
   }
 
   function handleArchive(draft: Draft) {
