@@ -430,8 +430,47 @@
         "generated": "Gerado",
         "edited": "Editado",
         "copied": "Copiado",
-        "discarded": "Descartado"
+        "discarded": "Arquivado"
       }
-    }
+    },
+    "loadMore": "Carregar mais",
+    "filterEmpty": "Nenhum rascunho neste filtro.",
+    "actions": {
+      "menu": "Ações do rascunho",
+      "resume": "Retomar",
+      "copy": "Copiar",
+      "archive": "Arquivar",
+      "restore": "Restaurar",
+      "delete": "Excluir"
+    },
+    "origin": {
+      "entry": "uma entrada sua",
+      "project": "projeto {name}",
+      "unavailable": "origem indisponível"
+    },
+    "filter": {
+      "label": "Filtrar rascunhos",
+      "statusLabel": "Status",
+      "formatLabel": "Formato",
+      "ativos": "Ativos",
+      "copiados": "Copiados",
+      "arquivados": "Arquivados",
+      "allFormats": "Todos",
+      "post": "Post",
+      "impactSummary": "Resumo"
+    },
+    "deleteConfirm": {
+      "title": "Excluir este rascunho?",
+      "description": "Isso não tem volta.",
+      "confirm": "Excluir definitivamente",
+      "cancel": "Cancelar"
+    },
+    "nudge": {
+      "label": "✦ Isso daria um bom post",
+      "cta": "Usar"
+    },
+    "resumeTitle": "Retomar rascunho",
+    "useProject": "Usar este projeto",
+    "projectSeed": "projeto {name} ({count, plural, one {# entrada} other {# entradas}})"
   }
 }

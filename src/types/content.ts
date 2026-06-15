@@ -52,3 +52,18 @@ export interface ContentRulesetViolation {
   field: string
   message: string
 }
+
+// ─── Hub da Presença (014) ──────────────────────────────────────────────────
+
+/**
+ * Filtro de status da listagem do hub. `ativos` é o default e exclui os arquivados
+ * (`discarded`); `copiados` e `arquivados` são recortes focados. Mapeado para a query no servidor.
+ */
+export type DraftStatusFilter = 'ativos' | 'copiados' | 'arquivados'
+
+/** Uma página da listagem paginada de rascunhos (keyset por `created_at`). */
+export interface DraftListPage {
+  items: Draft[]
+  /** Cursor opaco para a próxima página, ou `null` quando não há mais. */
+  nextCursor: string | null
+}

@@ -120,4 +120,36 @@ describe('triggerProactiveInsight', () => {
 
     expect(mockComplete).not.toHaveBeenCalled()
   })
+
+  it('014: dispara content_opportunity (sem IA) quando a captura recente tem sinal forte', async () => {
+    const strongFirst = [
+      { id: 's1', what_i_did: 'Lancei o app, 10k downloads no 1º mês', tags: ['lançamento'], impact: 'Crescimento forte', metric: '10k downloads' },
+      { id: 'e2', what_i_did: 'Reunião de status', tags: [], impact: null, metric: null },
+    ]
+    const admin = buildAdmin({ count: 0, list: strongFirst })
+    mockGetSupabaseAdmin.mockReturnValue(admin)
+
+    await triggerProactiveInsight('user-1')
+
+    expect(mockComplete).not.toHaveBeenCalled()
+    expect(admin.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'content_opportunity',
+        headline: 'Lancei o app, 10k downloads no 1º mês',
+        entry_ids: ['s1'],
+      })
+    )
+  })
+
+  it('014: captura fraca (sem impacto/métrica) cai no insight comum via IA', async () => {
+    mockComplete.mockResolvedValue(jsonBlock(VALID_DRAFT))
+    const weak = [{ id: 'w1', what_i_did: 'Reunião de status', tags: [], impact: null, metric: null }]
+    const admin = buildAdmin({ count: 0, list: weak })
+    mockGetSupabaseAdmin.mockReturnValue(admin)
+
+    await triggerProactiveInsight('user-1')
+
+    expect(mockComplete).toHaveBeenCalledOnce()
+    expect(admin.insert).toHaveBeenCalledWith(expect.objectContaining({ type: 'invisible_skill' }))
+  })
 })

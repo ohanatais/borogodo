@@ -1,7 +1,10 @@
 'use client'
 
 import { X, Plus, Flag, Trophy } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { HistoricoProject } from '@/lib/historico/getHistoricoData'
+import { UsarButton } from '@/components/features/content/UsarButton'
+import { buildProjectSeedRef } from '@/lib/content/projectSeed'
 import { EvidenceSection } from './EvidenceSection'
 
 interface ProjectDetailPanelProps {
@@ -39,6 +42,7 @@ export function ProjectDetailPanel({
   onClose,
   onStartCapture,
 }: ProjectDetailPanelProps) {
+  const t = useTranslations('presenca')
   return (
     <div
       className="rounded-2xl p-5 flex flex-col gap-4 h-fit"
@@ -109,6 +113,16 @@ export function ProjectDetailPanel({
 
       {/* Action row */}
       <div className="flex flex-col gap-2 mt-1">
+        {project.entries.length > 0 && (
+          <UsarButton
+            seedType="project"
+            seedRef={buildProjectSeedRef(company, project.name)}
+            seedSummary={t('projectSeed', { name: project.name, count: project.entries.length })}
+            formats={['post', 'impact_summary']}
+            label={t('useProject')}
+            className="self-start"
+          />
+        )}
         <div
           className="rounded-xl p-3 flex items-center justify-between gap-3"
           style={{ background: 'var(--muted)' }}

@@ -29,54 +29,44 @@ const BASE_ENTRY: ExtractedEntry = {
   source: 'text',
 }
 
-function makeInsertChain(insertedData: unknown[], insertError: unknown = null) {
-  return {
-    insert: vi.fn().mockReturnValue({
-      select: vi.fn().mockResolvedValue({ data: insertedData, error: insertError }),
-    }),
-  }
-}
-
-function makeSupabase({
+// Mock encadeado: cada método do query builder devolve o próprio builder; o builder é "thenable"
+// e resolve conforme as colunas pedidas no select. Captura as linhas passadas ao insert.
+function makeEntriesClient({
   existingTexts = [] as string[],
-  existingEmbeddings = [] as Array<{ embedding: unknown }>,
-  insertedData = [] as unknown[],
+  poolEmbeddings = [] as number[][],
+  inserted = null as unknown[] | null,
   insertError = null as unknown,
 } = {}) {
-  const fromMock = vi.fn((table: string) => {
-    if (table !== 'entries') throw new Error(`Unexpected table: ${table}`)
-    return {
-      select: vi.fn((cols?: string) => {
-        // exact dedup query — selects what_i_did
-        if (!cols || cols === 'what_i_did') {
-          return {
-            eq: vi.fn().mockResolvedValue({
-              data: existingTexts.map((t) => ({ what_i_did: t })),
-              error: null,
-            }),
-          }
-        }
-        // semantic dedup query — selects embedding
-        return {
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              not: vi.fn().mockReturnValue({
-                is: vi.fn().mockResolvedValue({ data: existingEmbeddings, error: null }),
-                eq: vi.fn().mockResolvedValue({ data: existingEmbeddings, error: null }),
-              }),
-              is: vi.fn().mockResolvedValue({ data: existingEmbeddings, error: null }),
-            }),
-            not: vi.fn().mockReturnValue({
-              is: vi.fn().mockResolvedValue({ data: existingEmbeddings, error: null }),
-              eq: vi.fn().mockResolvedValue({ data: existingEmbeddings, error: null }),
-            }),
-          }),
-        }
-      }),
-      ...makeInsertChain(insertedData, insertError),
+  const captured: { insertRows: unknown[] | null } = { insertRows: null }
+
+  function makeBuilder(result: { data: unknown; error: unknown }) {
+    const builder: Record<string, unknown> = {}
+    for (const m of ['eq', 'not', 'is', 'order', 'limit'] as const) {
+      builder[m] = vi.fn(() => builder)
     }
-  })
-  return { from: fromMock }
+    builder.then = (resolve: (v: unknown) => unknown) => resolve(result)
+    return builder
+  }
+
+  const client = {
+    from: vi.fn((table: string) => {
+      if (table !== 'entries') throw new Error(`Unexpected table: ${table}`)
+      return {
+        select: vi.fn((cols?: string) => {
+          if (cols === 'embedding') {
+            return makeBuilder({ data: poolEmbeddings.map((e) => ({ embedding: e })), error: null })
+          }
+          return makeBuilder({ data: existingTexts.map((t) => ({ what_i_did: t })), error: null })
+        }),
+        insert: vi.fn((rows: unknown[]) => {
+          captured.insertRows = rows
+          return { select: vi.fn(() => makeBuilder({ data: inserted ?? rows, error: insertError })) }
+        }),
+      }
+    }),
+  }
+
+  return { client, captured }
 }
 
 describe('saveEntries', () => {
@@ -85,74 +75,78 @@ describe('saveEntries', () => {
   })
 
   it('returns empty array when entries list is empty', async () => {
-    const supabase = makeSupabase()
-    const result = await saveEntries(supabase as never, 'user-1', [])
+    const { client } = makeEntriesClient()
+    const result = await saveEntries(client as never, 'user-1', [])
     expect(result).toEqual([])
   })
 
   it('filters out entries whose what_i_did matches an existing entry exactly', async () => {
-    const supabase = makeSupabase({
-      existingTexts: ['Liderou roadmap do produto'],
-      insertedData: [],
-    })
-    const result = await saveEntries(supabase as never, 'user-1', [BASE_ENTRY])
+    const { client } = makeEntriesClient({ existingTexts: ['Liderou roadmap do produto'] })
+    const result = await saveEntries(client as never, 'user-1', [BASE_ENTRY])
+    expect(result).toEqual([])
+  })
+
+  it('filters out near-identical entries (só diferem em pontuação/caixa) — conserto do bug de duplicação', async () => {
+    const { client } = makeEntriesClient({ existingTexts: ['Saí de zero GitHub pra borogodo.ai no ar, sozinha.'] })
+    const nearDup: ExtractedEntry = {
+      ...BASE_ENTRY,
+      company: null,
+      what_i_did: 'Saí de zero GitHub pra borogodo.ai no ar sozinha',
+    }
+    const result = await saveEntries(client as never, 'user-1', [nearDup])
     expect(result).toEqual([])
   })
 
   it('saves new entries that do not match existing texts', async () => {
     const saved = [{ id: 'new-id', ...BASE_ENTRY, user_id: 'user-1', embedding: null }]
-    const supabase = makeSupabase({
-      existingTexts: [],
-      insertedData: saved,
-    })
-    const result = await saveEntries(supabase as never, 'user-1', [BASE_ENTRY])
+    const { client } = makeEntriesClient({ inserted: saved })
+    const result = await saveEntries(client as never, 'user-1', [BASE_ENTRY])
     expect(result).toEqual(saved)
   })
 
-  it('skips semantic dedup for entries without company', async () => {
-    const { generateEmbedding } = await import('@/lib/ai/embeddings')
-    const entryWithoutCompany: ExtractedEntry = { ...BASE_ENTRY, company: null }
-    const saved = [{ id: 'id-1', ...entryWithoutCompany, user_id: 'user-1', embedding: null }]
-    const supabase = makeSupabase({ insertedData: saved })
-    await saveEntries(supabase as never, 'user-1', [entryWithoutCompany])
-    expect(generateEmbedding).not.toHaveBeenCalled()
+  it('roda o dedup semântico mesmo SEM empresa (conserto: antes era pulado)', async () => {
+    const { generateEmbedding, cosineSimilarity } = await import('@/lib/ai/embeddings')
+    vi.mocked(cosineSimilarity).mockReturnValue(0.95) // acima do limiar → duplicado
+    const entryWithoutCompany: ExtractedEntry = { ...BASE_ENTRY, company: null, what_i_did: 'algo único' }
+    const { client } = makeEntriesClient({ poolEmbeddings: [Array(1536).fill(0.2)] })
+
+    const result = await saveEntries(client as never, 'user-1', [entryWithoutCompany])
+
+    expect(generateEmbedding).toHaveBeenCalledWith('algo único')
+    expect(result).toEqual([]) // descartado pela similaridade
   })
 
-  it('throws when insert fails', async () => {
-    const supabase = makeSupabase({ insertError: { message: 'db error' }, insertedData: [] })
-    await expect(saveEntries(supabase as never, 'user-1', [BASE_ENTRY])).rejects.toThrow(
-      'Não foi possível salvar a entrada'
-    )
+  it('descarta a entrada quando há duplicata semântica no pool de recentes', async () => {
+    const { cosineSimilarity } = await import('@/lib/ai/embeddings')
+    vi.mocked(cosineSimilarity).mockReturnValue(0.97)
+    const { client } = makeEntriesClient({ poolEmbeddings: [Array(1536).fill(0.2)] })
+    const result = await saveEntries(client as never, 'user-1', [BASE_ENTRY])
+    expect(result).toEqual([])
   })
 
-  it('generates embedding for entries with company', async () => {
-    const { generateEmbedding } = await import('@/lib/ai/embeddings')
-    const saved = [{ id: 'id-1', ...BASE_ENTRY, user_id: 'user-1' }]
-    const supabase = makeSupabase({ insertedData: saved })
-    await saveEntries(supabase as never, 'user-1', [BASE_ENTRY])
-    expect(generateEmbedding).toHaveBeenCalledWith(BASE_ENTRY.what_i_did)
+  it('deduplica dentro do mesmo lote (duas iguais → salva uma só)', async () => {
+    const { client, captured } = makeEntriesClient()
+    const dupBatch: ExtractedEntry[] = [
+      { ...BASE_ENTRY, what_i_did: 'Entreguei 9 features na main' },
+      { ...BASE_ENTRY, what_i_did: 'Entreguei 9 features na main.' }, // só muda o ponto
+    ]
+    await saveEntries(client as never, 'user-1', dupBatch)
+    expect(captured.insertRows).toHaveLength(1)
   })
 
   it('still saves entry when embedding generation fails', async () => {
     const { generateEmbedding } = await import('@/lib/ai/embeddings')
     vi.mocked(generateEmbedding).mockRejectedValueOnce(new Error('OpenAI timeout'))
     const saved = [{ id: 'id-1', ...BASE_ENTRY, user_id: 'user-1', embedding: null }]
-    const supabase = makeSupabase({ insertedData: saved })
-    const result = await saveEntries(supabase as never, 'user-1', [BASE_ENTRY])
+    const { client } = makeEntriesClient({ inserted: saved })
+    const result = await saveEntries(client as never, 'user-1', [BASE_ENTRY])
     expect(result).toEqual(saved)
   })
 
-  it('discards entry when semantic duplicate is found', async () => {
-    const { generateEmbedding, cosineSimilarity } = await import('@/lib/ai/embeddings')
-    const existingEmbedding = Array(1536).fill(0.2)
-    vi.mocked(generateEmbedding).mockResolvedValueOnce(existingEmbedding)
-    vi.mocked(cosineSimilarity).mockReturnValueOnce(0.95)
-
-    const supabase = makeSupabase({
-      existingEmbeddings: [{ embedding: existingEmbedding }],
-      insertedData: [],
-    })
-    const result = await saveEntries(supabase as never, 'user-1', [BASE_ENTRY])
-    expect(result).toEqual([])
+  it('throws when insert fails', async () => {
+    const { client } = makeEntriesClient({ insertError: { message: 'db error' } })
+    await expect(saveEntries(client as never, 'user-1', [BASE_ENTRY])).rejects.toThrow(
+      'Não foi possível salvar a entrada'
+    )
   })
 })

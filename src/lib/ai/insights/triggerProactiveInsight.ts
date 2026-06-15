@@ -21,12 +21,13 @@ interface InsightEntryRow {
   what_i_did: string
   tags: string[]
   impact: string | null
+  metric: string | null
 }
 
 async function loadRecentEntries(admin: SupabaseAdmin, userId: string): Promise<InsightEntryRow[]> {
   const { data, error } = await admin
     .from('entries')
-    .select('id, what_i_did, tags, impact')
+    .select('id, what_i_did, tags, impact, metric')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(MAX_ENTRIES)
@@ -36,6 +37,14 @@ async function loadRecentEntries(admin: SupabaseAdmin, userId: string): Promise<
   }
 
   return (data ?? []) as InsightEntryRow[]
+}
+
+/**
+ * Sinal forte = a captura tem impacto OU métrica (decisão de produto, determinístico e testável).
+ * É o gatilho do nudge "isso daria um post" — captura fraca (sem impacto/métrica) não dispara.
+ */
+function isStrongSignal(entry: InsightEntryRow): boolean {
+  return Boolean(entry.impact?.trim()) || Boolean(entry.metric?.trim())
 }
 
 async function generateInsight(entries: InsightEntryRow[]) {
@@ -50,10 +59,13 @@ async function generateInsight(entries: InsightEntryRow[]) {
 }
 
 /**
- * Gera (Haiku), valida e persiste um insight proativo — preenche o stub no-op de 003.
- * Roda fora do request (service_role, sempre filtrando user_id). Evita acumular mais de
- * um insight não visto: se já há um, não gera outro. Erros são logados (sem dados de
- * usuário); nunca quebra a captura.
+ * Gera, valida e persiste um insight proativo — preenche o stub no-op de 003. Roda fora do request
+ * (service_role, sempre filtrando user_id). Parcimônia: no máximo um insight não-visto por vez.
+ *
+ * 014 (US4): quando a captura mais recente tem sinal forte (impacto/métrica), o nudge
+ * `content_opportunity` tem **prioridade** e substitui o insight comum (decisão de produto) — é
+ * determinístico (sem IA), com a entrada-origem em `entry_ids`. Sem sinal forte, cai no insight comum
+ * (Haiku). Erros são logados (sem dados de usuário); nunca quebra a captura.
  */
 export async function triggerProactiveInsight(userId: string): Promise<void> {
   const admin = getSupabaseAdmin()
@@ -64,6 +76,18 @@ export async function triggerProactiveInsight(userId: string): Promise<void> {
 
     const entries = await loadRecentEntries(admin, userId)
     if (entries.length === 0) return
+
+    const latest = entries[0]
+    if (isStrongSignal(latest)) {
+      await insertProactiveInsight(admin, {
+        userId,
+        type: 'content_opportunity',
+        headline: latest.what_i_did,
+        body: latest.impact?.trim() || latest.metric?.trim() || '',
+        entryIds: [latest.id],
+      })
+      return
+    }
 
     const draft = await generateInsight(entries)
     const entryIds = draft.entry_indexes

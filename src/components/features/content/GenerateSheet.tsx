@@ -9,10 +9,16 @@ import type { AdjustKind, DraftFormat, DraftVariant } from '@/types/content'
 import { DraftCard } from './DraftCard'
 import { AdjustChips } from './AdjustChips'
 import { VoiceCalibration } from './VoiceCalibration'
-import { PRESENCA_OPEN_EVENT, type PresencaOpenDetail } from './presencaEvents'
+import {
+  PRESENCA_OPEN_EVENT,
+  PRESENCA_RESUME_EVENT,
+  type PresencaOpenDetail,
+  type PresencaResumeDetail,
+} from './presencaEvents'
 
 type Status = 'idle' | 'generating' | 'done' | 'error'
 type ErrorKind = 'generationFailed' | 'generic'
+type Mode = 'generate' | 'resume'
 
 const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
   post: 'formats.post',
@@ -44,11 +50,16 @@ function GeneratingState({ label }: { label: string }) {
 export function GenerateSheet() {
   const t = useTranslations('presenca')
   const [open, setOpen] = useState(false)
+  const [mode, setMode] = useState<Mode>('generate')
   const [detail, setDetail] = useState<PresencaOpenDetail | null>(null)
   const [format, setFormat] = useState<DraftFormat>('post')
   const [status, setStatus] = useState<Status>('idle')
   const [variants, setVariants] = useState<DraftVariant[]>([])
   const [errorKind, setErrorKind] = useState<ErrorKind>('generic')
+  /** Id do rascunho em edição (modo "retomar"); `null` na geração fresca. */
+  const [existingDraftId, setExistingDraftId] = useState<string | null>(null)
+  /** Muda a cada geração/retomada para remontar os cards (evita estado de edição vazado entre rascunhos). */
+  const [genId, setGenId] = useState(0)
 
   const generate = useCallback(
     async (seed: PresencaOpenDetail, fmt: DraftFormat, adjust?: AdjustKind) => {
@@ -73,6 +84,7 @@ export function GenerateSheet() {
 
         const body = (await res.json()) as { variants: DraftVariant[] }
         setVariants(body.variants)
+        setGenId((id) => id + 1)
         setStatus('done')
       } catch {
         setErrorKind('generic')
@@ -83,18 +95,37 @@ export function GenerateSheet() {
   )
 
   useEffect(() => {
-    function handler(e: Event) {
+    function handleOpen(e: Event) {
       const next = (e as CustomEvent<PresencaOpenDetail>).detail
       if (!next) return
       const initialFormat = next.formats[0] ?? 'post'
+      setMode('generate')
+      setExistingDraftId(null)
       setDetail(next)
       setFormat(initialFormat)
       setVariants([])
       setOpen(true)
       void generate(next, initialFormat)
     }
-    window.addEventListener(PRESENCA_OPEN_EVENT, handler)
-    return () => window.removeEventListener(PRESENCA_OPEN_EVENT, handler)
+    function handleResume(e: Event) {
+      const d = (e as CustomEvent<PresencaResumeDetail>).detail
+      if (!d) return
+      // Retomar não chama o motor: reabre o body/ângulo salvos como um card editável vinculado ao id.
+      setMode('resume')
+      setExistingDraftId(d.draftId)
+      setDetail({ seedType: d.seedType, seedRef: d.seedRef, seedSummary: d.seedSummary, formats: [d.format] })
+      setFormat(d.format)
+      setVariants([{ angle: d.angle, body: d.body, evidenceRefs: [] }])
+      setGenId((id) => id + 1)
+      setStatus('done')
+      setOpen(true)
+    }
+    window.addEventListener(PRESENCA_OPEN_EVENT, handleOpen)
+    window.addEventListener(PRESENCA_RESUME_EVENT, handleResume)
+    return () => {
+      window.removeEventListener(PRESENCA_OPEN_EVENT, handleOpen)
+      window.removeEventListener(PRESENCA_RESUME_EVENT, handleResume)
+    }
   }, [generate])
 
   function handleFormatChange(next: DraftFormat) {
@@ -208,20 +239,21 @@ export function GenerateSheet() {
                 <>
                   {variants.map((variant, i) => (
                     <DraftCard
-                      key={i}
+                      key={`${genId}-${i}`}
                       variant={variant}
                       index={i}
                       format={format}
                       seed={{ seedType: detail.seedType, seedRef: detail.seedRef }}
+                      existingDraftId={mode === 'resume' && existingDraftId ? existingDraftId : undefined}
                     />
                   ))}
-                  <AdjustChips onAdjust={handleAdjust} />
+                  {mode === 'generate' && <AdjustChips onAdjust={handleAdjust} />}
                 </>
               )}
             </div>
 
-            {/* Rodapé: regerar + afinar voz (refino discreto) */}
-            {status === 'done' && (
+            {/* Rodapé: regerar + afinar voz (refino discreto) — só na geração fresca */}
+            {status === 'done' && mode === 'generate' && (
               <div className="flex items-center justify-between gap-3 px-5 py-3 border-t shrink-0" style={{ borderColor: 'var(--border)' }}>
                 <VoiceCalibration onSaved={handleRegenerate} />
                 <button

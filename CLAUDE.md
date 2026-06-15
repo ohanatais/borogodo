@@ -5,7 +5,7 @@ completo de produto, stack e processo de desenvolvimento está em `.claude/CLAUD
 
 ## Status do desenvolvimento
 
-Features mergeadas em `main` (até PR #21):
+Features mergeadas em `main` (até PR #22):
 - **001-landing-page** — landing page pública, design system e i18n
 - **002-user-auth** — autenticação (Google OAuth + e-mail/senha), painel protegido por middleware
 - **003-capture-pipeline** — captura de texto e PDF/LinkedIn, extração via IA com Zod
@@ -18,25 +18,26 @@ Features mergeadas em `main` (até PR #21):
 - **010-produto-polish** — 17 itens de refinamento de UX/identidade/bugs
 - **011-skills-robustez** — robustez de skills (PR #20)
 - **012-chat** — Q&A com streaming SSE, correção/marco guiado, discovery (PR #21)
+- **013-motor-de-voz** — fundação de conteúdo (`drafts`, `voice_profile` JSONB, motor `generateDraft`, post + resumo de impacto), migration `009` (PR #22)
 
 <!-- SPECKIT START -->
-Current feature: **013-motor-de-voz** (branch: `013-motor-de-voz`) — **em planejamento**
-Spec: [specs/013-motor-de-voz/spec.md](specs/013-motor-de-voz/spec.md) ·
-Tasks: [specs/013-motor-de-voz/tasks.md](specs/013-motor-de-voz/tasks.md)
+Current feature: **014-presenca** (branch: `014-presenca`) — **em revisão** (PR #23, draft)
+Spec: [specs/014-presenca/spec.md](specs/014-presenca/spec.md) ·
+Tasks: [specs/014-presenca/tasks.md](specs/014-presenca/tasks.md)
 
-Primeiro elo do bloco de Geração de Conteúdo (Presença) — epic plan em
-`docs/conteudo-plano-de-acao.md`. Trava a fundação compartilhada (`drafts`,
-`voice_profile` JSONB, `src/lib/ai/content/`, golden set) e os formatos âncora
-(post + resumo de impacto). Artefatos speckit completos (spec/plan/tasks/shape)
-prontos; **implementação ainda não iniciada** (decisão: planejar e codar em sessões
-separadas). Kickoff resolvido: nav "Presença" (rota `/presenca` entra na 014),
-`voice_profile` como JSONB, próxima migration `009`.
+Segundo elo do bloco de Geração de Conteúdo (Presença) — epic plan em
+`docs/conteudo-plano-de-acao.md`. **Sem migration** (usa `status='discarded'` e a RLS de
+`delete` da 013). Implementado: hub `/presenca` + nav (US1), gestão total do rascunho —
+editar/arquivar/excluir/restaurar/filtrar, em lista densa (US2), "Usar este projeto" no
+`/historico` com evidência agregada (US3), e sugestões — nudge `content_opportunity` no
+Painel + faixa "Sugestões pra você" na Presença (US4). Inclui conserto da dedup de entradas
+(`saveEntries`): normalização + dedup semântica sem exigir empresa + dedup no lote.
+Pendente: `/impeccable audit` + `/security-review` + `/pr-review` antes de marcar pronto.
 
-**Bloco inteiro planejado** (a cadeia da Presença):
-- **013-motor-de-voz** — fundação + post + resumo de impacto (migration `009`).
-- **014-presenca** — hub `/presenca` + nav + **gestão total do rascunho** (editar/arquivar/excluir/restaurar/filtrar) + "Usar" no projeto + **sugestões no Painel e na Presença** (nudge + faixa). Sem migration (usa `status='discarded'` e a RLS de `delete` da 013).
+**Bloco da Presença:**
+- **013-motor-de-voz** — fundação + post + resumo de impacto (migration `009`). ✅ mergeada.
+- **014-presenca** — hub + gestão total + "Usar" projeto + sugestões. 🔄 em revisão (PR #23).
 - **015-refino-voz** — recalibração de voz + golden set como gate de CI + mini-bio (migration `010`).
 
-Dependência: 013 → 014 → 015. Ohana pretende implementar em batch; respeitar a ordem
-(fundação da 013 antes de 014; `009` antes de `010`).
+Dependência: 013 → 014 → 015. Respeitar a ordem (`009` antes de `010`).
 <!-- SPECKIT END -->

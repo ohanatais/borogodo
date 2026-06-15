@@ -319,8 +319,47 @@
         "generated": "Generated",
         "edited": "Edited",
         "copied": "Copied",
-        "discarded": "Discarded"
+        "discarded": "Archived"
       }
-    }
+    },
+    "loadMore": "Load more",
+    "filterEmpty": "No drafts in this filter.",
+    "actions": {
+      "menu": "Draft actions",
+      "resume": "Resume",
+      "copy": "Copy",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete"
+    },
+    "origin": {
+      "entry": "one of your entries",
+      "project": "project {name}",
+      "unavailable": "origin unavailable"
+    },
+    "filter": {
+      "label": "Filter drafts",
+      "statusLabel": "Status",
+      "formatLabel": "Format",
+      "ativos": "Active",
+      "copiados": "Copied",
+      "arquivados": "Archived",
+      "allFormats": "All",
+      "post": "Post",
+      "impactSummary": "Summary"
+    },
+    "deleteConfirm": {
+      "title": "Delete this draft?",
+      "description": "This can't be undone.",
+      "confirm": "Delete permanently",
+      "cancel": "Cancel"
+    },
+    "nudge": {
+      "label": "✦ This would make a good post",
+      "cta": "Use"
+    },
+    "resumeTitle": "Resume draft",
+    "useProject": "Use this project",
+    "projectSeed": "project {name} ({count, plural, one {# entry} other {# entries}})"
   }
 }

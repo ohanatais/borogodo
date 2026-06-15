@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/db/supabase/server'
-import { updateDraft } from '@/lib/db/drafts'
+import { deleteDraft, updateDraft } from '@/lib/db/drafts'
 import { errorMessage } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
@@ -56,6 +56,35 @@ export async function PATCH(
     return NextResponse.json({ draft }, { status: 200 })
   } catch (error: unknown) {
     logger.error('draft update failed', { message: errorMessage(error) })
+    return jsonError('internal_error', 500)
+  }
+}
+
+/**
+ * DELETE /api/content/drafts/[id] — exclusão definitiva do próprio rascunho (014, FR-008). Auth-first;
+ * a confirmação é feita na UI (esta rota não confirma). Usa a política RLS `delete` da 013, filtrando
+ * por `id` E `user_id`. Idempotente: id de outro usuário/inexistente também devolve 204 — nunca 403,
+ * para não confirmar a existência de recursos alheios (constituição I). Nenhum conteúdo logado.
+ */
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return jsonError('unauthorized', 401)
+
+  const { id } = await params
+  if (!id) return jsonError('invalid_request', 400)
+
+  try {
+    await deleteDraft(supabase, user.id, id)
+    return new NextResponse(null, { status: 204 })
+  } catch (error: unknown) {
+    logger.error('draft delete failed', { message: errorMessage(error) })
     return jsonError('internal_error', 500)
   }
 }

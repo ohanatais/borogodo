@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 import { render, screen, act, waitFor } from '@testing-library/react'
 import { GenerateSheet } from '../GenerateSheet'
-import { PRESENCA_OPEN_EVENT } from '../presencaEvents'
+import { PRESENCA_OPEN_EVENT, PRESENCA_RESUME_EVENT } from '../presencaEvents'
 
 const VARIANTS = [
   { angle: 'o aprendizado', body: 'Primeiro rascunho na sua voz.', evidenceRefs: ['E1'] },
@@ -82,6 +82,31 @@ describe('GenerateSheet', () => {
     // i18n mockado devolve a chave; o estado de erro renderiza a chave de erro específica.
     expect(await screen.findByText('errors.generationFailed')).toBeInTheDocument()
     expect(screen.queryAllByTestId('draft-card')).toHaveLength(0)
+  })
+
+  it('US1/014: retomar reabre o corpo salvo sem chamar o motor (sem fetch)', async () => {
+    const fetchMock = vi.fn()
+    global.fetch = fetchMock as unknown as typeof fetch
+
+    render(<GenerateSheet />)
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent(PRESENCA_RESUME_EVENT, {
+          detail: {
+            draftId: 'd1',
+            format: 'post',
+            seedType: 'theme',
+            seedRef: 'produto 0→1',
+            angle: 'o aprendizado',
+            body: 'Corpo já salvo, intacto.',
+            seedSummary: 'produto 0→1',
+          },
+        })
+      )
+    })
+
+    expect(await screen.findByText('Corpo já salvo, intacto.')).toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('US3: aplicar um chip de ajuste regera o par enviando o adjust', async () => {
