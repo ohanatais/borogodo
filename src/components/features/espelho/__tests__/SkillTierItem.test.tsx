@@ -37,4 +37,31 @@ describe('SkillTierItem', () => {
     render(<SkillTierItem skill={skill} tierLabel="Emergente" />)
     expect(screen.queryByText(/Evidência/)).not.toBeInTheDocument()
   })
+
+  it('shows progression hint for Emergente tier', () => {
+    render(<SkillTierItem skill={makeSkill('Emergente')} tierLabel="Emergente" />)
+    expect(screen.getByText('skillProgress.Emergente')).toBeInTheDocument()
+  })
+
+  it('shows progression hint for Consistente tier', () => {
+    render(<SkillTierItem skill={makeSkill('Consistente')} tierLabel="Consistente" />)
+    expect(screen.getByText('skillProgress.Consistente')).toBeInTheDocument()
+  })
+
+  it('does not show progression hint for Comprovada tier', () => {
+    render(<SkillTierItem skill={makeSkill('Comprovada')} tierLabel="Comprovada" />)
+    expect(screen.queryByText(/skillProgress/)).not.toBeInTheDocument()
+  })
+
+  it('renders CheckCircle2 icon for Comprovada tier', () => {
+    render(<SkillTierItem skill={makeSkill('Comprovada')} tierLabel="Comprovada" />)
+    const icon = document.querySelector('svg')
+    expect(icon).toBeInTheDocument()
+  })
+
+  it('does not render CheckCircle2 icon for non-Comprovada tier', () => {
+    render(<SkillTierItem skill={makeSkill('Emergente')} tierLabel="Emergente" />)
+    const icon = document.querySelector('svg')
+    expect(icon).not.toBeInTheDocument()
+  })
 })

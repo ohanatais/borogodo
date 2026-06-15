@@ -184,7 +184,12 @@
       "forming": "Seu espelho está se formando",
       "formingSubtitle": "Continue capturando histórias para o Borogodó revelar seu padrão.",
       "formingOf": "O espelho de",
-      "formingSuffix": " tá se formando."
+      "formingSuffix": " tá se formando.",
+      "skills": {
+        "comprovadas": "{count, plural, one {# comprovada} other {# comprovadas}}",
+        "consistentes": "{count, plural, one {# consistente} other {# consistentes}}",
+        "emergentes": "{count, plural, one {# emergente} other {# emergentes}}"
+      }
     },
     "highlights": {
       "title": "Trajetória em destaque",
@@ -217,10 +222,15 @@
     },
     "categories": {
       "title": "Seus skills por categoria",
+      "emptyState": "Continue capturando para ver seus skills organizados por categoria.",
       "tier": {
         "Emergente": "Emergente",
         "Consistente": "Consistente",
         "Comprovada": "Comprovada"
+      },
+      "skillProgress": {
+        "Emergente": "Mais situações como essa elevam para Consistente.",
+        "Consistente": "Um resultado externo comprovado eleva para Comprovada."
       }
     },
     "empty": {

@@ -16,12 +16,23 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
 
-  if (categories.length === 0) return null
+  const visibleCategories = categories.filter((cat) => cat.skills.length > 0)
 
-  const active = categories[activeIndex]
+  if (categories.length === 0) {
+    return (
+      <div>
+        <SectionLabel>{t('title')}</SectionLabel>
+        <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+          {t('emptyState')}
+        </p>
+      </div>
+    )
+  }
+
+  const active = visibleCategories[activeIndex] ?? visibleCategories[0]
 
   function handleKeyDown(e: React.KeyboardEvent, i: number) {
-    const last = categories.length - 1
+    const last = visibleCategories.length - 1
     let next: number | null = null
     if (e.key === 'ArrowRight') next = i < last ? i + 1 : 0
     else if (e.key === 'ArrowLeft') next = i > 0 ? i - 1 : last
@@ -45,7 +56,7 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
           className="flex gap-0 border-b mb-4 overflow-x-auto"
           style={{ borderColor: 'var(--border)' }}
         >
-          {categories.map((cat, i) => (
+          {visibleCategories.map((cat, i) => (
             <button
               key={cat.name}
               ref={(el) => { tabRefs.current[i] = el }}
@@ -95,7 +106,7 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
 
       {/* Mobile: accordion */}
       <div className="lg:hidden space-y-2">
-        {categories.map((cat, i) => {
+        {visibleCategories.map((cat, i) => {
           const isOpen = activeIndex === i
           return (
             <div

@@ -25,9 +25,19 @@ const CATEGORIES: MacroCategory[] = [
 ]
 
 describe('MacroCategoryTabs', () => {
-  it('returns null when categories is empty', () => {
-    const { container } = render(<MacroCategoryTabs categories={[]} />)
-    expect(container.firstChild).toBeNull()
+  it('renders empty state message when categories is empty', () => {
+    render(<MacroCategoryTabs categories={[]} />)
+    expect(screen.getByText('emptyState')).toBeInTheDocument()
+  })
+
+  it('filters out categories with no skills', () => {
+    const withEmptyCategory: MacroCategory[] = [
+      { name: 'Vazia', skills: [] },
+      ...CATEGORIES,
+    ]
+    render(<MacroCategoryTabs categories={withEmptyCategory} />)
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs).toHaveLength(2) // only the 2 non-empty ones
   })
 
   it('renders all category tab buttons', () => {

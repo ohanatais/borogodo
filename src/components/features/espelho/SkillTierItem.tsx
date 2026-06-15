@@ -1,3 +1,7 @@
+'use client'
+
+import { CheckCircle2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { SkillItem, SkillTier } from '@/types/mirror'
 import { EvidenceText } from './EvidenceText'
 
@@ -13,6 +17,7 @@ interface SkillTierItemProps {
 }
 
 export function SkillTierItem({ skill, tierLabel }: SkillTierItemProps) {
+  const t = useTranslations('espelho.categories')
   const tierStyle = TIER_STYLES[skill.tier] ?? TIER_STYLES.Emergente
 
   return (
@@ -22,9 +27,12 @@ export function SkillTierItem({ skill, tierLabel }: SkillTierItemProps) {
           {skill.name}
         </p>
         <span
-          className="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium"
+          className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
           style={{ background: tierStyle.bg, color: tierStyle.text }}
         >
+          {skill.tier === 'Comprovada' && (
+            <CheckCircle2 size={10} aria-hidden="true" className="mr-0.5" />
+          )}
           {tierLabel}
         </span>
       </div>
@@ -32,6 +40,11 @@ export function SkillTierItem({ skill, tierLabel }: SkillTierItemProps) {
         <EvidenceText
           evidence={{ text: skill.evidence_text, entry_ids: skill.entry_ids }}
         />
+      )}
+      {skill.tier !== 'Comprovada' && (
+        <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+          {t(`skillProgress.${skill.tier}`)}
+        </p>
       )}
     </div>
   )

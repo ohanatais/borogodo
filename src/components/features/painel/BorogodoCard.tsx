@@ -64,7 +64,7 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
         <>
           {/* Specialty chips */}
           {specialties.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex flex-wrap gap-2 mb-4">
               {specialties.map((theme) => (
                 <span
                   key={theme}
@@ -77,6 +77,36 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
                   {theme}
                 </span>
               ))}
+            </div>
+          )}
+
+          {/* Skill summary strip */}
+          {mirror?.skillSummary && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {mirror.skillSummary.comprovadas > 0 && (
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: 'oklch(98% 0.01 320 / 0.2)', color: 'var(--color-primary-fg)' }}
+                >
+                  {t('skills.comprovadas', { count: mirror.skillSummary.comprovadas })}
+                </span>
+              )}
+              {mirror.skillSummary.consistentes > 0 && (
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: 'oklch(98% 0.01 320 / 0.2)', color: 'var(--color-primary-fg)' }}
+                >
+                  {t('skills.consistentes', { count: mirror.skillSummary.consistentes })}
+                </span>
+              )}
+              {mirror.skillSummary.emergentes > 0 && (
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: 'oklch(98% 0.01 320 / 0.2)', color: 'var(--color-primary-fg)' }}
+                >
+                  {t('skills.emergentes', { count: mirror.skillSummary.emergentes })}
+                </span>
+              )}
             </div>
           )}
 

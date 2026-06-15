@@ -75,7 +75,7 @@ describe('getPanelData', () => {
     expect(data.status).toBe('active')
     expect(data.entryCount).toBe(12)
     expect(data.monthsSpan).toBeGreaterThan(0)
-    expect(data.mirror).toEqual({ headline: 'Você lidera pelo exemplo.', strengthThemes: ['liderança'] })
+    expect(data.mirror).toEqual({ headline: 'Você lidera pelo exemplo.', strengthThemes: ['liderança'], skillSummary: null })
     expect(data.recentEntries).toHaveLength(3)
     expect(data.insight).toBeNull()
     expect(typeof data.composerPlaceholder).toBe('string')
