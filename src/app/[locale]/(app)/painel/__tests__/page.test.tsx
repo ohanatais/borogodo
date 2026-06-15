@@ -35,6 +35,7 @@ vi.mock('next/navigation', () => ({
 
 const BASE_DATA: PanelData = {
   name: 'Ana Silva',
+  avatarUrl: null,
   status: 'emerging',
   entryCount: 6,
   monthsSpan: 2,
