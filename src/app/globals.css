@@ -8,6 +8,7 @@
     --color-primary-fg:   oklch(98% 0.01 320);
     --color-accent:       oklch(62% 0.22 28);    /* coral-faísca */
     --color-accent-fg:    oklch(98% 0.01 28);
+    --color-accent-text:  oklch(56% 0.20 28);    /* coral sobre fundo claro (texto acessível, ≥4.5:1) */
     --color-warm:         oklch(74% 0.12 75);    /* mel */
     --color-teal:         oklch(70% 0.10 190);   /* verde-água */
     --color-lilas-nevoa:  oklch(95% 0.01 320);   /* lilas-névoa */

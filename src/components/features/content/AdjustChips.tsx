@@ -32,7 +32,7 @@ export function AdjustChips({ onAdjust, disabled = false }: AdjustChipsProps) {
           type="button"
           onClick={() => onAdjust(kind)}
           disabled={disabled}
-          className="text-xs font-medium px-3 py-1.5 rounded-full border transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center text-xs font-medium px-3 py-1.5 min-h-[48px] rounded-full border transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
             background: 'var(--card)',
             borderColor: 'var(--border)',

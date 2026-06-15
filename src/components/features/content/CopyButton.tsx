@@ -75,7 +75,7 @@ export function CopyButton({ text, onCopied, className = '' }: CopyButtonProps) 
       <button
         type="button"
         onClick={() => void handleCopy()}
-        className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-opacity hover:opacity-80 ${className}`}
+        className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 min-h-[48px] rounded-lg transition-opacity hover:opacity-80 ${className}`}
         style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
       >
         {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}

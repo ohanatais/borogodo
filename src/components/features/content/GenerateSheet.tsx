@@ -24,7 +24,7 @@ function GeneratingState({ label }: { label: string }) {
   const widths = ['100%', '92%', '78%']
   return (
     <div aria-live="polite" className="flex flex-col gap-4">
-      <p className="text-sm" style={{ color: 'var(--color-accent)' }}>
+      <p className="text-sm" style={{ color: 'var(--color-accent-text)' }}>
         {label}
       </p>
       <div className="flex flex-col gap-2" aria-hidden="true">
@@ -150,7 +150,7 @@ export function GenerateSheet() {
                 <button
                   type="button"
                   aria-label={t('close')}
-                  className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                  className="shrink-0 w-8 h-8 min-w-[48px] min-h-[48px] rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
                   <X size={18} />
@@ -170,7 +170,7 @@ export function GenerateSheet() {
                       role="tab"
                       aria-selected={active}
                       onClick={() => handleFormatChange(fmt)}
-                      className="text-sm px-3 py-1.5 rounded-full transition-colors"
+                      className="inline-flex items-center justify-center text-sm px-3 py-1.5 min-h-[48px] rounded-full transition-colors"
                       style={{
                         background: active ? 'var(--color-primary)' : 'var(--muted)',
                         color: active ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
@@ -195,7 +195,7 @@ export function GenerateSheet() {
                   <button
                     type="button"
                     onClick={handleRegenerate}
-                    className="self-start inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg"
+                    className="self-start inline-flex items-center gap-1.5 text-sm px-3 py-2 min-h-[48px] rounded-lg"
                     style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
                   >
                     <RefreshCw size={14} />
@@ -227,7 +227,7 @@ export function GenerateSheet() {
                 <button
                   type="button"
                   onClick={handleRegenerate}
-                  className="inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
+                  className="inline-flex items-center gap-1.5 text-sm px-3 py-2 min-h-[48px] rounded-lg transition-opacity hover:opacity-80"
                   style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
                 >
                   <RefreshCw size={14} />

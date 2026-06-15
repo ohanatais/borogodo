@@ -55,8 +55,8 @@ export function VoiceCalibration({ onSaved }: VoiceCalibrationProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 text-sm transition-opacity hover:opacity-80"
-        style={{ color: 'var(--color-accent)' }}
+        className="inline-flex items-center gap-1.5 text-sm min-h-[48px] transition-opacity hover:opacity-80"
+        style={{ color: 'var(--color-accent-text)' }}
       >
         <Mic2 size={14} aria-hidden="true" />
         {t('calibration.open')}
@@ -94,7 +94,7 @@ export function VoiceCalibration({ onSaved }: VoiceCalibrationProps) {
         type="button"
         onClick={() => void handleSave()}
         disabled={saving}
-        className="self-start text-sm font-medium px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80 disabled:opacity-50"
+        className="self-start inline-flex items-center justify-center text-sm font-medium px-3 py-1.5 min-h-[48px] rounded-lg transition-opacity hover:opacity-80 disabled:opacity-50"
         style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
       >
         {saving ? t('generating') : t('calibration.save')}

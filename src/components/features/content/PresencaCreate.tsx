@@ -42,7 +42,7 @@ export function PresencaCreate({ themes, entries, variant = 'solid' }: PresencaC
     variant === 'solid' ? (
       <button
         type="button"
-        className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full transition-opacity hover:opacity-90"
+        className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 min-h-[48px] rounded-full transition-opacity hover:opacity-90"
         style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
       >
         <Sparkles size={16} aria-hidden="true" />
@@ -51,7 +51,7 @@ export function PresencaCreate({ themes, entries, variant = 'solid' }: PresencaC
     ) : (
       <button
         type="button"
-        className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full border transition-opacity hover:opacity-80"
+        className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 min-h-[48px] rounded-full border transition-opacity hover:opacity-80"
         style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}
       >
         <Sparkles size={16} aria-hidden="true" />
@@ -86,7 +86,7 @@ export function PresencaCreate({ themes, entries, variant = 'solid' }: PresencaC
               <button
                 type="button"
                 aria-label={t('close')}
-                className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                className="shrink-0 w-8 h-8 min-w-[48px] min-h-[48px] rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
                 style={{ color: 'var(--muted-foreground)' }}
               >
                 <X size={18} />
@@ -102,7 +102,7 @@ export function PresencaCreate({ themes, entries, variant = 'solid' }: PresencaC
                 </p>
                 <Link
                   href="/painel"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 min-h-[48px] rounded-lg transition-opacity hover:opacity-80"
                   style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)' }}
                 >
                   {t('create.goRegister')}
@@ -122,7 +122,7 @@ export function PresencaCreate({ themes, entries, variant = 'solid' }: PresencaC
                       <button
                         type="button"
                         onClick={() => choose({ seedType: 'theme', seedRef: theme, seedSummary: theme, formats: THEME_FORMATS })}
-                        className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full border transition-opacity hover:opacity-80"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 min-h-[48px] rounded-full border transition-opacity hover:opacity-80"
                         style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                       >
                         <Sparkles size={13} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
@@ -147,7 +147,7 @@ export function PresencaCreate({ themes, entries, variant = 'solid' }: PresencaC
                         onClick={() =>
                           choose({ seedType: 'entry', seedRef: entry.id, seedSummary: entry.whatIDid, formats: ENTRY_FORMATS })
                         }
-                        className="flex w-full items-center gap-3 text-left rounded-xl px-3 py-3 border transition-opacity hover:opacity-80"
+                        className="flex w-full items-center gap-3 text-left rounded-xl px-3 py-3 min-h-[48px] border transition-opacity hover:opacity-80"
                         style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                       >
                         <span className="flex-1 text-sm line-clamp-2">{entry.whatIDid}</span>

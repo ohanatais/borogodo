@@ -149,7 +149,7 @@ export function DraftCard({ variant, index, format, seed }: DraftCardProps) {
           <button
             type="button"
             onClick={() => void handleEditDone()}
-            className="text-sm font-medium px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
+            className="inline-flex items-center justify-center text-sm font-medium px-3 py-2 min-h-[48px] rounded-lg transition-opacity hover:opacity-80"
             style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
           >
             {t('editDone')}
@@ -158,7 +158,7 @@ export function DraftCard({ variant, index, format, seed }: DraftCardProps) {
           <button
             type="button"
             onClick={() => setIsEditing(true)}
-            className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
+            className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 min-h-[48px] rounded-lg transition-opacity hover:opacity-80"
             style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
           >
             <Pencil size={14} aria-hidden="true" />
@@ -182,7 +182,7 @@ export function DraftCard({ variant, index, format, seed }: DraftCardProps) {
               type="button"
               onClick={() => void handleVoice(fb)}
               aria-pressed={active}
-              className="text-sm px-3 py-1.5 rounded-full border transition-colors"
+              className="inline-flex items-center justify-center text-sm px-3 py-1.5 min-h-[48px] rounded-full border transition-colors"
               style={{
                 background: active ? 'var(--color-lilas-nevoa)' : 'var(--card)',
                 borderColor: active ? 'var(--color-primary)' : 'var(--border)',
