@@ -5,6 +5,7 @@ import { ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { MacroCategory, SkillTier } from '@/types/mirror'
 import { SkillTierItem } from './SkillTierItem'
+import { SectionLabel } from '@/components/ui/SectionLabel'
 
 interface MacroCategoryTabsProps {
   categories: MacroCategory[]
@@ -35,9 +36,7 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
 
   return (
     <div>
-      <p className="text-sm font-semibold mb-4" style={{ color: 'var(--muted-foreground)' }}>
-        {t('title')}
-      </p>
+      <SectionLabel>{t('title')}</SectionLabel>
 
       {/* Desktop lg+: horizontal tabs */}
       <div className="hidden lg:block">

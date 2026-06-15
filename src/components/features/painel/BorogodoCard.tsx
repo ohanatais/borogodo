@@ -107,6 +107,14 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
           >
             {t('formingSubtitle')}
           </p>
+          <button
+            type="button"
+            onClick={() => document.querySelector('textarea')?.focus()}
+            className="mt-3 flex items-center gap-1.5 text-sm font-medium opacity-80 hover:opacity-100"
+            style={{ color: 'var(--color-primary-fg)' }}
+          >
+            Contar uma história agora ↓
+          </button>
         </div>
       )}
     </section>

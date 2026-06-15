@@ -30,13 +30,34 @@ export function HistoricoTimeline({
       </p>
 
       {isEmpty ? (
-        <div className="text-center py-16">
-          <p className="text-base mb-2" style={{ color: 'var(--foreground)' }}>
-            Nenhuma entrada com cargo e empresa ainda.
-          </p>
-          <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-            Conte histórias com seu cargo e empresa e elas aparecem aqui.
-          </p>
+        <div className="flex flex-col items-center py-16 gap-5">
+          {/* Visual: fio vazio com nó no topo */}
+          <div className="flex flex-col items-center gap-0">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ background: 'var(--color-primary)' }}
+            />
+            <div
+              className="w-px h-16"
+              style={{ borderLeft: '2px dotted var(--border)' }}
+            />
+          </div>
+          <div className="text-center max-w-xs">
+            <p className="text-base font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+              Seu fio ainda está em branco.
+            </p>
+            <p className="text-sm mb-4" style={{ color: 'var(--muted-foreground)' }}>
+              Conte uma história com seu cargo e empresa — ela aparece aqui como o primeiro nó da sua trajetória.
+            </p>
+            <button
+              type="button"
+              onClick={() => document.querySelector('textarea')?.focus()}
+              className="text-sm font-semibold px-4 py-2 rounded-lg transition-opacity hover:opacity-80"
+              style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+            >
+              Registrar agora
+            </button>
+          </div>
         </div>
       ) : (
         <div className="flex gap-6 items-start">

@@ -1,12 +1,32 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import type { Reflection } from '@/types/capture'
 import type { Mirror } from '@/types/mirror'
 import type { SufficiencyResult } from '@/lib/ai/mirror/evaluateSufficiency'
+
+const LOADING_MESSAGES = {
+  reading: [
+    'Lendo o que você me contou...',
+    'Identificando o que importa...',
+    'Encontrando o padrão...',
+  ],
+  evaluating: [
+    'Avaliando o que já temos...',
+    'Verificando as conexões...',
+    'Quase decidindo...',
+  ],
+  generating: [
+    'Montando seu espelho...',
+    'Escolhendo as palavras certas...',
+    'Quase lá...',
+  ],
+} as const
+
+type LoadingPhase = keyof typeof LOADING_MESSAGES
 
 const MAX_FOLLOW_UPS = 3
 
@@ -28,7 +48,20 @@ export function CaptureLoopStep() {
   })
   const [roundCount, setRoundCount] = useState(0)
   const [text, setText] = useState('')
+  const [msgIndex, setMsgIndex] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const loadingPhases: LoadingPhase[] = ['reading', 'evaluating', 'generating']
+  const currentPhase = loadingPhases.includes(loopState.phase as LoadingPhase)
+    ? (loopState.phase as LoadingPhase)
+    : null
+
+  useEffect(() => {
+    if (!currentPhase) return
+    setMsgIndex(0)
+    const id = setInterval(() => setMsgIndex((i) => (i + 1) % 3), 3000)
+    return () => clearInterval(id)
+  }, [currentPhase])
 
   async function handleCapture(formData: FormData) {
     setLoopState({ phase: 'reading' })
@@ -124,7 +157,7 @@ export function CaptureLoopStep() {
   return (
     <div
       className="flex flex-col min-h-screen px-6 py-12"
-      style={{ background: 'var(--color-creme)' }}
+      style={{ background: 'var(--color-lilas-nevoa)' }}
     >
       <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full gap-8">
         <AnimatePresence mode="wait">
@@ -210,7 +243,7 @@ export function CaptureLoopStep() {
                 }}
               />
               <p className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>
-                {t('reading')}
+                {LOADING_MESSAGES.reading[msgIndex]}
               </p>
             </motion.div>
           )}
@@ -259,7 +292,7 @@ export function CaptureLoopStep() {
                 }}
               />
               <p className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>
-                {t('evaluating')}
+                {LOADING_MESSAGES.evaluating[msgIndex]}
               </p>
             </motion.div>
           )}
@@ -280,7 +313,7 @@ export function CaptureLoopStep() {
                 }}
               />
               <p className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>
-                {t('generating')}
+                {LOADING_MESSAGES.generating[msgIndex]}
               </p>
             </motion.div>
           )}
@@ -288,12 +321,15 @@ export function CaptureLoopStep() {
           {loopState.phase === 'revealed' && (
             <motion.div
               key="revealed"
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
               className="flex flex-col gap-6 rounded-2xl p-6"
-              style={{ background: 'var(--color-lilas-nevoa)' }}
+              style={{ background: 'var(--card)' }}
             >
+              <p className="text-sm font-medium text-center" style={{ color: 'var(--color-primary)' }}>
+                Aqui está o que eu vi em você.
+              </p>
               <p
                 className="text-2xl leading-snug"
                 style={{ fontFamily: 'Fraunces, serif', color: 'var(--foreground)' }}

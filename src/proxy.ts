@@ -8,8 +8,9 @@ const intlMiddleware = createIntlMiddleware(routing)
 const PUBLIC_ROUTES = ['/', '/login', '/auth/callback']
 
 function isPublicRoute(pathname: string): boolean {
+  const stripped = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, '') || '/'
   return PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + '/')
+    (route) => stripped === route || stripped.startsWith(route + '/')
   )
 }
 

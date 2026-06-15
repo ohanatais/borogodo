@@ -31,6 +31,9 @@ export function MirrorFeedback({ snapshotId, initialResonated }: MirrorFeedbackP
       <p className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>
         {t('feedback.question')}
       </p>
+      <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+        Sua resposta ajuda o Borogodó a afinar a próxima leitura.
+      </p>
       <div className="flex gap-3">
         <button
           type="button"
