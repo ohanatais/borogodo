@@ -193,5 +193,18 @@ export function validateMirrorRuleset(mirror: Mirror): RulesetViolation[] {
     })
   }
 
+  // Assert 10: cada skill com tier "Comprovada" precisa de evidence_text com >= 20 caracteres
+  for (const category of mirror.categories ?? []) {
+    for (const skill of category.skills) {
+      if (skill.tier === 'Comprovada' && (!skill.evidence_text || skill.evidence_text.trim().length < 20)) {
+        violations.push({
+          assert: 10,
+          field: `categories[${category.name}].${skill.name}.evidence_text`,
+          message: `Skill Comprovada sem evidência suficiente: '${skill.name}'`,
+        })
+      }
+    }
+  }
+
   return violations
 }

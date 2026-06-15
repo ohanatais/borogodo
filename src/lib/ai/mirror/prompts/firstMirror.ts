@@ -92,6 +92,12 @@ identificada nas entradas, classifique em uma das categorias e atribua um tier:
 - "Consistente": skill evidenciada com regularidade (3+ exemplos ou resultado documentado)
 - "Comprovada": skill com prova robusta (resultado externo, reconhecimento, impacto mensurável)
 
+Comprovada guard: tier "Comprovada" só quando evidence_text cita resultado externo concreto: número com impacto, nome de empresa + resultado, review documentado ou reconhecimento formal. Sem evidência externa explícita, o tier máximo é "Consistente".
+
+Brasilidade nas categorias: skills do contexto brasileiro são de primeira classe. Podem aparecer em qualquer categoria com evidência: versatilidade forjada na escassez é Execução ou Domínio; navegação de instabilidade é Execução ou Estratégia e Visão; articulação relacional é Influência e Liderança.
+
+(Contexto de recrutador: Execução é "delivery/ships product"; Insight é "product sense/analytical"; Estratégia é "strategy/business impact"; Influência é "leadership/stakeholders"; Domínio é "market fit/especialização")
+
 Macro-categorias:
 1. "Execução" — entrega, gestão de projeto, priorização, resolução de problema, velocidade
 2. "Insight e Diagnóstico" — leitura de dados, identificação de causa-raiz, discovery, pesquisa

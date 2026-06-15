@@ -6,6 +6,10 @@ vi.mock('../SkillTierItem', () => ({
   SkillTierItem: ({ skill }: { skill: { name: string } }) => <div data-testid="skill-item">{skill.name}</div>,
 }))
 
+vi.mock('../TierSummaryCards', () => ({
+  TierSummaryCards: () => <div data-testid="tier-summary-cards" />,
+}))
+
 import { MacroCategoryTabs } from '../MacroCategoryTabs'
 
 const CATEGORIES: MacroCategory[] = [
@@ -25,9 +29,29 @@ const CATEGORIES: MacroCategory[] = [
 ]
 
 describe('MacroCategoryTabs', () => {
-  it('returns null when categories is empty', () => {
-    const { container } = render(<MacroCategoryTabs categories={[]} />)
-    expect(container.firstChild).toBeNull()
+  it('renders empty state message when categories is empty', () => {
+    render(<MacroCategoryTabs categories={[]} />)
+    expect(screen.getByText('emptyState')).toBeInTheDocument()
+  })
+
+  it('filters out categories with no skills', () => {
+    const withEmptyCategory: MacroCategory[] = [
+      { name: 'Vazia', skills: [] },
+      ...CATEGORIES,
+    ]
+    render(<MacroCategoryTabs categories={withEmptyCategory} />)
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs).toHaveLength(2) // only the 2 non-empty ones
+  })
+
+  it('renders empty state when all categories have empty skills', () => {
+    const allEmpty: MacroCategory[] = [
+      { name: 'Execução', skills: [] },
+      { name: 'Domínio', skills: [] },
+    ]
+    render(<MacroCategoryTabs categories={allEmpty} />)
+    expect(screen.getByText('emptyState')).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).toBeNull()
   })
 
   it('renders all category tab buttons', () => {

@@ -5,7 +5,16 @@ import { ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { MacroCategory, SkillTier } from '@/types/mirror'
 import { SkillTierItem } from './SkillTierItem'
+import { TierSummaryCards } from './TierSummaryCards'
 import { SectionLabel } from '@/components/ui/SectionLabel'
+
+const RECRUITER_CONTEXT: Partial<Record<string, string>> = {
+  'Execução': 'delivery · ship product',
+  'Insight e Diagnóstico': 'product sense · analytical',
+  'Estratégia e Visão': 'strategy · business impact',
+  'Influência e Liderança': 'leadership · stakeholders',
+  'Domínio': 'market fit · especialização',
+}
 
 interface MacroCategoryTabsProps {
   categories: MacroCategory[]
@@ -16,12 +25,30 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
 
-  if (categories.length === 0) return null
+  const visibleCategories = categories.filter((cat) => cat.skills.length > 0)
+  const allSkills = visibleCategories.flatMap((c) => c.skills)
+  const tierCounts = {
+    comprovadas: allSkills.filter((s) => s.tier === 'Comprovada').length,
+    consistentes: allSkills.filter((s) => s.tier === 'Consistente').length,
+    emergentes: allSkills.filter((s) => s.tier === 'Emergente').length,
+  }
 
-  const active = categories[activeIndex]
+  if (visibleCategories.length === 0) {
+    return (
+      <div>
+        <SectionLabel>{t('title')}</SectionLabel>
+        <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+          {t('emptyState')}
+        </p>
+      </div>
+    )
+  }
+
+  const safeActiveIndex = Math.min(Math.max(activeIndex, 0), visibleCategories.length - 1)
+  const active = visibleCategories[safeActiveIndex]
 
   function handleKeyDown(e: React.KeyboardEvent, i: number) {
-    const last = categories.length - 1
+    const last = visibleCategories.length - 1
     let next: number | null = null
     if (e.key === 'ArrowRight') next = i < last ? i + 1 : 0
     else if (e.key === 'ArrowLeft') next = i > 0 ? i - 1 : last
@@ -37,6 +64,11 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
   return (
     <div>
       <SectionLabel>{t('title')}</SectionLabel>
+      <TierSummaryCards
+        comprovadas={tierCounts.comprovadas}
+        consistentes={tierCounts.consistentes}
+        emergentes={tierCounts.emergentes}
+      />
 
       {/* Desktop lg+: horizontal tabs */}
       <div className="hidden lg:block">
@@ -45,22 +77,22 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
           className="flex gap-0 border-b mb-4 overflow-x-auto"
           style={{ borderColor: 'var(--border)' }}
         >
-          {categories.map((cat, i) => (
+          {visibleCategories.map((cat, i) => (
             <button
               key={cat.name}
               ref={(el) => { tabRefs.current[i] = el }}
               role="tab"
-              aria-selected={i === activeIndex}
+              aria-selected={i === safeActiveIndex}
               aria-controls={`tabpanel-${i}`}
               id={`tab-${i}`}
-              tabIndex={i === activeIndex ? 0 : -1}
+              tabIndex={i === safeActiveIndex ? 0 : -1}
               type="button"
               onClick={() => setActiveIndex(i)}
               onKeyDown={(e) => handleKeyDown(e, i)}
               className="shrink-0 px-3.5 py-2.5 min-h-[44px] text-sm font-medium transition-colors duration-200"
               style={{
-                color: i === activeIndex ? 'var(--color-primary)' : 'var(--muted-foreground)',
-                borderBottom: i === activeIndex ? '2px solid var(--color-primary)' : '2px solid transparent',
+                color: i === safeActiveIndex ? 'var(--color-primary)' : 'var(--muted-foreground)',
+                borderBottom: i === safeActiveIndex ? '2px solid var(--color-primary)' : '2px solid transparent',
                 marginBottom: '-1px',
                 background: 'transparent',
               }}
@@ -69,7 +101,7 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
               {cat.skills.length > 0 && (
                 <span
                   className="ml-1.5 text-xs"
-                  style={{ color: i === activeIndex ? 'var(--color-primary)' : 'var(--muted-foreground)', opacity: 0.7 }}
+                  style={{ color: i === safeActiveIndex ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
                 >
                   · {cat.skills.length}
                 </span>
@@ -80,9 +112,14 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
 
         <div
           role="tabpanel"
-          id={`tabpanel-${activeIndex}`}
-          aria-labelledby={`tab-${activeIndex}`}
+          id={`tabpanel-${safeActiveIndex}`}
+          aria-labelledby={`tab-${safeActiveIndex}`}
         >
+          {RECRUITER_CONTEXT[active.name] && (
+            <p className="text-xs mb-3 opacity-60" style={{ color: 'var(--muted-foreground)' }}>
+              {RECRUITER_CONTEXT[active.name]}
+            </p>
+          )}
           {active.skills.map((skill) => (
             <SkillTierItem
               key={skill.name}
@@ -95,7 +132,7 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
 
       {/* Mobile: accordion */}
       <div className="lg:hidden space-y-2">
-        {categories.map((cat, i) => {
+        {visibleCategories.map((cat, i) => {
           const isOpen = activeIndex === i
           return (
             <div
@@ -138,6 +175,11 @@ export function MacroCategoryTabs({ categories }: MacroCategoryTabsProps) {
                   aria-labelledby={`accordion-header-${i}`}
                   className="px-4 pb-2"
                 >
+                  {RECRUITER_CONTEXT[cat.name] && (
+                    <p className="text-xs pt-1 pb-2 opacity-60" style={{ color: 'var(--muted-foreground)' }}>
+                      {RECRUITER_CONTEXT[cat.name]}
+                    </p>
+                  )}
                   {cat.skills.map((skill) => (
                     <SkillTierItem
                       key={skill.name}

@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { CheckCircle2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { PanelMirror } from '@/lib/panel/getPanelData'
+import { TIER_STYLE } from '@/components/features/espelho/tierStyles'
 
 interface BorogodoCardProps {
   name: string
@@ -17,6 +19,7 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
 
   const hasData = mirror !== null
   const specialties = mirror?.strengthThemes?.slice(0, 5) ?? []
+  const growthCount = (mirror?.skillSummary?.emergentes ?? 0) + (mirror?.skillSummary?.consistentes ?? 0)
 
   return (
     <section
@@ -64,7 +67,7 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
         <>
           {/* Specialty chips */}
           {specialties.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex flex-wrap gap-2 mb-4">
               {specialties.map((theme) => (
                 <span
                   key={theme}
@@ -77,6 +80,39 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
                   {theme}
                 </span>
               ))}
+            </div>
+          )}
+
+          {/* Skill summary strip */}
+          {mirror?.skillSummary && (
+            <div className="mb-6 pt-2 border-t" style={{ borderColor: 'oklch(98% 0.01 320 / 0.15)' }}>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {mirror.skillSummary.comprovadas > 0 && (
+                  <span
+                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={{ background: TIER_STYLE.Comprovada.chipBg, color: TIER_STYLE.Comprovada.chipText }}
+                  >
+                    <CheckCircle2 size={10} aria-hidden="true" />
+                    {t('skills.comprovadas', { count: mirror.skillSummary.comprovadas })}
+                  </span>
+                )}
+                {mirror.skillSummary.consistentes > 0 && (
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={{ background: TIER_STYLE.Consistente.chipBg, color: TIER_STYLE.Consistente.chipText }}
+                  >
+                    {t('skills.consistentes', { count: mirror.skillSummary.consistentes })}
+                  </span>
+                )}
+                {mirror.skillSummary.emergentes > 0 && (
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={{ background: TIER_STYLE.Emergente.chipBg, color: TIER_STYLE.Emergente.chipText }}
+                  >
+                    {t('skills.emergentes', { count: mirror.skillSummary.emergentes })}
+                  </span>
+                )}
+              </div>
             </div>
           )}
 
@@ -95,7 +131,9 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
             className="inline-flex items-center gap-1.5 text-sm font-semibold transition-opacity hover:opacity-70"
             style={{ color: 'var(--color-primary-fg)' }}
           >
-            {t('viewMirror')}
+            {growthCount > 0
+              ? t('viewMirrorGrowth', { count: growthCount })
+              : t('viewMirror')}
           </Link>
         </>
       ) : (

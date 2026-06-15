@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import type { createServerClient } from '@/lib/db/supabase/server'
 import type { Entry } from '@/types/entry'
 import type { ProactiveInsight } from '@/types/insight'
+import type { MacroCategory } from '@/types/mirror'
 import { getMirrorStatus, type MirrorStatus } from './getMirrorStatus'
 import { getCapturePrompt } from './getCapturePrompt'
 
@@ -37,11 +38,20 @@ interface MirrorRow {
   primary_strength: { headline: string } | null
   strength_themes: string[] | null
   generated_at: string
+  mirror: unknown
+}
+
+export interface SkillSummary {
+  comprovadas: number
+  consistentes: number
+  emergentes: number
+  total: number
 }
 
 export interface PanelMirror {
   headline: string | null
   strengthThemes: string[]
+  skillSummary: SkillSummary | null
 }
 
 export interface PanelData {
@@ -111,7 +121,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .maybeSingle(),
     supabase
       .from('mirror_snapshots')
-      .select('primary_strength, strength_themes, generated_at')
+      .select('primary_strength, strength_themes, generated_at, mirror')
       .eq('user_id', userId)
       .order('generated_at', { ascending: false })
       .limit(1)
@@ -148,10 +158,24 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
   const oldestEntryDate = (oldestRes.data as { entry_date: string } | null)?.entry_date ?? null
   const newestEntryDate = (newestRes.data as { entry_date: string } | null)?.entry_date ?? null
 
+  const categories: MacroCategory[] =
+    (mirrorRow?.mirror as { categories?: MacroCategory[] } | null)?.categories ?? []
+  const allSkills = categories.flatMap((c) => c.skills)
+  const skillSummary: SkillSummary | null =
+    allSkills.length > 0
+      ? {
+          comprovadas: allSkills.filter((s) => s.tier === 'Comprovada').length,
+          consistentes: allSkills.filter((s) => s.tier === 'Consistente').length,
+          emergentes: allSkills.filter((s) => s.tier === 'Emergente').length,
+          total: allSkills.length,
+        }
+      : null
+
   const mirror: PanelMirror | null = mirrorRow
     ? {
         headline: mirrorRow.primary_strength?.headline ?? null,
         strengthThemes: mirrorRow.strength_themes ?? [],
+        skillSummary,
       }
     : null
 

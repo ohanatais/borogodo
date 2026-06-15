@@ -181,10 +181,16 @@
       "subtitle": "O borogodó de",
       "ariaLabel": "Perfil de {name}",
       "viewMirror": "Ver espelho completo →",
+      "viewMirrorGrowth": "{count, plural, one {Ver o skill que pode crescer →} other {Ver os # skills que podem crescer →}}",
       "forming": "Seu espelho está se formando",
       "formingSubtitle": "Continue capturando histórias para o Borogodó revelar seu padrão.",
       "formingOf": "O espelho de",
-      "formingSuffix": " tá se formando."
+      "formingSuffix": " tá se formando.",
+      "skills": {
+        "comprovadas": "{count, plural, one {# comprovada} other {# comprovadas}}",
+        "consistentes": "{count, plural, one {# consistente} other {# consistentes}}",
+        "emergentes": "{count, plural, one {# emergente} other {# emergentes}}"
+      }
     },
     "highlights": {
       "title": "Trajetória em destaque",
@@ -217,11 +223,32 @@
     },
     "categories": {
       "title": "Seus skills por categoria",
+      "emptyState": "Continue capturando para ver seus skills organizados por categoria.",
       "tier": {
         "Emergente": "Emergente",
         "Consistente": "Consistente",
         "Comprovada": "Comprovada"
-      }
+      },
+      "legend": {
+        "emergente": "tá aparecendo",
+        "consistente": "virou padrão",
+        "comprovada": "tem prova externa"
+      },
+      "criteriaButton": {
+        "Emergente": "Como avançar?",
+        "Consistente": "Como avançar?",
+        "Comprovada": "Ver critério"
+      },
+      "tierCriteria": {
+        "Emergente": "O Borogodó identificou esse padrão nas suas histórias, mas sem recorrência estabelecida ainda. Para avançar para Consistente: registre mais 2 ou 3 situações com resultado claro.",
+        "Consistente": "Padrão recorrente com resultados. Para chegar a Comprovada: adicione uma evidência externa (número com impacto, nome de empresa ou reconhecimento formal documentado).",
+        "Comprovada": "Nível máximo. Evidência externa validada por fora de você: resultado com número, empresa ou reconhecimento formal. Nada mais a provar aqui."
+      },
+      "skillProgress": {
+        "Emergente": "Mais situações como essa elevam para Consistente.",
+        "Consistente": "Um resultado externo (número, reconhecimento, empresa) eleva para Comprovada."
+      },
+      "skillProgressCta": "Registrar mais"
     },
     "empty": {
       "title": "Seu espelho está se formando.",
