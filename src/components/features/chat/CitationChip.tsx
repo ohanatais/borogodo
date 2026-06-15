@@ -20,7 +20,7 @@ export function CitationChip({ citation, index }: CitationChipProps) {
         background: 'var(--color-lilas-nevoa)',
         color: 'var(--color-primary)',
         border: '1px solid var(--color-primary)',
-        opacity: 0.85,
+        opacity: 1,
       }}
     >
       <span className="shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold"

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, Trash2, X } from 'lucide-react'
+import { Check, Trash2, RefreshCw } from 'lucide-react'
 import type { CorrectionAction } from '@/lib/ai/chat/answerCareerQuestion'
 
 const FIELD_LABELS: Record<string, string> = {
@@ -15,19 +15,19 @@ const FIELD_LABELS: Record<string, string> = {
   learning: 'Aprendizado',
 }
 
+const MIRROR_FIELDS = new Set(['what_i_did', 'impact', 'metric', 'company'])
+
 interface CorrectionConfirmCardProps {
   correction: CorrectionAction
-  onConfirm: () => void
-  onCancel: () => void
+  onDismiss: () => void
 }
 
-export function CorrectionConfirmCard({ correction, onConfirm, onCancel }: CorrectionConfirmCardProps) {
+export function CorrectionConfirmCard({ correction, onDismiss }: CorrectionConfirmCardProps) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const [showMirrorPrompt, setShowMirrorPrompt] = useState(false)
   const [regenerating, setRegenerating] = useState(false)
 
-  const mirrorFields = ['what_i_did', 'impact', 'metric', 'company']
-  const affectsMirror = Object.keys(correction.fields).some((f) => mirrorFields.includes(f))
+  const affectsMirror = Object.keys(correction.fields).some((f) => MIRROR_FIELDS.has(f))
 
   async function handleConfirm() {
     setStatus('loading')
@@ -35,6 +35,15 @@ export function CorrectionConfirmCard({ correction, onConfirm, onCancel }: Corre
       if (correction.action === 'delete') {
         const res = await fetch(`/api/entries/${correction.entryId}`, { method: 'DELETE' })
         if (!res.ok) throw new Error('Erro ao remover')
+      } else if (correction.action === 'enrich') {
+        const [field, answer] = Object.entries(correction.fields)[0] ?? []
+        if (!field || !answer) throw new Error('Campo de enriquecimento inválido')
+        const res = await fetch(`/api/entries/${correction.entryId}/enrich`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ field, answer }),
+        })
+        if (!res.ok) throw new Error('Erro ao enriquecer')
       } else {
         const res = await fetch(`/api/entries/${correction.entryId}`, {
           method: 'PATCH',
@@ -47,7 +56,6 @@ export function CorrectionConfirmCard({ correction, onConfirm, onCancel }: Corre
       if (affectsMirror && correction.action !== 'delete') {
         setShowMirrorPrompt(true)
       }
-      onConfirm()
     } catch {
       setStatus('error')
     }
@@ -73,21 +81,44 @@ export function CorrectionConfirmCard({ correction, onConfirm, onCancel }: Corre
           <Check size={14} style={{ color: 'var(--color-primary)' }} />
           {correction.action === 'delete' ? 'Entrada removida.' : 'Correção aplicada.'}
         </div>
+
         {showMirrorPrompt && (
-          <div className="space-y-2">
+          <div className="space-y-2 pt-1">
             <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
               Isso pode afetar seu espelho. Quer regenerar agora?
             </p>
-            <button
-              type="button"
-              onClick={() => void handleRegenerate()}
-              disabled={regenerating}
-              className="text-xs px-3 py-1.5 rounded-lg font-medium transition-opacity hover:opacity-80 disabled:opacity-50"
-              style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-            >
-              {regenerating ? 'Gerando...' : 'Regenerar espelho'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => void handleRegenerate()}
+                disabled={regenerating}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-opacity hover:opacity-80 disabled:opacity-50"
+                style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+              >
+                <RefreshCw size={11} className={regenerating ? 'animate-spin' : ''} />
+                {regenerating ? 'Gerando...' : 'Regenerar espelho'}
+              </button>
+              <button
+                type="button"
+                onClick={onDismiss}
+                className="text-xs px-3 py-1.5 rounded-lg transition-opacity hover:opacity-70"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                Agora não
+              </button>
+            </div>
           </div>
+        )}
+
+        {!showMirrorPrompt && (
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="text-xs"
+            style={{ color: 'var(--muted-foreground)' }}
+          >
+            Fechar
+          </button>
         )}
       </div>
     )
@@ -98,7 +129,7 @@ export function CorrectionConfirmCard({ correction, onConfirm, onCancel }: Corre
       className="rounded-xl p-4 space-y-3"
       style={{ background: 'var(--muted)', border: '1px solid var(--border)' }}
     >
-      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted-foreground)' }}>
+      <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
         {correction.action === 'delete' ? 'Remover entrada' : 'Confirmar correção'}
       </p>
 
@@ -122,7 +153,7 @@ export function CorrectionConfirmCard({ correction, onConfirm, onCancel }: Corre
       )}
 
       {status === 'error' && (
-        <p className="text-xs" style={{ color: 'oklch(55% 0.2 25)' }}>
+        <p className="text-xs" style={{ color: 'var(--destructive)' }}>
           Não foi possível aplicar a correção. Tente de novo.
         </p>
       )}
@@ -134,7 +165,7 @@ export function CorrectionConfirmCard({ correction, onConfirm, onCancel }: Corre
           disabled={status === 'loading'}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-opacity hover:opacity-80 disabled:opacity-50"
           style={{
-            background: correction.action === 'delete' ? 'oklch(55% 0.2 25)' : 'var(--color-primary)',
+            background: correction.action === 'delete' ? 'var(--destructive)' : 'var(--color-primary)',
             color: 'var(--color-primary-fg)',
           }}
         >
@@ -146,12 +177,12 @@ export function CorrectionConfirmCard({ correction, onConfirm, onCancel }: Corre
         </button>
         <button
           type="button"
-          onClick={onCancel}
+          onClick={onDismiss}
           disabled={status === 'loading'}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-opacity hover:opacity-70 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg text-xs font-medium transition-opacity hover:opacity-70 disabled:opacity-50"
           style={{ color: 'var(--muted-foreground)', background: 'var(--card)' }}
         >
-          <X size={12} /> Cancelar
+          Cancelar
         </button>
       </div>
     </div>

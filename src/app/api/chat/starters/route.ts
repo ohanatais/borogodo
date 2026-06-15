@@ -63,5 +63,8 @@ export async function GET(): Promise<NextResponse> {
     starters.push(s)
   }
 
-  return NextResponse.json({ starters: starters.slice(0, 3) })
+  return NextResponse.json(
+    { starters: starters.slice(0, 3) },
+    { headers: { 'Cache-Control': 'private, max-age=300, stale-while-revalidate=3600' } }
+  )
 }

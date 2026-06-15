@@ -55,7 +55,8 @@ export async function PATCH(request: Request, context: RouteContext): Promise<Ne
     .select()
     .maybeSingle()
 
-  if (error || !data) return jsonError('Entrada não encontrada', 404)
+  if (error) return jsonError('Erro ao atualizar entrada', 500)
+  if (!data) return jsonError('Entrada não encontrada', 404)
 
   return NextResponse.json({ ok: true, entry: data })
 }
@@ -70,13 +71,14 @@ export async function DELETE(_request: Request, context: RouteContext): Promise<
 
   const { id } = await context.params
 
-  const { error } = await supabase
+  const { error, count } = await supabase
     .from('entries')
-    .delete()
+    .delete({ count: 'exact' })
     .eq('id', id)
     .eq('user_id', user.id)
 
   if (error) return jsonError('Erro ao remover entrada', 500)
+  if (count === 0) return jsonError('Entrada não encontrada', 404)
 
   return NextResponse.json({ ok: true })
 }

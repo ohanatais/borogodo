@@ -3,6 +3,7 @@ import { generateEmbedding, cosineSimilarity, parseEmbedding } from '@/lib/ai/em
 import { getLatestSnapshot } from '@/lib/db/mirror'
 import { getProfile } from '@/lib/db/profiles'
 import { buildCareerChatSystemPrompt } from '@/lib/ai/chat/prompts/careerChat'
+import { logger } from '@/lib/log'
 import type { Entry } from '@/types/entry'
 import type { createServerClient } from '@/lib/db/supabase/server'
 
@@ -42,7 +43,7 @@ type EntryWithEmbedding = Entry & { embedding: unknown }
 const SEMANTIC_SEARCH_LIMIT = 200
 const TOP_K = 5
 const MODEL = 'claude-sonnet-4-6'
-const MAX_TOKENS = 1024
+const MAX_TOKENS = 2048
 const BLOCKS_START = '<BLOCKS>'
 const BLOCKS_END = '</BLOCKS>'
 
@@ -72,10 +73,7 @@ async function findRelevantEntries(
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_K)
-    .map(({ entry }) => {
-      const { embedding: _e, ...rest } = entry
-      return rest as Entry
-    })
+    .map(({ entry }) => entry as Entry)
 }
 
 async function fetchCompanyEntries(
@@ -127,13 +125,14 @@ interface BlocksPayload {
 function parseBlocks(buffer: string): BlocksPayload {
   const endIdx = buffer.indexOf(BLOCKS_END)
   const json = endIdx !== -1 ? buffer.slice(0, endIdx).trim() : buffer.trim()
+  if (!json) return {}
   try {
     const parsed: unknown = JSON.parse(json)
     if (parsed !== null && typeof parsed === 'object') {
       return parsed as BlocksPayload
     }
   } catch {
-    // ignore
+    logger.error('parseBlocks: JSON inválido no bloco estruturado', { raw: json.slice(0, 200) })
   }
   return {}
 }
@@ -158,17 +157,15 @@ export async function answerCareerQuestion(
     generateEmbedding(userMessage),
   ])
 
-  const relevantEntries = await findRelevantEntries(supabase, userId, queryEmbedding)
-
-  let companyEntries: Entry[] = []
-  if (context?.type === 'empresa' && context.entityId) {
-    companyEntries = await fetchCompanyEntries(supabase, userId, context.entityId)
-  }
-
-  let correctionEntry: Entry | null = null
-  if (context?.type === 'entry' && context.entityId) {
-    correctionEntry = await fetchEntryById(supabase, userId, context.entityId)
-  }
+  const [relevantEntries, companyEntries, correctionEntry] = await Promise.all([
+    findRelevantEntries(supabase, userId, queryEmbedding),
+    context?.type === 'empresa' && context.entityId
+      ? fetchCompanyEntries(supabase, userId, context.entityId)
+      : Promise.resolve<Entry[]>([]),
+    context?.type === 'entry' && context.entityId
+      ? fetchEntryById(supabase, userId, context.entityId)
+      : Promise.resolve<Entry | null>(null),
+  ])
 
   const systemPrompt = buildCareerChatSystemPrompt({
     profile,

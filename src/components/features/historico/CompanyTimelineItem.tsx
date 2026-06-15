@@ -19,6 +19,8 @@ export function CompanyTimelineItem({
 }: CompanyTimelineItemProps) {
   const [expanded, setExpanded] = useState(false)
 
+  const companyId = `company-${company.company.replace(/\s+/g, '-').toLowerCase()}`
+
   const collapsedLabel =
     company.roles.length === 1
       ? `${company.roles[0].role_title} · ${company.company}`
@@ -54,6 +56,7 @@ export function CompanyTimelineItem({
             onClick={() => setExpanded((v) => !v)}
             className="w-full text-left flex items-start justify-between gap-2"
             aria-expanded={expanded}
+            aria-controls={companyId}
           >
             <div className="min-w-0">
               <h3
@@ -74,7 +77,7 @@ export function CompanyTimelineItem({
           </button>
 
           {expanded && (
-            <div className="mt-3 space-y-3">
+            <div id={companyId} className="mt-3 space-y-3">
               {/* Role progression (only if 2+ roles) */}
               {company.roles.length >= 2 && (
                 <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
@@ -148,10 +151,11 @@ export function CompanyTimelineItem({
                     })
                   )
                 }}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80 mt-1"
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-2.5 min-h-[44px] rounded-lg transition-opacity hover:opacity-80 mt-1"
                 style={{
-                  color: 'var(--muted-foreground)',
-                  background: 'var(--muted)',
+                  background: 'var(--color-lilas-nevoa)',
+                  color: 'var(--color-primary)',
+                  border: '1px solid transparent',
                 }}
               >
                 <MessageSquare size={12} />

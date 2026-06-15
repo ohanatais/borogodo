@@ -11,6 +11,7 @@ export interface MessageData {
   citations?: Citation[]
   suggestions?: string[]
   isStreaming?: boolean
+  isError?: boolean
   helpful?: boolean | null
 }
 
@@ -22,7 +23,8 @@ interface ChatMessageProps {
 
 export function ChatMessage({ message, onSuggestionClick, onHelpful }: ChatMessageProps) {
   const isUser = message.role === 'user'
-  const showFeedback = !isUser && !message.isStreaming && message.content.length > 0
+  const isError = !isUser && !!message.isError
+  const showFeedback = !isUser && !message.isStreaming && !isError && message.content.length > 0
 
   return (
     <div className={`flex flex-col gap-1.5 ${isUser ? 'items-end' : 'items-start'}`}>
@@ -30,14 +32,30 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful }: ChatMessa
         className="max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
         style={
           isUser
-            ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)', borderBottomRightRadius: '4px' }
-            : { background: 'var(--card)', color: 'var(--foreground)', border: '1px solid var(--border)', borderBottomLeftRadius: '4px' }
+            ? {
+                background: 'var(--color-primary)',
+                color: 'var(--color-primary-fg)',
+                borderBottomRightRadius: '4px',
+              }
+            : isError
+            ? {
+                background: 'oklch(98% 0.01 25)',
+                color: 'var(--destructive)',
+                border: '1px solid oklch(88% 0.06 25)',
+                borderBottomLeftRadius: '4px',
+              }
+            : {
+                background: 'var(--card)',
+                color: 'var(--foreground)',
+                border: '1px solid var(--border)',
+                borderBottomLeftRadius: '4px',
+              }
         }
       >
         {message.content || (message.isStreaming && <span className="opacity-50">...</span>)}
         {message.isStreaming && message.content && (
           <span
-            className="inline-block w-0.5 h-3.5 ml-0.5 rounded-sm animate-pulse align-text-bottom"
+            className="inline-block w-0.5 h-3.5 ml-0.5 rounded-sm motion-safe:animate-pulse align-text-bottom"
             style={{ background: 'var(--color-primary)' }}
           />
         )}
@@ -58,7 +76,7 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful }: ChatMessa
               key={s}
               type="button"
               onClick={() => onSuggestionClick(s)}
-              className="text-left text-xs px-3 py-1.5 rounded-xl transition-colors hover:opacity-80"
+              className="text-left text-xs px-3 py-2.5 min-h-[44px] rounded-xl transition-colors hover:opacity-80"
               style={{
                 background: 'var(--color-lilas-nevoa)',
                 color: 'var(--color-primary)',
@@ -72,28 +90,28 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful }: ChatMessa
       )}
 
       {showFeedback && onHelpful && (
-        <div className="flex items-center gap-1 pl-1">
+        <div className="flex items-center gap-0.5 pl-1">
           <button
             type="button"
             onClick={() => onHelpful(true)}
             aria-label="Útil"
-            className="p-1 rounded transition-opacity hover:opacity-70"
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition-opacity hover:opacity-70"
             style={{
               color: message.helpful === true ? 'var(--color-primary)' : 'var(--muted-foreground)',
             }}
           >
-            <ThumbsUp size={12} />
+            <ThumbsUp size={13} />
           </button>
           <button
             type="button"
             onClick={() => onHelpful(false)}
             aria-label="Não útil"
-            className="p-1 rounded transition-opacity hover:opacity-70"
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition-opacity hover:opacity-70"
             style={{
-              color: message.helpful === false ? 'oklch(55% 0.2 25)' : 'var(--muted-foreground)',
+              color: message.helpful === false ? 'var(--foreground)' : 'var(--muted-foreground)',
             }}
           >
-            <ThumbsDown size={12} />
+            <ThumbsDown size={13} />
           </button>
         </div>
       )}

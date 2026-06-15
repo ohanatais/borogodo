@@ -37,8 +37,6 @@ interface SectionProps {
 }
 
 function MirrorSection({ label, sectionKey, headline, evidence, warm = false, primary = false }: SectionProps) {
-  const [hovered, setHovered] = useState(false)
-
   function handleIncorrect() {
     window.dispatchEvent(
       new CustomEvent('borogodo:chat-open', {
@@ -53,13 +51,14 @@ function MirrorSection({ label, sectionKey, headline, evidence, warm = false, pr
   return (
     <motion.div
       variants={item}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={`relative py-6 rounded-lg px-4 mb-2 ${primary ? 'border-b border-l-2' : 'border-b'}`}
+      className="group relative py-6 rounded-lg px-4 mb-2 border-b"
       style={{
         borderBottomColor: warm ? 'transparent' : 'var(--border)',
-        borderLeftColor: primary ? 'var(--color-primary)' : undefined,
-        background: warm ? 'oklch(74% 0.12 75 / 0.12)' : 'transparent',
+        background: primary
+          ? 'oklch(42% 0.19 320 / 0.04)'
+          : warm
+          ? 'oklch(74% 0.12 75 / 0.12)'
+          : 'transparent',
       }}
     >
       <SectionLabel className="mb-2">{label}</SectionLabel>
@@ -68,18 +67,17 @@ function MirrorSection({ label, sectionKey, headline, evidence, warm = false, pr
       </p>
       <EvidenceText evidence={evidence} />
 
-      {hovered && (
-        <button
-          type="button"
-          onClick={handleIncorrect}
-          className="absolute top-4 right-4 flex items-center gap-1 text-[11px] px-2 py-1 rounded-md transition-opacity hover:opacity-70"
-          style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
-          aria-label={`Marcar seção "${label}" como incorreta`}
-        >
-          <Flag size={11} />
-          incorreto?
-        </button>
-      )}
+      {/* Visible on mobile; hover-only on desktop */}
+      <button
+        type="button"
+        onClick={handleIncorrect}
+        className="absolute top-4 right-4 flex items-center gap-1 text-[11px] px-2 py-1 rounded-md transition-opacity opacity-70 lg:opacity-0 lg:group-hover:opacity-100"
+        style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
+        aria-label={`Marcar seção "${label}" como incorreta`}
+      >
+        <Flag size={11} />
+        corrigir
+      </button>
     </motion.div>
   )
 }
@@ -154,7 +152,6 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
     <div className="max-w-[980px] mx-auto px-6 py-8">
       {personName && <MirrorHeader name={personName} label={t('mirrorOf')} avatarUrl={avatarUrl} />}
 
-      {/* Ask about mirror CTA */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

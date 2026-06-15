@@ -30,8 +30,12 @@ export function ChatInput({ value, onChange, onSubmit, disabled, placeholder }: 
 
   return (
     <div
-      className="flex items-end gap-2 rounded-2xl px-3 py-2"
-      style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+      className="flex items-end gap-2 rounded-2xl px-3 py-2 focus-within:ring-2 focus-within:ring-offset-1 transition-shadow"
+      style={{
+        background: 'var(--card)',
+        border: '1px solid var(--border)',
+        '--tw-ring-color': 'var(--color-primary)',
+      } as React.CSSProperties}
     >
       <textarea
         ref={textareaRef}
@@ -41,7 +45,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, placeholder }: 
         placeholder={placeholder ?? 'Pergunte algo sobre sua carreira...'}
         rows={1}
         disabled={disabled}
-        aria-label={placeholder ?? 'Pergunte algo sobre sua carreira...'}
+        aria-label="Campo de pergunta sobre sua carreira"
         className="flex-1 resize-none text-sm outline-none bg-transparent leading-snug min-h-[24px] max-h-[120px]"
         style={{ color: 'var(--foreground)' }}
       />
@@ -50,7 +54,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, placeholder }: 
         onClick={onSubmit}
         disabled={!value.trim() || disabled}
         aria-label="Enviar"
-        className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-opacity disabled:opacity-30"
+        className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-opacity disabled:opacity-30"
         style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
       >
         <SendHorizonal size={14} />

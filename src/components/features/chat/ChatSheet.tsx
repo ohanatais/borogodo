@@ -39,8 +39,7 @@ type Action =
   | { type: 'ASSISTANT_DELTA'; id: string; text: string }
   | { type: 'ASSISTANT_DONE'; id: string; citations: Citation[]; suggestions: string[]; correction?: CorrectionAction; marcoPreview?: MarcoPreview }
   | { type: 'ASSISTANT_ERROR'; id: string; message: string }
-  | { type: 'CORRECTION_DISMISSED' }
-  | { type: 'MARCO_DISMISSED' }
+  | { type: 'CARD_DISMISSED' }
   | { type: 'SET_HELPFUL'; id: string; helpful: boolean }
 
 function reducer(state: State, action: Action): State {
@@ -101,14 +100,12 @@ function reducer(state: State, action: Action): State {
         status: 'error',
         messages: state.messages.map((m) =>
           m.id === action.id
-            ? { ...m, isStreaming: false, content: action.message }
+            ? { ...m, isStreaming: false, content: action.message, isError: true }
             : m
         ),
       }
-    case 'CORRECTION_DISMISSED':
-      return { ...state, pendingCorrection: null }
-    case 'MARCO_DISMISSED':
-      return { ...state, pendingMarco: null }
+    case 'CARD_DISMISSED':
+      return { ...state, pendingCorrection: null, pendingMarco: null }
     case 'SET_HELPFUL':
       return {
         ...state,
@@ -136,7 +133,7 @@ const initialState: State = {
 export function ChatSheet() {
   const [state, dispatch] = useReducer(reducer, initialState)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLDivElement>(null)
+  const inputAreaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function handler(e: Event) {
@@ -146,6 +143,16 @@ export function ChatSheet() {
     window.addEventListener('borogodo:chat-open', handler)
     return () => window.removeEventListener('borogodo:chat-open', handler)
   }, [])
+
+  // Focus textarea when sheet opens
+  useEffect(() => {
+    if (state.open) {
+      requestAnimationFrame(() => {
+        const textarea = inputAreaRef.current?.querySelector('textarea')
+        textarea?.focus()
+      })
+    }
+  }, [state.open])
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -163,6 +170,8 @@ export function ChatSheet() {
       dispatch({ type: 'ASSISTANT_STARTED', id: assistantMsgId })
 
       const history = state.messages.map((m) => ({ role: m.role, content: m.content }))
+
+      let reader: ReadableStreamDefaultReader<Uint8Array> | null = null
 
       try {
         const res = await fetch('/api/chat', {
@@ -184,49 +193,53 @@ export function ChatSheet() {
           return
         }
 
-        const reader = res.body.getReader()
+        reader = res.body.getReader()
         const decoder = new TextDecoder()
         let buffer = ''
 
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
 
-          buffer += decoder.decode(value, { stream: true })
-          const parts = buffer.split('\n\n')
-          buffer = parts.pop() ?? ''
+            buffer += decoder.decode(value, { stream: true })
+            const parts = buffer.split('\n\n')
+            buffer = parts.pop() ?? ''
 
-          for (const part of parts) {
-            if (!part.startsWith('data: ')) continue
-            const json = JSON.parse(part.slice(6)) as {
-              type: string
-              text?: string
-              citations?: Citation[]
-              suggestions?: string[]
-              correction?: CorrectionAction
-              marcoPreview?: MarcoPreview
-              message?: string
-            }
+            for (const part of parts) {
+              if (!part.startsWith('data: ')) continue
+              const json = JSON.parse(part.slice(6)) as {
+                type: string
+                text?: string
+                citations?: Citation[]
+                suggestions?: string[]
+                correction?: CorrectionAction
+                marcoPreview?: MarcoPreview
+                message?: string
+              }
 
-            if (json.type === 'delta' && json.text) {
-              dispatch({ type: 'ASSISTANT_DELTA', id: assistantMsgId, text: json.text })
-            } else if (json.type === 'done') {
-              dispatch({
-                type: 'ASSISTANT_DONE',
-                id: assistantMsgId,
-                citations: json.citations ?? [],
-                suggestions: json.suggestions ?? [],
-                correction: json.correction,
-                marcoPreview: json.marcoPreview,
-              })
-            } else if (json.type === 'error') {
-              dispatch({
-                type: 'ASSISTANT_ERROR',
-                id: assistantMsgId,
-                message: json.message ?? 'Erro desconhecido',
-              })
+              if (json.type === 'delta' && json.text) {
+                dispatch({ type: 'ASSISTANT_DELTA', id: assistantMsgId, text: json.text })
+              } else if (json.type === 'done') {
+                dispatch({
+                  type: 'ASSISTANT_DONE',
+                  id: assistantMsgId,
+                  citations: json.citations ?? [],
+                  suggestions: json.suggestions ?? [],
+                  correction: json.correction,
+                  marcoPreview: json.marcoPreview,
+                })
+              } else if (json.type === 'error') {
+                dispatch({
+                  type: 'ASSISTANT_ERROR',
+                  id: assistantMsgId,
+                  message: json.message ?? 'Erro desconhecido',
+                })
+              }
             }
           }
+        } finally {
+          reader.releaseLock()
         }
       } catch {
         dispatch({
@@ -259,28 +272,26 @@ export function ChatSheet() {
       <Dialog.Portal>
         <Dialog.Overlay
           className="fixed inset-0 z-40"
-          style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)' }}
+          style={{ background: 'oklch(18% 0.02 260 / 0.4)', backdropFilter: 'blur(2px)' }}
         />
 
+        {/* Mobile: bottom sheet. Desktop: centered modal */}
         <Dialog.Content
           onInteractOutside={(e) => e.preventDefault()}
           aria-describedby={undefined}
-          className="fixed z-50 flex flex-col focus:outline-none"
+          className="fixed z-50 flex flex-col focus:outline-none
+            bottom-0 left-0 right-0 rounded-t-[16px] max-h-[90dvh]
+            lg:bottom-auto lg:left-1/2 lg:right-auto lg:top-1/2
+            lg:-translate-x-1/2 lg:-translate-y-1/2
+            lg:w-[640px] lg:max-h-[80dvh] lg:rounded-2xl"
           style={{
-            right: 0,
-            bottom: 0,
-            left: 0,
-            top: 'auto',
-            maxHeight: '90dvh',
-            borderTopLeftRadius: '20px',
-            borderTopRightRadius: '20px',
             background: 'var(--color-creme)',
-            boxShadow: '0 -4px 32px rgba(0,0,0,0.12)',
+            boxShadow: '0 0 40px oklch(18% 0.02 260 / 0.2)',
           }}
         >
-          {/* Drag handle (mobile) */}
+          {/* Drag handle — mobile only */}
           <div className="flex justify-center pt-3 pb-1 lg:hidden">
-            <div className="w-10 h-1 rounded-full" style={{ background: 'var(--border)' }} />
+            <div className="w-10 h-1 rounded-full" style={{ background: 'var(--muted-foreground)', opacity: 0.3 }} />
           </div>
 
           {/* Header */}
@@ -305,7 +316,7 @@ export function ChatSheet() {
               <button
                 type="button"
                 aria-label="Fechar chat"
-                className="w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                className="relative w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-70 after:absolute after:inset-[-10px] after:content-['']"
                 style={{ color: 'var(--muted-foreground)' }}
               >
                 <X size={16} />
@@ -317,7 +328,7 @@ export function ChatSheet() {
           <div
             ref={scrollRef}
             className="flex-1 overflow-y-auto px-4 py-4"
-            style={{ minHeight: '200px', maxHeight: '60dvh' }}
+            style={{ minHeight: '200px' }}
           >
             {isEmpty ? (
               <StarterPrompts onSelect={handleStarterClick} />
@@ -332,20 +343,17 @@ export function ChatSheet() {
                   />
                 ))}
 
-                {/* Structured action cards after last assistant message */}
                 {state.pendingCorrection && (
                   <CorrectionConfirmCard
                     correction={state.pendingCorrection}
-                    onConfirm={() => dispatch({ type: 'CORRECTION_DISMISSED' })}
-                    onCancel={() => dispatch({ type: 'CORRECTION_DISMISSED' })}
+                    onDismiss={() => dispatch({ type: 'CARD_DISMISSED' })}
                   />
                 )}
 
                 {state.pendingMarco && (
                   <MarcoPreviewCard
                     marco={state.pendingMarco}
-                    onConfirm={() => dispatch({ type: 'MARCO_DISMISSED' })}
-                    onCancel={() => dispatch({ type: 'MARCO_DISMISSED' })}
+                    onDismiss={() => dispatch({ type: 'CARD_DISMISSED' })}
                   />
                 )}
               </div>
@@ -354,7 +362,7 @@ export function ChatSheet() {
 
           {/* Input area */}
           <div
-            ref={inputRef}
+            ref={inputAreaRef}
             className="px-4 py-3 border-t shrink-0"
             style={{ borderColor: 'var(--border)' }}
           >
@@ -372,7 +380,6 @@ export function ChatSheet() {
   )
 }
 
-// Helper to open the sheet from anywhere
 export function openChatSheet(detail?: ChatOpenDetail) {
   window.dispatchEvent(new CustomEvent('borogodo:chat-open', { detail: detail ?? {} }))
 }

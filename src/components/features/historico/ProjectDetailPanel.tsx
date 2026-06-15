@@ -1,3 +1,5 @@
+'use client'
+
 import { X, Plus, Flag, Trophy } from 'lucide-react'
 import type { HistoricoProject } from '@/lib/historico/getHistoricoData'
 import { EvidenceSection } from './EvidenceSection'
@@ -71,7 +73,7 @@ export function ProjectDetailPanel({
         <ul className="space-y-5">
           {project.entries.map((entry) => (
             <li key={entry.id} className="space-y-1 group relative">
-              <p className="text-[15px] leading-snug font-medium pr-6" style={{ color: 'var(--foreground)' }}>
+              <p className="text-[15px] leading-snug font-medium pr-16" style={{ color: 'var(--foreground)' }}>
                 {entry.what_i_did}
               </p>
               {entry.impact && (
@@ -89,11 +91,11 @@ export function ProjectDetailPanel({
               )}
               <EvidenceSection entryId={entry.id} initial={entry.evidences} />
 
-              {/* Correction button — visible on hover */}
+              {/* Visible on mobile; hover-only on desktop */}
               <button
                 type="button"
                 onClick={() => openCorrectionChat(entry.id, entry.what_i_did)}
-                className="absolute top-0 right-0 flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-0 right-0 flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md transition-opacity opacity-70 lg:opacity-0 lg:group-hover:opacity-100"
                 style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
                 aria-label="Corrigir esta entrada"
               >
@@ -107,7 +109,6 @@ export function ProjectDetailPanel({
 
       {/* Action row */}
       <div className="flex flex-col gap-2 mt-1">
-        {/* Capture invite */}
         <div
           className="rounded-xl p-3 flex items-center justify-between gap-3"
           style={{ background: 'var(--muted)' }}
@@ -126,7 +127,6 @@ export function ProjectDetailPanel({
           </button>
         </div>
 
-        {/* Marco CTA */}
         <button
           type="button"
           onClick={() => openMarcoChat(company, project.name)}

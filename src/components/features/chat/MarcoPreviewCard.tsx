@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check } from 'lucide-react'
 import type { MarcoPreview } from '@/lib/ai/chat/answerCareerQuestion'
 
 const FIELD_LABELS: Array<{ key: keyof MarcoPreview; label: string }> = [
@@ -15,11 +15,10 @@ const FIELD_LABELS: Array<{ key: keyof MarcoPreview; label: string }> = [
 
 interface MarcoPreviewCardProps {
   marco: MarcoPreview
-  onConfirm: () => void
-  onCancel: () => void
+  onDismiss: () => void
 }
 
-export function MarcoPreviewCard({ marco, onConfirm, onCancel }: MarcoPreviewCardProps) {
+export function MarcoPreviewCard({ marco, onDismiss }: MarcoPreviewCardProps) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
 
   async function handleConfirm() {
@@ -42,7 +41,6 @@ export function MarcoPreviewCard({ marco, onConfirm, onCancel }: MarcoPreviewCar
       })
       if (!res.ok) throw new Error('Erro ao salvar')
       setStatus('done')
-      onConfirm()
     } catch {
       setStatus('error')
     }
@@ -54,9 +52,19 @@ export function MarcoPreviewCard({ marco, onConfirm, onCancel }: MarcoPreviewCar
         className="rounded-xl p-4"
         style={{ background: 'var(--muted)', border: '1px solid var(--border)' }}
       >
-        <div className="flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          <Check size={14} style={{ color: 'var(--color-primary)' }} />
-          Marco salvo.
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+            <Check size={14} style={{ color: 'var(--color-primary)' }} />
+            Marco salvo.
+          </div>
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="text-xs"
+            style={{ color: 'var(--muted-foreground)' }}
+          >
+            Fechar
+          </button>
         </div>
       </div>
     )
@@ -67,7 +75,7 @@ export function MarcoPreviewCard({ marco, onConfirm, onCancel }: MarcoPreviewCar
       className="rounded-xl p-4 space-y-3"
       style={{ background: 'var(--muted)', border: '1px solid var(--border)' }}
     >
-      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted-foreground)' }}>
+      <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
         Salvar marco
       </p>
 
@@ -87,7 +95,7 @@ export function MarcoPreviewCard({ marco, onConfirm, onCancel }: MarcoPreviewCar
       </ul>
 
       {status === 'error' && (
-        <p className="text-xs" style={{ color: 'oklch(55% 0.2 25)' }}>
+        <p className="text-xs" style={{ color: 'var(--destructive)' }}>
           Não foi possível salvar. Tenta de novo?
         </p>
       )}
@@ -104,12 +112,12 @@ export function MarcoPreviewCard({ marco, onConfirm, onCancel }: MarcoPreviewCar
         </button>
         <button
           type="button"
-          onClick={onCancel}
+          onClick={onDismiss}
           disabled={status === 'loading'}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-opacity hover:opacity-70 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg text-xs font-medium transition-opacity hover:opacity-70 disabled:opacity-50"
           style={{ color: 'var(--muted-foreground)', background: 'var(--card)' }}
         >
-          <X size={12} /> Não salvar
+          Cancelar
         </button>
       </div>
     </div>
