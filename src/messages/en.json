@@ -148,6 +148,21 @@
     "empty": {
       "title": "Everything starts with a story.",
       "subtitle": "Tell me something you did at work — it can be small. Borogodó will start building your mirror from there."
+    },
+    "return": {
+      "hasNew": "This week you wrapped up: {evidence}",
+      "strengthAha": "This reinforces your strength in {theme}.",
+      "oldVictory": "{time} ago you delivered: {evidence}",
+      "invite": "Want to log something new?",
+      "inviteAriaLabel": "Log something new",
+      "welcome": "Ready to log your first win?",
+      "welcomeAriaLabel": "Log your first win"
+    },
+    "enrichment": {
+      "question": "Was there a number or deadline involved?",
+      "answerPlaceholder": "Your answer…",
+      "respond": "Respond",
+      "dismiss": "Later"
     }
   },
   "historico": {
@@ -172,11 +187,13 @@
   "capture": {
     "composer": {
       "submitAriaLabel": "Send",
-      "audioAriaLabel": "Record audio (coming soon)",
+      "audioAriaLabel": "Record by voice",
       "audioComingSoon": "coming soon",
       "fileAriaLabel": "Attach file",
       "imageAriaLabel": "Attach image (coming soon)",
       "imageComingSoon": "coming soon",
+      "artifactPlaceholder": "Paste a transcript, an email, a conversation…",
+      "privacyNotice": "Only paste what you can keep.",
       "prompt": {
         "first": "Tell me something you did at work.",
         "today": "Nice. Anything else from today?",
@@ -185,6 +202,28 @@
         "themeNudge": "Your strength in \"{theme}\" could use more evidence. Anything recent?",
         "longGap": "A week is a long time. Tell me what you've been up to."
       }
+    },
+    "batch": {
+      "summary": "Created {n, plural, one {# entry} other {# entries}}",
+      "undo": "Undo",
+      "undoAriaLabel": "Undo creation of {n, plural, one {# entry} other {# entries}}",
+      "undone": "Entries removed.",
+      "viewHistory": "View in history →"
+    },
+    "recording": {
+      "listening": "Listening…",
+      "stop": "Stop",
+      "stopAriaLabel": "Stop recording",
+      "cancel": "Cancel",
+      "cancelAriaLabel": "Cancel recording and discard",
+      "rerecord": "Re-record",
+      "rerecordAriaLabel": "Discard and re-record",
+      "unsupported": "Your browser doesn't transcribe well here — you can paste or type instead.",
+      "permissionDenied": "Microphone permission denied. Enable it in your browser settings.",
+      "liveRegionLabel": "Live transcript",
+      "use": "Use",
+      "useAriaLabel": "Use transcript",
+      "controlsGroupLabel": "Recording controls"
     },
     "reading": "Reading what you told me...",
     "reflection": {
@@ -201,13 +240,14 @@
     "apiErrors": {
       "unauthorized": "Unauthorized",
       "textTooShort": "Tell me a bit more, I couldn't catch that yet.",
+      "textTooLong": "This text is too long for one capture. Try breaking it into parts?",
       "invalidKind": "Invalid capture type",
       "comingSoon": "Audio/image capture is coming soon.",
       "invalidFile": "Invalid file",
       "fileTooLarge": "File too large (max 10 MB)",
       "missingFile": "No file sent",
       "generic": "I couldn't process your capture right now, try again?",
-      "noContent": "Hmm, I couldn't identify a professional achievement there. Tell me more — what did you do, decide, or learn?"
+      "noContent": "I couldn't find a clear win here — want to tell me in your own words?"
     },
     "sheet": {
       "closeAriaLabel": "Close"

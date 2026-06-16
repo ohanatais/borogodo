@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { PanelMirror } from '@/lib/panel/getPanelData'
 import { TIER_STYLE } from '@/components/features/espelho/tierStyles'
@@ -23,7 +23,7 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
 
   return (
     <section
-      aria-label={t('ariaLabel', { name: firstName })}
+      aria-label={firstName ? t('ariaLabel', { name: firstName }) : t('subtitleSelf')}
       className="rounded-xl p-6 lg:p-8 mb-6"
       style={{ background: 'var(--color-primary)' }}
     >
@@ -41,7 +41,7 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
             style={{ background: 'var(--background)', color: 'var(--color-primary)' }}
             aria-hidden="true"
           >
-            {firstName[0]?.toUpperCase() ?? '?'}
+            {firstName ? firstName[0].toUpperCase() : <User size={22} />}
           </div>
         )}
         <div className="min-w-0">
@@ -50,14 +50,18 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
               className="font-display text-2xl lg:text-[1.75rem] font-semibold leading-tight tracking-tight"
               style={{ color: 'var(--color-primary-fg)' }}
             >
-              {t('subtitle')} <em className="font-normal italic">{firstName}</em>
+              {firstName
+                ? <>{t('subtitle')} <em className="font-normal italic">{firstName}</em></>
+                : t('subtitleSelf')}
             </h2>
           ) : (
             <h2
               className="font-display text-2xl lg:text-[1.75rem] font-semibold leading-tight tracking-tight"
               style={{ color: 'var(--color-primary-fg)' }}
             >
-              {t('formingOf')} <em className="font-normal italic">{firstName}</em>{t('formingSuffix')}
+              {firstName
+                ? <>{t('formingOf')} <em className="font-normal italic">{firstName}</em>{t('formingSuffix')}</>
+                : t('formingSelf')}
             </h2>
           )}
         </div>

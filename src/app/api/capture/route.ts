@@ -8,11 +8,12 @@ import { captureAndReflect } from '@/lib/ai/extraction/captureAndReflect'
 import { extractFromDocument } from '@/lib/ai/extraction/extractFromLinkedIn'
 import { extractTextFromPDF } from '@/lib/pdf/extractText'
 import { saveEntries } from '@/lib/db/entries'
-import { fireAndForget, maybeRegenerateMirror, triggerProactiveInsight } from '@/lib/ai/extraction/jobs'
+import { fireAndForget, maybeRegenerateMirror, triggerProactiveInsight, triggerEnrichmentNudge } from '@/lib/ai/extraction/jobs'
 import { errorMessage, NoExtractableContentError } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
 const MIN_TEXT_LENGTH = 3
+const MAX_TEXT_LENGTH = 20_000
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
@@ -38,6 +39,10 @@ function readTextInput(formData: FormData, t: ApiErrors): { rawText: string } | 
 
   if (typeof content !== 'string' || content.trim().length < MIN_TEXT_LENGTH) {
     return { error: jsonError(t('textTooShort'), 400) }
+  }
+
+  if (content.trim().length > MAX_TEXT_LENGTH) {
+    return { error: jsonError(t('textTooLong'), 400) }
   }
 
   return { rawText: content.trim() }
@@ -202,4 +207,5 @@ async function handleFileCapture(
 function dispatchAsyncJobs(userId: string): void {
   fireAndForget('triggerProactiveInsight', triggerProactiveInsight(userId))
   fireAndForget('maybeRegenerateMirror', maybeRegenerateMirror(userId))
+  fireAndForget('triggerEnrichmentNudge', triggerEnrichmentNudge(userId))
 }

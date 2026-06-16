@@ -4,14 +4,18 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
 import { FileButton } from '@/components/features/capture/FileButton'
+import { AudioButton } from '@/components/features/capture/AudioButton'
 import { CaptureConversation } from '@/components/features/capture/CaptureConversation'
 import { ChatSheet, openChatSheet } from '@/components/features/chat/ChatSheet'
 import { GenerateSheet } from '@/components/features/content/GenerateSheet'
 import type { CaptureInput as CapturePayload } from '@/types/capture'
 import { Logo } from '@/components/ui/Logo'
 import { LogoutButton } from '@/components/features/auth/LogoutButton'
+
+const ARTIFACT_THRESHOLD_CHARS = 150
 
 interface NavItem {
   id: string
@@ -30,12 +34,12 @@ const NAV_ITEMS: NavItem[] = [
 
 interface AppShellClientProps {
   userName: string
-  captureHint: string
   children: React.ReactNode
 }
 
-export function AppShellClient({ userName, captureHint, children }: AppShellClientProps) {
+export function AppShellClient({ userName, children }: AppShellClientProps) {
   const pathname = usePathname()
+  const t = useTranslations('capture')
   const [activeCapture, setActiveCapture] = useState<CapturePayload | null>(null)
   const [projectContext, setProjectContext] = useState<{ name: string; company: string } | null>(null)
 
@@ -161,7 +165,7 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
           }}
         >
           <div className="max-w-[980px] mx-auto px-6 pt-4 pb-5">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 relative">
               {/* Toggle */}
               <div
                 className="flex items-center p-0.5 rounded-full shrink-0"
@@ -182,12 +186,26 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
                   Perguntar
                 </button>
               </div>
-              <CaptureInput
-                placeholder={captureHint}
-                mode="registrar"
-                projectContext={projectContext}
-                onClearProjectContext={() => setProjectContext(null)}
-                onCapture={(content) => openChatSheet({ prefillMessage: content, mode: 'registro' })}
+              <div className="flex-1 relative flex flex-col gap-1">
+                <CaptureInput
+                  placeholder={t('composer.artifactPlaceholder')}
+                  mode="registrar"
+                  projectContext={projectContext}
+                  onClearProjectContext={() => setProjectContext(null)}
+                  onCapture={(content) => {
+                    if (content.length >= ARTIFACT_THRESHOLD_CHARS) {
+                      setActiveCapture({ kind: 'text', content })
+                    } else {
+                      openChatSheet({ prefillMessage: content, mode: 'registro' })
+                    }
+                  }}
+                />
+                <p className="text-[11px] px-1" style={{ color: 'var(--muted-foreground)', opacity: 0.7 }}>
+                  {t('composer.privacyNotice')}
+                </p>
+              </div>
+              <AudioButton
+                onTranscript={(text) => setActiveCapture({ kind: 'text', content: text })}
               />
               <FileButton
                 accept=".pdf"
@@ -229,15 +247,27 @@ export function AppShellClient({ userName, captureHint, children }: AppShellClie
                 Perguntar
               </button>
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 flex flex-col gap-0.5">
               <CaptureInput
-                placeholder={captureHint}
+                placeholder={t('composer.artifactPlaceholder')}
                 mode="registrar"
                 projectContext={projectContext}
                 onClearProjectContext={() => setProjectContext(null)}
-                onCapture={(content) => openChatSheet({ prefillMessage: content, mode: 'registro' })}
+                onCapture={(content) => {
+                  if (content.length >= ARTIFACT_THRESHOLD_CHARS) {
+                    setActiveCapture({ kind: 'text', content })
+                  } else {
+                    openChatSheet({ prefillMessage: content, mode: 'registro' })
+                  }
+                }}
               />
+              <p className="text-[10px] px-1 hidden" style={{ color: 'var(--muted-foreground)' }}>
+                {t('composer.privacyNotice')}
+              </p>
             </div>
+            <AudioButton
+              onTranscript={(text) => setActiveCapture({ kind: 'text', content: text })}
+            />
             <FileButton
               accept=".pdf"
               icon={Paperclip}

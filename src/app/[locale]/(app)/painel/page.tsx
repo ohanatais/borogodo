@@ -16,7 +16,7 @@ export default async function PainelPage() {
   if (!user) redirect('/login')
 
   const data = await getPanelData(supabase, user.id)
-  const name = data.name || user.email || ''
+  const name = data.name || ''
 
   return (
     <div className="px-5 lg:px-9 py-4 max-w-[980px] mx-auto w-full">

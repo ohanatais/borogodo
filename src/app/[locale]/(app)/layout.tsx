@@ -1,7 +1,5 @@
 import { redirect } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
-import { getCapturePrompt } from '@/lib/panel/getCapturePrompt'
 import { AppShell } from '@/components/layout/AppShell'
 
 export default async function AppLayout({
@@ -16,33 +14,19 @@ export default async function AppLayout({
 
   if (!user) redirect('/login')
 
-  const [profileRes, recentRes, t] = await Promise.all([
-    supabase.from('profiles').select('name, onboarding_completed').eq('id', user.id).maybeSingle(),
-    supabase
-      .from('entries')
-      .select('created_at')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    getTranslations('capture.composer.prompt'),
-  ])
+  const profileRes = await supabase
+    .from('profiles')
+    .select('name, onboarding_completed')
+    .eq('id', user.id)
+    .maybeSingle()
 
   const profileData = profileRes.data as { name?: string | null; onboarding_completed?: boolean } | null
   if (!profileData?.onboarding_completed) redirect('/bem-vindo')
 
   const name = profileData?.name ?? ''
-  const lastEntryDate = (recentRes.data as { created_at?: string } | null)?.created_at
-  const now = new Date()
-  const daysSince = lastEntryDate
-    ? Math.floor((now.getTime() - new Date(lastEntryDate).getTime()) / 86_400_000)
-    : null
-
-  const prompt = getCapturePrompt(daysSince, [])
-  const captureHint = t(prompt.key, prompt.values)
 
   return (
-    <AppShell userName={name} captureHint={captureHint}>
+    <AppShell userName={name}>
       {children}
     </AppShell>
   )

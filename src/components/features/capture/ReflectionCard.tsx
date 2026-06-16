@@ -28,26 +28,31 @@ export function ReflectionCard({ reflection, onEnrich, onDismiss }: ReflectionCa
   }
 
   return (
-    <div className="w-full max-w-sm space-y-4">
+    <div className="w-full space-y-4">
       <p className="text-base leading-relaxed" style={{ color: 'var(--foreground)' }}>
         {reflection.summary}
       </p>
 
       {reflection.pills.length > 0 && (
-        <ul className="flex flex-wrap gap-2">
-          {reflection.pills.map((pill) => (
-            <li
-              key={pill}
-              className="text-xs font-medium px-3 py-1 rounded-full capitalize"
-              style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
-            >
-              {pill.replace(/_/g, ' ')}
-            </li>
-          ))}
-        </ul>
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--muted-foreground)' }}>
+            {t('reflection.pillsLabel')}
+          </p>
+          <ul className="flex flex-wrap gap-2">
+            {reflection.pills.map((pill) => (
+              <li
+                key={pill}
+                className="text-xs font-medium px-3 py-1 rounded-full capitalize"
+                style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+              >
+                {pill.replace(/_/g, ' ')}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
-      <p className="text-sm" style={{ color: 'var(--foreground)' }}>
+      <p className="text-base leading-relaxed" style={{ color: 'var(--foreground)' }}>
         {reflection.move.text}
       </p>
 

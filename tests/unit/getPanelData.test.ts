@@ -20,6 +20,7 @@ function chain(fixture: TableFixture) {
   const result = {
     select: () => result,
     eq: () => result,
+    update: () => result,
     not: () => result,
     order: () => result,
     limit: () => result,

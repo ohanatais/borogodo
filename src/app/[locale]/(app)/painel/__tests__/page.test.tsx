@@ -46,6 +46,7 @@ const BASE_DATA: PanelData = {
   mirror: { headline: 'Você media conflitos com leveza.', strengthThemes: ['mediação'], skillSummary: null },
   insight: null,
   composerPlaceholder: 'O que aconteceu no trabalho ontem?',
+  returnSignal: { type: 'welcome', strengthAha: false, entry: null },
 }
 
 describe('PainelPage', () => {

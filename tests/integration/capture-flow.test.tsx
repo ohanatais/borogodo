@@ -126,11 +126,11 @@ describe('Capture flow — composer to reflection', () => {
     expect(mockFetch).toHaveBeenCalledTimes(2)
   })
 
-  it('T013: renders audio and image buttons disabled with a "coming soon" tooltip', () => {
+  it('T013: renders audio button disabled with unsupported state when Speech API is unavailable', () => {
+    // jsdom does not implement SpeechRecognition — AudioButton renders as disabled with unsupported label
     render(<CaptureComposer placeholder="Conta uma coisa que você fez no trabalho." />)
 
-    const audioButton = screen.getByRole('button', { name: 'composer.audioAriaLabel' })
+    const audioButton = screen.getByRole('button', { name: 'recording.unsupported' })
     expect(audioButton).toBeDisabled()
-    expect(audioButton).toHaveAttribute('title', 'composer.audioComingSoon')
   })
 })

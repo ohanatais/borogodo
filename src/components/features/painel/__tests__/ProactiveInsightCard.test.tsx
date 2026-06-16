@@ -6,6 +6,10 @@ import { ProactiveInsightCard } from '../ProactiveInsightCard'
 const mockMarkSeen = vi.hoisted(() => vi.fn())
 vi.mock('@/lib/actions/insights', () => ({ markInsightSeen: mockMarkSeen }))
 
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({ refresh: vi.fn(), push: vi.fn() })),
+}))
+
 const mockObserve = vi.fn()
 const mockDisconnect = vi.fn()
 

@@ -179,6 +179,8 @@
     },
     "borogodoCard": {
       "subtitle": "O borogodó de",
+      "subtitleSelf": "O seu borogodó",
+      "formingSelf": "Seu espelho tá se formando.",
       "ariaLabel": "Perfil de {name}",
       "viewMirror": "Ver espelho completo →",
       "viewMirrorGrowth": "{count, plural, one {Ver o skill que pode crescer →} other {Ver os # skills que podem crescer →}}",
@@ -200,6 +202,21 @@
     "timeline": {
       "title": "Linha do tempo",
       "viewAll": "Ver linha do tempo completa"
+    },
+    "return": {
+      "hasNew": "Essa semana você fechou: {evidence}",
+      "strengthAha": "Isso reforça sua força em {theme}.",
+      "oldVictory": "Há {time} você entregou: {evidence}",
+      "invite": "Quer registrar algo novo?",
+      "inviteAriaLabel": "Registrar algo novo",
+      "welcome": "Vamos registrar a primeira conquista?",
+      "welcomeAriaLabel": "Registrar primeira conquista"
+    },
+    "enrichment": {
+      "question": "Teve algum número ou prazo nisso?",
+      "answerPlaceholder": "Sua resposta…",
+      "respond": "Responder",
+      "dismiss": "Depois"
     }
   },
   "espelho": {
@@ -283,11 +300,13 @@
   "capture": {
     "composer": {
       "submitAriaLabel": "Enviar",
-      "audioAriaLabel": "Gravar áudio (em breve)",
+      "audioAriaLabel": "Gravar por voz",
       "audioComingSoon": "em breve",
       "fileAriaLabel": "Anexar arquivo",
       "imageAriaLabel": "Anexar imagem (em breve)",
       "imageComingSoon": "em breve",
+      "artifactPlaceholder": "Cole uma transcrição, um e-mail, uma conversa…",
+      "privacyNotice": "Cole só o que você pode guardar.",
       "prompt": {
         "first": "Conta uma coisa que você fez no trabalho.",
         "today": "Boa. Tem mais alguma coisa do dia?",
@@ -297,9 +316,38 @@
         "longGap": "Uma semana é muito tempo. Conta o que você fez."
       }
     },
+    "batch": {
+      "summary": "Criei {n, plural, one {# entrada} other {# entradas}}",
+      "undo": "Desfazer",
+      "undoAriaLabel": "Desfazer criação de {n, plural, one {# entrada} other {# entradas}}",
+      "undone": "Entradas removidas.",
+      "viewHistory": "Ver no histórico →"
+    },
+    "recording": {
+      "start": "Gravar",
+      "startAriaLabel": "Iniciar gravação de voz",
+      "listening": "Ouvindo…",
+      "stop": "Parar",
+      "stopAriaLabel": "Parar gravação",
+      "cancel": "Cancelar",
+      "cancelAriaLabel": "Cancelar gravação e descartar",
+      "rerecord": "Regravar",
+      "rerecordAriaLabel": "Descartar e regravar",
+      "unsupported": "Seu navegador não transcreve bem por aqui — pode colar ou escrever.",
+      "permissionDenied": "Permissão de microfone negada. Habilite nas configurações do navegador.",
+      "liveRegionLabel": "Transcrição ao vivo",
+      "use": "Usar",
+      "useAriaLabel": "Usar transcrição",
+      "controlsGroupLabel": "Controles de gravação",
+      "noSpeech": "Nenhuma fala capturada. Tente gravar novamente.",
+      "errorAudioCapture": "Microfone não encontrado. Verifique se está conectado e se o navegador tem permissão.",
+      "errorNetwork": "O Chrome precisa acessar os servidores do Google para transcrever. Tente no Safari, ou cole o texto manualmente.",
+      "errorGeneric": "Não foi possível gravar. Tente novamente."
+    },
     "reading": "Lendo o que você me contou...",
     "reflection": {
       "opening": "Entendi:",
+      "pillsLabel": "Temas identificados",
       "respond": "Responder",
       "saveAsIs": "Salvar assim",
       "answerPlaceholder": "Sua resposta..."
@@ -312,13 +360,14 @@
     "apiErrors": {
       "unauthorized": "Não autorizado",
       "textTooShort": "Conta um pouco mais, ainda não consegui captar.",
+      "textTooLong": "Esse texto é grande demais pra uma captura. Quebra em partes?",
       "invalidKind": "Tipo de captura inválido",
       "comingSoon": "Captura por áudio/imagem chega em breve.",
       "invalidFile": "Arquivo inválido",
       "fileTooLarge": "Arquivo muito grande (máx 10 MB)",
       "missingFile": "Nenhum arquivo enviado",
       "generic": "Não consegui processar sua captura agora, tenta de novo?",
-      "noContent": "Hmm, não consegui identificar uma conquista profissional aí. Conta com mais detalhes — o que você fez, decidiu ou aprendeu?"
+      "noContent": "Não encontrei uma vitória clara aqui — quer contar com suas palavras?"
     },
     "sheet": {
       "closeAriaLabel": "Fechar"

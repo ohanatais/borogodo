@@ -6,6 +6,8 @@ export type ProactiveInsightType =
   // 014: nudge "isso daria um post" disparado por captura forte. `type` é texto livre no banco
   // (sem CHECK), então não há migration — só este valor novo no union de aplicação.
   | 'content_opportunity'
+  // 016: pergunta cirúrgica assíncrona para enriquecer entrada magra (sem metric/impact).
+  | 'enrichment_nudge'
 
 export interface ProactiveInsight {
   id: string
