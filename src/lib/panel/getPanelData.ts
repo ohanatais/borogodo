@@ -5,6 +5,7 @@ import type { ProactiveInsight } from '@/types/insight'
 import type { MacroCategory } from '@/types/mirror'
 import { getMirrorStatus, type MirrorStatus } from './getMirrorStatus'
 import { getCapturePrompt } from './getCapturePrompt'
+import { getReturnSignal, type ReturnSignal, type ReturnSignalEntry } from './getReturnSignal'
 
 const MS_PER_DAY = 86_400_000
 const MS_PER_MONTH = MS_PER_DAY * 30
@@ -67,7 +68,10 @@ export interface PanelData {
   mirror: PanelMirror | null
   insight: ProactiveInsight | null
   composerPlaceholder: string
+  returnSignal: ReturnSignal
 }
+
+export type { ReturnSignal }
 
 function calculateMonthsSpan(oldestDate: string | null, newestDate: string | null): number | null {
   if (!oldestDate || !newestDate) return null
@@ -94,8 +98,9 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     insightRes,
     timelineRes,
     highlightsRes,
+    returnEntriesRes,
   ] = await Promise.all([
-    supabase.from('profiles').select('name, avatar_url').eq('id', userId).single(),
+    supabase.from('profiles').select('name, avatar_url, last_panel_seen_at').eq('id', userId).single(),
     supabase.from('entries').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase
       .from('entries')
@@ -148,11 +153,19 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .not('impact', 'is', null)
       .order('entry_date', { ascending: false })
       .limit(3),
+    supabase
+      .from('entries')
+      .select('id, what_i_did, entry_date, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(50),
   ])
 
   const recentEntries = (recentRes.data ?? []) as RecentEntryRow[]
   const entryCount = countRes.count ?? 0
   const mirrorRow = mirrorRes.data as MirrorRow | null
+  const profileData = profileRes.data as { name?: string | null; avatar_url?: string | null; last_panel_seen_at?: string | null } | null
+  const lastPanelSeenAt = profileData?.last_panel_seen_at ?? null
   const lastEntry = recentEntries[0]
   const daysSince = calculateDaysSince(lastEntry?.created_at)
   const oldestEntryDate = (oldestRes.data as { entry_date: string } | null)?.entry_date ?? null
@@ -179,6 +192,20 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       }
     : null
 
+  const returnSignalEntries = (returnEntriesRes.data ?? []) as ReturnSignalEntry[]
+  const returnSignal = getReturnSignal({
+    entries: returnSignalEntries,
+    lastPanelSeenAt,
+    latestMirrorGeneratedAt: mirrorRow?.generated_at ?? null,
+    lastMirrorSeenAt: lastPanelSeenAt,
+  })
+
+  // Fire-and-forget: update last_panel_seen_at for next visit delta computation.
+  void supabase
+    .from('profiles')
+    .update({ last_panel_seen_at: new Date().toISOString() })
+    .eq('id', userId)
+
   const t = await getTranslations('capture.composer.prompt')
   const prompt = getCapturePrompt(daysSince, mirror?.strengthThemes)
 
@@ -191,8 +218,8 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
   })
 
   return {
-    name: profileRes.data?.name ?? '',
-    avatarUrl: (profileRes.data as { avatar_url?: string | null } | null)?.avatar_url ?? null,
+    name: profileData?.name ?? '',
+    avatarUrl: profileData?.avatar_url ?? null,
     status: getMirrorStatus(entryCount),
     entryCount,
     monthsSpan: calculateMonthsSpan(oldestEntryDate, newestEntryDate),
@@ -203,5 +230,6 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     mirror,
     insight: (insightRes.data as ProactiveInsight | null) ?? null,
     composerPlaceholder: t(prompt.key, prompt.values),
+    returnSignal,
   }
 }

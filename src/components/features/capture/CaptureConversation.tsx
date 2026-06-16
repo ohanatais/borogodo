@@ -7,13 +7,14 @@ import { useTranslations } from 'next-intl'
 import type { CaptureInput, Reflection } from '@/types/capture'
 import { ReadingState } from './ReadingState'
 import { ReflectionCard } from './ReflectionCard'
+import { BatchSummary } from './BatchSummary'
 
 interface CaptureConversationProps {
   input: CaptureInput
   onResolved: () => void
 }
 
-type Phase = 'reading' | 'reflecting' | 'error'
+type Phase = 'reading' | 'reflecting' | 'batch' | 'error'
 
 function buildFormData(input: CaptureInput): FormData {
   const formData = new FormData()
@@ -36,6 +37,7 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
   const [phase, setPhase] = useState<Phase>('reading')
   const [reflection, setReflection] = useState<Reflection | null>(null)
   const [entryId, setEntryId] = useState<string | null>(null)
+  const [batchIds, setBatchIds] = useState<string[]>([])
   const [serverError, setServerError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -69,13 +71,20 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
         }
         const data = (await res.json()) as { entries: Array<{ id: string }>; reflection: Reflection | null }
         if (cancelled) return
+        const savedIds = data.entries.map((e) => e.id)
         if (!data.reflection) {
           router.refresh()
-          onResolved()
+          if (savedIds.length > 1) {
+            setBatchIds(savedIds)
+            setPhase('batch')
+          } else {
+            onResolved()
+          }
           return
         }
         setReflection(data.reflection)
         setEntryId(data.entries[0]?.id ?? null)
+        setBatchIds(savedIds)
         setPhase('reflecting')
         router.refresh()
       } catch {
@@ -111,6 +120,7 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
   const handleRetry = () => {
     setReflection(null)
     setEntryId(null)
+    setBatchIds([])
     setServerError(null)
     setRetryCount((n) => n + 1)
   }
@@ -161,8 +171,16 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
         {/* AI response */}
         <div className="flex justify-start">
           {phase === 'reading' && <ReadingState />}
+          {phase === 'batch' && (
+            <BatchSummary ids={batchIds} onUndone={handleDismiss} />
+          )}
           {phase === 'reflecting' && reflection && (
-            <ReflectionCard reflection={reflection} onEnrich={handleEnrich} onDismiss={handleDismiss} />
+            <div className="space-y-4">
+              {batchIds.length > 1 && (
+                <BatchSummary ids={batchIds} onUndone={handleDismiss} />
+              )}
+              <ReflectionCard reflection={reflection} onEnrich={handleEnrich} onDismiss={handleDismiss} />
+            </div>
           )}
           {phase === 'error' && (
             <div className="space-y-4 max-w-sm">
