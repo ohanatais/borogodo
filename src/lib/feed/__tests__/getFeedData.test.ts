@@ -42,6 +42,35 @@ function makeSupabase(rows: unknown[], { error = null }: { error?: unknown } = {
 
 const DEFAULT_QUERY: FeedQuery = { axis: 'created_at' }
 
+describe('getFeedData — eixo entry_date (US2)', () => {
+  it('eixo entry_date ordena por entry_date DESC NULLS LAST', async () => {
+    const entries = [
+      makeMockEntry({ id: 'e1', entry_date: '2025-03-01', created_at: '2025-03-02T00:00:00Z' }),
+      makeMockEntry({ id: 'e2', entry_date: null, created_at: '2025-03-01T00:00:00Z' }),
+    ]
+    const supabase = makeSupabase(entries)
+
+    const result = await getFeedData(supabase as never, 'user-1', { axis: 'entry_date' })
+
+    expect(result.items).toHaveLength(2)
+    expect(result.items.map((i) => i.id).sort()).toEqual(['e1', 'e2'])
+  })
+
+  it('entradas sem entry_date nunca somem (aparecem ao final com eixo entry_date)', async () => {
+    const entries = [
+      makeMockEntry({ id: 'e1', entry_date: '2025-03-01', created_at: '2025-01-01T00:00:00Z' }),
+      makeMockEntry({ id: 'e2', entry_date: null, created_at: '2025-03-01T00:00:00Z' }),
+    ]
+    const supabase = makeSupabase(entries)
+
+    const result = await getFeedData(supabase as never, 'user-1', { axis: 'entry_date' })
+
+    const ids = result.items.map((i) => i.id)
+    expect(ids).toContain('e1')
+    expect(ids).toContain('e2')
+  })
+})
+
 describe('getFeedData', () => {
   it('retorna FeedPage com items para o userId correto', async () => {
     const entry = makeMockEntry()

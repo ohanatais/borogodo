@@ -2,9 +2,11 @@
 
 import { useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
-import type { FeedPage as FeedPageType, FeedItem, FeedQuery } from '@/lib/feed/types'
+import { useSearchParams } from 'next/navigation'
+import type { FeedPage as FeedPageType, FeedItem, FeedQuery, FeedAxis } from '@/lib/feed/types'
 import { EntryCard } from './EntryCard'
 import { EmptyFeed } from './EmptyFeed'
+import { FeedFilters } from './FeedFilters'
 
 interface FeedPageProps {
   initialPage: FeedPageType
@@ -13,6 +15,9 @@ interface FeedPageProps {
 
 export function FeedPage({ initialPage, initialQuery }: FeedPageProps) {
   const t = useTranslations('feed')
+  const searchParams = useSearchParams()
+  const currentAxis = (searchParams.get('axis') as FeedAxis) ?? initialQuery.axis
+
   const [items, setItems] = useState<FeedItem[]>(initialPage.items)
   const [nextCursor, setNextCursor] = useState<string | null>(initialPage.nextCursor)
   const [isLoading, setIsLoading] = useState(false)
@@ -55,6 +60,7 @@ export function FeedPage({ initialPage, initialQuery }: FeedPageProps) {
 
   return (
     <div className="flex flex-col gap-4">
+      <FeedFilters currentAxis={currentAxis} />
       <ul className="flex flex-col gap-2">
         {items.map((item) => (
           <EntryCard
