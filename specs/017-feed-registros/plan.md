@@ -65,9 +65,10 @@ specs/017-feed-registros/
 ├── research.md          ← Phase 0 ✅
 ├── data-model.md        ← Phase 1 ✅
 ├── quickstart.md        ← Phase 1 ✅
+├── shape.md             ← /impeccable shape ✅
 ├── contracts/
 │   └── api-feed.md      ← Phase 1 ✅
-└── tasks.md             ← /speckit-tasks (próximo)
+└── tasks.md             ← /speckit-tasks ✅
 ```
 
 ### Source Code

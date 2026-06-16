@@ -165,10 +165,22 @@ Substitui `EntryItem` (painel) e serve o feed. `EntryItem` passa a ser
 ```typescript
 interface ActivityGridProps {
   cells: ActivityCell[]
-  onCellClick: (date: string) => void  // seta filtro na URL
-  granularity: 'day' | 'week'          // decidido no /impeccable shape
+  onCellClick: (date: string) => void
 }
 ```
+
+**Decisões cravadas no `/impeccable shape`** (ver [shape.md](shape.md) §8):
+- Símbolo: ✦ (U+2726 — Black Four Pointed Star). Semântico com "faísca"; evita copiar GitHub.
+- Granularidade: **dia** (célula = 1 dia, linha = 1 semana, 7 colunas Seg–Dom).
+- Intensidade por tamanho + cor simultâneos:
+  - `0` → 8px, roxo-jambo muito claro, opacidade 0.3
+  - `1` → 9px, roxo-jambo claro, opacidade 0.85
+  - `2–3` → 11px, roxo-jambo médio, opacidade 1.0
+  - `4+` → 13px, roxo-jambo pleno, opacidade 1.0
+- Layout **desktop** (≥768px): faixa vertical sticky à direita, 52 semanas, mais recente no topo, label de mês à esquerda.
+- Layout **mobile** (<768px): faixa horizontal compacta, 13 semanas, scroll suave sem scrollbar.
+- **Threshold**: `GRID_MIN_DISTINCT_DAYS = 5` dias distintos nos últimos 90 dias. Abaixo do threshold a grade não aparece.
+- Hover: scale 1.4, CSS transition 150ms ease-out (sem Framer Motion).
 
 ### `<FeedFilters>` (novo, `src/components/features/feed/FeedFilters.tsx`)
 

@@ -13,7 +13,7 @@
 **Purpose**: Criar estrutura de pastas e garantir pré-requisitos antes de qualquer código de feature.
 
 - [ ] T001 Criar pastas `src/lib/feed/`, `src/lib/feed/__tests__/`, `src/components/features/feed/`, `src/app/api/feed/activity/`, `src/app/[locale]/(app)/registros/` (vazias, com `.gitkeep` se necessário)
-- [ ] T002 Rodar `/impeccable shape` para `/registros` — cravar granularidade da grade-faísca (dia vs semana), layout do card colapsável, posição do activity grid, estado de boas-vindas — **BLOQUEANTE para implementação de qualquer componente UI**
+- [x] T002 Rodar `/impeccable shape` para `/registros` — decisões cravadas em [shape.md](shape.md): célula=dia / linha=semana, símbolo ✦ com intensidade por tamanho+cor, faixa sticky vertical desktop / horizontal mobile, threshold 5 dias distintos/90d
 
 ---
 
@@ -137,7 +137,7 @@
 
 - [ ] T035 [US5] Criar `src/lib/feed/getActivityData.ts`: query `SELECT DATE(created_at), COUNT(*) FROM entries WHERE user_id = $1 AND created_at >= NOW() - INTERVAL GROUP BY DATE(created_at) ORDER BY date ASC`; retorna `ActivityCell[]` esparso (só dias com count > 0)
 - [ ] T036 [US5] Criar `src/app/api/feed/activity/route.ts`: auth, valida `window` (1–730, default 365), chama `getActivityData`, retorna `ActivityCell[]`
-- [ ] T037 [US5] Criar `src/components/features/feed/ActivityGrid.tsx` (Client Component): recebe `ActivityCell[]`, granularidade (`'day'|'week'` — **cravada no T002 `/impeccable shape`**), renderiza grid com tokens de cor do sistema (`--color-accent`, `--color-primary`, `--background`), clique em célula chama `onCellClick(date)` que atualiza filtros na URL; células claras nunca vermelhas
+- [ ] T037 [US5] Criar `src/components/features/feed/ActivityGrid.tsx` (Client Component): símbolo ✦ (U+2726) por célula com tamanho+cor variando pelo count do dia (0→8px opacidade 0.3, 1→9px 0.85, 2–3→11px, 4+→13px roxo-jambo pleno); layout desktop = faixa vertical sticky 7col×52linhas mais recente no topo com label de mês; layout mobile = faixa horizontal 13 semanas scroll suave sem scrollbar; threshold `GRID_MIN_DISTINCT_DAYS = 5` dias distintos em 90d controla visibilidade; hover = scale 1.4 CSS 150ms; clique → `onCellClick(date)` → atualiza URL; ver [shape.md](shape.md) §8
 - [ ] T038 [US5] Integrar `<ActivityGrid>` em `src/components/features/feed/FeedPage.tsx`: fetch de `/api/feed/activity` ao montar; threshold de massa crítica (≥5 registros em dias distintos nos últimos 90 dias, constante `GRID_MIN_DISTINCT_DAYS = 5`); ocultar grid quando abaixo do threshold
 
 **Checkpoint US5**: Testes T033–T034 passando. Validar cenário 7 do [quickstart.md](quickstart.md).
