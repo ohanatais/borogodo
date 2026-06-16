@@ -411,5 +411,42 @@
     "resumeTitle": "Resume draft",
     "useProject": "Use this project",
     "projectSeed": "project {name} ({count, plural, one {# entry} other {# entries}})"
+  },
+  "feed": {
+    "title": "Your records",
+    "empty": {
+      "heading": "No records yet",
+      "cta": "Make my first capture"
+    },
+    "axis": {
+      "created_at": "When I noted it",
+      "entry_date": "When it happened"
+    },
+    "filters": {
+      "search": "Search records…",
+      "period": "Period",
+      "company": "Company",
+      "tags": "Tags",
+      "metricOnly": "With metric",
+      "source": "Source",
+      "clear": "Clear filters"
+    },
+    "card": {
+      "expand": "View details",
+      "collapse": "Collapse",
+      "usar": "Use",
+      "delete": "Delete",
+      "deleteConfirm": {
+        "title": "Delete this record?",
+        "description": "This action is permanent. Drafts generated from it are not deleted.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      }
+    },
+    "pagination": {
+      "loadMore": "Load more"
+    },
+    "noDate": "No date",
+    "viewAll": "View all →"
   }
 }

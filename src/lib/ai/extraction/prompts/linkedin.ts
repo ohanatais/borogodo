@@ -10,8 +10,10 @@ profissional (currículo, LinkedIn export, relatório de desempenho, portfólio,
 
 Transforme o conteúdo em uma ou mais entradas estruturadas, uma por experiência/realização
 relevante. Campos disponíveis:
-   what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title,
-   role_start, role_end, project_name.
+   what_i_did, title, decision, learning, impact, metric, entry_date, tags, company,
+   role_title, role_start, role_end, project_name.
+   - title: string curta ≤80 chars que captura a essência da entrada — 1 frase nominal sem
+     ponto final. Ex: "Liderou Discovery para cliente HealthTech", "Expandiu squad de 3 para 12".
    - what_i_did: SEMPRE em português (PT-BR), mesmo que o documento esteja em inglês.
      Destile em 1–2 frases no máximo. Preserve a voz ativa e os fatos concretos da pessoa;
      não reescreva em corporês. Exemplos de distilação:
@@ -42,6 +44,7 @@ SAÍDA — apenas JSON dentro de bloco de código, sem texto adicional:
   "entries": [
     {
       "what_i_did": "...",
+      "title": "Frase nominal curta ≤80 chars",
       "decision": null,
       "learning": null,
       "impact": "...",

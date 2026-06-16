@@ -531,5 +531,42 @@
     "resumeTitle": "Retomar rascunho",
     "useProject": "Usar este projeto",
     "projectSeed": "projeto {name} ({count, plural, one {# entrada} other {# entradas}})"
+  },
+  "feed": {
+    "title": "Seus registros",
+    "empty": {
+      "heading": "Nenhum registro ainda",
+      "cta": "Fazer minha primeira captura"
+    },
+    "axis": {
+      "created_at": "Quando anotei",
+      "entry_date": "Quando aconteceu"
+    },
+    "filters": {
+      "search": "Buscar registros…",
+      "period": "Período",
+      "company": "Empresa",
+      "tags": "Tags",
+      "metricOnly": "Com métrica",
+      "source": "Origem",
+      "clear": "Limpar filtros"
+    },
+    "card": {
+      "expand": "Ver detalhes",
+      "collapse": "Recolher",
+      "usar": "Usar",
+      "delete": "Excluir",
+      "deleteConfirm": {
+        "title": "Excluir este registro?",
+        "description": "Esta ação é definitiva. Rascunhos gerados a partir dele não são apagados.",
+        "cancel": "Cancelar",
+        "confirm": "Excluir"
+      }
+    },
+    "pagination": {
+      "loadMore": "Carregar mais"
+    },
+    "noDate": "Sem data",
+    "viewAll": "Ver tudo →"
   }
 }
