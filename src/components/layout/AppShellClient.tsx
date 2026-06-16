@@ -165,7 +165,7 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
           }}
         >
           <div className="max-w-[980px] mx-auto px-6 pt-4 pb-5">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 relative">
               {/* Toggle */}
               <div
                 className="flex items-center p-0.5 rounded-full shrink-0"
@@ -204,11 +204,9 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
                   {t('composer.privacyNotice')}
                 </p>
               </div>
-              <div className="relative shrink-0">
-                <AudioButton
-                  onTranscript={(text) => setActiveCapture({ kind: 'text', content: text })}
-                />
-              </div>
+              <AudioButton
+                onTranscript={(text) => setActiveCapture({ kind: 'text', content: text })}
+              />
               <FileButton
                 accept=".pdf"
                 icon={Paperclip}
@@ -267,6 +265,9 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
                 {t('composer.privacyNotice')}
               </p>
             </div>
+            <AudioButton
+              onTranscript={(text) => setActiveCapture({ kind: 'text', content: text })}
+            />
             <FileButton
               accept=".pdf"
               icon={Paperclip}

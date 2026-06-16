@@ -160,54 +160,54 @@ function EnrichmentNudgeCard({
 
   return (
     <section
-      className="mb-6 flex flex-col gap-3 rounded-2xl border p-5"
+      className="mb-6 rounded-2xl border px-4 py-3"
       style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
     >
-      <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-        {question}
-      </p>
-      <div className="flex flex-col gap-2">
-        <label htmlFor="enrichment-answer" className="sr-only">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
           {question}
-        </label>
-        <textarea
+        </p>
+        <button
+          type="button"
+          onClick={() => void handleDismiss()}
+          aria-label={dismissLabel}
+          className="text-xs shrink-0 mt-0.5 opacity-50 hover:opacity-100 transition-opacity"
+          style={{ color: 'var(--muted-foreground)' }}
+        >
+          ✕
+        </button>
+      </div>
+      <div className="flex items-center gap-2">
+        <label htmlFor="enrichment-answer" className="sr-only">{question}</label>
+        <input
           id="enrichment-answer"
+          type="text"
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
           placeholder={answerPlaceholder}
-          rows={2}
-          className="w-full rounded-xl px-3 py-2 text-sm resize-none outline-none"
+          className="flex-1 rounded-lg px-3 py-2 text-sm outline-none min-h-[36px]"
           style={{
             background: 'var(--muted)',
             color: 'var(--foreground)',
             border: '1px solid var(--border)',
           }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter') {
               e.preventDefault()
               void handleRespond()
             }
           }}
         />
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => void handleRespond()}
-            disabled={!answer.trim() || sending}
-            className="px-4 py-2 rounded-full text-sm font-semibold min-h-[44px] disabled:opacity-40 transition-opacity"
-            style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-          >
-            {respondLabel}
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleDismiss()}
-            className="px-3 py-2 rounded-full text-sm min-h-[44px] transition-opacity hover:opacity-70"
-            style={{ color: 'var(--muted-foreground)' }}
-          >
-            {dismissLabel}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => void handleRespond()}
+          disabled={!answer.trim() || sending}
+          aria-label={respondLabel}
+          className="px-3 py-2 rounded-lg text-sm font-medium min-h-[36px] disabled:opacity-40 transition-opacity shrink-0"
+          style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+        >
+          {respondLabel}
+        </button>
       </div>
     </section>
   )
