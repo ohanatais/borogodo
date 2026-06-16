@@ -5,7 +5,6 @@ import { ProactiveInsightCard } from '@/components/features/painel/ProactiveInsi
 import { PanelEmptyState } from '@/components/features/painel/PanelEmptyState'
 import { MiniTimeline } from '@/components/features/painel/MiniTimeline'
 import { TrajectoryHighlights } from '@/components/features/painel/TrajectoryHighlights'
-import { ReturnHighlight } from '@/components/features/painel/ReturnHighlight'
 import { getPanelData } from '@/lib/panel/getPanelData'
 
 export default async function PainelPage() {
@@ -17,8 +16,7 @@ export default async function PainelPage() {
   if (!user) redirect('/login')
 
   const data = await getPanelData(supabase, user.id)
-  const name = data.name || user.email || ''
-  const strengthTheme = data.mirror?.strengthThemes[0] ?? null
+  const name = data.name || ''
 
   return (
     <div className="px-5 lg:px-9 py-4 max-w-[980px] mx-auto w-full">
@@ -28,10 +26,6 @@ export default async function PainelPage() {
         <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-8 lg:items-start">
           {/* Main column */}
           <div className="min-w-0">
-            <ReturnHighlight
-              signal={data.returnSignal}
-              strengthTheme={strengthTheme}
-            />
             <BorogodoCard
               name={name}
               avatarUrl={data.avatarUrl}

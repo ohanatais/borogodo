@@ -156,57 +156,59 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
         </button>
       </div>
 
-      {/* chat thread — anchored to the bottom */}
-      <div className="flex-1 flex flex-col justify-end overflow-y-auto px-4 pb-8 gap-6">
-        {/* user message */}
-        <div className="flex justify-end">
-          <div
-            className="max-w-xs rounded-2xl rounded-br-sm px-4 py-3 text-sm leading-relaxed"
-            style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-          >
-            {userBubbleText}
+      {/* chat thread — anchored to the bottom, centred on wide screens */}
+      <div className="flex-1 flex flex-col justify-end overflow-y-auto pb-8">
+        <div className="max-w-2xl mx-auto w-full px-4 flex flex-col gap-6">
+          {/* user message */}
+          <div className="flex justify-end">
+            <div
+              className="max-w-[75%] rounded-2xl rounded-br-sm px-4 py-3 text-sm leading-relaxed"
+              style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+            >
+              {userBubbleText}
+            </div>
           </div>
-        </div>
 
-        {/* AI response */}
-        <div className="flex justify-start">
-          {phase === 'reading' && <ReadingState />}
-          {phase === 'batch' && (
-            <BatchSummary ids={batchIds} onUndone={handleDismiss} />
-          )}
-          {phase === 'reflecting' && reflection && (
-            <div className="space-y-4">
-              {batchIds.length > 1 && (
-                <BatchSummary ids={batchIds} onUndone={handleDismiss} />
-              )}
-              <ReflectionCard reflection={reflection} onEnrich={handleEnrich} onDismiss={handleDismiss} />
-            </div>
-          )}
-          {phase === 'error' && (
-            <div className="space-y-4 max-w-sm">
-              <p className="text-sm" style={{ color: 'var(--foreground)' }}>
-                {serverError ?? t('error.message')}
-              </p>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleRetry}
-                  className="text-sm font-semibold px-4 py-2 rounded-full"
-                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-                >
-                  {t('error.retry')}
-                </button>
-                <button
-                  type="button"
-                  onClick={onResolved}
-                  className="text-sm font-medium px-4 py-2 rounded-full"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  {t('error.close')}
-                </button>
+          {/* AI response */}
+          <div className="flex justify-start">
+            {phase === 'reading' && <ReadingState />}
+            {phase === 'batch' && (
+              <BatchSummary ids={batchIds} onUndone={handleDismiss} />
+            )}
+            {phase === 'reflecting' && reflection && (
+              <div className="space-y-4 w-full">
+                {batchIds.length > 1 && (
+                  <BatchSummary ids={batchIds} onUndone={handleDismiss} />
+                )}
+                <ReflectionCard reflection={reflection} onEnrich={handleEnrich} onDismiss={handleDismiss} />
               </div>
-            </div>
-          )}
+            )}
+            {phase === 'error' && (
+              <div className="space-y-4">
+                <p className="text-sm" style={{ color: 'var(--foreground)' }}>
+                  {serverError ?? t('error.message')}
+                </p>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    className="text-sm font-semibold px-4 py-2 rounded-full"
+                    style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+                  >
+                    {t('error.retry')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onResolved}
+                    className="text-sm font-medium px-4 py-2 rounded-full"
+                    style={{ color: 'var(--muted-foreground)' }}
+                  >
+                    {t('error.close')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

@@ -29,6 +29,7 @@ export interface UseSpeechRecognitionReturn {
   supported: boolean
   state: SpeechState
   transcript: string
+  lastError: string | null
   start: () => void
   stop: () => void
   cancel: () => void
@@ -52,6 +53,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
   const [state, setState] = useState<SpeechState>('idle')
   const [transcript, setTranscript] = useState('')
+  const [lastError, setLastError] = useState<string | null>(null)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
 
   const cleanup = useCallback(() => {
@@ -79,7 +81,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
     rec.continuous = true
     rec.interimResults = true
-    rec.lang = navigator.language || 'pt-BR'
+    rec.lang = 'pt-BR'
 
     rec.addEventListener('result', (event: unknown) => {
       const e = event as SpeechResultEvent
@@ -92,10 +94,10 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
     rec.addEventListener('error', (event: unknown) => {
       const e = event as SpeechErrorEvent
+      setLastError(e.error)
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
         setState('permission-denied')
       } else {
-        // Any other error (network, audio-capture, etc.) — show retry UI
         setState('stopped')
       }
       recognitionRef.current = null
@@ -107,6 +109,8 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     })
 
     recognitionRef.current = rec
+    setLastError(null)
+    setState('listening')
     try {
       rec.start()
     } catch {
@@ -114,7 +118,6 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       recognitionRef.current = null
       return
     }
-    setState('listening')
   }, [Constructor, cleanup])
 
   const start = useCallback(() => {
@@ -139,5 +142,5 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     createAndStart()
   }, [createAndStart])
 
-  return { supported, state, transcript, start, stop, cancel, rerecord }
+  return { supported, state, transcript, lastError, start, stop, cancel, rerecord }
 }

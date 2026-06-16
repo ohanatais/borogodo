@@ -179,6 +179,8 @@
     },
     "borogodoCard": {
       "subtitle": "O borogodó de",
+      "subtitleSelf": "O seu borogodó",
+      "formingSelf": "Seu espelho tá se formando.",
       "ariaLabel": "Perfil de {name}",
       "viewMirror": "Ver espelho completo →",
       "viewMirrorGrowth": "{count, plural, one {Ver o skill que pode crescer →} other {Ver os # skills que podem crescer →}}",
@@ -322,6 +324,8 @@
       "viewHistory": "Ver no histórico →"
     },
     "recording": {
+      "start": "Gravar",
+      "startAriaLabel": "Iniciar gravação de voz",
       "listening": "Ouvindo…",
       "stop": "Parar",
       "stopAriaLabel": "Parar gravação",
@@ -334,11 +338,16 @@
       "liveRegionLabel": "Transcrição ao vivo",
       "use": "Usar",
       "useAriaLabel": "Usar transcrição",
-      "controlsGroupLabel": "Controles de gravação"
+      "controlsGroupLabel": "Controles de gravação",
+      "noSpeech": "Nenhuma fala capturada. Tente gravar novamente.",
+      "errorAudioCapture": "Microfone não encontrado. Verifique se está conectado e se o navegador tem permissão.",
+      "errorNetwork": "O Chrome precisa acessar os servidores do Google para transcrever. Tente no Safari, ou cole o texto manualmente.",
+      "errorGeneric": "Não foi possível gravar. Tente novamente."
     },
     "reading": "Lendo o que você me contou...",
     "reflection": {
       "opening": "Entendi:",
+      "pillsLabel": "Temas identificados",
       "respond": "Responder",
       "saveAsIs": "Salvar assim",
       "answerPlaceholder": "Sua resposta..."

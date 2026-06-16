@@ -76,8 +76,11 @@ describe('BorogodoCard', () => {
     expect(screen.queryByText('f')).not.toBeInTheDocument()
   })
 
-  it('renders fallback initial "?" when name is empty', () => {
+  it('renders user icon when name is empty', () => {
     render(<BorogodoCard name="" mirror={null} entryCount={0} />)
-    expect(screen.getByText('?')).toBeInTheDocument()
+    // No letter initial — the User icon is rendered (aria-hidden, no text)
+    expect(screen.queryByText('?')).not.toBeInTheDocument()
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading.textContent).toMatch(/formingSelf/)
   })
 })
