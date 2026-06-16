@@ -67,6 +67,10 @@ captura) e **prendendo o gatilho à rotina que já existe** (não cria ritual no
   ciclo iniciar/parar/cancelar/regravar (FR-012a).** Diferença honesta do v1: Web Speech entrega
   **texto ao vivo**, não clipe de áudio; "ouvir de novo" vira "ler o texto", regravar limpa a
   transcrição anterior. Áudio-clipe com replay exigiria servidor → fora do v1 (Out of Scope).
+- Q: Texto-ao-vivo (sem replay de áudio) está de bom tamanho pro v1? → A: **Sim.** Mantém Web Speech
+  grátis/sem servidor; replay de áudio fica como evolução (Out of Scope).
+- Q: Como disparar parar/cancelar na gravação? → A: **Botões explícitos** (parar/cancelar/regravar),
+  não segurar-e-arrastar — por acessibilidade e por funcionar no desktop (FR-012b).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -265,6 +269,9 @@ confirmar que, depois (não no mesmo toque), **ressurge uma única** pergunta ci
   **iniciar**, **parar**, **cancelar no meio** (descarta tudo, nada transcrito/salvo, volta ao estado
   inicial) e **regravar do zero** (descarta a transcrição anterior antes de iniciar a nova, sem
   acumular). No v1, com Web Speech, a revisão é **ler/editar o texto ao vivo**, não reouvir um clipe.
+- **FR-012b**: Os controles de gravação MUST ser **botões explícitos** (parar / cancelar / regravar),
+  rotulados e operáveis por teclado e leitor de tela — não um gesto de segurar-e-arrastar. Decisão por
+  acessibilidade e por funcionar igualmente no desktop (onde o gesto do WhatsApp não se aplica).
 - **FR-013**: Onde o suporte do navegador é fraco/ausente (ex.: Safari/iPhone), o sistema MUST
   sinalizar a limitação de forma honesta e MUST manter o caminho de texto plenamente funcional.
 
