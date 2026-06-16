@@ -37,6 +37,38 @@ src/
   types/            ← types globais
 ```
 
+## Fluxo de worktrees (features em paralelo)
+
+Cada feature roda em sua própria worktree — diretório irmão do repo principal — para que
+múltiplas features possam evoluir ao mesmo tempo sem interferir uma na outra.
+
+**Criar worktree para nova feature:**
+```bash
+./scripts/worktree-add.sh 020-nome-da-feature
+# Cria ../borogodo-020, branch 020-nome-da-feature a partir de main,
+# e já linka o .env.local automaticamente.
+```
+
+**Trabalhar em paralelo:**
+- Cada worktree é um diretório separado com seu próprio branch.
+- Abra abas de terminal independentes, uma por feature:
+  ```
+  # aba 1: cd ../borogodo-017 && claude
+  # aba 2: cd ../borogodo-018 && claude
+  # aba 3: cd ../borogodo-019 && claude
+  ```
+- Cada `claude` vê apenas o código daquela feature — contextos 100% isolados.
+- Alterações em uma não afetam as outras até o merge em `main`.
+
+**Regras:**
+- `.env.local` nunca vai pro git (está no `.gitignore`). O script `worktree-add.sh`
+  cria um symlink automático do `.env.local` do repo principal para a nova worktree.
+  Se criar worktree manualmente com `git worktree add`, rode depois:
+  `ln -sf /path/do/repo/principal/.env.local /path/da/worktree/.env.local`
+- **Sempre** usar `./scripts/worktree-add.sh` em vez de `git worktree add` direto.
+
+---
+
 ## Processo obrigatório por feature
 1. /speckit-specify → descrever o quê/por quê
 2. /speckit-clarify → fechar ambiguidades
