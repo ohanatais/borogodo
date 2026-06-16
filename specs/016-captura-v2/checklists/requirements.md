@@ -36,6 +36,10 @@
 - Tech names that appear (Web Speech API, claude-haiku-4-5) are pre-decided product constraints
   documented in the discovery (§3, §8), surfaced in Clarifications/Assumptions rather than as
   design choices being made here.
-- Three candidate areas remain for `/speckit-clarify` (deferred, not blocking): (1) review-before-save
-  UX for pasted extraction, (2) exact surface + delta threshold for the in-app resurfacing, (3) PII
-  handling for third-party data in pasted artifacts. Documented as Assumptions/Edge Cases for now.
+- Clarify (Session 2026-06-15) resolved the four high-impact decisions, re-grounded on the codebase
+  audit: (1) pasted extraction **auto-saves** (1-touch) + undo, not review-before-save; (2) delta =
+  **≥1 new entry** triggers "tem novidade", strength-aha only when the mirror regenerated; (3)
+  enrichment is **additive** — keep the synchronous question, add async resurfacing for still-magra
+  entries; (4) PII posture = **RLS + light privacy notice**, no auto-scrub in v1.
+- Remaining for `/speckit-plan`: confirm no migration is needed; exact resurfacing surface is a
+  `/impeccable shape` decision (likely top of Painel, evolving `getCapturePrompt`).

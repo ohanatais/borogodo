@@ -28,8 +28,9 @@ captura) e **prendendo o gatilho à rotina que já existe** (não cria ritual no
 >   dias-desde-a-última-entrada (`today`/`yesterday`/`longGap`/`themeNudge`). → US2 **substitui o
 >   relógio por delta** e adiciona o ressurgimento de vitória antiga.
 > - **Pergunta cirúrgica já existe, mas síncrona**: `ReflectionCard` + `PATCH /api/entries/[id]/enrich`
->   + `enrichEntryField` já perguntam e incorporam a resposta — **no momento da captura**. → US4 a torna
->   **assíncrona** (ressurge depois, para entradas magras).
+>   + `enrichEntryField` já perguntam e incorporam a resposta — **no momento da captura**. → US4 **mantém
+>   a síncrona e adiciona** um ressurgimento **assíncrono** (a pergunta volta depois, só se a entrada
+>   continuar magra) — aditivo, não substituição.
 > - **Áudio é só um stub**: `AudioButton` está `disabled` ("em breve") e `transcribe.ts` lança erro
 >   (costura de Whisper-servidor nunca ligada). → US3 implementa de fato, via **Web Speech client-side**
 >   (decisão do discovery), não pelo stub de servidor.
@@ -47,6 +48,22 @@ captura) e **prendendo o gatilho à rotina que já existe** (não cria ritual no
 - Q: Há migration nova? → A: **Provavelmente não.** Reusa `entries`, o pipeline de extração,
   `ReflectionCard` e `proactive_insights`. Confirmar o estado do schema no `/speckit-plan`.
 
+### Session 2026-06-15 (clarify)
+
+- Q: Ao colar um artefato que gera várias entradas, revisar antes de salvar ou auto-salvar? → A:
+  **Auto-salvar + desfazer.** Mantém a captura de 1 toque (auto-salva todas as entradas extraídas) e
+  mostra um resumo "criei N entradas" com **desfazer rápido**. Não há tela de revisão obrigatória.
+- Q: O que conta como "tem novidade" no ressurgimento (delta)? → A: **≥1 entrada nova desde o último
+  retorno** dispara o estado "tem novidade". O **aha de força** ("reforça sua força em Y") aparece
+  quando o **espelho também regenerou** (a cada ~5 entradas); com entrada nova mas sem regeneração do
+  espelho, mostra a novidade sem afirmar análise de força nova.
+- Q: A pergunta cirúrgica de enriquecimento vira assíncrona? → A: **Aditivo, não substituição.** Mantém
+  a pergunta **síncrona** no momento da captura (já funciona via `ReflectionCard`) **e** ressurge a
+  pergunta **depois** apenas se a entrada continuar magra. Dois momentos de completude, nenhum removido.
+- Q: Postura de privacidade para dado de terceiros no texto colado (v1)? → A: **RLS + aviso leve.**
+  Mantém o isolamento por RLS que já existe e adiciona um aviso discreto de privacidade no campo de
+  colar. **Sem** detecção/remoção automática de PII no v1.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Colar um artefato e virar entradas, sem escrever do zero (Priority: P1)
@@ -54,26 +71,29 @@ captura) e **prendendo o gatilho à rotina que já existe** (não cria ritual no
 A pessoa (Ana, Rafael — odeiam diário e odeiam áudio) acabou de sair de uma reunião, ou tem um
 e-mail/uma conversa de chat com uma vitória dentro. Em vez de redigir um relato, ela **cola o texto
 bruto** num campo de captura ("cole aqui uma transcrição de reunião, um e-mail, uma conversa") e o
-pipeline de extração que já existe **quebra o material em uma ou mais entradas** estruturadas. Ela
-revisa o que a IA extraiu antes de salvar — não é uma caixa-preta — e confirma. O atrito de "ter que
-formular a conquista" desaparece: ela só traz o que já produziu.
+pipeline de extração que já existe **quebra o material em uma ou mais entradas** estruturadas, que são
+**salvas na hora** (captura de 1 toque). Um resumo "criei N entradas" aparece com **desfazer rápido**,
+e ela pode editar ou excluir qualquer entrada depois no histórico — nunca uma tela de revisão
+obrigatória. O atrito de "ter que formular a conquista" desaparece: ela só traz o que já produziu.
 
 **Why this priority**: É o ataque direto ao gargalo (input) e o canal mais universal e barato (zero
 infra). Atende a maior fatia do público (quem não quer áudio nem escrever) e destrava dado fresco que
 faz todo o resto (espelho, voz, geração) parar de degradar. Sem este, a feature não entrega o núcleo.
 
 **Independent Test**: Com a conta QA, colar uma transcrição de reunião com 2–3 conquistas distintas →
-ver a IA propor 2–3 entradas estruturadas (o que fiz / impacto / empresa quando inferível) → revisar,
-ajustar e salvar → confirmar que as `entries` aparecem no histórico, ancoradas no texto colado.
+ver 2–3 entradas estruturadas (o que fiz / impacto / empresa quando inferível) **salvas na hora** com
+um resumo "criei N entradas" + desfazer → confirmar que as `entries` aparecem no histórico, ancoradas
+no texto colado, e que o desfazer remove o lote.
 
 **Acceptance Scenarios**:
 
 1. **Given** um usuário autenticado no ponto de captura, **When** cola um texto com múltiplas
-   conquistas e dispara a extração, **Then** o sistema propõe uma ou mais entradas estruturadas para
-   revisão, cada uma derivada do texto colado, sem inventar fato ausente.
-2. **Given** a proposta de entradas extraídas, **When** o usuário edita/remove um item e confirma,
-   **Then** apenas os itens confirmados são persistidos como `entries`, com o conteúdo bruto
-   preservado para rastreabilidade.
+   conquistas e dispara a extração, **Then** o sistema cria uma ou mais `entries` (salvas na hora),
+   cada uma derivada do texto colado, sem inventar fato ausente, com o conteúdo bruto preservado para
+   rastreabilidade, e aplica a dedup semântica existente.
+2. **Given** um lote de entradas recém-criado de um colar, **When** o resumo "criei N entradas" é
+   exibido, **Then** o usuário pode **desfazer** o lote inteiro num toque (remove as entradas criadas)
+   ou seguir e editar/excluir entradas individualmente no histórico.
 3. **Given** um texto colado que não contém nenhuma conquista identificável, **When** a extração roda,
    **Then** o sistema responde com um estado honesto ("não encontrei uma vitória clara aqui — quer
    contar com suas palavras?") em vez de fabricar uma entrada vazia.
@@ -85,10 +105,12 @@ ajustar e salvar → confirmar que as `entries` aparecem no histórico, ancorada
 Ao abrir o app, a **primeira coisa** que a pessoa vê é uma de duas, decidida por **delta de dados**,
 não por relógio:
 
-- **Tem novidade** (entrou dado novo desde a última vez) → "essa semana você fechou X" + um aha
-  ("isso reforça sua força em Y") ou um rascunho já pronto pra usar.
-- **Não tem novidade** → ressurge uma vitória antiga ("há 1 ano você entregou Z") + um convite leve a
-  registrar algo novo.
+- **Tem novidade** (≥1 entrada nova desde o último retorno) → "essa semana você fechou X". Quando o
+  espelho **também** regenerou (a cada ~5 entradas), acompanha um aha de força ("isso reforça sua
+  força em Y") ou um rascunho pronto; quando houve entrada nova mas o espelho não regenerou, mostra a
+  novidade sem afirmar análise de força nova.
+- **Não tem novidade** (nenhuma entrada nova) → ressurge uma vitória antiga ("há 1 ano você entregou
+  Z") + um convite leve a registrar algo novo.
 
 O gatilho se ancora em **rotina que já existe** (fim de semana, véspera de 1:1, ciclo de avaliação),
 nunca em "faz X dias que você não escreve" (culpa). E **nunca finge análise vazia**: sem delta real,
@@ -105,11 +127,11 @@ vitória antiga + convite a registrar, sem nenhuma afirmação analítica nova f
 
 **Acceptance Scenarios**:
 
-1. **Given** dado novo suficiente desde o último retorno (delta atingido), **When** a pessoa abre o
-   app, **Then** ela vê um destaque "tem novidade" ancorado em evidência real das entradas novas, sem
-   linguagem de cobrança.
-2. **Given** nenhum dado novo desde o último retorno, **When** a pessoa abre o app, **Then** ela vê o
-   ressurgimento de uma conquista anterior + um convite leve a capturar, e **nenhuma** análise nova é
+1. **Given** ≥1 entrada nova desde o último retorno, **When** a pessoa abre o app, **Then** ela vê um
+   destaque "tem novidade" ancorado nas entradas novas, sem linguagem de cobrança; o aha de força só
+   acompanha se o espelho regenerou.
+2. **Given** nenhuma entrada nova desde o último retorno, **When** a pessoa abre o app, **Then** ela vê
+   o ressurgimento de uma conquista anterior + um convite leve a capturar, e **nenhuma** análise nova é
    inventada.
 3. **Given** o ressurgimento exibido, **When** a pessoa toca no convite a registrar, **Then** ela cai
    direto num ponto de captura (colar / falar / escrever), fechando o gatilho→ação.
@@ -142,23 +164,24 @@ limitação e não bloqueia a captura por texto.
 
 ### User Story 4 — Uma pergunta cirúrgica quando a entrada chega magra (Priority: P3)
 
-Quando uma entrada é capturada com pouca substância (sem número, sem impacto claro), o sistema, **num
-segundo momento de baixo custo**, devolve **uma** pergunta cirúrgica — "teve algum número ou prazo
-nisso?" — reusando o `ReflectionCard` + `proactive_insights` que já existem. A captura continua sendo
-de 1 toque; a completude é empurrada para depois, sem travar o fluxo no momento do registro.
+Hoje, ao capturar, o produto já faz uma pergunta cirúrgica na hora (`ReflectionCard`). A 016 **mantém
+esse momento** e **adiciona** um segundo: quando uma entrada continua magra (sem número, sem impacto
+claro), o sistema, **num segundo momento de baixo custo**, faz **ressurgir uma** pergunta cirúrgica —
+"teve algum número ou prazo nisso?" — reusando o `ReflectionCard` + `proactive_insights`. A captura
+segue de 1 toque; a completude é empurrada para depois, sem travar o registro. Aditivo, não troca.
 
 **Why this priority**: Eleva a qualidade do dado (consistência) sem adicionar atrito na captura, mas é
 um refino sobre o que a US1/US3 já capturam. O produto funciona sem ele; por isso P3.
 
-**Independent Test**: Capturar uma entrada deliberadamente magra → confirmar que, depois (não no
-mesmo toque), surge **uma única** pergunta cirúrgica via `ReflectionCard`; respondê-la enriquece a
-entrada; ignorá-la não quebra nada.
+**Independent Test**: Capturar uma entrada deliberadamente magra que **não** foi enriquecida na hora →
+confirmar que, depois (não no mesmo toque), **ressurge uma única** pergunta cirúrgica via
+`ReflectionCard`; respondê-la enriquece a entrada; ignorá-la não quebra nada.
 
 **Acceptance Scenarios**:
 
-1. **Given** uma entrada salva sem métrica nem impacto claro, **When** o enriquecimento roda, **Then**
-   o sistema enfileira **uma** pergunta cirúrgica (nunca uma enxurrada), exibida fora do momento da
-   captura.
+1. **Given** uma entrada que continua magra após a captura (não enriquecida na hora), **When** o
+   enriquecimento assíncrono roda, **Then** o sistema faz ressurgir **uma** pergunta cirúrgica (nunca
+   uma enxurrada), exibida fora do momento da captura.
 2. **Given** a pergunta de enriquecimento exibida, **When** o usuário responde, **Then** a resposta é
    incorporada à entrada existente (não cria entrada nova) e a pergunta não reaparece.
 3. **Given** a pergunta de enriquecimento exibida, **When** o usuário a ignora, **Then** o fluxo segue
@@ -168,7 +191,8 @@ entrada; ignorá-la não quebra nada.
 
 - **Colar texto com dado sensível de terceiros** (nomes, e-mails, conteúdo de reunião alheia): o
   conteúdo é tratado como dado do próprio usuário, isolado por RLS; nada vaza para o contexto de IA de
-  outro usuário. (Tratamento de PII de terceiros e LGPD é decisão a refinar no plan/security-review.)
+  outro usuário. O campo de colar exibe um **aviso leve de privacidade** ("cole só o que você pode
+  guardar"). **Sem** detecção/remoção automática de PII no v1 (decisão de clarify — escopo do v1).
 - **Web Speech indisponível ou permissão de microfone negada**: degrada para o caminho de texto sem
   erro opaco; a UI explica.
 - **Transcrição vazia / barulho**: nada é salvo silenciosamente; o usuário vê o que foi transcrito e
@@ -188,10 +212,10 @@ entrada; ignorá-la não quebra nada.
 - **FR-001**: O sistema MUST oferecer um ponto de captura onde o usuário cola texto bruto (transcrição,
   e-mail, conversa) e dispara a extração que já existe (`claude-haiku-4-5` + schema Zod).
 - **FR-002**: A extração MUST poder quebrar um único texto colado em **uma ou mais** entradas
-  estruturadas, propostas ao usuário para **revisão antes de salvar**.
-- **FR-003**: O sistema MUST persistir apenas os itens **confirmados** pelo usuário como `entries`,
-  preservando o conteúdo bruto para rastreabilidade, e MUST aplicar a dedup semântica existente
-  (`saveEntries`) para não duplicar entradas.
+  estruturadas e MUST **salvá-las na hora** (captura de 1 toque), sem tela de revisão obrigatória.
+- **FR-003**: O sistema MUST exibir um resumo "criei N entradas" com **desfazer rápido** que remove o
+  lote criado; MUST preservar o conteúdo bruto para rastreabilidade; e MUST aplicar a dedup semântica
+  existente (`saveEntries`) para não duplicar entradas. A edição/exclusão fina segue no histórico.
 - **FR-004**: Quando o texto colado não contém conquista identificável, o sistema MUST responder com
   um estado honesto e um convite, **sem** fabricar entrada vazia.
 - **FR-005**: O sistema MUST impor e comunicar um limite de tamanho seguro para o texto colado, sem
@@ -199,10 +223,13 @@ entrada; ignorá-la não quebra nada.
 
 #### Ressurgimento in-app movido por delta (US2)
 - **FR-006**: Ao abrir o app, o sistema MUST exibir um destaque que é função do **delta de dados**
-  desde o último retorno: "tem novidade" (ancorado em evidência real) ou "ressurgir + convidar".
+  desde o último retorno: **≥1 entrada nova** → "tem novidade" (ancorado nas entradas novas); **nenhuma
+  entrada nova** → "ressurgir + convidar".
 - **FR-007**: O destaque "tem novidade" MUST se ancorar em entradas reais novas e MUST NOT usar
-  linguagem de cobrança ("faz X dias que você sumiu").
-- **FR-008**: Na ausência de delta real, o sistema MUST cair para ressurgimento de conquista anterior
+  linguagem de cobrança ("faz X dias que você sumiu"). O **aha de força** MUST acompanhar **somente
+  quando o espelho regenerou** (a cada ~5 entradas); caso contrário, mostra a novidade sem afirmar
+  análise de força nova.
+- **FR-008**: Na ausência de entrada nova, o sistema MUST cair para ressurgimento de conquista anterior
   + convite a capturar, e MUST NOT inventar nenhuma análise nova.
 - **FR-009**: O convite a registrar MUST levar diretamente a um ponto de captura (colar / falar /
   escrever), fechando gatilho→ação em um toque.
@@ -218,9 +245,10 @@ entrada; ignorá-la não quebra nada.
   sinalizar a limitação de forma honesta e MUST manter o caminho de texto plenamente funcional.
 
 #### Enriquecimento assíncrono (US4)
-- **FR-014**: Quando uma entrada chega magra (sem métrica/impacto claro), o sistema MUST enfileirar
-  **uma única** pergunta cirúrgica, exibida **fora** do momento da captura, reusando `ReflectionCard`
-  + `proactive_insights`.
+- **FR-014**: O sistema MUST **manter** a pergunta cirúrgica síncrona no momento da captura (já
+  existente) **e adicionar** um ressurgimento assíncrono: quando uma entrada continua magra (sem
+  métrica/impacto claro) após a captura, MUST fazer ressurgir **uma única** pergunta cirúrgica, exibida
+  **fora** do momento da captura, reusando `ReflectionCard` + `proactive_insights`.
 - **FR-015**: A resposta à pergunta de enriquecimento MUST ser incorporada à entrada existente (não
   cria entrada nova) e a pergunta MUST NOT reaparecer após respondida ou dispensada.
 
@@ -231,6 +259,9 @@ entrada; ignorá-la não quebra nada.
   de qualquer chamada ao LLM; o contexto de IA MUST NUNCA incluir dado de outro usuário.
 - **FR-018**: Toda nova superfície MUST respeitar a disciplina "nunca página em branco" e a RLS
   (`auth.uid() = user_id`) das entradas; IDs internos MUST NOT vazar em respostas de API.
+- **FR-019**: O campo de colar artefato MUST exibir um **aviso leve de privacidade** (ex.: "cole só o
+  que você pode guardar"); o v1 MUST NOT implementar detecção/remoção automática de PII — o isolamento
+  por RLS é a proteção de base e dado colado é tratado como dado do próprio usuário.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -250,8 +281,8 @@ entrada; ignorá-la não quebra nada.
 ### Measurable Outcomes
 
 - **SC-001**: A partir de um texto colado com N conquistas distintas, o usuário sai com até N entradas
-  estruturadas revisadas e salvas, sem ter redigido nenhum relato do zero.
-- **SC-002**: 100% das entradas extraídas exibidas para revisão derivam do texto fornecido — zero fato
+  estruturadas **salvas na hora** (com desfazer disponível), sem ter redigido nenhum relato do zero.
+- **SC-002**: 100% das entradas criadas a partir de um colar derivam do texto fornecido — zero fato
   inventado — verificável em teste contra fixtures de texto colado.
 - **SC-003**: Ao reabrir o app, a pessoa sempre vê um estado vivo e honesto (tem-novidade **ou**
   ressurgir+convidar) e **nunca** uma análise fabricada na ausência de dado novo — verificável em
@@ -269,8 +300,8 @@ entrada; ignorá-la não quebra nada.
 
 - Reusa o pipeline de extração existente (`claude-haiku-4-5` + schema Zod), `entries`, `ReflectionCard`
   e `proactive_insights`; **sem migration nova** prevista (a confirmar no `/speckit-plan`).
-- A revisão-antes-de-salvar segue o padrão de confirmação de captura já existente no produto (não é uma
-  caixa-preta que salva sozinha).
+- O colar **auto-salva** as entradas extraídas (mantém o 1-toque do produto) + desfazer rápido no
+  resumo; a curadoria fina (editar/excluir) reusa o histórico existente, não uma tela de revisão nova.
 - A Web Speech API é suficiente para o v1 de áudio; servidor de transcrição é evolução condicional à
   qualidade observada.
 - O "delta" que dirige o ressurgimento reusa a lógica de regeneração do espelho (a cada ~5 entradas)
