@@ -28,6 +28,35 @@ Regras de escrita (importantes, não esquecer):
 
 ---
 
+## Track de publicações e performance
+
+| Post | Dia | Horário | Impressões | Likes | Coments | Imagem | Observações |
+|---|---|---|---|---|---|---|---|
+| Pré-série: PR PostHog + GTM | ~2 semanas atrás | n/d | 841 | 15 | 1 | sim (print do PR) | post de trabalho |
+| Pré-série: pasta Downloads | ~2 semanas atrás | n/d | 866 | 19 | 3 | sim (print do Finder) | tema leve e relacionável |
+| Ep 01: PM autodidata na era da IA | segunda passada | ~10h | 838 | 19 | n/d | n/d | melhor da série, formato manifesto |
+| Ep 02: virei meu próprio stakeholder | segunda | 11h30 | 221 | 2 | n/d | não | só texto, introspectivo, queda forte |
+| Ep 03: nome brasileiro (com molho) | terça | (preencher) | (preencher) | (preencher) | (preencher) | não | só texto |
+| Ep 04: não tinha conta no GitHub | quarta (hoje) | 8h30 | 38 (parcial) | 0 (parcial) | n/d | não | só texto, horário fraco, medido cedo |
+
+> Colunas "(preencher)" são pra Ohana completar quando tiver os números fechados.
+
+Leitura dos dados (até agora):
+- Os 3 melhores tinham imagem; os 3 fracos são só texto. Queda de alcance de ~4x. Imagem
+  parece ser o maior lever, e é dado próprio.
+- Passar de semanal pra diário derrubou o alcance. No LinkedIn, post fraco entrega o
+  próximo pra menos gente, então postar todo dia com base pequena vira cascata pra baixo.
+- Trocar o horário a cada dia (8h30 num dia, 11h30 noutro) impede de ler sinal. O Ep 01,
+  o melhor, saiu segunda ~10h.
+
+Hipóteses a testar nos próximos (uma variável de cada vez):
+1. Colocar imagem em todo post (print de terminal, docs, card com a frase, foto do processo).
+2. Voltar pra 2x por semana (ex.: terça e quinta), deixando cada post respirar 48h.
+3. Fixar horário ~10h-11h, terça a quinta, por algumas semanas antes de mexer.
+4. Gancho de primeira linha mais largo (que pega além de PM) + mais valor/takeaway por post.
+
+---
+
 ## Estratégia da série
 
 ### Posts = ecossistema de repos (build-from-zero)
