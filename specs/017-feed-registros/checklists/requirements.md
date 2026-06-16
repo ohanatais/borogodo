@@ -36,6 +36,10 @@
   `evidences`/`embedding`/HNSW) — not greenfield. The only genuinely new column is `title`.
 - Cross-branch migration-number collision flagged (FR-019 / Assumptions): 015 reserved `010`
   unmerged, so 017's migration must take the next free number per merge order (likely `011`).
-- Candidate areas for `/speckit-clarify` (deferred, not blocking): (1) grid cell granularity
-  (day vs week) + critical-mass threshold; (2) painel change scope vs `TrajectoryHighlights`; (3)
-  whether semantic search stays fully out of v1. Documented as Assumptions for now.
+- Clarify (Session 2026-06-15) resolved: (1) grid cell granularity (day vs week) → **deferred to
+  `/impeccable shape`** (test with real persona frequency); (2) default time axis → **"quando anotei"
+  (`created_at`)**; (3) semantic search → **out of v1 (textual only)**, plus a new requirement
+  surfaced by Ohana — **delete a record from the feed** (FR-003a), since the raw feed is where the
+  user spots duplicates (reuses existing `DELETE /api/entries/[id]`; UI is new).
+- Remaining for `/speckit-plan`: confirm the migration number (not `010`) per merge order;
+  `/security-review` flagged (extraction, new column, search with user input, delete action).

@@ -46,6 +46,19 @@ escolhida no discovery), que dá leitura macro instantânea e é a ponte clicáv
   **não é 010** (reservado pela 015, não-mergeada) — confirmar no kickoff de implementação relativo à
   ordem de merge 015→016→017 (provável `011`).
 
+### Session 2026-06-15 (clarify)
+
+- Q: A grade-faísca usa célula = dia ou semana? → A: **Decidir no `/impeccable shape`** — testar com a
+  frequência real das personas (dia-a-dia é lindo cheio, mas pode parecer ralo pra quem captura
+  ~1x/semana). A spec mantém as duas hipóteses; o shape crava.
+- Q: Eixo de tempo padrão ao abrir `/registros`? → A: **"Quando anotei" (`created_at`)** — feed de
+  atividade, "ver a pilha crescer", que é o núcleo de retenção. "Quando aconteceu" fica no toggle.
+- Q: Busca semântica entra no v1? → A: **Não — só textual (`ilike` + tags) no v1.** Semântica é
+  evolução (exige embedding para toda entrada). **Adendo (Ohana):** como o feed expõe o dado cru, a
+  pessoa pode **ver um registro duplicado** (do colar da 016 ou de re-registro) e MUST poder
+  **excluí-lo dali** — deletar do feed entra no escopo (reusa o `DELETE /api/entries/[id]` existente;
+  hoje não há UI de excluir entrada).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Ver a pilha inteira: o feed cru de registros (Priority: P1)
@@ -54,9 +67,10 @@ A pessoa abre `/registros` e vê **tudo o que já registrou**, em ordem cronoló
 atividade — não a síntese curada do `/historico`, mas o dado cru, granular e contável. Cada item é um
 **card colapsado** com título (gerado automaticamente), metadados (origem, data, empresa/cargo quando
 houver), badge de métrica se existir, tags e thumbnail se houver imagem. Ao expandir, vê os campos
-estruturados, a imagem maior e um botão **"Usar"** que leva direto à geração de conteúdo (fecha o loop
-North Star a partir do feed). A pilha crescendo é a prova visível de que o trabalho dela não é
-invisível.
+estruturados, a imagem maior, um botão **"Usar"** que leva direto à geração de conteúdo (fecha o loop
+North Star a partir do feed) e a opção de **excluir o registro**. A pilha crescendo é a prova visível
+de que o trabalho dela não é invisível — e, como ela vê o dado cru, se topar um **duplicado** (do colar
+da 016 ou de um re-registro), consegue apagá-lo ali com uma confirmação.
 
 **Why this priority**: É o coração da feature e a única superfície que transforma o investimento em
 patrimônio visível. Sem ela, a 017 não existe. Entrega valor sozinha (ver/buscar/usar) mesmo sem a
@@ -72,10 +86,13 @@ que "Usar" abre a geração com aquela evidência carregada.
    cards colapsados em ordem cronológica, cada um com título, origem, data e (quando houver) métrica,
    tags e thumbnail — sem a agregação por empresa do `/historico`.
 2. **Given** um card colapsado, **When** o usuário o expande (`aria-expanded`), **Then** vê os campos
-   estruturados, a imagem maior se houver, e o botão "Usar".
+   estruturados, a imagem maior se houver, o botão "Usar" e a opção de **excluir**.
 3. **Given** um card expandido, **When** o usuário clica "Usar", **Then** a geração de conteúdo abre com
    a evidência daquele registro carregada.
-4. **Given** muitos registros, **When** o usuário rola o feed, **Then** o carregamento é paginado (sem
+4. **Given** um registro que o usuário identifica como duplicado ou indesejado, **When** ele escolhe
+   excluir e confirma, **Then** o registro é removido (reusando a deleção de entrada existente), some do
+   feed e da grade, sem afetar os demais.
+5. **Given** muitos registros, **When** o usuário rola o feed, **Then** o carregamento é paginado (sem
    travar nem carregar tudo de uma vez) e mantém a ordem.
 
 ### User Story 2 — Dois eixos de tempo: "quando anotei" vs "quando aconteceu" (Priority: P1)
@@ -203,6 +220,11 @@ e que o filtro "com métrica" existe no feed.
   data"), nunca some.
 - **Registro sem título e sem `what_i_did` útil**: o fallback ainda produz algo legível (ex.: data +
   origem), nunca um card vazio.
+- **Registro duplicado visível no feed**: a pessoa pode topar duplicatas que escaparam da dedup
+  semântica (especialmente vindas do colar da 016); o card oferece excluir com confirmação, e a
+  exclusão é imediata e reversível só por re-registro (sem "lixeira" no v1).
+- **Excluir registro em uso**: a confirmação deixa claro que a exclusão é definitiva; rascunhos já
+  gerados a partir dele não são apagados (vivem em `drafts`).
 - **Busca sem resultado**: estado honesto ("nada encontrado para X") + limpar busca, sem parecer erro.
 - **Imagem/anexo ausente ou quebrado**: o card degrada sem thumbnail, sem layout quebrado.
 - **Muitos registros (paginação)**: o feed pagina por cursor; a grade-faísca agrega sem carregar todas
@@ -223,11 +245,16 @@ e que o filtro "com métrica" existe no feed.
   expandido mostra os campos estruturados, imagem maior e o botão **"Usar"**.
 - **FR-003**: O botão "Usar" no card MUST abrir a geração de conteúdo com a evidência daquele registro
   carregada (mesmo destino do "Usar" das outras superfícies).
+- **FR-003a**: O card MUST permitir **excluir o registro** com confirmação, reusando a deleção de
+  entrada existente (`DELETE /api/entries/[id]`); ao excluir, o registro MUST sumir do feed e da
+  grade-faísca e a ação MUST respeitar a RLS (só o dono exclui). Casos de uso: remover duplicata vista
+  no feed ou um registro indesejado. (Hoje o endpoint existe; falta a UI — a 017 adiciona.)
 - **FR-004**: O feed MUST paginar por **cursor** (não carregar todas as entradas de uma vez).
 
 #### Dois eixos (US2)
 - **FR-005**: O feed MUST oferecer dois eixos via toggle — "quando anotei" (`created_at`) e "quando
-  aconteceu" (`entry_date`) — com o estado **na URL** (linkável e reproduzível ao abrir direto).
+  aconteceu" (`entry_date`) — com o estado **na URL** (linkável e reproduzível ao abrir direto). O eixo
+  **padrão** (sem parâmetro na URL) MUST ser **"quando anotei"** (feed de atividade).
 - **FR-006**: No eixo "quando aconteceu", entradas sem `entry_date` MUST ter tratamento previsível
   (agrupadas/sinalizadas), nunca sumindo nem quebrando a ordenação.
 
@@ -285,7 +312,7 @@ e que o filtro "com métrica" existe no feed.
 ### Measurable Outcomes
 
 - **SC-001**: Em `/registros`, o usuário vê **100%** dos seus registros (nenhum somido), em cards
-  legíveis com título, e consegue abrir a geração via "Usar" direto do feed.
+  legíveis com título, e consegue abrir a geração via "Usar" **e excluir um registro** direto do feed.
 - **SC-002**: O usuário alterna entre "quando anotei" e "quando aconteceu" e o estado persiste na URL
   (abrir a URL reproduz o eixo) — verificável em teste.
 - **SC-003**: Nenhum card aparece sem título (IA ou fallback determinístico) — verificável em teste com
@@ -325,6 +352,8 @@ e que o filtro "com métrica" existe no feed.
 - **Substituir o `/historico`** — ele complementa o feed (síntese curada vs. cru), com cross-link.
 - **Captura por colar/áudio e o ressurgimento por delta** — são da 016.
 - **Edição inline dos campos no card do feed** — a edição fina segue no fluxo existente; o card foca em
-  ver + "Usar".
+  ver + "Usar" + excluir. (Excluir entra no v1; editar campos no card, não.)
+- **Lixeira / desfazer exclusão** — no v1 a exclusão é definitiva (com confirmação); recuperação por
+  lixeira é evolução.
 - **A mecânica "medidor de força"** (#2 do discovery §10) — vive no espelho/painel, não é desta feature
   (pode entrar noutro elo).
