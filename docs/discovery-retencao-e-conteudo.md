@@ -290,6 +290,58 @@ histórico do discovery e vai para a spec da 018.)_
 
 ---
 
+## 10. Mecânicas de engajamento (UI) — exploradas no discovery
+
+Duas mecânicas escolhidas (simples, não-genéricas, fiéis à marca). Princípio que guia as
+duas: **brasilidade é substância, não enfeite** — mora na paleta (jambo/coral/mel/creme),
+na Fraunces e no calor da copy; nunca em clichê (samba/futebol/jeitinho/emoji/diminutivo).
+
+### #2 — Medidor de força (dirige a captura)
+Não é uma barra de "% completo" genérica. Roda sobre o vocabulário que o espelho já tem:
+os tiers **Emergente → Consistente → Comprovada**. Cada força mostra em que tier está e o
+que falta pra subir ("mais 2 evidências e sua força em X vira Consistente"). Dirige a
+captura pra um gap específico, pelo desejo de "revelar" mais — não pela culpa. Vive no
+**espelho/painel**.
+
+### #3 — Consistência visual (a vencedora: grade estilo GitHub com faíscas)
+Exploradas duas formas; a escolhida foi a **grade de atividade estilo GitHub** (dias ×
+semanas, fundo de células bem claras) com **faíscas preenchendo** os dias que tiveram
+registro e célula vazia quando não houve. A constelação "solta" (faíscas livres sobre um
+fundo) ficou como conceito-irmão, mas a grade venceu por:
+- **credibilidade emprestada**: o formato já é lido como "ferramenta séria de quem produz"
+  (Rafael/Bruno reconhecem), e a faísca entra como preenchimento, herdando a sobriedade.
+- **vazio é espaço, não falha**: épocas quietas são células claras, sem vermelho de
+  vergonha (anti-Duolingo de verdade).
+- **leitura macro instantânea**: o ano "ganha densidade" da esquerda pra direita; a
+  temperatura (lilás suave → jambo → coral nos recentes) diz "o que importa agora está
+  aceso", sem legenda.
+- **escala melhor**: funciona com poucos dados (grade mais vazia, sem ficar triste) e com
+  muitos (ano denso). A faísca é **clicável** → ponte direta pro feed (filtra o período).
+
+Vive no **feed de registros (017)**: a grade no topo (mapa) + o feed cronológico embaixo
+(território), uma alimentando a outra — registrar acende uma faísca e põe um card no topo.
+
+### Os dois abismos a evitar (norte de craft)
+O Borogodó tem **dois** riscos opostos, ambos proibidos pela marca:
+- **fofo/infantil** (Duolingo): mascote, confete, neon, pontos/troféus, copy "Parabéns!!!".
+- **genérico** (SaaS cinza de 2022): sem paleta, sem serifa, vira ferramenta gringa
+  traduzida — mata a identidade que é a defesa contra "parecer IA".
+
+**Norte:** sofisticado **com** calor brasileiro — sóbrio na moldura, borogodó nos detalhes
+(grade contida + faísca/paleta/Fraunces nos toques certos; um único acento quente, o coral,
+com parcimônia). Validar com personas reais no `/impeccable shape`, não cravar do nosso gosto.
+
+### Decisões de craft para o shape (017)
+- **Granularidade dia vs. semana**: dia-a-dia é lindo cheio, mas pode parecer ralo pra quem
+  captura 1x/semana. Talvez a célula seja a semana. Testar com a frequência real do público.
+- **Amadurece com massa crítica**: a mecânica visual aparece quando há registros suficientes
+  (com 2-3 faíscas é um céu vazio e triste). No começo, o feed cru e o medidor de força (#2)
+  carregam o peso; a grade entra como recompensa de quem já alimentou.
+- Mockups de referência (3 registros: quente, sóbrio, híbrido-grade) ficaram no histórico do
+  discovery; o híbrido-grade é a direção aprovada.
+
+---
+
 ## Fontes (pesquisa de LinkedIn, jun/2026)
 
 - Hootsuite — How the LinkedIn algorithm works in 2025

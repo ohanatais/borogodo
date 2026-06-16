@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
-import { listDrafts, hasAnyDraft } from '@/lib/db/drafts'
+import { listDrafts, hasAnyDraft, getVoiceSignal, getVoiceProfile } from '@/lib/db/drafts'
+import { shouldSuggestRecalibration } from '@/lib/ai/content/recalibrateVoice'
 import { getLatestSnapshot } from '@/lib/db/mirror'
 import { getRecentEntries } from '@/lib/db/entries'
 import { PresencaCreate, type PresencaSeedEntry } from '@/components/features/content/PresencaCreate'
@@ -29,16 +30,19 @@ export default async function PresencaPage() {
 
   if (!user) redirect('/login')
 
-  const [page, anyDrafts, snapshot, recentEntries, t] = await Promise.all([
+  const [page, anyDrafts, snapshot, recentEntries, voiceSignal, voiceProfile, t] = await Promise.all([
     listDrafts(supabase, user.id, { limit: HUB_PAGE_SIZE }),
     hasAnyDraft(supabase, user.id),
     getLatestSnapshot(supabase, user.id),
     getRecentEntries(supabase, user.id, RECENT_ENTRY_SEEDS),
+    getVoiceSignal(supabase, user.id),
+    getVoiceProfile(supabase, user.id),
     getTranslations('presenca.page'),
   ])
 
   const themes = snapshot?.strength_themes ?? []
   const entrySeeds: PresencaSeedEntry[] = recentEntries.map((e) => ({ id: e.id, whatIDid: e.what_i_did }))
+  const suggestRecalibration = shouldSuggestRecalibration(voiceSignal, voiceProfile)
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
@@ -59,7 +63,14 @@ export default async function PresencaPage() {
         </div>
       </header>
 
-      <PresencaHub initialPage={page} hasAnyDrafts={anyDrafts} themes={themes} entries={entrySeeds} />
+      <PresencaHub
+        initialPage={page}
+        hasAnyDrafts={anyDrafts}
+        themes={themes}
+        entries={entrySeeds}
+        suggestRecalibration={suggestRecalibration}
+        recalibrateSignalKey={voiceSignal.lastFeedbackAt}
+      />
     </div>
   )
 }

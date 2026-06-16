@@ -19,6 +19,7 @@ interface DraftListItemProps {
 const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
   post: 'formats.post',
   impact_summary: 'formats.impactSummary',
+  mini_bio: 'formats.miniBio',
 }
 
 const STATUS_LABEL_KEY: Record<DraftStatus, string> = {

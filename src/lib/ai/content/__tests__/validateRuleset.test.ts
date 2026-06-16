@@ -76,6 +76,43 @@ describe('validateContentRuleset — uma regra por assert', () => {
   })
 })
 
+describe('validateContentRuleset — assert 10: clichê de bio (015)', () => {
+  function asserts(text: string): number[] {
+    return validateContentRuleset(text).map((v) => v.assert)
+  }
+
+  it('pega "apaixonado por tecnologia"', () => {
+    expect(asserts('Sou apaixonado por tecnologia e inovação.')).toContain(10)
+  })
+
+  it('pega "apaixonada por" (variação de gênero)', () => {
+    expect(asserts('Apaixonada por produto desde sempre.')).toContain(10)
+  })
+
+  it('pega "transformando ideias em realidade"', () => {
+    expect(asserts('Vivo transformando ideias em realidade.')).toContain(10)
+  })
+
+  it('pega "profissional movido a desafios"', () => {
+    expect(asserts('Profissional movido a desafios e a resultados.')).toContain(10)
+  })
+
+  it('pega "em busca de novos desafios"', () => {
+    expect(asserts('Estou sempre em busca de novos desafios.')).toContain(10)
+  })
+
+  it('pega "entusiasta de"', () => {
+    expect(asserts('Entusiasta de inteligência artificial.')).toContain(10)
+  })
+
+  it('não acusa uma bio concreta e factual', () => {
+    const concreta =
+      'Lidero o time de dados de uma fintech há três anos. Antes disso, fui analista no varejo, ' +
+      'onde montei o primeiro painel de vendas da empresa.'
+    expect(asserts(concreta)).not.toContain(10)
+  })
+})
+
 describe('validateContentRuleset — acumula múltiplas violações', () => {
   it('retorna uma violação por classe quando o texto peca em várias', () => {
     const ruim = 'Esse projeto data-driven foi simplesmente um game changer 🚀'

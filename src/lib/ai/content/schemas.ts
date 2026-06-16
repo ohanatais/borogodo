@@ -14,9 +14,12 @@ const draftOutputSchema = z.object({
 })
 
 // Um schema por formato (FR-008). Idênticos em v1; nomeados à parte para poderem divergir
-// sem tocar no orquestrador caso post e resumo de impacto precisem de formas diferentes.
+// sem tocar no orquestrador caso os formatos precisem de formas diferentes.
 export const postDraftSchema = draftOutputSchema
 export const impactSummaryDraftSchema = draftOutputSchema
+// Mini-bio (015): mesma forma (2 variantes); a disciplina de "curta + factual + sem clichê" vem do
+// prompt e do ruleset (assert 10), não da forma. Nomeado à parte para divergir sem tocar no motor.
+export const miniBioDraftSchema = draftOutputSchema
 
 export type DraftOutput = z.infer<typeof draftOutputSchema>
 export type DraftOutputVariant = DraftOutput['variants'][number]
@@ -24,6 +27,7 @@ export type DraftOutputVariant = DraftOutput['variants'][number]
 const SCHEMA_BY_FORMAT: Record<DraftFormat, typeof draftOutputSchema> = {
   post: postDraftSchema,
   impact_summary: impactSummaryDraftSchema,
+  mini_bio: miniBioDraftSchema,
 }
 
 /**

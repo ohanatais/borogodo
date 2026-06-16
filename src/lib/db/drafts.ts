@@ -9,6 +9,7 @@ import type {
   SeedType,
   VoiceFeedback,
   VoiceProfile,
+  VoiceSignal,
 } from '@/types/content'
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
@@ -220,6 +221,84 @@ export async function updateDraft(
   }
 
   return toDraft(data as DraftRow)
+}
+
+// Teto de rascunhos com feedback considerados na recalibração (013/014 → 015). Limita o volume
+// enviado ao LLM e o custo da query; o limiar de sugestão (3) é muito menor, então não distorce.
+const MAX_FEEDBACK_DRAFTS = 40
+
+interface VoiceFeedbackRow {
+  body: string
+  voice_feedback: VoiceFeedback
+  updated_at: string
+}
+
+/** Sinal de voz + os corpos dos rascunhos que soaram / não soaram, para sugerir e aplicar a recalibração. */
+export interface VoiceFeedbackData {
+  signal: VoiceSignal
+  soa: string[]
+  naoSoa: string[]
+}
+
+const EMPTY_SIGNAL: VoiceSignal = { soaCount: 0, naoSoaCount: 0, lastFeedbackAt: null }
+
+/**
+ * Lê só o SINAL de voz (sem corpos): conta "soa"/"nao_soa" e o feedback mais recente. É o que a
+ * página da Presença e o modo "sugerir" da rota precisam para decidir se vale recalibrar — sem
+ * trazer os corpos dos rascunhos à toa (evita até 40 bodies no carregamento da página).
+ */
+export async function getVoiceSignal(
+  supabase: SupabaseServerClient,
+  userId: string
+): Promise<VoiceSignal> {
+  const { data, error } = await supabase
+    .from('drafts')
+    .select('voice_feedback, updated_at')
+    .eq('user_id', userId)
+    .in('voice_feedback', ['soa', 'nao_soa'])
+    .order('updated_at', { ascending: false })
+    .limit(MAX_FEEDBACK_DRAFTS)
+
+  if (error || !data) return EMPTY_SIGNAL
+
+  const rows = data as { voice_feedback: VoiceFeedback; updated_at: string }[]
+  const soaCount = rows.filter((r) => r.voice_feedback === 'soa').length
+  const naoSoaCount = rows.filter((r) => r.voice_feedback === 'nao_soa').length
+
+  return { soaCount, naoSoaCount, lastFeedbackAt: rows[0]?.updated_at ?? null }
+}
+
+/**
+ * Lê os rascunhos com feedback de voz do usuário (015) COM os corpos: conta "soa"/"nao_soa", separa
+ * os corpos por sinal e marca o feedback mais recente. Usado só ao APLICAR a recalibração (precisa
+ * dos corpos como insumo do LLM). Escopo por `user_id` (a RLS reforça); em erro devolve vazio.
+ * Sem logar corpo.
+ */
+export async function getVoiceFeedbackData(
+  supabase: SupabaseServerClient,
+  userId: string
+): Promise<VoiceFeedbackData> {
+  const empty: VoiceFeedbackData = { signal: EMPTY_SIGNAL, soa: [], naoSoa: [] }
+
+  const { data, error } = await supabase
+    .from('drafts')
+    .select('body, voice_feedback, updated_at')
+    .eq('user_id', userId)
+    .in('voice_feedback', ['soa', 'nao_soa'])
+    .order('updated_at', { ascending: false })
+    .limit(MAX_FEEDBACK_DRAFTS)
+
+  if (error || !data) return empty
+
+  const rows = data as VoiceFeedbackRow[]
+  const soa = rows.filter((r) => r.voice_feedback === 'soa').map((r) => r.body)
+  const naoSoa = rows.filter((r) => r.voice_feedback === 'nao_soa').map((r) => r.body)
+
+  return {
+    signal: { soaCount: soa.length, naoSoaCount: naoSoa.length, lastFeedbackAt: rows[0]?.updated_at ?? null },
+    soa,
+    naoSoa,
+  }
 }
 
 /** Lê o perfil de voz (JSONB em `profiles`) do usuário. `null` até a primeira inferência/calibração. */

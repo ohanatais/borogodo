@@ -10,7 +10,7 @@ export interface PresencaOpenDetail {
   seedRef: string
   /** Texto curto da evidência base, mostrado como "Baseado em:". */
   seedSummary: string
-  /** Formatos oferecidos: tema → ['post']; entrada → ['post', 'impact_summary']. */
+  /** Formatos oferecidos: tema → ['post', 'mini_bio']; entrada → ['post', 'impact_summary']. */
   formats: DraftFormat[]
 }
 

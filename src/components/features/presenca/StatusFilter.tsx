@@ -20,6 +20,7 @@ const FORMAT_OPTIONS: { value: DraftFormat | null; key: string }[] = [
   { value: null, key: 'filter.allFormats' },
   { value: 'post', key: 'filter.post' },
   { value: 'impact_summary', key: 'filter.impactSummary' },
+  { value: 'mini_bio', key: 'filter.miniBio' },
 ]
 
 function Pill({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {

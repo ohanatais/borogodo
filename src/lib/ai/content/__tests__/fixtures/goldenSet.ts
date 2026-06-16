@@ -230,6 +230,67 @@ export const goodCases: GoldenCase[] = [
       ],
     },
   },
+  {
+    name: 'mini-bio — PM sênior, factual, sem clichê',
+    format: 'mini_bio',
+    seedLabels: ['E1', 'E2'],
+    voiceProfile: { tone: 'direto e caloroso', samples: [], updatedAt: TS },
+    output: {
+      variants: [
+        {
+          angle: 'mais direta',
+          body: 'Sou PM há oito anos, hoje lidero produto numa fintech. Já construí times de discovery do zero e levei dois produtos de ideia a lançamento.',
+          evidence_refs: ['E1'],
+        },
+        {
+          angle: 'mais narrativa',
+          body: 'Comecei em dados e migrei para produto quando vi que gostava mais de decidir o que construir. Hoje cuido da área de pagamentos de uma fintech.',
+          evidence_refs: ['E2'],
+        },
+      ],
+    },
+  },
+  {
+    name: 'mini-bio — designer, transição de carreira',
+    format: 'mini_bio',
+    seedLabels: ['E1'],
+    voiceProfile: null,
+    output: {
+      variants: [
+        {
+          angle: 'pra topo de perfil',
+          body: 'Designer de produto há cinco anos. Trabalho com pesquisa e interface, e gosto de simplificar fluxo que cresceu demais.',
+          evidence_refs: ['E1'],
+        },
+        {
+          angle: 'pra assinatura',
+          body: 'Entrei em design vindo da arquitetura. Hoje desenho produtos digitais, com foco em quem usa todo dia e não tem tempo a perder.',
+          evidence_refs: [],
+        },
+      ],
+    },
+  },
+  {
+    name: 'mini-bio — engenheiro de dados, técnico e seco, curta',
+    format: 'mini_bio',
+    seedLabels: ['E1', 'E2'],
+    voiceProfile: { tone: 'técnico e seco', lengthPref: 'curto', samples: [], updatedAt: TS },
+    lengthPref: 'curto',
+    output: {
+      variants: [
+        {
+          angle: 'pra topo de perfil',
+          body: 'Engenheiro de dados. Monto pipelines e cuido da base que o time de produto usa para decidir.',
+          evidence_refs: ['E1'],
+        },
+        {
+          angle: 'pra assinatura',
+          body: 'Trabalho com dados desde a faculdade. Hoje cuido da infraestrutura de dados de uma empresa de logística, do ETL ao painel.',
+          evidence_refs: ['E2'],
+        },
+      ],
+    },
+  },
 ]
 
 export const badCases: BadCase[] = [
@@ -242,4 +303,5 @@ export const badCases: BadCase[] = [
   { name: 'número sem janela de tempo', assert: 7, body: 'Subi a meta de 20 para 45.' },
   { name: 'gíria de elogio (mandou bem)', assert: 8, body: 'Você mandou bem demais nesse projeto.' },
   { name: 'brasilidade boba (jeitinho)', assert: 9, body: 'Resolvi tudo no jeitinho de sempre.' },
+  { name: 'clichê de bio (apaixonado por tecnologia)', assert: 10, body: 'Profissional apaixonado por tecnologia e movido a desafios.' },
 ]

@@ -85,6 +85,24 @@ export const SILLY_BRAZILIANISM: readonly RegExp[] = [
 export const EMOJI_RE = /\p{Extended_Pictographic}/u
 
 /**
+ * Assert 10 (015) — clichê de bio de LinkedIn. É o formato onde o clichê é mais forte e mais datado;
+ * sem a regra, a mini-bio (e qualquer texto) soa genérica. Vale para todos os formatos: "apaixonado
+ * por tecnologia" é vazio num post tanto quanto numa bio. Escopado a frases inequívocas de auto-bio
+ * para não acusar texto concreto (uma bio factual sobre o que a pessoa fez não dispara nenhuma).
+ */
+export const BIO_CLICHES: readonly RegExp[] = [
+  /apaixonad[oa]\s+por/i,
+  /paix[ãa]o\s+por\s+(?:tecnologia|produto|inova[çc][ãa]o|dados|design|pessoas)/i,
+  /transformand[oa]?\s+ideias\s+em\s+realidade/i,
+  /movid[oa]\s+(?:a|por)\s+(?:desafios|resultados)/i,
+  /em\s+busca\s+(?:de|por)\s+(?:novos\s+)?desafios/i,
+  /entusiasta\s+d[aeo]/i,
+  /profissional\s+(?:dedicad|movid|apaixonad|focad|orientad|comprometid|versátil|versatil)/i,
+  /resultados\s+que\s+falam\s+por\s+si/i,
+  /sempre\s+(?:em\s+busca\s+de\s+(?:aprendizado|conhecimento|crescimento)|aprendendo)/i,
+]
+
+/**
  * Assert 7 — métrica de mudança (percentual ou "de X para Y"). Quando presente sem janela de
  * tempo, soa como número solto/cobrança. Escopado ao caso canônico da marca ("de 41% para 58%
  * em 4 trimestres") para alta precisão e baixo falso-positivo; pode evoluir com saídas reais.

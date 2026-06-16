@@ -49,16 +49,37 @@ describe('golden set — casos ruins (o ruleset pega cada classe)', () => {
   }
 })
 
-describe('golden set — cobertura do harness', () => {
-  it('tem ao menos 10 casos bons cobrindo post e resumo de impacto', () => {
-    expect(goodCases.length).toBeGreaterThanOrEqual(10)
-    expect(goodCases.some((c) => c.format === 'post')).toBe(true)
-    expect(goodCases.some((c) => c.format === 'impact_summary')).toBe(true)
+describe('golden set — meta-regressão: o guardrail morde de fato', () => {
+  // Prova que SE uma mudança de prompt degradar a saída (travessão, clichê de bio), o golden set
+  // pega via `assert`. Pega um caso-ouro limpo, injeta a degradação e confirma que passa a violar.
+  it('um corpo bom degradado com travessão passa a violar o assert 1', () => {
+    const clean = goodCases[0].output.variants[0].body
+    expect(validateContentRuleset(clean)).toEqual([]) // baseline limpo
+    const degraded = `${clean} Entreguei tudo — no prazo.`
+    expect(validateContentRuleset(degraded).map((v) => v.assert)).toContain(1)
   })
 
-  it('os casos ruins cobrem os 9 asserts', () => {
+  it('uma mini-bio degradada com clichê de bio passa a violar o assert 10', () => {
+    const miniBio = goodCases.find((c) => c.format === 'mini_bio')
+    expect(miniBio).toBeDefined()
+    const clean = miniBio!.output.variants[0].body
+    expect(validateContentRuleset(clean)).toEqual([]) // baseline limpo
+    const degraded = `${clean} Sou um profissional apaixonado por tecnologia.`
+    expect(validateContentRuleset(degraded).map((v) => v.assert)).toContain(10)
+  })
+})
+
+describe('golden set — cobertura do harness', () => {
+  it('tem ao menos 12 casos bons cobrindo os 3 formatos (post, resumo, mini-bio)', () => {
+    expect(goodCases.length).toBeGreaterThanOrEqual(12)
+    expect(goodCases.some((c) => c.format === 'post')).toBe(true)
+    expect(goodCases.some((c) => c.format === 'impact_summary')).toBe(true)
+    expect(goodCases.some((c) => c.format === 'mini_bio')).toBe(true)
+  })
+
+  it('os casos ruins cobrem os 10 asserts (9 da 013 + clichê de bio da 015)', () => {
     const covered = new Set(badCases.map((c) => c.assert))
-    for (let assert = 1; assert <= 9; assert++) {
+    for (let assert = 1; assert <= 10; assert++) {
       expect(covered.has(assert)).toBe(true)
     }
   })

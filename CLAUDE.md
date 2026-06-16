@@ -5,7 +5,7 @@ completo de produto, stack e processo de desenvolvimento está em `.claude/CLAUD
 
 ## Status do desenvolvimento
 
-Features mergeadas em `main` (até PR #22):
+Features mergeadas em `main` (até PR #23):
 - **001-landing-page** — landing page pública, design system e i18n
 - **002-user-auth** — autenticação (Google OAuth + e-mail/senha), painel protegido por middleware
 - **003-capture-pipeline** — captura de texto e PDF/LinkedIn, extração via IA com Zod
@@ -19,25 +19,28 @@ Features mergeadas em `main` (até PR #22):
 - **011-skills-robustez** — robustez de skills (PR #20)
 - **012-chat** — Q&A com streaming SSE, correção/marco guiado, discovery (PR #21)
 - **013-motor-de-voz** — fundação de conteúdo (`drafts`, `voice_profile` JSONB, motor `generateDraft`, post + resumo de impacto), migration `009` (PR #22)
+- **014-presenca** — hub `/presenca`, gestão total do rascunho, "Usar projeto" no histórico, sugestões (PR #23)
 
 <!-- SPECKIT START -->
-Current feature: **014-presenca** (branch: `014-presenca`) — **em revisão** (PR #23, draft)
-Spec: [specs/014-presenca/spec.md](specs/014-presenca/spec.md) ·
-Tasks: [specs/014-presenca/tasks.md](specs/014-presenca/tasks.md)
+Current feature: **015-refino-voz** (branch: `015-refino-voz`) — **validada**, PR #24 ready for review
+Spec: [specs/015-refino-voz/spec.md](specs/015-refino-voz/spec.md) ·
+Tasks: [specs/015-refino-voz/tasks.md](specs/015-refino-voz/tasks.md)
 
-Segundo elo do bloco de Geração de Conteúdo (Presença) — epic plan em
-`docs/conteudo-plano-de-acao.md`. **Sem migration** (usa `status='discarded'` e a RLS de
-`delete` da 013). Implementado: hub `/presenca` + nav (US1), gestão total do rascunho —
-editar/arquivar/excluir/restaurar/filtrar, em lista densa (US2), "Usar este projeto" no
-`/historico` com evidência agregada (US3), e sugestões — nudge `content_opportunity` no
-Painel + faixa "Sugestões pra você" na Presença (US4). Inclui conserto da dedup de entradas
-(`saveEntries`): normalização + dedup semântica sem exigir empresa + dedup no lote.
-Pendente: `/impeccable audit` + `/security-review` + `/pr-review` antes de marcar pronto.
+Terceiro e último elo do bloco de Geração de Conteúdo (Presença) — epic plan em
+`docs/conteudo-plano-de-acao.md`. Migration `010` (estende o CHECK de `drafts.format` para
+`mini_bio`) — **aplicada no dev `borogodo-dev`; prod pendente** (aplicar antes do deploy).
+Implementado: recalibração de voz com consentimento — `recalibrateVoice` (preserva amostras),
+`POST /api/content/voice/recalibrate` (sugerir/aplicar), `VoiceRecalibratePrompt` no topo do
+`/presenca`, gate de sugestão no servidor via `getVoiceSignal` (≥3 "não soa") (US1); golden set
+como gate dedicado e obrigatório no `ci.yml`, determinístico, + meta-regressão (US2); mini-bio
+como 3º formato no mesmo motor — `prompts/miniBio.ts` anti-clichê, opção no seletor (tema →
+post + mini-bio) (US3). Code-review + security-review feitos; sem CRITICAL/HIGH. Validada manualmente.
+Pendente: `/impeccable audit` + `/pr-review` + migration `010` no prod antes do deploy.
 
-**Bloco da Presença:**
+**Bloco da Presença (fechado):**
 - **013-motor-de-voz** — fundação + post + resumo de impacto (migration `009`). ✅ mergeada.
-- **014-presenca** — hub + gestão total + "Usar" projeto + sugestões. 🔄 em revisão (PR #23).
-- **015-refino-voz** — recalibração de voz + golden set como gate de CI + mini-bio (migration `010`).
+- **014-presenca** — hub + gestão total + "Usar" projeto + sugestões. ✅ mergeada (PR #23).
+- **015-refino-voz** — recalibração de voz + golden set como gate de CI + mini-bio (migration `010`). 🔄 em revisão.
 
 Dependência: 013 → 014 → 015. Respeitar a ordem (`009` antes de `010`).
 <!-- SPECKIT END -->

@@ -90,6 +90,25 @@ describe('PresencaHub', () => {
     expect(screen.getByText('Corpo do rascunho salvo.')).toBeInTheDocument()
   })
 
+  it('mostra a sugestão de recalibrar a voz quando há sinal acumulado (015)', async () => {
+    render(
+      <PresencaHub
+        initialPage={page([draft()])}
+        hasAnyDrafts
+        themes={[]}
+        entries={[]}
+        suggestRecalibration
+        recalibrateSignalKey="2026-06-15T12:00:00Z"
+      />
+    )
+    expect(await screen.findByText('suggestion')).toBeInTheDocument()
+  })
+
+  it('não mostra a sugestão de recalibrar quando não há sinal', () => {
+    render(<PresencaHub initialPage={page([draft()])} hasAnyDrafts themes={[]} entries={[]} />)
+    expect(screen.queryByText('suggestion')).not.toBeInTheDocument()
+  })
+
   it('vazio pristino (sem nenhum rascunho) mostra os caminhos de entrada, nunca página em branco', () => {
     render(<PresencaHub initialPage={page([])} hasAnyDrafts={false} themes={['produto 0→1']} entries={[]} />)
     expect(screen.getByText('page.empty.title')).toBeInTheDocument()

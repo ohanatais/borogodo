@@ -380,7 +380,8 @@
     "angleLabel": "Ângulo",
     "formats": {
       "post": "Post",
-      "impactSummary": "Resumo de impacto"
+      "impactSummary": "Resumo de impacto",
+      "miniBio": "Mini-bio"
     },
     "adjust": {
       "label": "Ajustar os dois rascunhos",
@@ -397,7 +398,15 @@
     "voice": {
       "prompt": "Soa como você?",
       "yes": "Soa",
-      "no": "Não soa"
+      "no": "Não soa",
+      "recalibrate": {
+        "suggestion": "Vi que alguns rascunhos não soaram como você. Quer que eu afine sua voz a partir do seu retorno?",
+        "accept": "Afinar minha voz",
+        "dismiss": "Agora não",
+        "applying": "Afinando sua voz...",
+        "done": "Pronto. Afinei sua voz com base no seu retorno, sem mexer nas suas amostras. As próximas gerações já refletem isso.",
+        "error": "Não consegui afinar agora. O seu retorno continua salvo, tenta de novo?"
+      }
     },
     "calibration": {
       "open": "Afinar voz",
@@ -457,7 +466,8 @@
       "arquivados": "Arquivados",
       "allFormats": "Todos",
       "post": "Post",
-      "impactSummary": "Resumo"
+      "impactSummary": "Resumo",
+      "miniBio": "Mini-bio"
     },
     "deleteConfirm": {
       "title": "Excluir este rascunho?",

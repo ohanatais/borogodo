@@ -18,68 +18,68 @@ golden set) e 014 (drafts acumulados com voice_feedback)**.
 ---
 
 ## Phase 1: Setup
-- [ ] T001 [SETUP] i18n `presenca.*` (sugestão de recalibrar, opção mini-bio, microcopy de
+- [x] T001 [SETUP] i18n `presenca.*` (sugestão de recalibrar, opção mini-bio, microcopy de
   consentimento) em `pt-BR.json` + espelho em `en.json`.
 
 ## Phase 2: Foundational (Blocking)
-- [ ] T002 [FND] `supabase/migrations/010_drafts_mini_bio.sql` — `ALTER` no CHECK de `drafts.format`
+- [x] T002 [FND] `supabase/migrations/010_drafts_mini_bio.sql` — `ALTER` no CHECK de `drafts.format`
   para aceitar `'mini_bio'`. Conferir que `010` é o próximo número livre após `009`.
-- [ ] T003 [FND] Escrever testes do ruleset anti-clichê de bio (`__tests__/validateRuleset.test.ts`):
+- [x] T003 [FND] Escrever testes do ruleset anti-clichê de bio (`__tests__/validateRuleset.test.ts`):
   clichês de bio ("apaixonado por tecnologia" etc.) disparam o novo `assert`. **Devem falhar.**
-- [ ] T004 [FND] Estender `bannedTerms.ts` (clichês de bio) e `validateRuleset.ts` (novo assert) até
+- [x] T004 [FND] Estender `bannedTerms.ts` (clichês de bio) e `validateRuleset.ts` (novo assert) até
   T003 passar.
-- [ ] T005 [FND] Ampliar o golden set (`__tests__/fixtures/` + `goldenSet.test.ts`) para cobrir os 3
+- [x] T005 [FND] Ampliar o golden set (`__tests__/fixtures/` + `goldenSet.test.ts`) para cobrir os 3
   formatos (post, resumo, mini-bio) e o novo assert; manter asserções determinísticas (sem IA).
 
 **Checkpoint**: ruleset e golden set cobrem mini-bio; migration aplicável.
 
 ## Phase 3: User Story 1 — Recalibração de voz (P1) 🎯
-- [ ] T006 [US1] Escrever teste de `recalibrateVoice` (`__tests__/recalibrateVoice.test.ts`): só sugere
+- [x] T006 [US1] Escrever teste de `recalibrateVoice` (`__tests__/recalibrateVoice.test.ts`): só sugere
   com sinal acumulado; ao aplicar, funde feedback + amostras e **preserva** `samples`; sem aceite, não
   muda. **Devem falhar.**
-- [ ] T007 [US1] Implementar `src/lib/ai/content/recalibrateVoice.ts` (lê `voice_feedback` de `drafts`,
+- [x] T007 [US1] Implementar `src/lib/ai/content/recalibrateVoice.ts` (lê `voice_feedback` de `drafts`,
   recalibra `inferred_summary`/`tone`, preserva amostras, cacheia) até T006 passar.
-- [ ] T008 [US1] `POST /api/content/voice/recalibrate` (`route.ts`): auth-first; modo "sugerir" (lê
+- [x] T008 [US1] `POST /api/content/voice/recalibrate` (`route.ts`): auth-first; modo "sugerir" (lê
   sinal, não muda nada) e modo "aplicar" (com consentimento explícito no payload); RLS.
-- [ ] T009 [US1] `VoiceRecalibratePrompt.tsx` — sugestão discreta ("vi que alguns rascunhos não soaram
+- [x] T009 [US1] `VoiceRecalibratePrompt.tsx` — sugestão discreta ("vi que alguns rascunhos não soaram
   como você; quer afinar?") com aceitar/dispensar, reusando a estética dos cards existentes.
-- [ ] T010 [US1] Teste de integração: acumular feedback → sugestão aparece; aceitar → `voice_profile`
+- [x] T010 [US1] Teste de integração: acumular feedback → sugestão aparece; aceitar → `voice_profile`
   evolui (amostras intactas); recusar → inalterado.
 
 **Checkpoint**: a voz melhora com o uso, sempre com consentimento.
 
 ## Phase 4: User Story 2 — Golden set como guardrail de CI (P1)
-- [ ] T011 [US2] Garantir que o golden set roda como **gate obrigatório** no `.github/workflows/ci.yml`
+- [x] T011 [US2] Garantir que o golden set roda como **gate obrigatório** no `.github/workflows/ci.yml`
   (step dedicado ou dentro de `npm test`, mas bloqueante) em PRs para `main`/`develop`.
-- [ ] T012 [US2] Teste de meta-regressão: um caso de fixture propositalmente degradado (travessão /
+- [x] T012 [US2] Teste de meta-regressão: um caso de fixture propositalmente degradado (travessão /
   antítese / clichê de bio) faz o golden set **falhar** por `assert`; revertido, passa.
-- [ ] T013 [US2] Documentar no `docs/` (ou no README de testes) que mudança de prompt do bloco exige
+- [x] T013 [US2] Documentar no `docs/` (ou no README de testes) que mudança de prompt do bloco exige
   golden set verde; sem custo de IA no CI (determinístico + fixtures).
 
 **Checkpoint**: regressão de voz é bloqueada no merge, automaticamente.
 
 ## Phase 5: User Story 3 — Mini-bio (P2)
-- [ ] T014 [US3] Escrever teste de `miniBioDraftSchema` + prompt (forma + ruleset, sem clichê de bio).
+- [x] T014 [US3] Escrever teste de `miniBioDraftSchema` + prompt (forma + ruleset, sem clichê de bio).
   **Deve falhar.**
-- [ ] T015 [US3] `prompts/miniBio.ts` (herda disciplina anti-IA + anti-clichê de bio) e
+- [x] T015 [US3] `prompts/miniBio.ts` (herda disciplina anti-IA + anti-clichê de bio) e
   `miniBioDraftSchema` em `schemas.ts` até T014 passar.
-- [ ] T016 [US3] Estender `generateDraft` + `generate/route.ts` para `format='mini_bio'` (reuso do
+- [x] T016 [US3] Estender `generateDraft` + `generate/route.ts` para `format='mini_bio'` (reuso do
   orquestrador e da validação).
-- [ ] T017 [US3] Adicionar a opção "mini-bio" no seletor de formato do `GenerateSheet` (reuso da UI da
+- [x] T017 [US3] Adicionar a opção "mini-bio" no seletor de formato do `GenerateSheet` (reuso da UI da
   013); persistir com `format='mini_bio'`.
-- [ ] T018 [US3] Teste: mini-bio gera 2 versões factuais sem clichê, passa no ruleset, persiste com
+- [x] T018 [US3] Teste: mini-bio gera 2 versões factuais sem clichê, passa no ruleset, persiste com
   `format='mini_bio'`.
 
 **Checkpoint**: 3 formatos no mesmo motor; fundação provada de ponta a ponta.
 
 ## Phase 6: Polish & Cross-Cutting
-- [ ] T019 [P] [POLISH] a11y da sugestão de recalibrar e do seletor de mini-bio (label, foco, teclado,
+- [x] T019 [P] [POLISH] a11y da sugestão de recalibrar e do seletor de mini-bio (label, foco, teclado,
   48px, 375px).
-- [ ] T020 [P] [POLISH] Zero string hardcoded; `en.json` espelha.
-- [ ] T021 [POLISH] `/impeccable audit` (UI leve) + `web-design-guidelines`.
-- [ ] T022 [POLISH] `/security-review` (voz do usuário, geração) + `/code-review high` + `/pr-review`;
-  cobertura ≥ 80%; CI verde (com o golden set como gate).
-- [ ] T023 [POLISH] Atualizar marcadores SPECKIT do `CLAUDE.md`; fechar o bloco de Geração de Conteúdo;
+- [x] T020 [P] [POLISH] Zero string hardcoded; `en.json` espelha.
+- [ ] T021 [POLISH] `/impeccable audit` (UI leve) + `web-design-guidelines`. **(pendente)**
+- [ ] T022 [POLISH] `/security-review` ✅ + `/code-review high` ✅ + `/pr-review` (pendente);
+  cobertura ≥ 80% ✅; CI verde (com o golden set como gate) — rodando no PR #24.
+- [x] T023 [POLISH] Atualizar marcadores SPECKIT do `CLAUDE.md`; fechar o bloco de Geração de Conteúdo;
   `docs/aprendizados.md` se houver algo não-óbvio (decisão de Ohana).
 
 ---
@@ -93,3 +93,10 @@ golden set) e 014 (drafts acumulados com voice_feedback)**.
 
 ## Notes
 - ~23 tasks. Migration mínima (`010`). UI leve — reusa as superfícies de 013/014.
+
+### Resolução (2026-06-15)
+O WIP `d7f7362` (fundação + ruleset + golden set + forma da mini-bio) foi **retomado e concluído** nos
+commits `8f5aa5a` (US1+US2+US3), `be3d727` (achados do code-review) e `f1cee2e` (status). Migration `010`
+**aplicada no dev** (`borogodo-dev`); **prod pendente**. Validado manualmente pela Ohana. PR #24 (draft →
+ready). Pendente só `/impeccable audit` (T021) e `/pr-review` (parte de T022); o re-nag da sugestão fica
+como follow-up (coluna `voice_feedback_at`).

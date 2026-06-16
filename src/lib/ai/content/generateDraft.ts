@@ -8,6 +8,7 @@ import {
   IMPACT_SUMMARY_SYSTEM_PROMPT,
   buildImpactSummaryUserPrompt,
 } from '@/lib/ai/content/prompts/impactSummary'
+import { MINI_BIO_SYSTEM_PROMPT, buildMiniBioUserPrompt } from '@/lib/ai/content/prompts/miniBio'
 import type { ContentPromptInput } from '@/lib/ai/content/prompts/discipline'
 import { GenerationFailedError } from '@/lib/errors'
 import type { ContentRulesetViolation, DraftFormat, DraftVariant } from '@/types/content'
@@ -29,6 +30,9 @@ interface PromptParts {
 function promptFor(format: DraftFormat): PromptParts {
   if (format === 'impact_summary') {
     return { system: IMPACT_SUMMARY_SYSTEM_PROMPT, buildUser: buildImpactSummaryUserPrompt }
+  }
+  if (format === 'mini_bio') {
+    return { system: MINI_BIO_SYSTEM_PROMPT, buildUser: buildMiniBioUserPrompt }
   }
   return { system: POST_SYSTEM_PROMPT, buildUser: buildPostUserPrompt }
 }
