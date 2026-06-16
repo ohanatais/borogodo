@@ -63,6 +63,10 @@ captura) e **prendendo o gatilho à rotina que já existe** (não cria ritual no
 - Q: Postura de privacidade para dado de terceiros no texto colado (v1)? → A: **RLS + aviso leve.**
   Mantém o isolamento por RLS que já existe e adiciona um aviso discreto de privacidade no campo de
   colar. **Sem** detecção/remoção automática de PII no v1.
+- Q: O áudio cobre o "começar, não gostar, parar e recomeçar" (intuição do WhatsApp)? → A: **Sim —
+  ciclo iniciar/parar/cancelar/regravar (FR-012a).** Diferença honesta do v1: Web Speech entrega
+  **texto ao vivo**, não clipe de áudio; "ouvir de novo" vira "ler o texto", regravar limpa a
+  transcrição anterior. Áudio-clipe com replay exigiria servidor → fora do v1 (Out of Scope).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -144,22 +148,36 @@ mesmo campo de captura, de onde segue para a mesma extração da US1. Onde a Web
 (iPhone/Safari), a UI **deixa isso honesto** e mantém o texto/colar como caminho principal — o áudio
 é um plus onde funciona bem (Android/Chrome/desktop), nunca uma promessa quebrada.
 
+O controle de gravação segue a intuição de áudio do WhatsApp — começar, parar, **desistir no meio** e
+**recomeçar do zero** —, com uma diferença honesta do v1: a Web Speech entrega **texto ao vivo**, não
+um clipe de áudio. Então "ouvir de novo antes de mandar" vira **"ler o texto que saiu"** (até melhor
+para o nosso caso, que é texto), e regravar significa **limpar o que transcreveu e falar de novo**. Em
+nenhum momento o áudio vira entrada sozinho: sempre há o texto na tela antes de extrair. (Um modelo de
+áudio-clipe com replay exigiria guardar áudio + transcrição no servidor — fora do v1, ver Out of Scope.)
+
 **Why this priority**: Amplia o alcance da captura para um perfil real, mas o valor central (input sem
 atrito) já é entregue por colar/escrever. A limitação de plataforma do v1 (Safari fraco) tira o áudio
 do caminho crítico. Por isso P2.
 
 **Independent Test**: Em Chrome/desktop, tocar o microfone, narrar uma conquista, parar → ver a
-transcrição no campo e seguir para a extração da US1; em Safari/iPhone, confirmar que a UI sinaliza a
-limitação e não bloqueia a captura por texto.
+transcrição no campo; cancelar uma gravação no meio e confirmar que nada fica; regravar e confirmar que
+o texto anterior é descartado; seguir para a extração da US1. Em Safari/iPhone, confirmar que a UI
+sinaliza a limitação e não bloqueia a captura por texto.
 
 **Acceptance Scenarios**:
 
 1. **Given** um navegador com suporte a Web Speech, **When** o usuário grava e para, **Then** o texto
    transcrito aparece no campo de captura, editável antes da extração.
-2. **Given** um navegador sem suporte confiável (Safari/iPhone), **When** o usuário acessa a captura,
+2. **Given** uma gravação em andamento, **When** o usuário **cancela no meio** (desiste), **Then** o
+   reconhecimento para, nada é transcrito nem salvo, e a UI volta ao estado inicial (pronto pra gravar
+   de novo ou digitar).
+3. **Given** uma transcrição que a pessoa não gostou (ainda não extraída), **When** ela escolhe
+   **regravar**, **Then** o texto anterior é descartado e uma nova gravação começa do zero — sem
+   acumular com a tentativa anterior.
+4. **Given** um navegador sem suporte confiável (Safari/iPhone), **When** o usuário acessa a captura,
    **Then** o botão de áudio se apresenta de forma honesta (indisponível/limitado) e o caminho de
    texto permanece plenamente funcional.
-3. **Given** uma transcrição imperfeita, **When** o usuário a revisa, **Then** ele pode corrigir o
+5. **Given** uma transcrição imperfeita, **When** o usuário a revisa, **Then** ele pode corrigir o
    texto antes de disparar a extração (o áudio nunca salva direto sem revisão).
 
 ### User Story 4 — Uma pergunta cirúrgica quando a entrada chega magra (Priority: P3)
@@ -195,6 +213,8 @@ confirmar que, depois (não no mesmo toque), **ressurge uma única** pergunta ci
   guardar"). **Sem** detecção/remoção automática de PII no v1 (decisão de clarify — escopo do v1).
 - **Web Speech indisponível ou permissão de microfone negada**: degrada para o caminho de texto sem
   erro opaco; a UI explica.
+- **Cancelar/regravar no meio**: parar ou desistir da gravação encerra o reconhecimento na hora;
+  regravar limpa a transcrição anterior antes de começar — nunca emenda a fala nova na antiga.
 - **Transcrição vazia / barulho**: nada é salvo silenciosamente; o usuário vê o que foi transcrito e
   decide.
 - **Delta ambíguo no nudge**: na dúvida entre "tem novidade" e "não tem", o sistema **nunca** fabrica
@@ -241,6 +261,10 @@ confirmar que, depois (não no mesmo toque), **ressurge uma única** pergunta ci
   API), sem backend de transcrição no v1, alimentando o mesmo campo/extração da US1.
 - **FR-012**: O áudio transcrito MUST ser revisável e editável pelo usuário **antes** da extração;
   nunca salva direto sem revisão.
+- **FR-012a**: A captura por voz MUST oferecer o ciclo de controle de áudio (intuição do WhatsApp):
+  **iniciar**, **parar**, **cancelar no meio** (descarta tudo, nada transcrito/salvo, volta ao estado
+  inicial) e **regravar do zero** (descarta a transcrição anterior antes de iniciar a nova, sem
+  acumular). No v1, com Web Speech, a revisão é **ler/editar o texto ao vivo**, não reouvir um clipe.
 - **FR-013**: Onde o suporte do navegador é fraco/ausente (ex.: Safari/iPhone), o sistema MUST
   sinalizar a limitação de forma honesta e MUST manter o caminho de texto plenamente funcional.
 
@@ -320,5 +344,8 @@ confirmar que, depois (não no mesmo toque), **ressurge uma única** pergunta ci
 - **Push / PWA / notificações fora do app**.
 - **Newsletter** (formato e plataforma de envio) — outro produto, fora do wedge.
 - **Transcrição de áudio no servidor** — evolução condicional, não v1.
+- **Áudio-clipe com replay (modelo WhatsApp completo)** — gravar, dar play e regravar ouvindo o áudio
+  exigiria guardar o arquivo de áudio + transcrição no servidor; o v1 entrega o equivalente em texto
+  (ler/editar/regravar), não o replay do áudio.
 - **Coluna `title` / feed cru de registros / grade-faísca** — são da 017.
 - **Anexos genéricos (PDF/DOCX) no colar** — o v1 é texto; arquivo é evolução.
