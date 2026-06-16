@@ -8,9 +8,10 @@ const intlMiddleware = createIntlMiddleware(routing)
 const PUBLIC_ROUTES = ['/', '/login', '/auth/callback']
 
 function isPublicRoute(pathname: string): boolean {
-  const stripped = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, '') || '/'
+  // Com localePrefix: 'never' (next-intl) as URLs nunca têm prefixo de locale,
+  // então comparamos o pathname diretamente.
   return PUBLIC_ROUTES.some(
-    (route) => stripped === route || stripped.startsWith(route + '/')
+    (route) => pathname === route || pathname.startsWith(route + '/')
   )
 }
 
