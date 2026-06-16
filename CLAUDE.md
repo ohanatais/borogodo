@@ -22,7 +22,7 @@ Features mergeadas em `main` (até PR #23):
 - **014-presenca** — hub `/presenca`, gestão total do rascunho, "Usar projeto" no histórico, sugestões (PR #23)
 
 <!-- SPECKIT START -->
-Current feature: **015-refino-voz** (branch: `015-refino-voz`) — **em revisão** (validação manual em curso)
+Current feature: **015-refino-voz** (branch: `015-refino-voz`) — **validada**, PR #24 ready for review
 Spec: [specs/015-refino-voz/spec.md](specs/015-refino-voz/spec.md) ·
 Tasks: [specs/015-refino-voz/tasks.md](specs/015-refino-voz/tasks.md)
 
@@ -34,8 +34,8 @@ Implementado: recalibração de voz com consentimento — `recalibrateVoice` (pr
 `/presenca`, gate de sugestão no servidor via `getVoiceSignal` (≥3 "não soa") (US1); golden set
 como gate dedicado e obrigatório no `ci.yml`, determinístico, + meta-regressão (US2); mini-bio
 como 3º formato no mesmo motor — `prompts/miniBio.ts` anti-clichê, opção no seletor (tema →
-post + mini-bio) (US3). Code-review + security-review feitos; sem CRITICAL/HIGH.
-Pendente: validação manual (quickstart) + `/impeccable audit` + `/pr-review` + migration no prod.
+post + mini-bio) (US3). Code-review + security-review feitos; sem CRITICAL/HIGH. Validada manualmente.
+Pendente: `/impeccable audit` + `/pr-review` + migration `010` no prod antes do deploy.
 
 **Bloco da Presença (fechado):**
 - **013-motor-de-voz** — fundação + post + resumo de impacto (migration `009`). ✅ mergeada.
