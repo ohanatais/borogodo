@@ -69,7 +69,14 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
     cleanup()
 
-    const rec = new Constructor()
+    let rec: SpeechRecognitionLike
+    try {
+      rec = new Constructor()
+    } catch {
+      setState('stopped')
+      return
+    }
+
     rec.continuous = true
     rec.interimResults = true
     rec.lang = navigator.language || 'pt-BR'
@@ -88,7 +95,8 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
         setState('permission-denied')
       } else {
-        setState('idle')
+        // Any other error (network, audio-capture, etc.) — show retry UI
+        setState('stopped')
       }
       recognitionRef.current = null
     })
@@ -99,7 +107,13 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     })
 
     recognitionRef.current = rec
-    rec.start()
+    try {
+      rec.start()
+    } catch {
+      setState('stopped')
+      recognitionRef.current = null
+      return
+    }
     setState('listening')
   }, [Constructor, cleanup])
 

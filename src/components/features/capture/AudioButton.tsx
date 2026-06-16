@@ -45,7 +45,7 @@ export function AudioButton({ onTranscript }: AudioButtonProps) {
 
   if (open) {
     return (
-      <div className="fixed bottom-20 left-4 right-4 z-40 lg:bottom-24 lg:left-auto lg:right-6 lg:w-[420px]">
+      <div className="fixed bottom-20 left-4 right-4 z-50 lg:bottom-24 lg:left-auto lg:right-6 lg:w-[420px]">
         <AudioRecorder
           onTranscript={handleTranscript}
           onCancel={() => setOpen(false)}
