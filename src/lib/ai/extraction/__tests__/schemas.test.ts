@@ -24,15 +24,15 @@ describe('T025 — title no schema de extração', () => {
     expect(entries[0].title).toBeUndefined()
   })
 
-  it('title maior que 80 chars falha a validação', () => {
-    expect(() =>
-      validateEntries(
-        [{ ...BASE_RAW, title: 'a'.repeat(81) }],
-        'text',
-        undefined,
-        'raw'
-      )
-    ).toThrow()
+  it('title maior que 80 chars é descartado silenciosamente (LLM não respeitou o limite)', () => {
+    const entries = validateEntries(
+      [{ ...BASE_RAW, title: 'a'.repeat(81) }],
+      'text',
+      undefined,
+      'raw'
+    )
+
+    expect(entries[0].title).toBeUndefined()
   })
 
   it('title com exatamente 80 chars passa a validação', () => {
