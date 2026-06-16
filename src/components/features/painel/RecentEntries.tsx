@@ -1,12 +1,14 @@
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { EntrySource } from '@/types/entry'
 import { EntryItem } from './EntryItem'
 
-const MAX_VISIBLE_ENTRIES = 3
+const MAX_VISIBLE_ENTRIES = 5
 
 interface RecentEntry {
   id: string
   what_i_did: string
+  title?: string | null
   source: EntrySource
   created_at: string
 }
@@ -17,6 +19,7 @@ interface RecentEntriesProps {
 
 export function RecentEntries({ entries }: RecentEntriesProps) {
   const t = useTranslations('panel')
+  const feedT = useTranslations('feed')
 
   if (entries.length === 0) return null
 
@@ -38,6 +41,13 @@ export function RecentEntries({ entries }: RecentEntriesProps) {
           />
         ))}
       </ul>
+      <Link
+        href="/registros"
+        className="inline-block text-sm font-medium mt-1 transition-opacity hover:opacity-70"
+        style={{ color: 'var(--color-primary)' }}
+      >
+        {feedT('viewAll')}
+      </Link>
     </section>
   )
 }
