@@ -6,10 +6,12 @@ vi.mock('@/lib/db/supabase/server', () => ({
 }))
 
 const mockGetVoiceProfile = vi.fn()
+const mockGetVoiceSignal = vi.fn()
 const mockGetVoiceFeedbackData = vi.fn()
 const mockUpsertVoiceProfile = vi.fn()
 vi.mock('@/lib/db/drafts', () => ({
   getVoiceProfile: (...args: unknown[]) => mockGetVoiceProfile(...args),
+  getVoiceSignal: (...args: unknown[]) => mockGetVoiceSignal(...args),
   getVoiceFeedbackData: (...args: unknown[]) => mockGetVoiceFeedbackData(...args),
   upsertVoiceProfile: (...args: unknown[]) => mockUpsertVoiceProfile(...args),
 }))
@@ -40,6 +42,7 @@ describe('POST /api/content/voice/recalibrate', () => {
     vi.clearAllMocks()
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     mockGetVoiceProfile.mockResolvedValue(null)
+    mockGetVoiceSignal.mockResolvedValue(SIGNAL_HIGH)
     mockGetVoiceFeedbackData.mockResolvedValue({
       signal: SIGNAL_HIGH,
       soa: ['soou bem'],
@@ -68,11 +71,7 @@ describe('POST /api/content/voice/recalibrate', () => {
   })
 
   it('modo sugerir devolve false abaixo do limiar', async () => {
-    mockGetVoiceFeedbackData.mockResolvedValue({
-      signal: { soaCount: 0, naoSoaCount: 1, lastFeedbackAt: '2026-06-10T00:00:00.000Z' },
-      soa: [],
-      naoSoa: ['só um'],
-    })
+    mockGetVoiceSignal.mockResolvedValue({ soaCount: 0, naoSoaCount: 1, lastFeedbackAt: '2026-06-10T00:00:00.000Z' })
     const { POST } = await import('../route')
     const res = await POST(makeRequest())
     const body = (await res.json()) as { suggest: boolean }

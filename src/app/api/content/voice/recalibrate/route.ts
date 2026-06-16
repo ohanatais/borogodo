@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { recalibrateVoice, shouldSuggestRecalibration } from '@/lib/ai/content/recalibrateVoice'
-import { getVoiceFeedbackData, getVoiceProfile, upsertVoiceProfile } from '@/lib/db/drafts'
+import { getVoiceFeedbackData, getVoiceSignal, getVoiceProfile, upsertVoiceProfile } from '@/lib/db/drafts'
 import { errorMessage } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
@@ -45,17 +45,23 @@ export async function POST(request: Request): Promise<NextResponse> {
   if (!parsed.success) return jsonError('invalid_request', 400)
 
   try {
+    // Modo sugerir: só o sinal (sem trazer os corpos dos rascunhos à toa).
+    if (!parsed.data.apply) {
+      const [existing, signal] = await Promise.all([
+        getVoiceProfile(supabase, user.id),
+        getVoiceSignal(supabase, user.id),
+      ])
+      return NextResponse.json(
+        { suggest: shouldSuggestRecalibration(signal, existing), signal },
+        { status: 200 }
+      )
+    }
+
+    // Modo aplicar (consentimento explícito): precisa dos corpos como insumo do LLM.
     const [existing, feedback] = await Promise.all([
       getVoiceProfile(supabase, user.id),
       getVoiceFeedbackData(supabase, user.id),
     ])
-
-    if (!parsed.data.apply) {
-      return NextResponse.json(
-        { suggest: shouldSuggestRecalibration(feedback.signal, existing), signal: feedback.signal },
-        { status: 200 }
-      )
-    }
 
     // Aplicar sem nenhum sinal seria recalibrar do nada — no-op honesto, devolve a voz intacta.
     if (feedback.soa.length === 0 && feedback.naoSoa.length === 0) {

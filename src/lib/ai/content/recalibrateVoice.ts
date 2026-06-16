@@ -64,7 +64,12 @@ export async function recalibrateVoice(
     maxTokens: MAX_TOKENS,
   })
 
-  const inferredSummary = raw.trim() || existing?.inferredSummary
+  const inferredSummary = raw.trim()
+  if (!inferredSummary) {
+    // O LLM não devolveu síntese: falhar honestamente, em vez de gravar voz vazia, avançar o
+    // `updatedAt` (suprimindo futuras sugestões) e ainda mostrar "pronto" à pessoa. A rota mapeia 500.
+    throw new Error('Recalibração não produziu uma síntese de voz')
+  }
 
   return {
     tone: existing?.tone,

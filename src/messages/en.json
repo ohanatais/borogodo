@@ -355,7 +355,8 @@
       "arquivados": "Archived",
       "allFormats": "All",
       "post": "Post",
-      "impactSummary": "Summary"
+      "impactSummary": "Summary",
+      "miniBio": "Mini-bio"
     },
     "deleteConfirm": {
       "title": "Delete this draft?",

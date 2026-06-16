@@ -46,6 +46,13 @@ describe('recalibrateVoice — aplica com consentimento, preservando amostras', 
     expect(userPrompt).toContain('ISSO NAO SOOU')
   })
 
+  it('lança quando o LLM volta em branco (não grava voz vazia nem finge sucesso)', async () => {
+    const complete = vi.fn().mockResolvedValue('   ')
+    await expect(
+      recalibrateVoice({ existing: null, soaSamples: ['x'], naoSoaSamples: ['y'] }, complete)
+    ).rejects.toThrow()
+  })
+
   it('sem sinal nenhum, não chama o LLM e mantém o perfil inalterado', async () => {
     const complete = vi.fn()
     const existing: VoiceProfile = {

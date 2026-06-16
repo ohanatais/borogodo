@@ -466,7 +466,8 @@
       "arquivados": "Arquivados",
       "allFormats": "Todos",
       "post": "Post",
-      "impactSummary": "Resumo"
+      "impactSummary": "Resumo",
+      "miniBio": "Mini-bio"
     },
     "deleteConfirm": {
       "title": "Excluir este rascunho?",
