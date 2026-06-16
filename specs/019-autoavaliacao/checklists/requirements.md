@@ -37,7 +37,15 @@
 - Dependency: 013 (engine) → 016 (nudge for the calendar trigger) → 019. US1 (on-demand) is independent;
   US2 (proactive calendar trigger) depends on 016 being built.
 - Migration: extend `drafts.format` CHECK only; number ≠ 010 (015 already in main), confirm per merge order.
-- Candidate clarify areas: (1) artifact shape (structured multi-section vs longer impact_summary);
-  (2) how the user picks the period / configures the review cycle; (3) whether the self-assessment
-  includes "areas to develop" (new territory vs the strength-focused mirror); (4) whether the proactive
-  calendar trigger (US2) is in v1 or a fast-follow given the 016 dependency.
+- Clarify (Session 2026-06-15) resolved: (1) artifact = **structured by sections** (entregas/impacto/
+  evolução/pontos a desenvolver); (2) period = **presets + custom range**, with a **configurable trigger
+  recurrence (default trimestral/semestral, editable)**; (3) **includes "pontos a desenvolver"** but
+  **evidence-grounded** (emerging strengths, thin-evidence themes, or user-stated intent — never
+  fabricated weakness); (4) **proactive trigger in v1 but painel-only** (reuses 016), **email deferred**
+  to fast-follow.
+- Pushback applied (against the literal answer, accepted by Ohana): email reverses a deliberate
+  discovery decision (in-app first; clock-based email = lixo) → painel v1, email fast-follow; a monthly
+  cadence for a *performance* self-assessment is off (review rhythm is quarterly/biannual) — the monthly
+  light "keep-fresh" nudge belongs to 016, not here.
+- Dependency: US2 (trigger) needs 016 built; US1 (on-demand) is independent. Migration = extend
+  `drafts.format` CHECK only (≠ 010).
