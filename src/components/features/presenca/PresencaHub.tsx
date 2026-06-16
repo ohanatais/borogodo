@@ -14,6 +14,7 @@ import {
   type DraftUpdatedDetail,
 } from '@/components/features/content/presencaEvents'
 import { patchDraft, deleteDraft } from '@/components/features/content/draftsClient'
+import { VoiceRecalibratePrompt } from '@/components/features/content/VoiceRecalibratePrompt'
 import { DraftListItem } from './DraftListItem'
 import { StatusFilter } from './StatusFilter'
 import { DeleteConfirm } from './DeleteConfirm'
@@ -24,6 +25,10 @@ interface PresencaHubProps {
   hasAnyDrafts: boolean
   themes: string[]
   entries: PresencaSeedEntry[]
+  /** Sugerir recalibrar a voz (015): sinal de "não soa" acumulado acima do limiar (decidido no servidor). */
+  suggestRecalibration?: boolean
+  /** Chave do sinal (lastFeedbackAt) para lembrar a dispensa da sugestão até chegar feedback novo. */
+  recalibrateSignalKey?: string | null
 }
 
 function buildQuery(cursor: string | null, status: DraftStatusFilter, format: DraftFormat | null): string {
@@ -48,7 +53,14 @@ function matchesStatusFilter(status: DraftStatus, filter: DraftStatusFilter): bo
  * restaurar e excluir saem da lista de forma otimista, com rollback se a escrita falhar e transição
  * suave (Framer). Reusa o motor da 013 (retomar → `GenerateSheet`). Nunca mostra página em branco.
  */
-export function PresencaHub({ initialPage, hasAnyDrafts, themes, entries }: PresencaHubProps) {
+export function PresencaHub({
+  initialPage,
+  hasAnyDrafts,
+  themes,
+  entries,
+  suggestRecalibration = false,
+  recalibrateSignalKey = null,
+}: PresencaHubProps) {
   const t = useTranslations('presenca')
   const [items, setItems] = useState<Draft[]>(initialPage.items)
   const [cursor, setCursor] = useState<string | null>(initialPage.nextCursor)
@@ -171,6 +183,8 @@ export function PresencaHub({ initialPage, hasAnyDrafts, themes, entries }: Pres
 
   return (
     <div className="flex flex-col gap-4">
+      {suggestRecalibration && <VoiceRecalibratePrompt signalKey={recalibrateSignalKey} />}
+
       {hasAnyDrafts && (
         <StatusFilter
           status={status}

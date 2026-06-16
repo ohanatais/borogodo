@@ -30,6 +30,13 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Guardrail de voz (015): gate explícito e obrigatório. Trava regressão das regras anti-IA e do
+      # schema sempre que um prompt do bloco de conteúdo mudar. Determinístico, sem chamada de IA
+      # (asserções sobre o ruleset + fixtures mockadas), então sem custo e sem flakiness. Roda à parte
+      # do `npm test` de propósito: mesmo que a suíte geral fosse pulada, o guardrail de voz não é.
+      - name: Golden set (guardrail de voz)
+        run: npx vitest run src/lib/ai/content/__tests__/goldenSet.test.ts src/lib/ai/content/__tests__/validateRuleset.test.ts
+
       - name: Tests
         run: npm test --if-present
 

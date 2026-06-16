@@ -20,7 +20,10 @@ interface PresencaCreateProps {
   variant?: 'solid' | 'subtle'
 }
 
-const THEME_FORMATS: DraftFormat[] = ['post']
+// Tema do espelho carrega a trajetória recente inteira como evidência (loadThemeSeed → entradas
+// recentes), então é o seed certo para a mini-bio (sobre a pessoa como um todo, não um feito só).
+// A bio a partir de uma entrada única ficaria estreita demais, por isso não entra em ENTRY_FORMATS.
+const THEME_FORMATS: DraftFormat[] = ['post', 'mini_bio']
 const ENTRY_FORMATS: DraftFormat[] = ['post', 'impact_summary']
 
 /**

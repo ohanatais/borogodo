@@ -46,6 +46,17 @@ export interface VoiceProfile {
   updatedAt: string
 }
 
+/**
+ * Sinal acumulado de "soa"/"nao_soa" dos rascunhos (013/014) — base para SUGERIR a recalibração de
+ * voz (015), nunca para aplicá-la sozinha. `lastFeedbackAt` é o feedback mais recente (ISO), usado
+ * para só sugerir quando há sinal novo desde a última recalibração (`voice_profile.updatedAt`).
+ */
+export interface VoiceSignal {
+  soaCount: number
+  naoSoaCount: number
+  lastFeedbackAt: string | null
+}
+
 /** Violação anti-IA detectada pelo ruleset determinístico (espelha `RulesetViolation` do espelho). */
 export interface ContentRulesetViolation {
   assert: number

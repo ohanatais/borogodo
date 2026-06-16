@@ -55,6 +55,43 @@ describe('generateDraft — caminho feliz', () => {
   })
 })
 
+describe('generateDraft — mini-bio (US3 da 015)', () => {
+  const MINI_BIO_OUTPUT = {
+    variants: [
+      { angle: 'mais direta', body: 'Sou PM há oito anos, hoje lidero produto numa fintech. Construí times de discovery do zero.', evidence_refs: ['E1'] },
+      { angle: 'mais narrativa', body: 'Comecei em dados e migrei para produto. Hoje cuido da área de pagamentos de uma fintech.', evidence_refs: ['E2'] },
+    ],
+  }
+
+  it('usa o system prompt da mini-bio (com a regra anti-clichê) e devolve 2 variantes que passam no ruleset', async () => {
+    const complete = vi.fn().mockResolvedValue(jsonBlock(MINI_BIO_OUTPUT))
+    const result = await generateDraft({ ...BASE_INPUT, format: 'mini_bio' }, complete)
+
+    expect(result.variants).toHaveLength(2)
+    expect(complete.mock.calls[0][0].system).toContain('mini-bio')
+    expect(complete.mock.calls[0][0].system).toContain('CLICHÊ DE BIO')
+  })
+
+  it('regenera quando a bio sai com clichê de bio (assert 10) e fica limpa na 2ª', async () => {
+    const DIRTY_BIO = {
+      variants: [
+        { angle: 'a', body: 'Profissional apaixonado por tecnologia e movido a desafios.', evidence_refs: ['E1'] },
+        { angle: 'b', body: 'Sou PM numa fintech há oito anos.', evidence_refs: ['E2'] },
+      ],
+    }
+    const complete = vi
+      .fn()
+      .mockResolvedValueOnce(jsonBlock(DIRTY_BIO))
+      .mockResolvedValueOnce(jsonBlock(MINI_BIO_OUTPUT))
+
+    const result = await generateDraft({ ...BASE_INPUT, format: 'mini_bio' }, complete)
+
+    expect(result.variants).toHaveLength(2)
+    expect(complete).toHaveBeenCalledTimes(2)
+    expect(complete.mock.calls[1][0].user).toContain('violou as regras')
+  })
+})
+
 describe('generateDraft — regeneração única', () => {
   it('regenera uma vez ao detectar violação do ruleset e injeta o feedback', async () => {
     const complete = vi

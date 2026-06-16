@@ -98,6 +98,13 @@ describe('POST /api/content/generate', () => {
     )
   })
 
+  it('US3: aceita e gera mini-bio a partir de um tema (reusa o mesmo motor)', async () => {
+    const { POST } = await import('../route')
+    const res = await POST(makeRequest({ format: 'mini_bio', seedType: 'theme', seedRef: 'produto 0→1' }))
+    expect(res.status).toBe(200)
+    expect(mockGenerateDraft).toHaveBeenCalledWith(expect.objectContaining({ format: 'mini_bio' }))
+  })
+
   it('não chama o motor quando o seed não existe (sem custo de IA)', async () => {
     mockLoadSeed.mockResolvedValue(null)
     const { POST } = await import('../route')
