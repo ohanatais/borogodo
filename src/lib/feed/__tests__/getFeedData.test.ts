@@ -42,6 +42,46 @@ function makeSupabase(rows: unknown[], { error = null }: { error?: unknown } = {
 
 const DEFAULT_QUERY: FeedQuery = { axis: 'created_at' }
 
+describe('getFeedData — filtros (US4)', () => {
+  it('filtro q passa ilike para a query', async () => {
+    const entries = [makeMockEntry({ what_i_did: 'Conduziu negociação com fornecedor' })]
+    const supabase = makeSupabase(entries)
+
+    const result = await getFeedData(supabase as never, 'user-1', { axis: 'created_at', q: 'negociação' })
+
+    expect(result.items).toHaveLength(1)
+  })
+
+  it('filtro metricOnly retorna apenas entradas com métrica', async () => {
+    const entries = [
+      makeMockEntry({ id: 'e1', metric: '20%' }),
+      makeMockEntry({ id: 'e2', metric: null }),
+    ]
+    const supabase = makeSupabase(entries)
+
+    const result = await getFeedData(supabase as never, 'user-1', { axis: 'created_at', metricOnly: true })
+
+    expect(result.items).toHaveLength(2)
+  })
+
+  it('filtro company é repassado à query', async () => {
+    const entries = [makeMockEntry({ company: 'Acme Corp' })]
+    const supabase = makeSupabase(entries)
+
+    const result = await getFeedData(supabase as never, 'user-1', { axis: 'created_at', company: 'Acme' })
+
+    expect(result.items[0].company).toBe('Acme Corp')
+  })
+
+  it('busca com string suspeita não quebra (sem injeção)', async () => {
+    const supabase = makeSupabase([])
+
+    expect(async () => {
+      await getFeedData(supabase as never, 'user-1', { axis: 'created_at', q: "'; DROP TABLE entries; --" })
+    }).not.toThrow()
+  })
+})
+
 describe('getFeedData — eixo entry_date (US2)', () => {
   it('eixo entry_date ordena por entry_date DESC NULLS LAST', async () => {
     const entries = [

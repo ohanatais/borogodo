@@ -429,7 +429,11 @@
       "tags": "Tags",
       "metricOnly": "With metric",
       "source": "Source",
-      "clear": "Clear filters"
+      "clear": "Clear filters",
+      "today": "Today",
+      "week": "7 days",
+      "month": "30 days",
+      "quarter": "90 days"
     },
     "card": {
       "expand": "View details",

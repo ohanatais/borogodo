@@ -549,7 +549,11 @@
       "tags": "Tags",
       "metricOnly": "Com métrica",
       "source": "Origem",
-      "clear": "Limpar filtros"
+      "clear": "Limpar filtros",
+      "today": "Hoje",
+      "week": "7 dias",
+      "month": "30 dias",
+      "quarter": "90 dias"
     },
     "card": {
       "expand": "Ver detalhes",
