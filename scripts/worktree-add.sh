@@ -22,12 +22,15 @@ PARENT_DIR="$(dirname "$REPO_ROOT")"
 PREFIX="$(echo "$BRANCH" | grep -oE '^[0-9]+' || echo "$BRANCH")"
 WORKTREE_DIR="$PARENT_DIR/$REPO_NAME-$PREFIX"
 
-echo "→ Criando worktree: $WORKTREE_DIR (branch: $BRANCH, base: $BASE)"
+echo "→ Sincronizando com origin/$BASE..."
+git fetch origin "$BASE"
+
+echo "→ Criando worktree: $WORKTREE_DIR (branch: $BRANCH, base: origin/$BASE)"
 
 if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
   git worktree add "$WORKTREE_DIR" "$BRANCH"
 else
-  git worktree add -b "$BRANCH" "$WORKTREE_DIR" "$BASE"
+  git worktree add -b "$BRANCH" "$WORKTREE_DIR" "origin/$BASE"
 fi
 
 # Linka .env.local se existir no repositório principal
