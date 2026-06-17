@@ -20,6 +20,7 @@ interface AngleChip {
 const ANGLE_CHIPS: AngleChip[] = [
   { value: null, labelKey: 'angles.relato' },
   { value: 'study', labelKey: 'angles.study' },
+  { value: 'opinion', labelKey: 'angles.opinion' },
 ]
 
 /**

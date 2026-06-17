@@ -310,7 +310,25 @@
     "angles": {
       "label": "Choose the post angle",
       "relato": "Story",
-      "study": "Study"
+      "study": "Study",
+      "opinion": "Opinion"
+    },
+    "opinion": {
+      "thesisLabel": "Your thesis",
+      "thesisPlaceholder": "A statement you want to defend...",
+      "lastroLabel": "Backing",
+      "fromEntry": "Use a saved entry",
+      "writeNow": "Write now",
+      "writeNowTitle": "Record what happened",
+      "writeNowPlaceholder": "What happened? Be specific — this becomes real evidence.",
+      "generateBtn": "Generate",
+      "needsLastroError": "Add some backing: select an entry or describe the experience here."
+    },
+    "captureOffer": {
+      "question": "Save this experience?",
+      "save": "Save",
+      "dismiss": "Dismiss",
+      "saved": "Experience saved!"
     },
     "formats": {
       "post": "Post",

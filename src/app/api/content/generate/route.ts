@@ -15,6 +15,7 @@ const generateRequestSchema = z.object({
   adjust: z.enum(['mais_curto', 'menos_formal', 'tira_jargao']).nullish(),
   angleKind: z.enum(['study', 'opinion']).nullish(),
   thesis: z.string().max(500).nullish(),
+  lastroText: z.string().max(2000).nullish(),
 })
 
 function jsonError(error: string, status: number): NextResponse {
@@ -43,18 +44,29 @@ export async function POST(request: Request): Promise<NextResponse> {
   const parsed = generateRequestSchema.safeParse(body)
   if (!parsed.success) return jsonError('invalid_request', 400)
 
-  const { format, seedType, seedRef, angle, adjust, angleKind, thesis } = parsed.data
+  const { format, seedType, seedRef, angle, adjust, angleKind, thesis, lastroText } = parsed.data
 
   try {
     const seed = await loadSeedEvidence(supabase, user.id, seedType, seedRef)
     if (!seed) return jsonError('seed_not_found', 404)
+
+    const trimmedLastro = lastroText?.trim() ?? ''
+    // Guardrail de lastro (US2): opinião sem evidência registrada e sem vivência na hora não gera.
+    if (angleKind === 'opinion' && seed.evidence.length === 0 && trimmedLastro === '') {
+      return jsonError('opinion_needs_lastro', 400)
+    }
+
+    // Lastro "escrever agora" entra como evidência prepended (âncora prioritária para a tese).
+    const evidence = trimmedLastro
+      ? [{ label: 'Lastro', text: trimmedLastro }, ...seed.evidence]
+      : seed.evidence
 
     const voiceProfile = await getVoiceProfile(supabase, user.id)
 
     const { variants } = await generateDraft({
       format,
       seedSummary: seed.seedSummary,
-      evidence: seed.evidence,
+      evidence,
       voiceProfile,
       angle: angle ?? null,
       adjust: adjust ?? null,

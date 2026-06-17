@@ -162,3 +162,31 @@ describe('generateDraft — ângulo de estudo (US1)', () => {
     expect(complete.mock.calls[0][0].user).not.toContain('ÂNGULO:')
   })
 })
+
+// T017 — RED (Phase 4 US2): guardrail de opinião sem lastro
+describe('generateDraft — guardrail de opinião (US2)', () => {
+  // Corpos limpos no ruleset (sem travessão, antítese, advérbio de ênfase, jargão etc.)
+  // — só violam o guardrail de opinião por NÃO ancorarem em evidência (evidence_refs vazio).
+  const NO_ANCHOR_OUTPUT = {
+    variants: [
+      { angle: 'a tese', body: 'Retenção se constrói com confiança acumulada ao longo dos trimestres.', evidence_refs: [] },
+      { angle: 'o contraponto', body: 'A maioria dos times mede engajamento e esquece a confiança.', evidence_refs: [] },
+    ],
+  }
+
+  it('lança GenerationFailedError quando todas as variantes de opinião saem sem evidência nas duas tentativas', async () => {
+    const complete = vi.fn().mockResolvedValue(jsonBlock(NO_ANCHOR_OUTPUT))
+
+    await expect(
+      generateDraft({ ...BASE_INPUT, format: 'post', angleKind: 'opinion', thesis: 'Retenção é confiança' }, complete)
+    ).rejects.toBeInstanceOf(GenerationFailedError)
+    expect(complete).toHaveBeenCalledTimes(2)
+  })
+
+  it('não aplica o guardrail de opinião quando angleKind não é opinion (relato com evidência vazia passa)', async () => {
+    const complete = vi.fn().mockResolvedValue(jsonBlock(NO_ANCHOR_OUTPUT))
+
+    const result = await generateDraft({ ...BASE_INPUT, format: 'post', angleKind: null }, complete)
+    expect(result.variants).toHaveLength(2)
+  })
+})

@@ -9,6 +9,8 @@ import type { AdjustKind, AngleKind, DraftFormat, DraftVariant } from '@/types/c
 import { DraftCard } from './DraftCard'
 import { AdjustChips } from './AdjustChips'
 import { AngleSelector, type AngleValue } from './AngleSelector'
+import { OpinionPanel } from './OpinionPanel'
+import { CaptureOffer } from './CaptureOffer'
 import { VoiceCalibration } from './VoiceCalibration'
 import {
   PRESENCA_OPEN_EVENT,
@@ -20,6 +22,12 @@ import {
 type Status = 'idle' | 'angle-select' | 'generating' | 'done' | 'error'
 type ErrorKind = 'generationFailed' | 'generic'
 type Mode = 'generate' | 'resume'
+type LastroMode = 'entry' | 'writeNow'
+
+interface OpinionOptions {
+  thesis: string
+  lastroText: string
+}
 
 const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
   post: 'formats.post',
@@ -64,10 +72,26 @@ export function GenerateSheet() {
   const [genId, setGenId] = useState(0)
   /** Ângulo escolhido para o post (018 US1); `null` = relato (padrão). */
   const [angleKind, setAngleKind] = useState<AngleValue>(null)
+  /** Estado do painel de opinião (018 US2). */
+  const [thesis, setThesis] = useState('')
+  const [lastroMode, setLastroMode] = useState<LastroMode | null>(null)
+  const [lastroText, setLastroText] = useState('')
+  const [opinionError, setOpinionError] = useState<string | null>(null)
+  /** Vivência dita na hora que gerou a opinião — habilita o CaptureOffer; salva quando salva. */
+  const [pendingLastro, setPendingLastro] = useState<string | null>(null)
+  const [captureDismissed, setCaptureDismissed] = useState(false)
 
   const generate = useCallback(
-    async (seed: PresencaOpenDetail, fmt: DraftFormat, adjust?: AdjustKind, angle?: AngleKind | null) => {
+    async (
+      seed: PresencaOpenDetail,
+      fmt: DraftFormat,
+      adjust?: AdjustKind,
+      angle?: AngleKind | null,
+      opinion?: OpinionOptions
+    ) => {
       setStatus('generating')
+      setOpinionError(null)
+      const trimmedLastro = opinion?.lastroText.trim() ?? ''
       try {
         const res = await fetch('/api/content/generate', {
           method: 'POST',
@@ -78,10 +102,20 @@ export function GenerateSheet() {
             seedRef: seed.seedRef,
             ...(adjust ? { adjust } : {}),
             ...(angle ? { angleKind: angle } : {}),
+            ...(opinion?.thesis.trim() ? { thesis: opinion.thesis.trim() } : {}),
+            ...(trimmedLastro ? { lastroText: trimmedLastro } : {}),
           }),
         })
 
         if (!res.ok) {
+          if (res.status === 400) {
+            const body = (await res.json().catch(() => ({}))) as { error?: string }
+            if (body.error === 'opinion_needs_lastro') {
+              setOpinionError('opinion_needs_lastro')
+              setStatus('angle-select')
+              return
+            }
+          }
           setErrorKind(res.status === 422 ? 'generationFailed' : 'generic')
           setStatus('error')
           return
@@ -89,6 +123,8 @@ export function GenerateSheet() {
 
         const body = (await res.json()) as { variants: DraftVariant[] }
         setVariants(body.variants)
+        setPendingLastro(trimmedLastro || null)
+        setCaptureDismissed(false)
         setGenId((id) => id + 1)
         setStatus('done')
       } catch {
@@ -110,6 +146,12 @@ export function GenerateSheet() {
       setFormat(initialFormat)
       setVariants([])
       setAngleKind(null)
+      setThesis('')
+      setLastroMode(null)
+      setLastroText('')
+      setOpinionError(null)
+      setPendingLastro(null)
+      setCaptureDismissed(false)
       setOpen(true)
       // Post abre no seletor de ângulo (US1); outros formatos geram direto (sem ângulo).
       if (initialFormat === 'post') {
@@ -153,15 +195,36 @@ export function GenerateSheet() {
 
   function handleSelectAngle(angle: AngleValue) {
     setAngleKind(angle)
+    setOpinionError(null)
+    // Opinião abre o painel inline (tese + lastro) em vez de gerar de imediato.
+    if (angle === 'opinion') return
     if (detail) void generate(detail, format, undefined, angle)
   }
 
+  function opinionOptions(): OpinionOptions | undefined {
+    if (angleKind !== 'opinion') return undefined
+    return { thesis, lastroText: lastroMode === 'writeNow' ? lastroText : '' }
+  }
+
+  function handleGenerateOpinion() {
+    if (detail) void generate(detail, format, undefined, 'opinion', opinionOptions())
+  }
+
   function handleRegenerate() {
-    if (detail) void generate(detail, format, undefined, angleKind)
+    if (detail) void generate(detail, format, undefined, angleKind, opinionOptions())
   }
 
   function handleAdjust(adjust: AdjustKind) {
-    if (detail) void generate(detail, format, adjust, angleKind)
+    if (detail) void generate(detail, format, adjust, angleKind, opinionOptions())
+  }
+
+  function handleAcceptCapture() {
+    if (!pendingLastro) return
+    const form = new FormData()
+    form.append('kind', 'text')
+    form.append('content', pendingLastro)
+    void fetch('/api/capture', { method: 'POST', body: form })
+    setCaptureDismissed(true)
   }
 
   if (!detail) return null
@@ -239,7 +302,24 @@ export function GenerateSheet() {
             {/* Conteúdo: animação de escrita, rascunhos, ou erro honesto */}
             <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4 min-h-0">
               {status === 'angle-select' && (
-                <AngleSelector selected={angleKind} onSelect={handleSelectAngle} />
+                <>
+                  <AngleSelector selected={angleKind} onSelect={handleSelectAngle} />
+                  {angleKind === 'opinion' && (
+                    <OpinionPanel
+                      thesis={thesis}
+                      onThesisChange={setThesis}
+                      lastroMode={lastroMode}
+                      onLastroModeChange={setLastroMode}
+                      entries={[]}
+                      selectedEntryRef={null}
+                      onSelectEntry={() => {}}
+                      lastroText={lastroText}
+                      onLastroTextChange={setLastroText}
+                      onGenerate={handleGenerateOpinion}
+                      error={opinionError}
+                    />
+                  )}
+                </>
               )}
 
               {status === 'generating' && <GeneratingState label={t('generating')} />}
@@ -277,6 +357,13 @@ export function GenerateSheet() {
                 </>
               )}
             </div>
+
+            {/* Oferta de captura: vivência dita na hora vira entrada permanente (US2) */}
+            {status === 'done' && mode === 'generate' && pendingLastro && !captureDismissed && (
+              <div className="px-5 pb-3 shrink-0">
+                <CaptureOffer onAccept={handleAcceptCapture} onDismiss={() => setCaptureDismissed(true)} />
+              </div>
+            )}
 
             {/* Rodapé: regerar + afinar voz (refino discreto) — só na geração fresca */}
             {status === 'done' && mode === 'generate' && (

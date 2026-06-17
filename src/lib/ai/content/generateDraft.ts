@@ -70,6 +70,16 @@ function isClean(result: AttemptResult): result is { output: DraftOutput; violat
   return result.output !== null && result.violations.length === 0
 }
 
+/**
+ * Guardrail de opinião (US2): uma opinião sem âncora não pode sair. Se todas as variantes voltarem
+ * com `evidence_refs` vazio, a tese não tem lastro real — trata como falha (regenera/lança). Só
+ * vale para `angleKind === 'opinion'`; relato/estudo com evidência vazia continuam passando.
+ */
+function passesOpinionGuardrail(input: GenerateDraftInput, output: DraftOutput): boolean {
+  if (input.angleKind !== 'opinion') return true
+  return output.variants.some((v) => v.evidence_refs.length > 0)
+}
+
 const MALFORMED_FEEDBACK =
   '\n\nA tentativa anterior não voltou no formato JSON pedido. Devolva exatamente 2 variantes no formato especificado.'
 
@@ -93,13 +103,13 @@ export async function generateDraft(
   const baseUser = buildUser(promptInput)
 
   const first = await attempt(system, baseUser, format, complete)
-  if (isClean(first)) {
+  if (isClean(first) && passesOpinionGuardrail(input, first.output)) {
     return { variants: toVariants(first.output) }
   }
 
   const feedback = first.violations.length > 0 ? violationFeedback(first.violations) : MALFORMED_FEEDBACK
   const second = await attempt(system, baseUser + feedback, format, complete)
-  if (isClean(second)) {
+  if (isClean(second) && passesOpinionGuardrail(input, second.output)) {
     return { variants: toVariants(second.output) }
   }
 

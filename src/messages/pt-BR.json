@@ -430,7 +430,25 @@
     "angles": {
       "label": "Escolha o ângulo do post",
       "relato": "Relato",
-      "study": "Estudo"
+      "study": "Estudo",
+      "opinion": "Opinião"
+    },
+    "opinion": {
+      "thesisLabel": "Sua tese",
+      "thesisPlaceholder": "Uma afirmação que você quer defender...",
+      "lastroLabel": "Lastro",
+      "fromEntry": "Usar entrada registrada",
+      "writeNow": "Escrever agora",
+      "writeNowTitle": "Registre o que aconteceu",
+      "writeNowPlaceholder": "O que aconteceu? Seja específico — isso vira evidência real.",
+      "generateBtn": "Gerar",
+      "needsLastroError": "Adicione um lastro: selecione uma entrada ou descreva a vivência aqui."
+    },
+    "captureOffer": {
+      "question": "Salvar esta vivência?",
+      "save": "Salvar",
+      "dismiss": "Dispensar",
+      "saved": "Vivência salva!"
     },
     "formats": {
       "post": "Post",

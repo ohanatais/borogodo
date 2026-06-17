@@ -292,6 +292,26 @@ export const goodCases: GoldenCase[] = [
     },
   },
   {
+    name: 'post opinião (018 US2) — tese ancorada no lastro',
+    format: 'post',
+    seedLabels: ['Lastro', 'E1'],
+    voiceProfile: { tone: 'direto e caloroso', samples: [], updatedAt: TS },
+    output: {
+      variants: [
+        {
+          angle: 'a tese',
+          body: 'Retenção se constrói com confiança, não com promoção. Conduzi a virada de retenção numa fintech ajustando o onboarding a cada ciclo, e a recompra subiu de forma constante ao longo de quatro trimestres.',
+          evidence_refs: ['Lastro'],
+        },
+        {
+          angle: 'o contraponto',
+          body: 'Muito time mede engajamento e esquece a confiança acumulada. Quando parei de caçar usuário novo e cuidei de quem já estava na base, a conversa com o cliente mudou de tom no primeiro mês.',
+          evidence_refs: ['E1'],
+        },
+      ],
+    },
+  },
+  {
     name: 'post estudo (018 US1) — aprendizado ancorado',
     format: 'post',
     seedLabels: ['E1', 'E2'],
@@ -327,4 +347,5 @@ export const badCases: BadCase[] = [
   { name: 'hot take', assert: 11, body: 'Isso é um hot take que vai incomodar muito gente.' },
   { name: 'impopular mas', assert: 11, body: 'Opinião impopular mas alguém tinha que falar sobre isso.' },
   { name: 'ninguém fala sobre isso', assert: 11, body: 'Ninguém fala sobre isso mas é a verdade do mercado.' },
+  { name: 'opinião sem âncora (hot take de polêmica vazia)', assert: 11, body: 'Vou dar um hot take aqui: a maioria está errada e ninguém tem coragem de dizer.' },
 ]

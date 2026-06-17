@@ -123,13 +123,27 @@ const STUDY_ANGLE_INSTRUCTION = `ÂNGULO: Estudo. Conte algo que você estudou o
 fez de fato). O foco é o aprendizado concreto, não a auto-bajulação: o que mudou no seu jeito de
 pensar ou fazer, sempre colado a um fato das suas entradas. Nada de lição genérica de coach.`
 
+function opinionAngleInstruction(thesis: string | null | undefined): string {
+  const thesisLine = thesis?.trim()
+    ? `\nTese a defender: "${thesis.trim()}".`
+    : ''
+  return `ÂNGULO: Opinião. Defenda uma tese ancorada no lastro real (a evidência abaixo, incluindo o
+[Lastro] quando houver). Toda afirmação da tese precisa apontar para um fato concreto seu, nunca
+opinião vazia: cada variante deve ter evidence_refs não-vazio. Proibido "hot take", "opinião
+impopular mas", "ninguém fala sobre isso" e qualquer pose de polêmica sem substância.${thesisLine}`
+}
+
 /**
  * Bloco de ângulo do post (018). Vazio para o ângulo padrão (relato). Estudo reorienta as duas
- * variantes para o aprendizado ancorado na evidência. Opinião (US2) será adicionado na Phase 4.
+ * variantes para o aprendizado ancorado na evidência. Opinião (US2) defende uma tese ancorada no
+ * lastro, sem opinião vazia (assert 11).
  */
 export function buildAngleBlock(input: ContentPromptInput): string {
   if (input.angleKind === 'study') {
     return `\n\n${STUDY_ANGLE_INSTRUCTION}`
+  }
+  if (input.angleKind === 'opinion') {
+    return `\n\n${opinionAngleInstruction(input.thesis)}`
   }
   return ''
 }

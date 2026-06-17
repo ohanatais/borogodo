@@ -134,4 +134,66 @@ describe('POST /api/content/generate', () => {
       expect.objectContaining({ thesis: 'Retenção é confiança' })
     )
   })
+
+  // T018 — RED (Phase 4 US2): pré-check de lastro + injeção de lastroText
+  describe('US2: opinião com lastro', () => {
+    it('devolve 400 opinion_needs_lastro quando opinion sem evidência e sem lastroText', async () => {
+      mockLoadSeed.mockResolvedValue({ seedSummary: 'produto 0→1', evidence: [] })
+      const { POST } = await import('../route')
+      const res = await POST(makeRequest({ ...VALID_BODY, angleKind: 'opinion', thesis: 'Retenção é confiança' }))
+      expect(res.status).toBe(400)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('opinion_needs_lastro')
+    })
+
+    it('não chama o motor quando falta lastro (sem custo de IA)', async () => {
+      mockLoadSeed.mockResolvedValue({ seedSummary: 'produto 0→1', evidence: [] })
+      const { POST } = await import('../route')
+      await POST(makeRequest({ ...VALID_BODY, angleKind: 'opinion', thesis: 'Retenção é confiança' }))
+      expect(mockGenerateDraft).not.toHaveBeenCalled()
+    })
+
+    it('injeta lastroText como { label: "Lastro" } no início da evidência antes do motor', async () => {
+      mockLoadSeed.mockResolvedValue({
+        seedSummary: 'produto 0→1',
+        evidence: [{ label: 'E1', text: 'fato registrado' }],
+      })
+      const { POST } = await import('../route')
+      await POST(
+        makeRequest({
+          ...VALID_BODY,
+          angleKind: 'opinion',
+          thesis: 'Retenção é confiança',
+          lastroText: 'Conduzi a virada de retenção numa fintech no último ano.',
+        })
+      )
+      expect(mockGenerateDraft).toHaveBeenCalledWith(
+        expect.objectContaining({
+          evidence: [
+            { label: 'Lastro', text: 'Conduzi a virada de retenção numa fintech no último ano.' },
+            { label: 'E1', text: 'fato registrado' },
+          ],
+        })
+      )
+    })
+
+    it('com lastroText e evidência vazia, gera normalmente (lastro basta como âncora)', async () => {
+      mockLoadSeed.mockResolvedValue({ seedSummary: 'produto 0→1', evidence: [] })
+      const { POST } = await import('../route')
+      const res = await POST(
+        makeRequest({
+          ...VALID_BODY,
+          angleKind: 'opinion',
+          thesis: 'Retenção é confiança',
+          lastroText: 'Conduzi a virada de retenção numa fintech.',
+        })
+      )
+      expect(res.status).toBe(200)
+      expect(mockGenerateDraft).toHaveBeenCalledWith(
+        expect.objectContaining({
+          evidence: [{ label: 'Lastro', text: 'Conduzi a virada de retenção numa fintech.' }],
+        })
+      )
+    })
+  })
 })
