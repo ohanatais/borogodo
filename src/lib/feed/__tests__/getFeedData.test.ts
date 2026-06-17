@@ -18,6 +18,7 @@ function makeMockEntry(overrides: Record<string, unknown> = {}) {
     impact: null,
     decision: null,
     learning: null,
+    file_name: null,
     ...overrides,
   }
 }
@@ -85,6 +86,15 @@ describe('getFeedData — filtros (US4)', () => {
     const result = await getFeedData(supabase as never, 'user-1', { axis: 'created_at', metricOnly: true })
 
     expect(result.items).toHaveLength(2)
+  })
+
+  it('repassa o file_name do arquivo de origem para o item (issue #42)', async () => {
+    const entries = [makeMockEntry({ source: 'linkedin_pdf', file_name: 'curriculo-2025.pdf' })]
+    const supabase = makeSupabase(entries)
+
+    const result = await getFeedData(supabase as never, 'user-1', { axis: 'created_at' })
+
+    expect(result.items[0].file_name).toBe('curriculo-2025.pdf')
   })
 
   it('filtro company é repassado à query', async () => {
