@@ -105,6 +105,53 @@ describe('POST /api/content/generate', () => {
     expect(mockGenerateDraft).toHaveBeenCalledWith(expect.objectContaining({ format: 'mini_bio' }))
   })
 
+  it('US1 (019): gera autoavaliação a partir de um período (self_assessment + period)', async () => {
+    const { POST } = await import('../route')
+    const res = await POST(
+      makeRequest({
+        format: 'self_assessment',
+        seedType: 'period',
+        seedRef: 'period:::2025-01-01:::2025-06-30',
+      })
+    )
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { variants: unknown[] }
+    expect(body.variants).toHaveLength(2)
+    expect(mockLoadSeed).toHaveBeenCalledWith(
+      expect.anything(),
+      'user-1',
+      'period',
+      'period:::2025-01-01:::2025-06-30'
+    )
+    expect(mockGenerateDraft).toHaveBeenCalledWith(
+      expect.objectContaining({ format: 'self_assessment' })
+    )
+  })
+
+  it('US1 (019): período malformado → 404 seed_not_found (loadSeedEvidence devolve null)', async () => {
+    mockLoadSeed.mockResolvedValue(null)
+    const { POST } = await import('../route')
+    const res = await POST(
+      makeRequest({
+        format: 'self_assessment',
+        seedType: 'period',
+        seedRef: 'period:::2025-06-30:::2025-01-01',
+      })
+    )
+    expect(res.status).toBe(404)
+    const body = (await res.json()) as { error: string }
+    expect(body.error).toBe('seed_not_found')
+  })
+
+  it('US1 (019): 401 sem sessão mesmo no fluxo de autoavaliação', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+    const { POST } = await import('../route')
+    const res = await POST(
+      makeRequest({ format: 'self_assessment', seedType: 'period', seedRef: 'period:::2025-01-01:::2025-06-30' })
+    )
+    expect(res.status).toBe(401)
+  })
+
   it('não chama o motor quando o seed não existe (sem custo de IA)', async () => {
     mockLoadSeed.mockResolvedValue(null)
     const { POST } = await import('../route')

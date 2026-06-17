@@ -7,6 +7,7 @@ import type { DraftFormat, DraftVariant, SeedType, VoiceFeedback } from '@/types
 import { CopyButton } from './CopyButton'
 import { createDraft, patchDraft } from './draftsClient'
 import { notifyDraftUpdated } from './presencaEvents'
+import { parseSelfAssessmentSections, type SelfAssessmentSection } from './selfAssessmentSections'
 
 /** Evidência base, necessária para persistir o rascunho escolhido (US4). */
 export interface DraftSeed {
@@ -30,6 +31,33 @@ const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
   post: 'formats.post',
   impact_summary: 'formats.impactSummary',
   mini_bio: 'formats.miniBio',
+  self_assessment: 'formats.selfAssessment',
+}
+
+/**
+ * Render por seções da autoavaliação (T016): cada cabeçalho vira um bloco com rótulo próprio em
+ * hierarquia *product* (peso/tamanho, não display). "Pontos a desenvolver" recebe o mesmo tratamento
+ * visual das demais — enquadrado como crescimento, sem cor de alerta.
+ */
+function SelfAssessmentBody({ sections }: { sections: SelfAssessmentSection[] }) {
+  const t = useTranslations('autoavaliacao.sections')
+
+  return (
+    <div className="flex flex-col gap-4">
+      {sections.map((section, i) => (
+        <section key={`${section.key ?? 'raw'}-${i}`} className="flex flex-col gap-1">
+          {(section.key || section.rawLabel) && (
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+              {section.key ? t(section.key) : section.rawLabel}
+            </h3>
+          )}
+          <p className="text-base whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--foreground)' }}>
+            {section.body}
+          </p>
+        </section>
+      ))}
+    </div>
+  )
 }
 
 /**
@@ -153,6 +181,8 @@ export function DraftCard({ variant, index, format, seed, existingDraftId }: Dra
           className="text-base leading-relaxed rounded-lg p-2 border resize-y"
           style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
         />
+      ) : format === 'self_assessment' ? (
+        <SelfAssessmentBody sections={parseSelfAssessmentSections(body)} />
       ) : (
         <p className="text-base whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--foreground)' }}>
           {body}

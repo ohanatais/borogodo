@@ -20,6 +20,9 @@ export const impactSummaryDraftSchema = draftOutputSchema
 // Mini-bio (015): mesma forma (2 variantes); a disciplina de "curta + factual + sem clichê" vem do
 // prompt e do ruleset (assert 10), não da forma. Nomeado à parte para divergir sem tocar no motor.
 export const miniBioDraftSchema = draftOutputSchema
+// Autoavaliação (019): mesma forma (2 variantes); a disciplina das 4 seções vem do prompt, não da
+// forma. Nomeado à parte para divergir sem tocar no motor.
+export const selfAssessmentDraftSchema = draftOutputSchema
 
 export type DraftOutput = z.infer<typeof draftOutputSchema>
 export type DraftOutputVariant = DraftOutput['variants'][number]
@@ -28,6 +31,7 @@ const SCHEMA_BY_FORMAT: Record<DraftFormat, typeof draftOutputSchema> = {
   post: postDraftSchema,
   impact_summary: impactSummaryDraftSchema,
   mini_bio: miniBioDraftSchema,
+  self_assessment: selfAssessmentDraftSchema,
 }
 
 /**

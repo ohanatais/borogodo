@@ -310,7 +310,8 @@
     "formats": {
       "post": "Post",
       "impactSummary": "Impact summary",
-      "miniBio": "Mini-bio"
+      "miniBio": "Mini-bio",
+      "selfAssessment": "Self-assessment"
     },
     "adjust": {
       "label": "Adjust both drafts",
@@ -411,5 +412,27 @@
     "resumeTitle": "Resume draft",
     "useProject": "Use this project",
     "projectSeed": "project {name} ({count, plural, one {# entry} other {# entries}})"
+  },
+  "autoavaliacao": {
+    "title": "Your self-assessment",
+    "subtitle": "Pick a period and harvest what you did. Two structured versions, anchored in your real work.",
+    "presets": {
+      "esteAno": "This year",
+      "ultimoCiclo": "Last cycle",
+      "outroPeriodo": "Other period"
+    },
+    "range": {
+      "from": "From",
+      "to": "To"
+    },
+    "generate": "Generate self-assessment",
+    "basedOnPeriod": "{from} to {to}",
+    "sections": {
+      "entregas": "Deliverables",
+      "impacto": "Impact",
+      "evolucao": "Growth",
+      "pontosADesenvolver": "Areas to develop"
+    },
+    "limited": "There's still little to harvest here — log what you did and come back."
   }
 }

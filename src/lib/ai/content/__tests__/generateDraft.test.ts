@@ -92,6 +92,36 @@ describe('generateDraft — mini-bio (US3 da 015)', () => {
   })
 })
 
+describe('generateDraft — self_assessment (US1, 019)', () => {
+  const sectionedBody =
+    'Entregas: liderei o lançamento do produto no primeiro semestre. ' +
+    'Impacto: a adoção subiu de 41% para 58% em quatro trimestres. ' +
+    'Evolução: assumi a coordenação de discovery, que antes não era minha. ' +
+    'Pontos a desenvolver: quero ganhar repertório em negociação com fornecedores.'
+
+  const SELF_ASSESSMENT_OUTPUT = {
+    variants: [
+      { angle: 'mais factual', body: sectionedBody, evidence_refs: ['E1', 'E2'] },
+      { angle: 'mais reflexiva', body: sectionedBody, evidence_refs: ['E1'] },
+    ],
+  }
+
+  it('usa o system prompt próprio de autoavaliação e devolve 2 variantes com as 4 seções', async () => {
+    const complete = vi.fn().mockResolvedValue(jsonBlock(SELF_ASSESSMENT_OUTPUT))
+    const result = await generateDraft({ ...BASE_INPUT, format: 'self_assessment' }, complete)
+
+    expect(result.variants).toHaveLength(2)
+    for (const variant of result.variants) {
+      expect(variant.body).toContain('Entregas')
+      expect(variant.body).toContain('Impacto')
+      expect(variant.body).toContain('Evolução')
+      expect(variant.body).toContain('Pontos a desenvolver')
+    }
+    // O prompt de autoavaliação é distinto (não reusa o de post).
+    expect(complete.mock.calls[0][0].system).toContain('autoavaliação')
+  })
+})
+
 describe('generateDraft — regeneração única', () => {
   it('regenera uma vez ao detectar violação do ruleset e injeta o feedback', async () => {
     const complete = vi

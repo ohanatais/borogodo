@@ -430,7 +430,8 @@
     "formats": {
       "post": "Post",
       "impactSummary": "Resumo de impacto",
-      "miniBio": "Mini-bio"
+      "miniBio": "Mini-bio",
+      "selfAssessment": "Autoavaliação"
     },
     "adjust": {
       "label": "Ajustar os dois rascunhos",
@@ -531,5 +532,27 @@
     "resumeTitle": "Retomar rascunho",
     "useProject": "Usar este projeto",
     "projectSeed": "projeto {name} ({count, plural, one {# entrada} other {# entradas}})"
+  },
+  "autoavaliacao": {
+    "title": "Sua autoavaliação",
+    "subtitle": "Escolha um período e colha o que você fez. Duas versões estruturadas, ancoradas no seu trabalho real.",
+    "presets": {
+      "esteAno": "Este ano",
+      "ultimoCiclo": "Último ciclo",
+      "outroPeriodo": "Outro período"
+    },
+    "range": {
+      "from": "De",
+      "to": "Até"
+    },
+    "generate": "Gerar autoavaliação",
+    "basedOnPeriod": "{from} a {to}",
+    "sections": {
+      "entregas": "Entregas",
+      "impacto": "Impacto",
+      "evolucao": "Evolução",
+      "pontosADesenvolver": "Pontos a desenvolver"
+    },
+    "limited": "Ainda há pouco aqui pra colher — registre o que você fez e volte."
   }
 }

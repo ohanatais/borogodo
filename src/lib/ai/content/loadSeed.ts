@@ -3,10 +3,13 @@ import { getLatestSnapshot } from '@/lib/db/mirror'
 import type { EvidenceItem } from '@/lib/ai/content/prompts/discipline'
 import type { SeedType } from '@/types/content'
 import { parseProjectSeedRef } from '@/lib/content/projectSeed'
+import { parsePeriodSeedRef } from '@/lib/content/period'
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 
 const MAX_THEME_EVIDENCE = 12
+/** Teto de evidência do seed por período (019, US1): protege prompt/custo em intervalos longos. */
+export const MAX_PERIOD_EVIDENCE = 50
 
 export interface SeedEvidence {
   seedSummary: string
@@ -109,6 +112,37 @@ async function loadProjectSeed(
 }
 
 /**
+ * Período inteiro (019, US1): agrega a evidência das entradas de um intervalo de datas, escopado ao
+ * usuário. A chave vem codificada em `seedRef` (period:::from:::to). Intervalo vazio devolve evidência
+ * vazia (NUNCA null): base limitada é estado honesto, e a UI ainda gera reconhecendo o que há.
+ */
+async function loadPeriodSeed(
+  supabase: SupabaseServerClient,
+  userId: string,
+  seedRef: string
+): Promise<SeedEvidence | null> {
+  const parsed = parsePeriodSeedRef(seedRef)
+  if (!parsed) return null
+
+  const { data } = await supabase
+    .from('entries')
+    .select(ENTRY_EVIDENCE_COLUMNS)
+    .eq('user_id', userId)
+    .gte('entry_date', parsed.from)
+    .lte('entry_date', parsed.to)
+    .order('entry_date', { ascending: false })
+    .limit(MAX_PERIOD_EVIDENCE)
+
+  const seedSummary = `${parsed.from} a ${parsed.to}`
+  const evidence = (data ?? []).map((e, i) => ({
+    label: `E${i + 1}`,
+    text: formatEntryEvidence(e as EntryEvidenceRow),
+  }))
+
+  return { seedSummary, evidence }
+}
+
+/**
  * Carrega a evidência de um seed, sempre escopada ao usuário (constituição I: seedRef validado como
  * dele antes de qualquer chamada ao LLM). Retorna `null` quando o seed não é do usuário / não existe
  * (a rota mapeia 404).
@@ -121,5 +155,6 @@ export async function loadSeedEvidence(
 ): Promise<SeedEvidence | null> {
   if (seedType === 'theme') return loadThemeSeed(supabase, userId, seedRef)
   if (seedType === 'entry') return loadEntrySeed(supabase, userId, seedRef)
+  if (seedType === 'period') return loadPeriodSeed(supabase, userId, seedRef)
   return loadProjectSeed(supabase, userId, seedRef)
 }

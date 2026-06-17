@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
-import { loadSeedEvidence } from '../loadSeed'
+import { loadSeedEvidence, MAX_PERIOD_EVIDENCE } from '../loadSeed'
 import { buildProjectSeedRef } from '@/lib/content/projectSeed'
+import { serializePeriodSeedRef } from '@/lib/content/period'
 
 vi.mock('@/lib/db/mirror', () => ({ getLatestSnapshot: vi.fn() }))
 
@@ -68,6 +69,92 @@ describe('loadSeedEvidence — project (US3)', () => {
   it('devolve null para seedRef de projeto malformado (não consulta o banco)', async () => {
     const { supabase } = makeSupabase([])
     const seed = await loadSeedEvidence(supabase as never, 'user-1', 'project', 'sem-separador')
+    expect(seed).toBeNull()
+    expect(supabase.from).not.toHaveBeenCalled()
+  })
+})
+
+// ─── US1 (019): seed por período ─────────────────────────────────────────────
+
+interface PeriodCalls {
+  eq: unknown[][]
+  gte: unknown[][]
+  lte: unknown[][]
+  limit: number[]
+}
+
+function makePeriodSupabase(rows: Row[]) {
+  const calls: PeriodCalls = { eq: [], gte: [], lte: [], limit: [] }
+  const builder: Record<string, unknown> = {}
+  builder.select = vi.fn(() => builder)
+  builder.eq = vi.fn((...args: unknown[]) => {
+    calls.eq.push(args)
+    return builder
+  })
+  builder.gte = vi.fn((...args: unknown[]) => {
+    calls.gte.push(args)
+    return builder
+  })
+  builder.lte = vi.fn((...args: unknown[]) => {
+    calls.lte.push(args)
+    return builder
+  })
+  builder.order = vi.fn(() => builder)
+  builder.limit = vi.fn((n: number) => {
+    calls.limit.push(n)
+    return builder
+  })
+  builder.then = (resolve: (v: unknown) => unknown) => resolve({ data: rows, error: null })
+  return { supabase: { from: vi.fn(() => builder) }, calls }
+}
+
+describe('loadSeedEvidence — period (US1, 019)', () => {
+  it('filtra as entradas do intervalo escopado por user_id e devolve evidência rotulada', async () => {
+    const rows: Row[] = [
+      { id: '1', what_i_did: 'Liderou o ciclo', company: 'Acme', role_title: 'PM', impact: '+20%', metric: null },
+      { id: '2', what_i_did: 'Entregou roadmap', company: 'Acme', role_title: 'PM', impact: null, metric: null },
+    ]
+    const { supabase, calls } = makePeriodSupabase(rows)
+
+    const seed = await loadSeedEvidence(
+      supabase as never,
+      'user-1',
+      'period',
+      serializePeriodSeedRef('2025-01-01', '2025-06-30')
+    )
+
+    expect(seed).not.toBeNull()
+    expect(seed!.evidence).toHaveLength(2)
+    expect(seed!.evidence[0].label).toBe('E1')
+    expect(calls.eq).toEqual(expect.arrayContaining([['user_id', 'user-1']]))
+    // Filtra pelo intervalo de datas (limites inclusivos).
+    expect(calls.gte.length).toBe(1)
+    expect(calls.lte.length).toBe(1)
+    expect(calls.gte[0][1]).toBe('2025-01-01')
+    expect(calls.lte[0][1]).toBe('2025-06-30')
+  })
+
+  it('aplica o limite seguro MAX_PERIOD_EVIDENCE na query', async () => {
+    const { supabase, calls } = makePeriodSupabase([])
+    await loadSeedEvidence(supabase as never, 'user-1', 'period', serializePeriodSeedRef('2025-01-01', '2025-06-30'))
+    expect(calls.limit).toContain(MAX_PERIOD_EVIDENCE)
+  })
+
+  it('intervalo vazio devolve SeedEvidence com evidence: [] (NÃO null — base limitada é estado honesto)', async () => {
+    const { supabase } = makePeriodSupabase([])
+    const seed = await loadSeedEvidence(
+      supabase as never,
+      'user-1',
+      'period',
+      serializePeriodSeedRef('2025-01-01', '2025-06-30')
+    )
+    expect(seed).not.toBeNull()
+    expect(seed!.evidence).toEqual([])
+  })
+
+  it('devolve null para seedRef de período malformado (não consulta o banco)', async () => {
+    const { supabase } = makePeriodSupabase([])
+    const seed = await loadSeedEvidence(supabase as never, 'user-1', 'period', 'period:::2025-06-30:::2025-01-01')
     expect(seed).toBeNull()
     expect(supabase.from).not.toHaveBeenCalled()
   })

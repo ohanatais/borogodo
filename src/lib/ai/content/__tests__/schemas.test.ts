@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { validateDraftOutput, postDraftSchema, impactSummaryDraftSchema } from '../schemas'
+import {
+  validateDraftOutput,
+  postDraftSchema,
+  impactSummaryDraftSchema,
+  selfAssessmentDraftSchema,
+} from '../schemas'
 
 const VALID_RAW = {
   variants: [
@@ -32,6 +37,21 @@ describe('validateDraftOutput — forma válida', () => {
   it('expõe os dois schemas nomeados', () => {
     expect(postDraftSchema.safeParse(VALID_RAW).success).toBe(true)
     expect(impactSummaryDraftSchema.safeParse(VALID_RAW).success).toBe(true)
+  })
+})
+
+describe('validateDraftOutput — self_assessment (US1, 019)', () => {
+  it('valida exatamente 2 variantes no formato self_assessment via SCHEMA_BY_FORMAT', () => {
+    const parsed = validateDraftOutput(VALID_RAW, 'self_assessment')
+    expect(parsed.variants).toHaveLength(2)
+  })
+
+  it('expõe o schema nomeado selfAssessmentDraftSchema', () => {
+    expect(selfAssessmentDraftSchema.safeParse(VALID_RAW).success).toBe(true)
+  })
+
+  it('rejeita malformado também no formato self_assessment', () => {
+    expect(() => validateDraftOutput({ variants: [VALID_RAW.variants[0]] }, 'self_assessment')).toThrow()
   })
 })
 

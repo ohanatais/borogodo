@@ -20,6 +20,7 @@ const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
   post: 'formats.post',
   impact_summary: 'formats.impactSummary',
   mini_bio: 'formats.miniBio',
+  self_assessment: 'formats.selfAssessment',
 }
 
 const STATUS_LABEL_KEY: Record<DraftStatus, string> = {
