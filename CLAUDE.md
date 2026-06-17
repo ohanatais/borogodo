@@ -22,22 +22,25 @@ Features mergeadas em `main` (até PR #40):
 - **014-presenca** — hub `/presenca`, gestão total do rascunho, "Usar projeto" no histórico, sugestões (PR #23)
 - **015-refino-voz** — recalibração de voz com consentimento, golden set como gate de CI, mini-bio (3º formato), migration `010` (PR #24)
 - **016-captura-v2** — captura multi-item, ressurgimento por delta, áudio via Web Speech, pergunta cirúrgica (PR #40)
+- **017-feed-registros** — feed cru de registros (`/registros`), cards colapsáveis, busca/filtros, grade-faísca
 
 **Bloco da Presença (fechado):** 013 → 014 → 015 mergeadas. Migrations `009` e `010` aplicadas em
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **017-feed-registros** (branch: `017-feed-registros`)
-Spec: [specs/017-feed-registros/spec.md](specs/017-feed-registros/spec.md) ·
-Plan: [specs/017-feed-registros/plan.md](specs/017-feed-registros/plan.md) ·
-Tasks: [specs/017-feed-registros/tasks.md](specs/017-feed-registros/tasks.md) ← gerado pelo /speckit-tasks
+Current feature: **018-seeds-expandidos** (branch: `018-seeds-expandidos`) — **US1+US2 implementadas (draft PR #44); polish/validação pendentes**
+Spec: [specs/018-seeds-expandidos/spec.md](specs/018-seeds-expandidos/spec.md) ·
+Plan: [specs/018-seeds-expandidos/plan.md](specs/018-seeds-expandidos/plan.md) ·
+Tasks: [specs/018-seeds-expandidos/tasks.md](specs/018-seeds-expandidos/tasks.md)
 
-Feed cru de registros (`/registros`): cards colapsáveis, dois eixos de tempo, busca textual,
-filtros combináveis, exclusão, grade-faísca (estilo GitHub). Painel aponta pro feed via
-"Ver tudo →". Extração ganha `title` gerado no mesmo turno Haiku. Migration `01X` (número
-confirmar no kickoff — provável `011` após 015→016 mergeadas).
+Terceiro elo da aposta de retenção — amplia o **output** (mais ângulos de post). Sem migration: `angle_kind`
+no `drafts.qa jsonb` existente. Dois novos ângulos: **US1** estudo/aprendizado (P1, reusa `loadSeedEvidence`
++ `generateDraft`); **US2** opinião/tese com lastro (P2, guardrail: `evidence_refs` não-vazio ou vivência
+na hora + sinergia 016 de captura). **US3** P1 transversal: assert 11 anti-opinião-vazia em `bannedTerms.ts`
++ golden set como gate de CI (padrão 015). UI: estado `'angle-select'` no `GenerateSheet` antes de gerar.
 
-Shape: [specs/017-feed-registros/shape.md](specs/017-feed-registros/shape.md) ✅
+**Estado:** US1 (estudo) e US2 (opinião com lastro) implementadas e commitadas. Pendente: Phase 5 (validação
+manual quickstart, `/code-review`, audit) + revisão de produto (feature em stand-by no draft PR #44).
 
-Próximos passos: implementar — começar pela Phase 1 (T001) → Phase 2 → US1 (T010–T018).
+**Migration:** footprint **0**. Zero schema change. `angle_kind`, `thesis`, `lastro_captured` vão no `qa jsonb` existente.
 <!-- SPECKIT END -->
