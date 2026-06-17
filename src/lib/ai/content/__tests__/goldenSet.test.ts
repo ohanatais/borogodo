@@ -77,9 +77,9 @@ describe('golden set — cobertura do harness', () => {
     expect(goodCases.some((c) => c.format === 'mini_bio')).toBe(true)
   })
 
-  it('os casos ruins cobrem os 10 asserts (9 da 013 + clichê de bio da 015)', () => {
+  it('os casos ruins cobrem os 11 asserts (9 da 013 + clichê de bio da 015 + opinião-vazia da 018)', () => {
     const covered = new Set(badCases.map((c) => c.assert))
-    for (let assert = 1; assert <= 10; assert++) {
+    for (let assert = 1; assert <= 11; assert++) {
       expect(covered.has(assert)).toBe(true)
     }
   })

@@ -304,4 +304,7 @@ export const badCases: BadCase[] = [
   { name: 'gíria de elogio (mandou bem)', assert: 8, body: 'Você mandou bem demais nesse projeto.' },
   { name: 'brasilidade boba (jeitinho)', assert: 9, body: 'Resolvi tudo no jeitinho de sempre.' },
   { name: 'clichê de bio (apaixonado por tecnologia)', assert: 10, body: 'Profissional apaixonado por tecnologia e movido a desafios.' },
+  { name: 'hot take', assert: 11, body: 'Isso é um hot take que vai incomodar muito gente.' },
+  { name: 'impopular mas', assert: 11, body: 'Opinião impopular mas alguém tinha que falar sobre isso.' },
+  { name: 'ninguém fala sobre isso', assert: 11, body: 'Ninguém fala sobre isso mas é a verdade do mercado.' },
 ]
