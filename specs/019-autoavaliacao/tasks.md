@@ -71,8 +71,9 @@ fabricar.
 - [ ] T012 [P] [US1] Criar `src/lib/ai/content/prompts/selfAssessment.ts`: `SELF_ASSESSMENT_SYSTEM_PROMPT` (herda `ANTI_AI_DISCIPLINE` + `OUTPUT_CONTRACT`) ensinando as 4 seções (Entregas / Impacto / Evolução / Pontos a desenvolver) no `body`, com pontos a desenvolver ancorados em sinal honesto/intenção informada (proíbe fraqueza inventada); `buildSelfAssessmentUserPrompt`
 - [ ] T013 [US1] Adicionar `selfAssessmentDraftSchema` em `src/lib/ai/content/schemas.ts` e registrar no `SCHEMA_BY_FORMAT` (mesma forma de 2 variantes; nomeado à parte p/ poder divergir)
 - [ ] T014 [US1] Adicionar o ramo `'self_assessment'` no `promptFor` de `src/lib/ai/content/generateDraft.ts` (system + buildUser do novo prompt)
-- [ ] T015 [US1] Criar a tela da autoavaliação (RSC) em `src/app/(área autenticada)/autoavaliacao/page.tsx` + seletor de período (preset + range) client em `src/components/features/autoavaliacao/PeriodPicker.tsx` (mobile-first, alvo ≥48px, labels acessíveis)
-- [ ] T016 [US1] Render das 2 variações por seções em `src/components/features/autoavaliacao/SelfAssessmentResult.tsx` (consome `/api/content/generate`); estado de **base limitada** convidando a registrar (sem fabricar) e estado de erro honesto (422)
+- [ ] T015 [US1] Criar a rota dedicada `src/app/[locale]/(app)/autoavaliacao/page.tsx` (RSC) com headline (assinatura Fraunces bold+itálico) + `PeriodPicker` client em `src/components/features/autoavaliacao/PeriodPicker.tsx`: presets como chips (este ano · último ciclo, "este ano" pré-selecionado) + range personalizado com dois `<input type="date">` revelados inline; mobile-first, alvos ≥48px, labels acessíveis. "Gerar autoavaliação" dispara `openPresenca` com `seedType:'period'` e o `seedRef` serializado (reusa o `GenerateSheet` montado no AppShell)
+- [ ] T016 [US1] Estender o `DraftCard` (`src/components/features/content/DraftCard.tsx`) para renderizar o `body` **por seções** quando `format === 'self_assessment'` (parser leve de cabeçalhos Entregas/Impacto/Evolução/Pontos a desenvolver → blocos com cabeçalho próprio, hierarquia de *product*); "Pontos a desenvolver" com o mesmo tratamento visual das outras (enquadrado como crescimento, sem cor de alerta). Os estados de base limitada e erro 422 já vêm do `GenerateSheet`
+- [ ] T016b [US1] Registrar `self_assessment` em `FORMAT_LABEL_KEY` do `GenerateSheet.tsx` e garantir o header "Baseado em: <período>" usando o `seedSummary` do intervalo
 
 **Checkpoint**: US1 funcional e testável sozinha — MVP. **PARAR e validar com a Ohana** (quickstart).
 
@@ -114,7 +115,7 @@ calendário; editar recorrência → gatilho muda; sem recorrência → nada for
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US3] Ligar a tela da autoavaliação ao fluxo de persistência/edição/cópia existente (`/api/content/drafts` + chips de ajuste reusando `adjust`), garantindo que `self_assessment` passa pelos mesmos componentes de edição/cópia da 013/014
+- [ ] T023 [US3] Garantir que o `DraftCard` estendido (T016) preserva edição inline / cópia / persistência (`/api/content/drafts`) com o render por seções — editar não pode quebrar o parser de seções; copiar leva o texto completo das 4 seções
 - [ ] T024 [US3] Conferir que os chips de ajuste (`mais_curto`/`menos_formal`/`tira_jargao`) regeram o `self_assessment` mantendo a evidência (reuso de `buildAdjustBlock`)
 
 **Checkpoint**: as três stories independentemente funcionais.
