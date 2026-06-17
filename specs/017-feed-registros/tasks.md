@@ -12,7 +12,7 @@
 
 **Purpose**: Criar estrutura de pastas e garantir pré-requisitos antes de qualquer código de feature.
 
-- [ ] T001 Criar pastas `src/lib/feed/`, `src/lib/feed/__tests__/`, `src/components/features/feed/`, `src/app/api/feed/activity/`, `src/app/[locale]/(app)/registros/` (vazias, com `.gitkeep` se necessário)
+- [x] T001 Criar pastas `src/lib/feed/`, `src/lib/feed/__tests__/`, `src/components/features/feed/`, `src/app/api/feed/activity/`, `src/app/[locale]/(app)/registros/` (vazias, com `.gitkeep` se necessário)
 - [x] T002 Rodar `/impeccable shape` para `/registros` — decisões cravadas em [shape.md](shape.md): célula=dia / linha=semana, símbolo ✦ com intensidade por tamanho+cor, faixa sticky vertical desktop / horizontal mobile, threshold 5 dias distintos/90d
 
 ---
@@ -23,13 +23,13 @@
 
 **⚠️ CRÍTICO**: Nenhuma user story começa antes desta fase estar completa.
 
-- [ ] T003 Confirmar número da migration (verificar última em `supabase/migrations/`), criar `supabase/migrations/01X_entry_title.sql` com `ALTER TABLE entries ADD COLUMN IF NOT EXISTS title TEXT` e `CREATE INDEX IF NOT EXISTS entries_user_entry_date_idx ON entries (user_id, entry_date DESC NULLS LAST)`
-- [ ] T004 Adicionar `title?: string | null` a `ExtractedEntry` em `src/types/entry.ts` (o campo é herdado por `Entry` automaticamente)
-- [ ] T005 [P] Criar `src/lib/feed/types.ts` com `FeedItem`, `FeedQuery`, `FeedAxis`, `ActivityCell`, `FeedPage` conforme [data-model.md](data-model.md)
-- [ ] T006 [P] Adicionar namespace `feed` em `src/messages/pt-BR.json` e espelhar stub em `src/messages/en.json` com todas as chaves de [data-model.md § i18n Keys](data-model.md)
-- [ ] T007 Adicionar `title` ao schema Zod de extração em `src/lib/ai/extraction/schemas.ts` (`z.string().max(80).optional()`)
-- [ ] T008 Atualizar prompt de extração em `src/lib/ai/extraction/prompts/linkedin.ts` (ou arquivo equivalente com `DOCUMENT_EXTRACTION_SYSTEM_PROMPT`) para instruir o Haiku a gerar `title`: string curta ≤80 chars que captura a essência do registro
-- [ ] T009 Criar `src/components/features/feed/EntryCard.tsx` — componente unificado (`variant: 'feed' | 'panel'`): colapsável (`aria-expanded`), título, metadados, botão "Usar" (`<UsarButton>`); variante `feed` exibe opção de excluir (AlertDialog de confirmação); variante `panel` omite excluir
+- [x] T003 Confirmar número da migration (verificar última em `supabase/migrations/`), criar `supabase/migrations/01X_entry_title.sql` com `ALTER TABLE entries ADD COLUMN IF NOT EXISTS title TEXT` e `CREATE INDEX IF NOT EXISTS entries_user_entry_date_idx ON entries (user_id, entry_date DESC NULLS LAST)`
+- [x] T004 Adicionar `title?: string | null` a `ExtractedEntry` em `src/types/entry.ts` (o campo é herdado por `Entry` automaticamente)
+- [x] T005 [P] Criar `src/lib/feed/types.ts` com `FeedItem`, `FeedQuery`, `FeedAxis`, `ActivityCell`, `FeedPage` conforme [data-model.md](data-model.md)
+- [x] T006 [P] Adicionar namespace `feed` em `src/messages/pt-BR.json` e espelhar stub em `src/messages/en.json` com todas as chaves de [data-model.md § i18n Keys](data-model.md)
+- [x] T007 Adicionar `title` ao schema Zod de extração em `src/lib/ai/extraction/schemas.ts` (`z.string().max(80).optional()`)
+- [x] T008 Atualizar prompt de extração em `src/lib/ai/extraction/prompts/linkedin.ts` (ou arquivo equivalente com `DOCUMENT_EXTRACTION_SYSTEM_PROMPT`) para instruir o Haiku a gerar `title`: string curta ≤80 chars que captura a essência do registro
+- [x] T009 Criar `src/components/features/feed/EntryCard.tsx` — componente unificado (`variant: 'feed' | 'panel'`): colapsável (`aria-expanded`), título, metadados, botão "Usar" (`<UsarButton>`); variante `feed` exibe opção de excluir (AlertDialog de confirmação); variante `panel` omite excluir
 
 **Checkpoint**: Migration pronta, tipos alinhados, extração gera `title`, i18n configurado, `<EntryCard>` renderizável isoladamente.
 
@@ -43,18 +43,18 @@
 
 ### Testes (escrever ANTES da implementação — devem FALHAR primeiro)
 
-- [ ] T010 [P] [US1] Escrever teste unitário de `getFeedData` em `src/lib/feed/__tests__/getFeedData.test.ts`: retorna `FeedItem[]` paginado, título nunca vazio (fallback determinístico), filtra apenas registros do `userId` correto
-- [ ] T011 [P] [US1] Escrever teste unitário do endpoint `GET /api/feed` em `src/app/api/feed/__tests__/route.test.ts`: retorna 401 sem auth, 400 com `axis` inválido, 200 com shape correto de `FeedPage`
+- [x] T010 [P] [US1] Escrever teste unitário de `getFeedData` em `src/lib/feed/__tests__/getFeedData.test.ts`: retorna `FeedItem[]` paginado, título nunca vazio (fallback determinístico), filtra apenas registros do `userId` correto
+- [x] T011 [P] [US1] Escrever teste unitário do endpoint `GET /api/feed` em `src/app/api/feed/__tests__/route.test.ts`: retorna 401 sem auth, 400 com `axis` inválido, 200 com shape correto de `FeedPage`
 
 ### Implementação US1
 
-- [ ] T012 [US1] Criar `src/lib/feed/getFeedData.ts`: query Supabase com cursor `(created_at, id)`, `FEED_PAGE_SIZE = 20`, projeção para `FeedItem`, fallback de `title` (`what_i_did.slice(0, 60).trim()`), extração de `thumbnail` do `evidences` JSONB
-- [ ] T013 [US1] Criar `src/app/api/feed/route.ts`: auth (`createServerClient` + `getUser`), parse e validação dos query params de `FeedQuery`, chama `getFeedData`, retorna `FeedPage` JSON
-- [ ] T014 [US1] Criar `src/app/[locale]/(app)/registros/page.tsx` (Server Component): lê search params iniciais, faz fetch server-side da primeira página, passa dados ao `<FeedPageClient>`
-- [ ] T015 [P] [US1] Criar `src/app/[locale]/(app)/registros/loading.tsx`: skeleton de Suspense para a página do feed
-- [ ] T016 [US1] Criar `src/components/features/feed/FeedPage.tsx` (Client Component): recebe primeira página via props, gerencia estado de paginação ("Carregar mais" → fetch `/api/feed?cursor=…`), lista `<EntryCard variant="feed">` com remoção otimista ao excluir
-- [ ] T017 [US1] Criar `src/components/features/feed/EmptyFeed.tsx`: estado de boas-vindas quando sem registros (título, texto, botão CTA para captura) — nunca página em branco
-- [ ] T018 [US1] Atualizar `src/components/features/painel/EntryItem.tsx` para ser wrapper de `<EntryCard variant="panel">` (mantém interface atual externamente)
+- [x] T012 [US1] Criar `src/lib/feed/getFeedData.ts`: query Supabase com cursor `(created_at, id)`, `FEED_PAGE_SIZE = 20`, projeção para `FeedItem`, fallback de `title` (`what_i_did.slice(0, 60).trim()`), extração de `thumbnail` do `evidences` JSONB
+- [x] T013 [US1] Criar `src/app/api/feed/route.ts`: auth (`createServerClient` + `getUser`), parse e validação dos query params de `FeedQuery`, chama `getFeedData`, retorna `FeedPage` JSON
+- [x] T014 [US1] Criar `src/app/[locale]/(app)/registros/page.tsx` (Server Component): lê search params iniciais, faz fetch server-side da primeira página, passa dados ao `<FeedPageClient>`
+- [x] T015 [P] [US1] Criar `src/app/[locale]/(app)/registros/loading.tsx`: skeleton de Suspense para a página do feed
+- [x] T016 [US1] Criar `src/components/features/feed/FeedPage.tsx` (Client Component): recebe primeira página via props, gerencia estado de paginação ("Carregar mais" → fetch `/api/feed?cursor=…`), lista `<EntryCard variant="feed">` com remoção otimista ao excluir
+- [x] T017 [US1] Criar `src/components/features/feed/EmptyFeed.tsx`: estado de boas-vindas quando sem registros (título, texto, botão CTA para captura) — nunca página em branco
+- [x] T018 [US1] Atualizar `src/components/features/painel/EntryItem.tsx` para ser wrapper de `<EntryCard variant="panel">` (mantém interface atual externamente)
 
 **Checkpoint US1**: `/registros` funciona end-to-end. Testes T010–T011 passando. Validar cenários 1 e 2 do [quickstart.md](quickstart.md).
 
@@ -68,14 +68,14 @@
 
 ### Testes (escrever ANTES — devem FALHAR primeiro)
 
-- [ ] T019 [US2] Adicionar caso de teste em `src/lib/feed/__tests__/getFeedData.test.ts`: eixo `entry_date` ordena por `entry_date DESC NULLS LAST`; entradas sem `entry_date` aparecem ao final, nunca somem
+- [x] T019 [US2] Adicionar caso de teste em `src/lib/feed/__tests__/getFeedData.test.ts`: eixo `entry_date` ordena por `entry_date DESC NULLS LAST`; entradas sem `entry_date` aparecem ao final, nunca somem
 
 ### Implementação US2
 
-- [ ] T020 [US2] Atualizar `getFeedData` em `src/lib/feed/getFeedData.ts` para suportar `axis: 'entry_date'` — ordenar por `entry_date DESC NULLS LAST`, cursor por `(entry_date, id)`
-- [ ] T021 [US2] Atualizar `/api/feed` em `src/app/api/feed/route.ts` para validar e repassar parâmetro `axis`
-- [ ] T022 [US2] Criar toggle de eixo em `src/components/features/feed/FeedFilters.tsx` (Client Component inicial, apenas axis toggle): atualiza URL com `router.replace` ao mudar; lê estado da URL; labels em i18n (`feed.axis.created_at`, `feed.axis.entry_date`)
-- [ ] T023 [US2] Atualizar `src/app/[locale]/(app)/registros/page.tsx` para ler `axis` dos search params e passá-lo ao `<FeedPageClient>`; atualizar `<FeedPage.tsx>` para incluir `<FeedFilters>` e recarregar ao mudar eixo
+- [x] T020 [US2] Atualizar `getFeedData` em `src/lib/feed/getFeedData.ts` para suportar `axis: 'entry_date'` — ordenar por `entry_date DESC NULLS LAST`, cursor por `(entry_date, id)`
+- [x] T021 [US2] Atualizar `/api/feed` em `src/app/api/feed/route.ts` para validar e repassar parâmetro `axis`
+- [x] T022 [US2] Criar toggle de eixo em `src/components/features/feed/FeedFilters.tsx` (Client Component inicial, apenas axis toggle): atualiza URL com `router.replace` ao mudar; lê estado da URL; labels em i18n (`feed.axis.created_at`, `feed.axis.entry_date`)
+- [x] T023 [US2] Atualizar `src/app/[locale]/(app)/registros/page.tsx` para ler `axis` dos search params e passá-lo ao `<FeedPageClient>`; atualizar `<FeedPage.tsx>` para incluir `<FeedFilters>` e recarregar ao mudar eixo
 
 **Checkpoint US2**: Testes T019 passando. Validar cenário 3 do [quickstart.md](quickstart.md).
 
@@ -89,13 +89,13 @@
 
 ### Testes (escrever ANTES — devem FALHAR primeiro)
 
-- [ ] T024 [P] [US3] Adicionar caso de teste em `src/lib/feed/__tests__/getFeedData.test.ts`: `FeedItem.title` nunca é `null` ou `''` — fallback determinístico para registros sem `title` persistido
-- [ ] T025 [P] [US3] Adicionar caso de teste em `src/lib/ai/extraction/__tests__/schemas.test.ts` (ou criar): `title` presente no JSON extraído passa validação Zod; ausência de `title` é tratada graciosamente (campo opcional na validação, mas gerado pelo prompt)
+- [x] T024 [P] [US3] Adicionar caso de teste em `src/lib/feed/__tests__/getFeedData.test.ts`: `FeedItem.title` nunca é `null` ou `''` — fallback determinístico para registros sem `title` persistido
+- [x] T025 [P] [US3] Adicionar caso de teste em `src/lib/ai/extraction/__tests__/schemas.test.ts` (ou criar): `title` presente no JSON extraído passa validação Zod; ausência de `title` é tratada graciosamente (campo opcional na validação, mas gerado pelo prompt)
 
 ### Implementação US3
 
-- [ ] T026 [US3] Verificar end-to-end: fazer captura de texto, inspecionar `SELECT title FROM entries ORDER BY created_at DESC LIMIT 1` no Supabase Studio local — confirmar que `title` está persistido (smoke test manual)
-- [ ] T027 [US3] Garantir que `<EntryCard>` exibe `item.title` (que já vem sem null de `getFeedData` graças ao fallback) — sem mudança extra de código se T009 foi implementado corretamente
+- [x] T026 [US3] Verificar end-to-end: fazer captura de texto, inspecionar `SELECT title FROM entries ORDER BY created_at DESC LIMIT 1` no Supabase Studio local — confirmar que `title` está persistido (smoke test manual)
+- [x] T027 [US3] Garantir que `<EntryCard>` exibe `item.title` (que já vem sem null de `getFeedData` graças ao fallback) — sem mudança extra de código se T009 foi implementado corretamente
 
 **Checkpoint US3**: Testes T024–T025 passando. Validar cenários 4 e 5 do [quickstart.md](quickstart.md).
 
@@ -109,14 +109,14 @@
 
 ### Testes (escrever ANTES — devem FALHAR primeiro)
 
-- [ ] T028 [US4] Adicionar casos de teste em `src/lib/feed/__tests__/getFeedData.test.ts`: filtro `q` retorna só matches; `metricOnly` filtra; `company` filtra; filtros combináveis; busca com string suspeita (injeção) não quebra
+- [x] T028 [US4] Adicionar casos de teste em `src/lib/feed/__tests__/getFeedData.test.ts`: filtro `q` retorna só matches; `metricOnly` filtra; `company` filtra; filtros combináveis; busca com string suspeita (injeção) não quebra
 
 ### Implementação US4
 
-- [ ] T029 [US4] Atualizar `getFeedData` em `src/lib/feed/getFeedData.ts` para aplicar todos os filtros: `q` (`ilike` em `what_i_did`, `title`; `contains` em `tags`), `from`/`to` (range em `created_at` ou `entry_date` conforme eixo), `company` (ilike), `tags` (array contains), `metricOnly` (`not('metric', 'is', null)`), `source`
-- [ ] T030 [US4] Atualizar `/api/feed` em `src/app/api/feed/route.ts` para aceitar, validar (Zod) e repassar todos os params de filtro
-- [ ] T031 [US4] Expandir `src/components/features/feed/FeedFilters.tsx` com: input de busca textual (`q`), seletor de período (presets: hoje, semana, mês, trimestre + range), dropdown empresa, multi-select tags, checkbox "Com métrica", dropdown origem — tudo serializado na URL
-- [ ] T032 [US4] Adicionar estado "sem resultados" em `<FeedPage.tsx>`: quando `items.length === 0` e há filtros ativos, exibir mensagem honesta + botão limpar (nunca parece erro)
+- [x] T029 [US4] Atualizar `getFeedData` em `src/lib/feed/getFeedData.ts` para aplicar todos os filtros: `q` (`ilike` em `what_i_did`, `title`; `contains` em `tags`), `from`/`to` (range em `created_at` ou `entry_date` conforme eixo), `company` (ilike), `tags` (array contains), `metricOnly` (`not('metric', 'is', null)`), `source`
+- [x] T030 [US4] Atualizar `/api/feed` em `src/app/api/feed/route.ts` para aceitar, validar (Zod) e repassar todos os params de filtro
+- [x] T031 [US4] Expandir `src/components/features/feed/FeedFilters.tsx` com: input de busca textual (`q`), seletor de período (presets: hoje, semana, mês, trimestre + range), dropdown empresa, multi-select tags, checkbox "Com métrica", dropdown origem — tudo serializado na URL
+- [x] T032 [US4] Adicionar estado "sem resultados" em `<FeedPage.tsx>`: quando `items.length === 0` e há filtros ativos, exibir mensagem honesta + botão limpar (nunca parece erro)
 
 **Checkpoint US4**: Testes T028 passando. Validar cenário 6 do [quickstart.md](quickstart.md).
 
@@ -130,15 +130,15 @@
 
 ### Testes (escrever ANTES — devem FALHAR primeiro)
 
-- [ ] T033 [US5] Criar `src/lib/feed/__tests__/getActivityData.test.ts`: retorna array esparso com `date` + `count`; só registros do `userId` correto; janela de dias respeitada
-- [ ] T034 [US5] Criar `src/app/api/feed/activity/__tests__/route.test.ts`: 401 sem auth, 200 com `ActivityCell[]`; parâmetro `window` fora do range (1–730) retorna 400
+- [x] T033 [US5] Criar `src/lib/feed/__tests__/getActivityData.test.ts`: retorna array esparso com `date` + `count`; só registros do `userId` correto; janela de dias respeitada
+- [x] T034 [US5] Criar `src/app/api/feed/activity/__tests__/route.test.ts`: 401 sem auth, 200 com `ActivityCell[]`; parâmetro `window` fora do range (1–730) retorna 400
 
 ### Implementação US5
 
-- [ ] T035 [US5] Criar `src/lib/feed/getActivityData.ts`: query `SELECT DATE(created_at), COUNT(*) FROM entries WHERE user_id = $1 AND created_at >= NOW() - INTERVAL GROUP BY DATE(created_at) ORDER BY date ASC`; retorna `ActivityCell[]` esparso (só dias com count > 0)
-- [ ] T036 [US5] Criar `src/app/api/feed/activity/route.ts`: auth, valida `window` (1–730, default 365), chama `getActivityData`, retorna `ActivityCell[]`
-- [ ] T037 [US5] Criar `src/components/features/feed/ActivityGrid.tsx` (Client Component): símbolo ✦ (U+2726) por célula com tamanho+cor variando pelo count do dia (0→8px opacidade 0.3, 1→9px 0.85, 2–3→11px, 4+→13px roxo-jambo pleno); layout desktop = faixa vertical sticky 7col×52linhas mais recente no topo com label de mês; layout mobile = faixa horizontal 13 semanas scroll suave sem scrollbar; threshold `GRID_MIN_DISTINCT_DAYS = 5` dias distintos em 90d controla visibilidade; hover = scale 1.4 CSS 150ms; clique → `onCellClick(date)` → atualiza URL; ver [shape.md](shape.md) §8
-- [ ] T038 [US5] Integrar `<ActivityGrid>` em `src/components/features/feed/FeedPage.tsx`: fetch de `/api/feed/activity` ao montar; threshold de massa crítica (≥5 registros em dias distintos nos últimos 90 dias, constante `GRID_MIN_DISTINCT_DAYS = 5`); ocultar grid quando abaixo do threshold
+- [x] T035 [US5] Criar `src/lib/feed/getActivityData.ts`: query `SELECT DATE(created_at), COUNT(*) FROM entries WHERE user_id = $1 AND created_at >= NOW() - INTERVAL GROUP BY DATE(created_at) ORDER BY date ASC`; retorna `ActivityCell[]` esparso (só dias com count > 0)
+- [x] T036 [US5] Criar `src/app/api/feed/activity/route.ts`: auth, valida `window` (1–730, default 365), chama `getActivityData`, retorna `ActivityCell[]`
+- [x] T037 [US5] Criar `src/components/features/feed/ActivityGrid.tsx` (Client Component): símbolo ✦ (U+2726) por célula com tamanho+cor variando pelo count do dia (0→8px opacidade 0.3, 1→9px 0.85, 2–3→11px, 4+→13px roxo-jambo pleno); layout desktop = faixa vertical sticky 7col×52linhas mais recente no topo com label de mês; layout mobile = faixa horizontal 13 semanas scroll suave sem scrollbar; threshold `GRID_MIN_DISTINCT_DAYS = 5` dias distintos em 90d controla visibilidade; hover = scale 1.4 CSS 150ms; clique → `onCellClick(date)` → atualiza URL; ver [shape.md](shape.md) §8
+- [x] T038 [US5] Integrar `<ActivityGrid>` em `src/components/features/feed/FeedPage.tsx`: fetch de `/api/feed/activity` ao montar; threshold de massa crítica (≥5 registros em dias distintos nos últimos 90 dias, constante `GRID_MIN_DISTINCT_DAYS = 5`); ocultar grid quando abaixo do threshold
 
 **Checkpoint US5**: Testes T033–T034 passando. Validar cenário 7 do [quickstart.md](quickstart.md).
 
@@ -152,14 +152,14 @@
 
 ### Testes (escrever ANTES — devem FALHAR primeiro)
 
-- [ ] T039 [US6] Adicionar/atualizar teste de `getPanelData` em `src/lib/panel/__tests__/getPanelData.test.ts` (ou criar): não retorna mais `highlights`; retorna `recentEntries` com 5 itens (incluindo `title`); shape correto
+- [x] T039 [US6] Adicionar/atualizar teste de `getPanelData` em `src/lib/panel/__tests__/getPanelData.test.ts` (ou criar): não retorna mais `highlights`; retorna `recentEntries` com 5 itens (incluindo `title`); shape correto
 
 ### Implementação US6
 
-- [ ] T040 [US6] Atualizar `getPanelData` em `src/lib/panel/getPanelData.ts`: remover query `highlightsRes`, aumentar limite de `recentRes` para 5, adicionar `title` ao `select` de `recentEntries`; remover `highlights` do tipo `PanelData`
-- [ ] T041 [US6] Atualizar `src/components/features/painel/RecentEntries.tsx`: exibir até 5 entradas (`MAX_VISIBLE_ENTRIES = 5`), adicionar link "Ver tudo →" (`/registros`) abaixo da lista — i18n key `feed.viewAll`
-- [ ] T042 [US6] Atualizar `src/app/[locale]/(app)/painel/page.tsx`: remover `<TrajectoryHighlights>` e sua importação; garantir que `<RecentEntries>` recebe os 5 recentes com `title`
-- [ ] T043 [US6] Marcar `src/components/features/painel/TrajectoryHighlights.tsx` para remoção: deletar o arquivo e remover quaisquer referências residuais
+- [x] T040 [US6] Atualizar `getPanelData` em `src/lib/panel/getPanelData.ts`: remover query `highlightsRes`, aumentar limite de `recentRes` para 5, adicionar `title` ao `select` de `recentEntries`; remover `highlights` do tipo `PanelData`
+- [x] T041 [US6] Atualizar `src/components/features/painel/RecentEntries.tsx`: exibir até 5 entradas (`MAX_VISIBLE_ENTRIES = 5`), adicionar link "Ver tudo →" (`/registros`) abaixo da lista — i18n key `feed.viewAll`
+- [x] T042 [US6] Atualizar `src/app/[locale]/(app)/painel/page.tsx`: remover `<TrajectoryHighlights>` e sua importação; garantir que `<RecentEntries>` recebe os 5 recentes com `title`
+- [x] T043 [US6] Marcar `src/components/features/painel/TrajectoryHighlights.tsx` para remoção: deletar o arquivo e remover quaisquer referências residuais
 
 **Checkpoint US6**: Testes T039 passando. Validar cenário 8 do [quickstart.md](quickstart.md).
 

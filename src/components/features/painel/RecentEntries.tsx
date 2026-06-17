@@ -26,16 +26,17 @@ export function RecentEntries({ entries }: RecentEntriesProps) {
   const visibleEntries = entries.slice(0, MAX_VISIBLE_ENTRIES)
 
   return (
-    <section className="px-6 py-4 space-y-2">
+    <section className="py-4 space-y-2">
       <h2 className="text-sm font-semibold" style={{ color: 'var(--muted-foreground)' }}>
         {t('recentEntries.title')}
       </h2>
-      <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
+      <ul className="flex flex-col gap-2">
         {visibleEntries.map((entry) => (
           <EntryItem
             key={entry.id}
             id={entry.id}
             whatIDid={entry.what_i_did}
+            title={entry.title}
             source={entry.source}
             createdAt={entry.created_at}
           />

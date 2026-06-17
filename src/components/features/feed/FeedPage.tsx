@@ -10,6 +10,7 @@ import { FeedFilters } from './FeedFilters'
 import { ActivityGrid, GRID_MIN_DISTINCT_DAYS } from './ActivityGrid'
 
 interface FeedPageProps {
+  filterKey: string
   initialPage: FeedPageType
   initialQuery: FeedQuery
 }
@@ -26,7 +27,7 @@ function hasActiveFilters(searchParams: URLSearchParams): boolean {
   )
 }
 
-export function FeedPage({ initialPage, initialQuery }: FeedPageProps) {
+export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps) {
   const t = useTranslations('feed')
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -36,6 +37,15 @@ export function FeedPage({ initialPage, initialQuery }: FeedPageProps) {
   const [nextCursor, setNextCursor] = useState<string | null>(initialPage.nextCursor)
   const [isLoading, setIsLoading] = useState(false)
   const [activityCells, setActivityCells] = useState<ActivityCell[]>([])
+
+  // Resync feed state when filters change — the server returned a fresh page.
+  // Replaces a remounting `key`, so the search input keeps focus and the
+  // activity grid below does not flicker on every keystroke / filter change.
+  useEffect(() => {
+    setItems(initialPage.items)
+    setNextCursor(initialPage.nextCursor)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterKey])
 
   useEffect(() => {
     fetch('/api/feed/activity')

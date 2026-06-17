@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { Search, X } from 'lucide-react'
 import type { FeedAxis } from '@/lib/feed/types'
 
@@ -56,9 +56,19 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
 
   const hasActiveFilters = currentQ || currentMetricOnly || currentFrom || searchParams.get('to')
 
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
+
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      updateParam('q', e.target.value || null)
+      const value = e.target.value || null
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(() => updateParam('q', value), 300)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [searchParams]
@@ -84,12 +94,11 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
                 type="button"
                 onClick={() => handleAxisChange(axis)}
                 aria-pressed={active}
-                className="text-xs px-3 py-1.5 rounded-full transition-all min-h-[44px]"
+                className="text-xs px-3 py-1.5 rounded-full transition-all min-h-[44px] hover:opacity-80"
                 style={{
-                  background: active ? 'var(--card)' : 'transparent',
-                  color: active ? 'var(--foreground)' : 'var(--muted-foreground)',
+                  background: active ? 'var(--color-primary)' : 'transparent',
+                  color: active ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
                   fontWeight: active ? 600 : 400,
-                  boxShadow: active ? '0 1px 3px oklch(0% 0 0 / 0.1)' : 'none',
                 }}
               >
                 {t(`axis.${axis}`)}

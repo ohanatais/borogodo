@@ -7,14 +7,22 @@ import type { FeedItem } from '@/lib/feed/types'
 interface EntryItemProps {
   id: string
   whatIDid: string
+  title?: string | null
   source: EntrySource
   createdAt: string
 }
 
-export function EntryItem({ id, whatIDid, source, createdAt }: EntryItemProps) {
+function truncateToWord(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text
+  const sliced = text.slice(0, maxLen)
+  const lastSpace = sliced.lastIndexOf(' ')
+  return lastSpace > maxLen * 0.4 ? sliced.slice(0, lastSpace) : sliced
+}
+
+export function EntryItem({ id, whatIDid, title, source, createdAt }: EntryItemProps) {
   const item: FeedItem = {
     id,
-    title: whatIDid.slice(0, 60).trim(),
+    title: title ?? truncateToWord(whatIDid, 80),
     what_i_did: whatIDid,
     source,
     created_at: createdAt,

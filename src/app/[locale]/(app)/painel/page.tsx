@@ -19,7 +19,7 @@ export default async function PainelPage() {
   const name = data.name || ''
 
   return (
-    <div className="px-5 lg:px-9 py-4 max-w-[980px] mx-auto w-full">
+    <div className="px-6 py-4 max-w-[980px] mx-auto w-full">
       {data.entryCount === 0 ? (
         <PanelEmptyState />
       ) : (

@@ -72,7 +72,16 @@ export async function getFeedData(
     const decoded = decodeCursor(cursor)
     if (decoded) {
       if (axis === 'entry_date') {
-        req = req.or(`entry_date.lt.${decoded.date},and(entry_date.eq.${decoded.date},id.lt.${decoded.id})`)
+        if (decoded.date === 'null') {
+          // Past all dated entries — paginate within the null-entry_date group by id
+          req = req.is('entry_date', null)
+          req = req.lt('id', decoded.id)
+        } else {
+          // Include null entry_date rows so they flow through to later pages naturally
+          req = req.or(
+            `entry_date.lt.${decoded.date},and(entry_date.eq.${decoded.date},id.lt.${decoded.id}),entry_date.is.null`
+          )
+        }
       } else {
         req = req.or(`created_at.lt.${decoded.date},and(created_at.eq.${decoded.date},id.lt.${decoded.id})`)
       }
@@ -83,10 +92,21 @@ export async function getFeedData(
     req = req.or(`what_i_did.ilike.%${q}%,title.ilike.%${q}%`)
   }
   if (from) {
-    req = req.gte(axis, from)
+    if (axis === 'entry_date') {
+      // Include null entry_date rows — they have no date to compare, so they should not disappear
+      req = req.or(`entry_date.gte.${from},entry_date.is.null`)
+    } else {
+      req = req.gte(axis, from)
+    }
   }
   if (to) {
-    req = req.lte(axis, to)
+    if (axis === 'entry_date') {
+      req = req.or(`entry_date.lte.${to},entry_date.is.null`)
+    } else {
+      // Append end-of-day to date-only strings so the full day is covered for timestamptz columns
+      const toISO = to.includes('T') ? to : `${to}T23:59:59.999Z`
+      req = req.lte(axis, toISO)
+    }
   }
   if (company) {
     req = req.ilike('company', `%${company}%`)
@@ -121,7 +141,7 @@ export async function getFeedData(
   const nextCursor =
     hasNextPage && lastRow
       ? encodeCursor(
-          axis === 'entry_date' ? (lastRow.entry_date ?? lastRow.created_at) : lastRow.created_at,
+          axis === 'entry_date' ? (lastRow.entry_date ?? 'null') : lastRow.created_at,
           lastRow.id
         )
       : null

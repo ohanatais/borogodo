@@ -37,12 +37,13 @@ describe('RecentEntries', () => {
     const user = userEvent.setup()
     render(<RecentEntries entries={ENTRIES} />)
 
-    const button = screen.getByRole('button', { name: /Mediou um conflito entre áreas/ })
-    expect(button).toHaveAttribute('aria-expanded', 'false')
+    const triggers = screen.getAllByRole('button', { name: /card\.(expand|collapse)/ })
+    const first = triggers[0]
+    expect(first).toHaveAttribute('aria-expanded', 'false')
 
-    await user.click(button)
+    await user.click(first)
 
-    expect(button).toHaveAttribute('aria-expanded', 'true')
+    expect(first).toHaveAttribute('aria-expanded', 'true')
   })
 
   it('mostra link "Ver tudo" para /registros', () => {

@@ -68,7 +68,7 @@ export default async function RegistrosPage({ searchParams }: RegistrosPageProps
         </h1>
       </header>
 
-      <FeedPage key={filterKey} initialPage={initialPage} initialQuery={query} />
+      <FeedPage filterKey={filterKey} initialPage={initialPage} initialQuery={query} />
     </div>
   )
 }
