@@ -39,13 +39,15 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
   const [activityCells, setActivityCells] = useState<ActivityCell[]>([])
 
   // Resync feed state when filters change — the server returned a fresh page.
-  // Replaces a remounting `key`, so the search input keeps focus and the
-  // activity grid below does not flicker on every keystroke / filter change.
-  useEffect(() => {
+  // Adjusting state during render (React's recommended pattern) instead of a
+  // remounting `key` keeps the search input focused and avoids the activity
+  // grid flickering on every keystroke / filter change.
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey)
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey)
     setItems(initialPage.items)
     setNextCursor(initialPage.nextCursor)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterKey])
+  }
 
   useEffect(() => {
     fetch('/api/feed/activity')

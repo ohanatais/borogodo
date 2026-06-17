@@ -52,6 +52,29 @@ describe('getFeedData — filtros (US4)', () => {
     expect(result.items).toHaveLength(1)
   })
 
+  it('escapa q com vírgula entre aspas para não quebrar o filtro OR (segurança)', async () => {
+    const supabase = makeSupabase([makeMockEntry()])
+
+    await getFeedData(supabase as never, 'user-1', { axis: 'created_at', q: 'a,b' })
+
+    const builder = supabase.from().select() as Record<string, ReturnType<typeof vi.fn>>
+    const orArgs = builder.or.mock.calls.map((c) => c[0] as string)
+    const qClause = orArgs.find((arg) => arg.includes('ilike'))
+    // A vírgula precisa estar dentro das aspas — caso contrário separaria a OR.
+    expect(qClause).toContain('ilike."%a,b%"')
+  })
+
+  it('ignora cursor craftado para não injetar cláusulas no OR (segurança)', async () => {
+    const crafted = Buffer.from('x,or(user_id.eq.outro)|nao-uuid!').toString('base64')
+    const supabase = makeSupabase([makeMockEntry()])
+
+    await getFeedData(supabase as never, 'user-1', { axis: 'created_at', cursor: crafted })
+
+    const builder = supabase.from().select() as Record<string, ReturnType<typeof vi.fn>>
+    const orArgs = builder.or.mock.calls.map((c) => c[0] as string)
+    expect(orArgs.some((arg) => arg.includes('user_id.eq.outro'))).toBe(false)
+  })
+
   it('filtro metricOnly retorna apenas entradas com métrica', async () => {
     const entries = [
       makeMockEntry({ id: 'e1', metric: '20%' }),

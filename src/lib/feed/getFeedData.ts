@@ -42,15 +42,36 @@ function encodeCursor(dateStr: string, id: string): string {
   return Buffer.from(`${dateStr}|${id}`).toString('base64')
 }
 
+// Date-only (YYYY-MM-DD) or ISO timestamp. Used to keep user-controlled date
+// values from being interpolated as raw PostgREST filter syntax in `.or()`.
+const DATE_LIKE = /^\d{4}-\d{2}-\d{2}(T[\d:.+-]+Z?)?$/
+// UUIDs only — hex + dashes; safe to interpolate.
+const UUID_LIKE = /^[0-9a-fA-F-]+$/
+
+function isDateLike(value: string): boolean {
+  return DATE_LIKE.test(value)
+}
+
 function decodeCursor(cursor: string): { date: string; id: string } | null {
   try {
     const decoded = Buffer.from(cursor, 'base64').toString('utf-8')
     const [date, id] = decoded.split('|')
     if (!date || !id) return null
+    // Reject crafted cursors: date must be the 'null' sentinel or a real date,
+    // and id must be a UUID — otherwise they could inject extra filter clauses.
+    if (date !== 'null' && !isDateLike(date)) return null
+    if (!UUID_LIKE.test(id)) return null
     return { date, id }
   } catch {
     return null
   }
+}
+
+// PostgREST treats commas, parens and dots as structural inside `.or()`.
+// Wrapping the value in double quotes makes them literal; escape any embedded
+// backslash or quote so the term itself can't break out of the quoted value.
+function quoteForOr(value: string): string {
+  return `"${value.replace(/[\\"]/g, '\\$&')}"`
 }
 
 export async function getFeedData(
@@ -89,9 +110,10 @@ export async function getFeedData(
   }
 
   if (q) {
-    req = req.or(`what_i_did.ilike.%${q}%,title.ilike.%${q}%`)
+    const safeQ = quoteForOr(`%${q}%`)
+    req = req.or(`what_i_did.ilike.${safeQ},title.ilike.${safeQ}`)
   }
-  if (from) {
+  if (from && isDateLike(from)) {
     if (axis === 'entry_date') {
       // Include null entry_date rows — they have no date to compare, so they should not disappear
       req = req.or(`entry_date.gte.${from},entry_date.is.null`)
@@ -99,7 +121,7 @@ export async function getFeedData(
       req = req.gte(axis, from)
     }
   }
-  if (to) {
+  if (to && isDateLike(to)) {
     if (axis === 'entry_date') {
       req = req.or(`entry_date.lte.${to},entry_date.is.null`)
     } else {
