@@ -26,21 +26,25 @@ Features mergeadas em `main` (até PR #24):
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **016-captura-v2** (branch: `016-captura-v2`) — **planejamento concluído; implementação não iniciada**
-Spec: [specs/016-captura-v2/spec.md](specs/016-captura-v2/spec.md) ·
-Plan: [specs/016-captura-v2/plan.md](specs/016-captura-v2/plan.md) ·
-Tasks: [specs/016-captura-v2/tasks.md](specs/016-captura-v2/tasks.md)
+Current feature: **019-autoavaliacao** (branch: `019-autoavaliacao`) — **planejamento em andamento; implementação não iniciada**
+Spec: [specs/019-autoavaliacao/spec.md](specs/019-autoavaliacao/spec.md) ·
+Plan: [specs/019-autoavaliacao/plan.md](specs/019-autoavaliacao/plan.md) ·
+Research: [specs/019-autoavaliacao/research.md](specs/019-autoavaliacao/research.md) ·
+Tasks: (pendente — `/speckit-tasks`)
 
-Primeira aposta de retenção pós-Presença — ataca o gargalo no **input** (alimentar dado fresco), não no
-output. Discovery em `docs/discovery-retencao-e-conteudo.md` (§1/§3/§8). Quatro frentes, **reusando** o
-pipeline existente: **US1** colar artefato vira N entradas (reusa extração+`saveEntries`; novo só o
-resumo "criei N entradas"+desfazer e o limite de tamanho); **US2** ressurgimento por **delta** ("≥1
-entrada nova desde o último retorno", substitui o nudge por relógio); **US3** áudio via **Web Speech**
-client-side (sem servidor); **US4** pergunta cirúrgica assíncrona via `proactive_insights`+`ReflectionCard`.
-Spec ✅, clarify ✅, plan ✅, research ✅, tasks ✅. **Gates antes de codar:** `/impeccable shape` do
-ressurgimento (US2) e da gravação (US3).
+Quarto elo de retenção — **segundo payoff episódico**. A pessoa escolhe um **período** e o motor
+**colhe as entradas do intervalo** e gera uma **autoavaliação estruturada por seções** (entregas,
+impacto, evolução, pontos a desenvolver), 2 variações, ancorada em evidência real. **Reusa o motor da
+013** (`generateDraft`) como **novo formato** `self_assessment` — não motor novo (constituição III).
+**US1** novo formato + novo seed por período (`loadPeriodSeed`, espelha `loadProjectSeed` mas por
+intervalo de datas); **US2** gatilho de calendário no painel via novo `getReviewCycleSignal` paralelo
+ao `getReturnSignal` da 016 (já em `main`), só painel, sem e-mail no v1; **US3** edição/chips/cópia =
+reuso total da 013. Spec ✅, clarify ✅, plan ✅, research ✅, data-model ✅, contracts ✅, quickstart ✅,
+tasks ⬜. **Gate antes de codar:** `/impeccable shape` da tela de autoavaliação (seletor de período +
+render por seções).
 
-**Migration:** footprint **0–1**. US1/US3/US4 não tocam schema. Única candidata: coluna
-`profiles.last_panel_seen_at` (`011`) para o delta da US2 — **decisão aberta** (Opção A migration / B
-localStorage), a fechar na fase da US2 (tasks T006/T012).
+**Migration 012** (`011` já em `main` pela 016): estende o CHECK de `drafts.format` para
+`self_assessment` **e** adiciona `profiles.review_cycle_months` + `review_cycle_anchor` (aditivo,
+nullable). Sem recorrência configurada → gatilho proativo não dispara; geração sob demanda nunca
+bloqueia.
 <!-- SPECKIT END -->
