@@ -416,6 +416,8 @@
     "title": "Your records",
     "empty": {
       "heading": "No records yet",
+      "description": "Every story you share becomes a record here. Start with the most recent one.",
+      "filtered": "No records match these filters.",
       "cta": "Make my first capture"
     },
     "axis": {
@@ -448,7 +450,8 @@
       }
     },
     "pagination": {
-      "loadMore": "Load more"
+      "loadMore": "Load more",
+      "loading": "Loading..."
     },
     "noDate": "No date",
     "viewAll": "View all →"

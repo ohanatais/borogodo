@@ -54,7 +54,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
     router.replace('?', { scroll: false })
   }
 
-  const hasActiveFilters = currentQ || currentMetricOnly || currentFrom
+  const hasActiveFilters = currentQ || currentMetricOnly || currentFrom || searchParams.get('to')
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,7 +84,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
                 type="button"
                 onClick={() => handleAxisChange(axis)}
                 aria-pressed={active}
-                className="text-xs px-3 py-1.5 rounded-full transition-all min-h-[36px]"
+                className="text-xs px-3 py-1.5 rounded-full transition-all min-h-[44px]"
                 style={{
                   background: active ? 'var(--card)' : 'transparent',
                   color: active ? 'var(--foreground)' : 'var(--muted-foreground)',
@@ -102,7 +102,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
           <button
             type="button"
             onClick={handleClearAll}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full transition-opacity hover:opacity-70 min-h-[36px]"
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full transition-opacity hover:opacity-70 min-h-[44px]"
             style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
           >
             <X size={12} aria-hidden="true" />
@@ -146,11 +146,11 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
               type="button"
               aria-pressed={active}
               onClick={() => updateParam('from', active ? null : fromVal)}
-              className="text-xs px-3 py-1.5 rounded-full transition-all min-h-[36px]"
+              className="inline-flex items-center justify-center text-xs font-medium px-3 min-h-[48px] md:min-h-[36px] rounded-full border transition-colors"
               style={{
-                background: active ? 'var(--color-lilas-nevoa)' : 'var(--muted)',
-                color: active ? 'var(--color-primary)' : 'var(--muted-foreground)',
-                fontWeight: active ? 600 : 400,
+                background: active ? 'var(--color-primary)' : 'var(--card)',
+                borderColor: active ? 'var(--color-primary)' : 'var(--border)',
+                color: active ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
               }}
             >
               {t(`filters.${key}`)}
@@ -163,11 +163,11 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
           type="button"
           aria-pressed={currentMetricOnly}
           onClick={() => updateParam('metricOnly', currentMetricOnly ? null : 'true')}
-          className="text-xs px-3 py-1.5 rounded-full transition-all min-h-[36px]"
+          className="inline-flex items-center justify-center text-xs font-medium px-3 min-h-[48px] md:min-h-[36px] rounded-full border transition-colors"
           style={{
-            background: currentMetricOnly ? 'var(--color-lilas-nevoa)' : 'var(--muted)',
-            color: currentMetricOnly ? 'var(--color-primary)' : 'var(--muted-foreground)',
-            fontWeight: currentMetricOnly ? 600 : 400,
+            background: currentMetricOnly ? 'var(--color-primary)' : 'var(--card)',
+            borderColor: currentMetricOnly ? 'var(--color-primary)' : 'var(--border)',
+            color: currentMetricOnly ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
           }}
         >
           {t('filters.metricOnly')}

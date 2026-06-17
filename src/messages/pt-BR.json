@@ -536,6 +536,8 @@
     "title": "Seus registros",
     "empty": {
       "heading": "Nenhum registro ainda",
+      "description": "Cada história que você conta vira um registro aqui. Comece pela mais recente.",
+      "filtered": "Nenhum registro com esses filtros.",
       "cta": "Fazer minha primeira captura"
     },
     "axis": {
@@ -568,7 +570,8 @@
       }
     },
     "pagination": {
-      "loadMore": "Carregar mais"
+      "loadMore": "Carregar mais",
+      "loading": "Carregando..."
     },
     "noDate": "Sem data",
     "viewAll": "Ver tudo →"

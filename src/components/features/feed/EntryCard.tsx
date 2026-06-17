@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useTranslations } from 'next-intl'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Pencil, Check, X, ChevronDown, ChevronUp } from 'lucide-react'
 import type { FeedItem } from '@/lib/feed/types'
 import type { EntrySource } from '@/types/entry'
 import { UsarButton } from '@/components/features/content/UsarButton'
@@ -12,6 +12,7 @@ interface EntryCardProps {
   item: FeedItem
   variant: 'feed' | 'panel'
   onDelete?: (id: string) => void
+  onEdit?: (id: string, what_i_did: string) => void
 }
 
 const SOURCE_ICON: Record<EntrySource, string> = {
@@ -30,10 +31,13 @@ function formatDate(dateStr: string): string {
   })
 }
 
-export function EntryCard({ item, variant, onDelete }: EntryCardProps) {
+export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
   const t = useTranslations('feed')
   const [expanded, setExpanded] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [editValue, setEditValue] = useState(item.what_i_did)
+  const [saving, setSaving] = useState(false)
 
   const displayDate = item.entry_date ?? item.created_at
   const dateLabel = formatDate(displayDate)
@@ -43,11 +47,36 @@ export function EntryCard({ item, variant, onDelete }: EntryCardProps) {
     onDelete?.(item.id)
   }
 
+  async function handleSaveEdit() {
+    const trimmed = editValue.trim()
+    if (!trimmed || trimmed === item.what_i_did) { setEditing(false); return }
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/entries/${item.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ what_i_did: trimmed }),
+      })
+      if (res.ok) {
+        onEdit?.(item.id, trimmed)
+        setEditing(false)
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function handleCancelEdit() {
+    setEditValue(item.what_i_did)
+    setEditing(false)
+  }
+
   return (
     <li className="rounded-xl border" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
       <button
         type="button"
         aria-expanded={expanded}
+        aria-label={expanded ? t('card.collapse') : t('card.expand')}
         onClick={() => setExpanded((v) => !v)}
         className="flex w-full items-start gap-3 px-4 py-3 text-left min-h-[48px] transition-opacity hover:opacity-80"
         style={{ color: 'var(--foreground)' }}
@@ -62,20 +91,50 @@ export function EntryCard({ item, variant, onDelete }: EntryCardProps) {
             {item.company && <span>· {item.company}</span>}
           </span>
         </span>
-        <span
-          className="text-xs shrink-0 mt-0.5 px-1 py-0.5 rounded"
-          style={{ color: 'var(--muted-foreground)' }}
-          aria-hidden="true"
-        >
-          {expanded ? '▲' : '▼'}
+        <span className="shrink-0 mt-0.5" style={{ color: 'var(--muted-foreground)' }} aria-hidden="true">
+          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </span>
       </button>
 
       {expanded && (
         <div className="px-4 pb-4 flex flex-col gap-3">
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
-            {item.what_i_did}
-          </p>
+          {editing ? (
+            <div className="flex flex-col gap-2">
+              <textarea
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                rows={Math.max(3, editValue.split('\n').length + 1)}
+                autoFocus
+                className="text-sm leading-relaxed rounded-lg p-2 border resize-y w-full"
+                style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => void handleSaveEdit()}
+                  disabled={saving}
+                  className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 min-h-[44px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+                >
+                  <Check size={12} aria-hidden="true" />
+                  {saving ? '…' : 'Salvar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 min-h-[44px] rounded-full transition-opacity hover:opacity-80"
+                  style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+                >
+                  <X size={12} aria-hidden="true" />
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+              {editValue}
+            </p>
+          )}
 
           {item.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
@@ -95,11 +154,23 @@ export function EntryCard({ item, variant, onDelete }: EntryCardProps) {
             <UsarButton
               seedType="entry"
               seedRef={item.id}
-              seedSummary={item.what_i_did}
+              seedSummary={editValue}
               formats={['post', 'impact_summary']}
             />
 
-            {variant === 'feed' && onDelete && (
+            {variant === 'feed' && !editing && (
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[48px] rounded-full transition-opacity hover:opacity-80"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                <Pencil size={12} aria-hidden="true" />
+                Editar
+              </button>
+            )}
+
+            {variant === 'feed' && onDelete && !editing && (
               <button
                 type="button"
                 aria-label={t('card.delete')}
@@ -119,11 +190,11 @@ export function EntryCard({ item, variant, onDelete }: EntryCardProps) {
         <Dialog.Portal>
           <Dialog.Overlay
             className="fixed inset-0 z-40"
-            style={{ background: 'oklch(18% 0.02 260 / 0.4)', backdropFilter: 'blur(2px)' }}
+            style={{ background: 'var(--overlay-bg)', backdropFilter: 'blur(2px)' }}
           />
           <Dialog.Content
             className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(92vw,380px)] rounded-2xl p-6 flex flex-col gap-5 focus:outline-none"
-            style={{ background: 'var(--color-creme)', boxShadow: '0 8px 40px oklch(18% 0.02 260 / 0.25)' }}
+            style={{ background: 'var(--color-creme)', boxShadow: 'var(--shadow-modal)' }}
           >
             <div className="flex flex-col gap-1.5">
               <Dialog.Title className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>
