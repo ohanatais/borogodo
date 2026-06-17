@@ -8,8 +8,8 @@ import { errorMessage, GenerationFailedError } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
 const generateRequestSchema = z.object({
-  format: z.enum(['post', 'impact_summary', 'mini_bio']),
-  seedType: z.enum(['entry', 'theme', 'project']),
+  format: z.enum(['post', 'impact_summary', 'mini_bio', 'self_assessment']),
+  seedType: z.enum(['entry', 'theme', 'project', 'period']),
   seedRef: z.string().min(1),
   angle: z.string().max(200).nullish(),
   adjust: z.enum(['mais_curto', 'menos_formal', 'tira_jargao']).nullish(),

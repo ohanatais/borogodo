@@ -1,8 +1,8 @@
 // Tipos da fundação de Geração de Conteúdo (Presença, 013).
 // Reusados por 014 (hub) e 015 (refino de voz). Identificadores em inglês (constituição II).
 
-export type DraftFormat = 'post' | 'impact_summary' | 'mini_bio'
-export type SeedType = 'entry' | 'theme' | 'project'
+export type DraftFormat = 'post' | 'impact_summary' | 'mini_bio' | 'self_assessment'
+export type SeedType = 'entry' | 'theme' | 'project' | 'period'
 export type DraftStatus = 'generated' | 'edited' | 'copied' | 'discarded'
 export type VoiceFeedback = 'soa' | 'nao_soa'
 export type LengthPref = 'curto' | 'medio' | 'longo'
