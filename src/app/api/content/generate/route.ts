@@ -13,6 +13,8 @@ const generateRequestSchema = z.object({
   seedRef: z.string().min(1),
   angle: z.string().max(200).nullish(),
   adjust: z.enum(['mais_curto', 'menos_formal', 'tira_jargao']).nullish(),
+  angleKind: z.enum(['study', 'opinion']).nullish(),
+  thesis: z.string().max(500).nullish(),
 })
 
 function jsonError(error: string, status: number): NextResponse {
@@ -41,7 +43,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const parsed = generateRequestSchema.safeParse(body)
   if (!parsed.success) return jsonError('invalid_request', 400)
 
-  const { format, seedType, seedRef, angle, adjust } = parsed.data
+  const { format, seedType, seedRef, angle, adjust, angleKind, thesis } = parsed.data
 
   try {
     const seed = await loadSeedEvidence(supabase, user.id, seedType, seedRef)
@@ -56,6 +58,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       voiceProfile,
       angle: angle ?? null,
       adjust: adjust ?? null,
+      angleKind: angleKind ?? null,
+      thesis: thesis ?? null,
     })
 
     return NextResponse.json({ variants }, { status: 200 })

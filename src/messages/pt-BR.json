@@ -427,6 +427,11 @@
     "generating": "Escrevendo na sua voz...",
     "regenerate": "Gerar de novo",
     "angleLabel": "Ângulo",
+    "angles": {
+      "label": "Escolha o ângulo do post",
+      "relato": "Relato",
+      "study": "Estudo"
+    },
     "formats": {
       "post": "Post",
       "impactSummary": "Resumo de impacto",

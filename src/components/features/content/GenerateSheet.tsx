@@ -5,9 +5,10 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { motion } from 'framer-motion'
 import { X, RefreshCw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import type { AdjustKind, DraftFormat, DraftVariant } from '@/types/content'
+import type { AdjustKind, AngleKind, DraftFormat, DraftVariant } from '@/types/content'
 import { DraftCard } from './DraftCard'
 import { AdjustChips } from './AdjustChips'
+import { AngleSelector, type AngleValue } from './AngleSelector'
 import { VoiceCalibration } from './VoiceCalibration'
 import {
   PRESENCA_OPEN_EVENT,
@@ -16,7 +17,7 @@ import {
   type PresencaResumeDetail,
 } from './presencaEvents'
 
-type Status = 'idle' | 'generating' | 'done' | 'error'
+type Status = 'idle' | 'angle-select' | 'generating' | 'done' | 'error'
 type ErrorKind = 'generationFailed' | 'generic'
 type Mode = 'generate' | 'resume'
 
@@ -61,9 +62,11 @@ export function GenerateSheet() {
   const [existingDraftId, setExistingDraftId] = useState<string | null>(null)
   /** Muda a cada geração/retomada para remontar os cards (evita estado de edição vazado entre rascunhos). */
   const [genId, setGenId] = useState(0)
+  /** Ângulo escolhido para o post (018 US1); `null` = relato (padrão). */
+  const [angleKind, setAngleKind] = useState<AngleValue>(null)
 
   const generate = useCallback(
-    async (seed: PresencaOpenDetail, fmt: DraftFormat, adjust?: AdjustKind) => {
+    async (seed: PresencaOpenDetail, fmt: DraftFormat, adjust?: AdjustKind, angle?: AngleKind | null) => {
       setStatus('generating')
       try {
         const res = await fetch('/api/content/generate', {
@@ -74,6 +77,7 @@ export function GenerateSheet() {
             seedType: seed.seedType,
             seedRef: seed.seedRef,
             ...(adjust ? { adjust } : {}),
+            ...(angle ? { angleKind: angle } : {}),
           }),
         })
 
@@ -105,8 +109,14 @@ export function GenerateSheet() {
       setDetail(next)
       setFormat(initialFormat)
       setVariants([])
+      setAngleKind(null)
       setOpen(true)
-      void generate(next, initialFormat)
+      // Post abre no seletor de ângulo (US1); outros formatos geram direto (sem ângulo).
+      if (initialFormat === 'post') {
+        setStatus('angle-select')
+      } else {
+        void generate(next, initialFormat)
+      }
     }
     function handleResume(e: Event) {
       const d = (e as CustomEvent<PresencaResumeDetail>).detail
@@ -132,15 +142,26 @@ export function GenerateSheet() {
   function handleFormatChange(next: DraftFormat) {
     if (!detail || next === format) return
     setFormat(next)
-    void generate(detail, next)
+    setAngleKind(null)
+    // Voltar para post reabre o seletor de ângulo; outros formatos geram direto.
+    if (next === 'post') {
+      setStatus('angle-select')
+    } else {
+      void generate(detail, next)
+    }
+  }
+
+  function handleSelectAngle(angle: AngleValue) {
+    setAngleKind(angle)
+    if (detail) void generate(detail, format, undefined, angle)
   }
 
   function handleRegenerate() {
-    if (detail) void generate(detail, format)
+    if (detail) void generate(detail, format, undefined, angleKind)
   }
 
   function handleAdjust(adjust: AdjustKind) {
-    if (detail) void generate(detail, format, adjust)
+    if (detail) void generate(detail, format, adjust, angleKind)
   }
 
   if (!detail) return null
@@ -217,6 +238,10 @@ export function GenerateSheet() {
 
             {/* Conteúdo: animação de escrita, rascunhos, ou erro honesto */}
             <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4 min-h-0">
+              {status === 'angle-select' && (
+                <AngleSelector selected={angleKind} onSelect={handleSelectAngle} />
+              )}
+
               {status === 'generating' && <GeneratingState label={t('generating')} />}
 
               {status === 'error' && (

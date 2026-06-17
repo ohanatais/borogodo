@@ -307,6 +307,11 @@
     "generating": "Writing in your voice...",
     "regenerate": "Generate again",
     "angleLabel": "Angle",
+    "angles": {
+      "label": "Choose the post angle",
+      "relato": "Story",
+      "study": "Study"
+    },
     "formats": {
       "post": "Post",
       "impactSummary": "Impact summary",

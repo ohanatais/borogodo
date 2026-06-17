@@ -111,4 +111,27 @@ describe('POST /api/content/generate', () => {
     await POST(makeRequest(VALID_BODY))
     expect(mockGenerateDraft).not.toHaveBeenCalled()
   })
+
+  // T008 — RED (Phase 3 US1): angleKind no schema da rota
+  it('US1: passa angleKind study para o motor quando enviado na requisição', async () => {
+    const { POST } = await import('../route')
+    await POST(makeRequest({ ...VALID_BODY, angleKind: 'study' }))
+    expect(mockGenerateDraft).toHaveBeenCalledWith(
+      expect.objectContaining({ angleKind: 'study' })
+    )
+  })
+
+  it('US1: rejeita angleKind inválido com 400', async () => {
+    const { POST } = await import('../route')
+    const res = await POST(makeRequest({ ...VALID_BODY, angleKind: 'invalid' }))
+    expect(res.status).toBe(400)
+  })
+
+  it('US1: passa thesis para o motor quando enviado', async () => {
+    const { POST } = await import('../route')
+    await POST(makeRequest({ ...VALID_BODY, angleKind: 'study', thesis: 'Retenção é confiança' }))
+    expect(mockGenerateDraft).toHaveBeenCalledWith(
+      expect.objectContaining({ thesis: 'Retenção é confiança' })
+    )
+  })
 })

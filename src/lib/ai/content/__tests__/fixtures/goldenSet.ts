@@ -291,6 +291,26 @@ export const goodCases: GoldenCase[] = [
       ],
     },
   },
+  {
+    name: 'post estudo (018 US1) — aprendizado ancorado',
+    format: 'post',
+    seedLabels: ['E1', 'E2'],
+    voiceProfile: { tone: 'direto e caloroso', samples: [], updatedAt: TS },
+    output: {
+      variants: [
+        {
+          angle: 'o que estudei',
+          body: 'Estudei análise de cohort do zero enquanto liderava o discovery de um produto numa fintech. Levei umas semanas pra entender por que retenção contava mais que aquisição no nosso caso.',
+          evidence_refs: ['E1'],
+        },
+        {
+          angle: 'a mudança de perspectiva',
+          body: 'Aprendi a olhar retenção como confiança acumulada ao longo dos trimestres, ajustando o onboarding a cada ciclo em vez de caçar usuário novo.',
+          evidence_refs: ['E2'],
+        },
+      ],
+    },
+  },
 ]
 
 export const badCases: BadCase[] = [

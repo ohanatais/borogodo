@@ -133,3 +133,32 @@ describe('generateDraft — falha após a 2ª tentativa', () => {
     expect(complete).toHaveBeenCalledTimes(2)
   })
 })
+
+// T006 — RED (Phase 3 US1): ângulo de estudo
+describe('generateDraft — ângulo de estudo (US1)', () => {
+  const STUDY_OUTPUT = {
+    variants: [
+      { angle: 'o aprendizado', body: 'Estudei análise de cohort do zero enquanto liderava produto numa fintech.', evidence_refs: ['E1'] },
+      { angle: 'a mudança de perspectiva', body: 'Aprendi a olhar retenção como confiança acumulada ao longo dos trimestres.', evidence_refs: ['E2'] },
+    ],
+  }
+
+  it('injeta o bloco de ângulo de estudo no user prompt', async () => {
+    const complete = vi.fn().mockResolvedValue(jsonBlock(STUDY_OUTPUT))
+    await generateDraft({ ...BASE_INPUT, format: 'post', angleKind: 'study' }, complete)
+    expect(complete.mock.calls[0][0].user).toContain('ÂNGULO: Estudo')
+  })
+
+  it('devolve 2 variantes que passam no ruleset com angleKind study', async () => {
+    const complete = vi.fn().mockResolvedValue(jsonBlock(STUDY_OUTPUT))
+    const result = await generateDraft({ ...BASE_INPUT, format: 'post', angleKind: 'study' }, complete)
+    expect(result.variants).toHaveLength(2)
+    expect(result.variants[0].evidenceRefs).toEqual(['E1'])
+  })
+
+  it('não injeta bloco de ângulo quando angleKind é nulo', async () => {
+    const complete = vi.fn().mockResolvedValue(jsonBlock(CLEAN_OUTPUT))
+    await generateDraft({ ...BASE_INPUT, format: 'post', angleKind: null }, complete)
+    expect(complete.mock.calls[0][0].user).not.toContain('ÂNGULO:')
+  })
+})

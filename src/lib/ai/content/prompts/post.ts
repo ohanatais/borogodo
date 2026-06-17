@@ -2,6 +2,7 @@ import {
   ANTI_AI_DISCIPLINE,
   OUTPUT_CONTRACT,
   buildAdjustBlock,
+  buildAngleBlock,
   buildEvidenceBlock,
   buildVoiceBlock,
   type ContentPromptInput,
@@ -36,7 +37,7 @@ export function buildPostUserPrompt(input: ContentPromptInput): string {
 Evidência (cada afirmação do post deve se apoiar em uma destas; use o rótulo [En] em evidence_refs):
 ${buildEvidenceBlock(input.evidence)}
 
-${buildVoiceBlock(input.voiceProfile)}${angleLine}${buildAdjustBlock(input.adjust)}
+${buildVoiceBlock(input.voiceProfile)}${angleLine}${buildAngleBlock(input)}${buildAdjustBlock(input.adjust)}
 
 Gere 2 variantes de post de LinkedIn a partir disso.`
 }
