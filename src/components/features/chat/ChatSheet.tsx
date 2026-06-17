@@ -267,9 +267,23 @@ export function ChatSheet() {
       const detail = (e as CustomEvent<ChatOpenDetail>).detail
       dispatch({ type: 'OPEN', payload: detail ?? {} })
     }
+    function closeHandler() {
+      dispatch({ type: 'CLOSE' })
+    }
     window.addEventListener('borogodo:chat-open', handler)
-    return () => window.removeEventListener('borogodo:chat-open', handler)
+    window.addEventListener('borogodo:chat-close', closeHandler)
+    return () => {
+      window.removeEventListener('borogodo:chat-open', handler)
+      window.removeEventListener('borogodo:chat-close', closeHandler)
+    }
   }, [])
+
+  // Reflect open/close state to the capture toggle (Registrar | Perguntar).
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent('borogodo:chat-state', { detail: { open: state.open } })
+    )
+  }, [state.open])
 
   // Auto-send prefill message when sheet opens with a pre-set context action
   useEffect(() => {
@@ -448,4 +462,8 @@ export function ChatSheet() {
 
 export function openChatSheet(detail?: ChatOpenDetail) {
   window.dispatchEvent(new CustomEvent('borogodo:chat-open', { detail: detail ?? {} }))
+}
+
+export function closeChatSheet() {
+  window.dispatchEvent(new CustomEvent('borogodo:chat-close'))
 }

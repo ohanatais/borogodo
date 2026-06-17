@@ -5,7 +5,7 @@ completo de produto, stack e processo de desenvolvimento está em `.claude/CLAUD
 
 ## Status do desenvolvimento
 
-Features mergeadas em `main` (até PR #24):
+Features mergeadas em `main` (até PR #40):
 - **001-landing-page** — landing page pública, design system e i18n
 - **002-user-auth** — autenticação (Google OAuth + e-mail/senha), painel protegido por middleware
 - **003-capture-pipeline** — captura de texto e PDF/LinkedIn, extração via IA com Zod
@@ -21,26 +21,23 @@ Features mergeadas em `main` (até PR #24):
 - **013-motor-de-voz** — fundação de conteúdo (`drafts`, `voice_profile` JSONB, motor `generateDraft`, post + resumo de impacto), migration `009` (PR #22)
 - **014-presenca** — hub `/presenca`, gestão total do rascunho, "Usar projeto" no histórico, sugestões (PR #23)
 - **015-refino-voz** — recalibração de voz com consentimento, golden set como gate de CI, mini-bio (3º formato), migration `010` (PR #24)
+- **016-captura-v2** — captura multi-item, ressurgimento por delta, áudio via Web Speech, pergunta cirúrgica (PR #40)
 
 **Bloco da Presença (fechado):** 013 → 014 → 015 mergeadas. Migrations `009` e `010` aplicadas em
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **016-captura-v2** (branch: `016-captura-v2`) — **planejamento concluído; implementação não iniciada**
-Spec: [specs/016-captura-v2/spec.md](specs/016-captura-v2/spec.md) ·
-Plan: [specs/016-captura-v2/plan.md](specs/016-captura-v2/plan.md) ·
-Tasks: [specs/016-captura-v2/tasks.md](specs/016-captura-v2/tasks.md)
+Current feature: **017-feed-registros** (branch: `017-feed-registros`)
+Spec: [specs/017-feed-registros/spec.md](specs/017-feed-registros/spec.md) ·
+Plan: [specs/017-feed-registros/plan.md](specs/017-feed-registros/plan.md) ·
+Tasks: [specs/017-feed-registros/tasks.md](specs/017-feed-registros/tasks.md) ← gerado pelo /speckit-tasks
 
-Primeira aposta de retenção pós-Presença — ataca o gargalo no **input** (alimentar dado fresco), não no
-output. Discovery em `docs/discovery-retencao-e-conteudo.md` (§1/§3/§8). Quatro frentes, **reusando** o
-pipeline existente: **US1** colar artefato vira N entradas (reusa extração+`saveEntries`; novo só o
-resumo "criei N entradas"+desfazer e o limite de tamanho); **US2** ressurgimento por **delta** ("≥1
-entrada nova desde o último retorno", substitui o nudge por relógio); **US3** áudio via **Web Speech**
-client-side (sem servidor); **US4** pergunta cirúrgica assíncrona via `proactive_insights`+`ReflectionCard`.
-Spec ✅, clarify ✅, plan ✅, research ✅, tasks ✅. **Gates antes de codar:** `/impeccable shape` do
-ressurgimento (US2) e da gravação (US3).
+Feed cru de registros (`/registros`): cards colapsáveis, dois eixos de tempo, busca textual,
+filtros combináveis, exclusão, grade-faísca (estilo GitHub). Painel aponta pro feed via
+"Ver tudo →". Extração ganha `title` gerado no mesmo turno Haiku. Migration `01X` (número
+confirmar no kickoff — provável `011` após 015→016 mergeadas).
 
-**Migration:** footprint **0–1**. US1/US3/US4 não tocam schema. Única candidata: coluna
-`profiles.last_panel_seen_at` (`011`) para o delta da US2 — **decisão aberta** (Opção A migration / B
-localStorage), a fechar na fase da US2 (tasks T006/T012).
+Shape: [specs/017-feed-registros/shape.md](specs/017-feed-registros/shape.md) ✅
+
+Próximos passos: implementar — começar pela Phase 1 (T001) → Phase 2 → US1 (T010–T018).
 <!-- SPECKIT END -->

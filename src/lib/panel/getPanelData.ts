@@ -15,6 +15,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 interface RecentEntryRow {
   id: string
   what_i_did: string
+  title: string | null
   source: Entry['source']
   entry_date: string | null
   created_at: string
@@ -24,14 +25,6 @@ export interface TimelineEntry {
   id: string
   role_title: string | null
   company: string | null
-  entry_date: string | null
-}
-
-export interface HighlightEntry {
-  id: string
-  what_i_did: string
-  impact: string | null
-  metric: string | null
   entry_date: string | null
 }
 
@@ -64,7 +57,6 @@ export interface PanelData {
   daysSince: number | null
   recentEntries: RecentEntryRow[]
   timelineEntries: TimelineEntry[]
-  highlights: HighlightEntry[]
   mirror: PanelMirror | null
   insight: ProactiveInsight | null
   composerPlaceholder: string
@@ -97,17 +89,16 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     mirrorRes,
     insightRes,
     timelineRes,
-    highlightsRes,
     returnEntriesRes,
   ] = await Promise.all([
     supabase.from('profiles').select('name, avatar_url, last_panel_seen_at').eq('id', userId).single(),
     supabase.from('entries').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase
       .from('entries')
-      .select('id, what_i_did, source, entry_date, created_at')
+      .select('id, what_i_did, title, source, entry_date, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .limit(3),
+      .limit(5),
     supabase
       .from('entries')
       .select('entry_date')
@@ -146,13 +137,6 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .not('role_title', 'is', null)
       .order('entry_date', { ascending: false })
       .limit(10),
-    supabase
-      .from('entries')
-      .select('id, what_i_did, impact, metric, entry_date')
-      .eq('user_id', userId)
-      .not('impact', 'is', null)
-      .order('entry_date', { ascending: false })
-      .limit(3),
     supabase
       .from('entries')
       .select('id, what_i_did, entry_date, created_at')
@@ -226,7 +210,6 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     daysSince,
     recentEntries,
     timelineEntries,
-    highlights: (highlightsRes.data ?? []) as HighlightEntry[],
     mirror,
     insight: (insightRes.data as ProactiveInsight | null) ?? null,
     composerPlaceholder: t(prompt.key, prompt.values),

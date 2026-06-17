@@ -29,6 +29,7 @@ const textField = z
 
 const extractedEntrySchema = z.object({
   what_i_did: z.string().min(1),
+  title: z.string().max(80).optional().catch(undefined),
   decision: textField,
   learning: textField,
   impact: textField,
