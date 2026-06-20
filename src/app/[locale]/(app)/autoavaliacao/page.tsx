@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
+import { listDrafts } from '@/lib/db/drafts'
 import { PeriodPicker } from '@/components/features/autoavaliacao/PeriodPicker'
+import { SelfAssessmentHistory } from '@/components/features/autoavaliacao/SelfAssessmentHistory'
 
 export const metadata: Metadata = {
   title: 'Autoavaliação | Borogodó',
@@ -25,6 +27,10 @@ export default async function AutoavaliacaoPage() {
 
   const t = await getTranslations('autoavaliacao')
 
+  // Histórico do próprio artefato: as autoavaliações já salvas (drafts `self_assessment`). Vivem na
+  // tabela `drafts`, separadas de `entries` — por isso nunca tocam o espelho.
+  const history = await listDrafts(supabase, user.id, { format: 'self_assessment' })
+
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
       <header className="mb-8">
@@ -37,6 +43,8 @@ export default async function AutoavaliacaoPage() {
       </header>
 
       <PeriodPicker />
+
+      <SelfAssessmentHistory items={history.items} />
     </div>
   )
 }

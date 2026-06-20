@@ -128,6 +128,32 @@ describe('POST /api/content/generate', () => {
     )
   })
 
+  it('US1 (019): período sem evidência → { limited: true } sem chamar o motor (não inventa)', async () => {
+    mockLoadSeed.mockResolvedValue({ seedSummary: '2025-01-01 a 2025-06-30', evidence: [] })
+    const { POST } = await import('../route')
+    const res = await POST(
+      makeRequest({
+        format: 'self_assessment',
+        seedType: 'period',
+        seedRef: 'period:::2025-01-01:::2025-06-30',
+      })
+    )
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { limited?: boolean; variants?: unknown[] }
+    expect(body.limited).toBe(true)
+    expect(body.variants).toBeUndefined()
+    expect(mockGenerateDraft).not.toHaveBeenCalled()
+  })
+
+  it('US1 (019): seed não-period vazio NÃO vira limited (só period colhe agregado)', async () => {
+    mockLoadSeed.mockResolvedValue({ seedSummary: 'produto 0→1', evidence: [] })
+    const { POST } = await import('../route')
+    const res = await POST(makeRequest(VALID_BODY))
+    // post/theme com evidência vazia segue o caminho normal do motor (não é o caso "colher o ano").
+    expect(mockGenerateDraft).toHaveBeenCalled()
+    expect(res.status).toBe(200)
+  })
+
   it('US1 (019): período malformado → 404 seed_not_found (loadSeedEvidence devolve null)', async () => {
     mockLoadSeed.mockResolvedValue(null)
     const { POST } = await import('../route')

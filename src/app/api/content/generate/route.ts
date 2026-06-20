@@ -47,6 +47,14 @@ export async function POST(request: Request): Promise<NextResponse> {
     const seed = await loadSeedEvidence(supabase, user.id, seedType, seedRef)
     if (!seed) return jsonError('seed_not_found', 404)
 
+    // Base limitada (019): um período sem nenhuma evidência não autoriza o motor a inventar para
+    // preencher. Em vez de um 422 genérico (que parece bug), devolvemos um sinal honesto que a UI
+    // traduz em "ainda há pouco aqui pra colher — registre e volte". Só para `period`: os demais
+    // seeds sempre carregam ao menos a entrada/tema/projeto que os originou.
+    if (seedType === 'period' && seed.evidence.length === 0) {
+      return NextResponse.json({ limited: true }, { status: 200 })
+    }
+
     const voiceProfile = await getVoiceProfile(supabase, user.id)
 
     const { variants } = await generateDraft({

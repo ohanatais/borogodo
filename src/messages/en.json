@@ -307,6 +307,10 @@
     "generating": "Writing in your voice...",
     "regenerate": "Generate again",
     "angleLabel": "Angle",
+    "limited": {
+      "message": "There's still little to harvest in this period. Rather than make things up, I'd rather show you that: log what you did and come back, and I'll build a faithful self-assessment.",
+      "cta": "Log something now"
+    },
     "formats": {
       "post": "Post",
       "impactSummary": "Impact summary",
@@ -433,7 +437,13 @@
       "evolucao": "Growth",
       "pontosADesenvolver": "Areas to develop"
     },
-    "limited": "There's still little to harvest here — log what you did and come back."
+    "limited": "There's still little to harvest here — log what you did and come back.",
+    "history": {
+      "title": "Your self-assessments",
+      "empty": "Once you generate your first self-assessment, it'll be kept here.",
+      "generatedOn": "Generated on {date}",
+      "untitled": "Self-assessment"
+    }
   },
   "feed": {
     "title": "Your records",

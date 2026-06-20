@@ -84,6 +84,24 @@ describe('POST /api/content/drafts', () => {
     )
   })
 
+  it('US1 (019): persiste autoavaliação (format self_assessment + seedType period)', async () => {
+    const { POST } = await import('../route')
+    const res = await POST(
+      postRequest({
+        ...VALID_CREATE,
+        format: 'self_assessment',
+        seedType: 'period',
+        seedRef: 'period:::2025-01-01:::2025-06-30',
+      })
+    )
+    expect(res.status).toBe(201)
+    expect(mockInsertDraft).toHaveBeenCalledWith(
+      expect.anything(),
+      'user-1',
+      expect.objectContaining({ format: 'self_assessment', seedType: 'period' })
+    )
+  })
+
   it('devolve 401 quando não há sessão', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const { POST } = await import('../route')

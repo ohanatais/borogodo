@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
 import * as Dialog from '@radix-ui/react-dialog'
 import { motion } from 'framer-motion'
 import { X, RefreshCw } from 'lucide-react'
@@ -16,7 +17,7 @@ import {
   type PresencaResumeDetail,
 } from './presencaEvents'
 
-type Status = 'idle' | 'generating' | 'done' | 'error'
+type Status = 'idle' | 'generating' | 'done' | 'error' | 'limited'
 type ErrorKind = 'generationFailed' | 'generic'
 type Mode = 'generate' | 'resume'
 
@@ -84,8 +85,13 @@ export function GenerateSheet() {
           return
         }
 
-        const body = (await res.json()) as { variants: DraftVariant[] }
-        setVariants(body.variants)
+        const body = (await res.json()) as { variants?: DraftVariant[]; limited?: boolean }
+        // Base limitada (019): o período não tinha evidência; o motor não inventou. Estado honesto.
+        if (body.limited) {
+          setStatus('limited')
+          return
+        }
+        setVariants(body.variants ?? [])
         setGenId((id) => id + 1)
         setStatus('done')
       } catch {
@@ -219,6 +225,21 @@ export function GenerateSheet() {
             {/* Conteúdo: animação de escrita, rascunhos, ou erro honesto */}
             <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4 min-h-0">
               {status === 'generating' && <GeneratingState label={t('generating')} />}
+
+              {status === 'limited' && (
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm" style={{ color: 'var(--foreground)' }}>
+                    {t('limited.message')}
+                  </p>
+                  <Link
+                    href="/registros"
+                    className="self-start inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 min-h-[48px] rounded-lg transition-opacity hover:opacity-90"
+                    style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+                  >
+                    {t('limited.cta')}
+                  </Link>
+                </div>
+              )}
 
               {status === 'error' && (
                 <div className="flex flex-col gap-3">

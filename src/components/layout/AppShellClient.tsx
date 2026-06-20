@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip, LayoutList } from 'lucide-react'
+import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip, LayoutList, ClipboardCheck } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
@@ -31,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'registros',  label: 'Registros',       icon: <LayoutList size={20} />,        path: '/registros'  },
   { id: 'historico',  label: 'Linha do Tempo',  icon: <GitCommitVertical size={20} />, path: '/historico'  },
   { id: 'presenca',   label: 'Presença',        icon: <PenLine size={20} />,           path: '/presenca'   },
+  { id: 'autoavaliacao', label: 'Autoavaliação', icon: <ClipboardCheck size={20} />,   path: '/autoavaliacao' },
 ]
 
 interface AppShellClientProps {

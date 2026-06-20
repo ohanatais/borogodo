@@ -427,6 +427,10 @@
     "generating": "Escrevendo na sua voz...",
     "regenerate": "Gerar de novo",
     "angleLabel": "Ângulo",
+    "limited": {
+      "message": "Ainda há pouco aqui pra colher neste período. Em vez de inventar, prefiro te mostrar isso: registre o que você fez e volte que eu monto sua autoavaliação fiel.",
+      "cta": "Registrar agora"
+    },
     "formats": {
       "post": "Post",
       "impactSummary": "Resumo de impacto",
@@ -553,7 +557,13 @@
       "evolucao": "Evolução",
       "pontosADesenvolver": "Pontos a desenvolver"
     },
-    "limited": "Ainda há pouco aqui pra colher — registre o que você fez e volte."
+    "limited": "Ainda há pouco aqui pra colher — registre o que você fez e volte.",
+    "history": {
+      "title": "Suas autoavaliações",
+      "empty": "Quando você gerar sua primeira autoavaliação, ela fica guardada aqui.",
+      "generatedOn": "Gerada em {date}",
+      "untitled": "Autoavaliação"
+    }
   },
   "feed": {
     "title": "Seus registros",
