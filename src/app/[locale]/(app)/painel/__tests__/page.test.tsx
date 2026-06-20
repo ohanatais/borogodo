@@ -77,4 +77,19 @@ describe('PainelPage', () => {
     expect(heading.textContent).toMatch(/formingOf/)
     expect(screen.getByText('formingSubtitle')).toBeInTheDocument()
   })
+
+  it('017: mostra o convite do Repertório quando há histórico', async () => {
+    mockGetPanelData.mockResolvedValueOnce(BASE_DATA)
+    const { default: PainelPage } = await import('../page')
+    render(await PainelPage())
+    expect(screen.getByText('hubs.mostrar.title')).toBeInTheDocument()
+    expect(screen.getByText('hubs.preparar.title')).toBeInTheDocument()
+  })
+
+  it('017: não mostra o convite quando ainda não há entradas', async () => {
+    mockGetPanelData.mockResolvedValueOnce({ ...BASE_DATA, entryCount: 0 })
+    const { default: PainelPage } = await import('../page')
+    render(await PainelPage())
+    expect(screen.queryByText('hubs.mostrar.title')).not.toBeInTheDocument()
+  })
 })

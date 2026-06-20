@@ -4,13 +4,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
-import { RefreshCw, MessageSquare, Flag } from 'lucide-react'
+import { RefreshCw, MessageSquare, Flag, UserSquare } from 'lucide-react'
 import type { MirrorSnapshot } from '@/types/mirror'
 import { MirrorFeedback } from './MirrorFeedback'
 import { EvidenceText } from './EvidenceText'
 import { MacroCategoryTabs } from './MacroCategoryTabs'
 import { SectionLabel } from '@/components/ui/SectionLabel'
 import { UsarButton } from '@/components/features/content/UsarButton'
+import { openPresenca } from '@/components/features/content/presencaEvents'
 
 interface MirrorContentProps {
   snapshot: MirrorSnapshot
@@ -116,6 +117,7 @@ function MirrorHeader({ name, label, avatarUrl }: { name: string; label: string;
 
 export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorContentProps) {
   const t = useTranslations('espelho')
+  const tr = useTranslations('repertorio')
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [regenerateError, setRegenerateError] = useState<string | null>(null)
@@ -147,6 +149,19 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
         detail: { context: { type: 'espelho' } },
       })
     )
+  }
+
+  // 017: o Espelho é onde a pessoa contempla quem é profissionalmente — o lugar certo pra virar
+  // isso numa bio. Reusa o motor de mini-bio com o tema de força principal como âncora da trajetória.
+  const primaryTheme = mirror.strength_themes[0]
+  function handleCreateBio() {
+    if (!primaryTheme) return
+    openPresenca({
+      seedType: 'theme',
+      seedRef: primaryTheme,
+      seedSummary: primaryTheme,
+      formats: ['mini_bio'],
+    })
   }
 
   return (
@@ -229,6 +244,16 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
                 </span>
               ))}
             </div>
+
+            <button
+              type="button"
+              onClick={handleCreateBio}
+              className="mt-4 inline-flex items-center gap-2 text-sm font-medium px-4 py-2 min-h-[48px] rounded-full transition-opacity hover:opacity-80"
+              style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}
+            >
+              <UserSquare size={14} aria-hidden="true" />
+              {tr('bio.cta')}
+            </button>
           </motion.div>
         )}
 

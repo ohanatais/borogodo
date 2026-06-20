@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { BorogodoCard } from '@/components/features/painel/BorogodoCard'
+import { UsarInvite } from '@/components/features/painel/UsarInvite'
 import { ProactiveInsightCard } from '@/components/features/painel/ProactiveInsightCard'
 import { PanelEmptyState } from '@/components/features/painel/PanelEmptyState'
 import { MiniTimeline } from '@/components/features/painel/MiniTimeline'
@@ -32,6 +33,7 @@ export default async function PainelPage() {
               mirror={data.mirror}
               entryCount={data.entryCount}
             />
+            <UsarInvite />
             <TrajectoryHighlights highlights={data.highlights} />
             <ProactiveInsightCard insight={data.insight} />
           </div>

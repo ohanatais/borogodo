@@ -89,10 +89,10 @@ primeiro e veja-o falhar antes de implementar.
 
 ## Phase 4: User Story 3 — Convite no Painel (P2)
 
-- [ ] T013 [P] [US3] Criar `src/components/features/painel/UsarInvite.tsx`: dois cards (frase +
+- [x] T013 [P] [US3] Criar `src/components/features/painel/UsarInvite.tsx`: dois cards (frase +
   exemplos) com `Link` p/ `/presenca` (âncoras opcionais). Segue o idioma visual do Painel. Testes
   em `__tests__/UsarInvite.test.tsx` (renderiza dois cards com link correto). **TDD: teste primeiro.**
-- [ ] T014 [US3] `src/app/[locale]/(app)/painel/page.tsx`: montar `UsarInvite` no ramo populado
+- [x] T014 [US3] `src/app/[locale]/(app)/painel/page.tsx`: montar `UsarInvite` no ramo populado
   (`entryCount > 0`), logo após `<BorogodoCard />`. Ramo vazio inalterado. Ajustar/extender
   `__tests__/page.test.tsx` (convite só com entradas).
 
@@ -102,7 +102,7 @@ primeiro e veja-o falhar antes de implementar.
 
 ## Phase 5: User Story 4 — Bio no Espelho (P3)
 
-- [ ] T015 [US4] `src/components/features/espelho/MirrorContent.tsx`: botão "Criar minha bio" perto
+- [x] T015 [US4] `src/components/features/espelho/MirrorContent.tsx`: botão "Criar minha bio" perto
   do resumo/temas → `openPresenca({seedType:'theme',seedRef:strength_themes[0],formats:['mini_bio']})`;
   oculto se sem temas. Teste em `__tests__/MirrorContent.test.tsx` (dispara evento certo; ausente
   sem temas). **TDD: teste primeiro.**
