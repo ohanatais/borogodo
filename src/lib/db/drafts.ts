@@ -5,6 +5,7 @@ import type {
   DraftListPage,
   DraftStatus,
   DraftStatusFilter,
+  ForwardStep,
   LengthPref,
   SeedType,
   VoiceFeedback,
@@ -183,6 +184,46 @@ export async function deleteDraft(
   draftId: string
 ): Promise<boolean> {
   const { error } = await supabase.from('drafts').delete().eq('id', draftId).eq('user_id', userId)
+
+  return !error
+}
+
+/**
+ * Lê só o `body` de uma autoavaliação ESCRITA do próprio usuário (019, US2). Filtra por `id` E
+ * `user_id` E `format='self_assessment'`: insumo do passo-pra-frente, escopado (a IA nunca vê texto de
+ * outro usuário nem de outro formato). `null` quando não é do usuário → a rota mapeia 404.
+ */
+export async function getSelfAssessmentBody(
+  supabase: SupabaseServerClient,
+  userId: string,
+  draftId: string
+): Promise<string | null> {
+  const { data } = await supabase
+    .from('drafts')
+    .select('body')
+    .eq('id', draftId)
+    .eq('user_id', userId)
+    .eq('format', 'self_assessment')
+    .maybeSingle()
+
+  return (data as { body?: string } | null)?.body ?? null
+}
+
+/**
+ * Persiste o passo-pra-frente em `drafts.qa.forwardStep` do próprio usuário (019, US2). Escopado por
+ * `id` E `user_id` (RLS reforça). Sobrescreve `qa` (a autoavaliação só usa `qa` para o forwardStep).
+ */
+export async function saveForwardStep(
+  supabase: SupabaseServerClient,
+  userId: string,
+  draftId: string,
+  forwardStep: ForwardStep
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('drafts')
+    .update({ qa: { forwardStep }, updated_at: new Date().toISOString() })
+    .eq('id', draftId)
+    .eq('user_id', userId)
 
   return !error
 }
