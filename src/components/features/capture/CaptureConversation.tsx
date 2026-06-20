@@ -41,6 +41,9 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
   const [serverError, setServerError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const dialogRef = useRef<HTMLDivElement>(null)
+  // Guarda de idempotência: o POST de captura cria registros, então não pode
+  // disparar duas vezes (o React Strict Mode roda o efeito 2× no mount em dev).
+  const submittedAttempt = useRef<number | null>(null)
 
   useEffect(() => {
     dialogRef.current?.focus()
@@ -54,23 +57,23 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
   }, [])
 
   useEffect(() => {
-    let cancelled = false
+    // Um POST por tentativa (mount inicial + cada retry). Sem isso, o Strict Mode
+    // dispararia a captura duas vezes e criaria registros duplicados.
+    if (submittedAttempt.current === retryCount) return
+    submittedAttempt.current = retryCount
 
     const run = async () => {
       setPhase('reading')
       setServerError(null)
       try {
         const res = await fetch('/api/capture', { method: 'POST', body: buildFormData(input) })
-        if (cancelled) return
         if (!res.ok) {
           const body = await res.json().catch(() => ({})) as { error?: string }
-          if (cancelled) return
           setServerError(body.error ?? null)
           setPhase('error')
           return
         }
         const data = (await res.json()) as { entries: BatchEntry[]; reflection: Reflection | null }
-        if (cancelled) return
         if (!data.reflection) {
           router.refresh()
           if (data.entries.length > 1) {
@@ -87,15 +90,11 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
         setPhase('reflecting')
         router.refresh()
       } catch {
-        if (!cancelled) setPhase('error')
+        setPhase('error')
       }
     }
 
     run()
-
-    return () => {
-      cancelled = true
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, retryCount])
 
@@ -172,12 +171,12 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
           <div className="flex justify-start">
             {phase === 'reading' && <ReadingState />}
             {phase === 'batch' && (
-              <BatchSummary entries={batchEntries} onUndone={handleDismiss} />
+              <BatchSummary entries={batchEntries} onUndone={handleDismiss} onDone={handleDismiss} />
             )}
             {phase === 'reflecting' && reflection && (
               <div className="space-y-4 w-full">
                 {batchEntries.length > 1 && (
-                  <BatchSummary entries={batchEntries} onUndone={handleDismiss} />
+                  <BatchSummary entries={batchEntries} onUndone={handleDismiss} onDone={handleDismiss} />
                 )}
                 <ReflectionCard reflection={reflection} onEnrich={handleEnrich} onDismiss={handleDismiss} />
               </div>

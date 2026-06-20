@@ -205,11 +205,14 @@
     },
     "batch": {
       "summary": "Created {n, plural, one {# entry} other {# entries}}",
+      "reviewHint": "Review and discard anything you don't want to keep.",
+      "reviewHintCompany": "{company} · review and discard anything you don't want.",
       "undo": "Undo all",
       "undoAriaLabel": "Undo creation of {n, plural, one {# entry} other {# entries}}",
+      "discard": "Discard",
       "discardAriaLabel": "Discard: {title}",
       "undone": "Entries removed.",
-      "viewHistory": "View in history →"
+      "viewFeed": "View entries →"
     },
     "recording": {
       "listening": "Listening…",
