@@ -51,12 +51,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (!seed) return jsonError('seed_not_found', 404)
 
     const trimmedLastro = lastroText?.trim() ?? ''
-    // Guardrail de lastro (US2): opinião sem evidência registrada e sem vivência na hora não gera.
-    if (angleKind === 'opinion' && seed.evidence.length === 0 && trimmedLastro === '') {
-      return jsonError('opinion_needs_lastro', 400)
-    }
-
-    // Lastro "escrever agora" entra como evidência prepended (âncora prioritária para a tese).
+    // Opinião não exige evidência (revisão de produto 018): página em branco é válida. Quando o
+    // usuário oferece um exemplo, ele entra como evidência prepended (âncora prioritária da tese).
     const evidence = trimmedLastro
       ? [{ label: 'Lastro', text: trimmedLastro }, ...seed.evidence]
       : seed.evidence

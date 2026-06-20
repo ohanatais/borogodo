@@ -71,12 +71,15 @@ function isClean(result: AttemptResult): result is { output: DraftOutput; violat
 }
 
 /**
- * Guardrail de opinião (US2): uma opinião sem âncora não pode sair. Se todas as variantes voltarem
- * com `evidence_refs` vazio, a tese não tem lastro real — trata como falha (regenera/lança). Só
- * vale para `angleKind === 'opinion'`; relato/estudo com evidência vazia continuam passando.
+ * Guardrail de opinião (US2, revisado na 018): preserva o moat onde há dado, sem prender onde não há.
+ * Se o usuário tem evidência disponível, a opinião gerada precisa citá-la (`evidence_refs` não-vazio
+ * em ao menos uma variante) — opinião que ignora o próprio histórico é falha. Mas opinião sem
+ * nenhuma evidência disponível é válida (página em branco): aí o guardrail não se aplica. Os banned
+ * terms anti-opinião-oca (assert 11) seguem valendo nos dois casos.
  */
 function passesOpinionGuardrail(input: GenerateDraftInput, output: DraftOutput): boolean {
   if (input.angleKind !== 'opinion') return true
+  if (input.evidence.length === 0) return true
   return output.variants.some((v) => v.evidence_refs.length > 0)
 }
 

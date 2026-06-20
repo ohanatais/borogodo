@@ -32,8 +32,12 @@ export function AngleSelector({ selected, onSelect, disabled }: AngleSelectorPro
   const t = useTranslations('presenca')
 
   return (
-    <div className="flex gap-2" role="group" aria-label={t('angles.label')}>
-      {ANGLE_CHIPS.map((chip) => {
+    <div className="flex flex-col gap-2">
+      <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+        {t('angles.label')}
+      </span>
+      <div className="flex gap-2" role="group" aria-label={t('angles.label')}>
+        {ANGLE_CHIPS.map((chip) => {
         const active = chip.value === selected
         return (
           <button
@@ -51,7 +55,8 @@ export function AngleSelector({ selected, onSelect, disabled }: AngleSelectorPro
             {t(chip.labelKey)}
           </button>
         )
-      })}
+        })}
+      </div>
     </div>
   )
 }

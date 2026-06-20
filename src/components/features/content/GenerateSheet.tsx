@@ -22,7 +22,6 @@ import {
 type Status = 'idle' | 'angle-select' | 'generating' | 'done' | 'error'
 type ErrorKind = 'generationFailed' | 'generic'
 type Mode = 'generate' | 'resume'
-type LastroMode = 'entry' | 'writeNow'
 
 interface OpinionOptions {
   thesis: string
@@ -72,12 +71,10 @@ export function GenerateSheet() {
   const [genId, setGenId] = useState(0)
   /** Ângulo escolhido para o post (018 US1); `null` = relato (padrão). */
   const [angleKind, setAngleKind] = useState<AngleValue>(null)
-  /** Estado do painel de opinião (018 US2). */
+  /** Estado do painel de opinião (018 US2, revisado): o que dizer + um exemplo opcional. */
   const [thesis, setThesis] = useState('')
-  const [lastroMode, setLastroMode] = useState<LastroMode | null>(null)
-  const [lastroText, setLastroText] = useState('')
-  const [opinionError, setOpinionError] = useState<string | null>(null)
-  /** Vivência dita na hora que gerou a opinião — habilita o CaptureOffer; salva quando salva. */
+  const [exampleText, setExampleText] = useState('')
+  /** Exemplo dito na hora que gerou a opinião — habilita o CaptureOffer; salva quando salva. */
   const [pendingLastro, setPendingLastro] = useState<string | null>(null)
   const [captureDismissed, setCaptureDismissed] = useState(false)
 
@@ -90,7 +87,6 @@ export function GenerateSheet() {
       opinion?: OpinionOptions
     ) => {
       setStatus('generating')
-      setOpinionError(null)
       const trimmedLastro = opinion?.lastroText.trim() ?? ''
       try {
         const res = await fetch('/api/content/generate', {
@@ -108,14 +104,6 @@ export function GenerateSheet() {
         })
 
         if (!res.ok) {
-          if (res.status === 400) {
-            const body = (await res.json().catch(() => ({}))) as { error?: string }
-            if (body.error === 'opinion_needs_lastro') {
-              setOpinionError('opinion_needs_lastro')
-              setStatus('angle-select')
-              return
-            }
-          }
           setErrorKind(res.status === 422 ? 'generationFailed' : 'generic')
           setStatus('error')
           return
@@ -147,9 +135,7 @@ export function GenerateSheet() {
       setVariants([])
       setAngleKind(null)
       setThesis('')
-      setLastroMode(null)
-      setLastroText('')
-      setOpinionError(null)
+      setExampleText('')
       setPendingLastro(null)
       setCaptureDismissed(false)
       setOpen(true)
@@ -195,15 +181,14 @@ export function GenerateSheet() {
 
   function handleSelectAngle(angle: AngleValue) {
     setAngleKind(angle)
-    setOpinionError(null)
-    // Opinião abre o painel inline (tese + lastro) em vez de gerar de imediato.
+    // Opinião abre o painel inline (o que dizer + exemplo opcional) em vez de gerar de imediato.
     if (angle === 'opinion') return
     if (detail) void generate(detail, format, undefined, angle)
   }
 
   function opinionOptions(): OpinionOptions | undefined {
     if (angleKind !== 'opinion') return undefined
-    return { thesis, lastroText: lastroMode === 'writeNow' ? lastroText : '' }
+    return { thesis, lastroText: exampleText }
   }
 
   function handleGenerateOpinion() {
@@ -308,15 +293,9 @@ export function GenerateSheet() {
                     <OpinionPanel
                       thesis={thesis}
                       onThesisChange={setThesis}
-                      lastroMode={lastroMode}
-                      onLastroModeChange={setLastroMode}
-                      entries={[]}
-                      selectedEntryRef={null}
-                      onSelectEntry={() => {}}
-                      lastroText={lastroText}
-                      onLastroTextChange={setLastroText}
+                      exampleText={exampleText}
+                      onExampleTextChange={setExampleText}
                       onGenerate={handleGenerateOpinion}
-                      error={opinionError}
                     />
                   )}
                 </>

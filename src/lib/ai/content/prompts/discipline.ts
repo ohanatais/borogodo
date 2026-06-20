@@ -123,14 +123,20 @@ const STUDY_ANGLE_INSTRUCTION = `ÂNGULO: Estudo. Conte algo que você estudou o
 fez de fato). O foco é o aprendizado concreto, não a auto-bajulação: o que mudou no seu jeito de
 pensar ou fazer, sempre colado a um fato das suas entradas. Nada de lição genérica de coach.`
 
-function opinionAngleInstruction(thesis: string | null | undefined): string {
+function opinionAngleInstruction(thesis: string | null | undefined, hasEvidence: boolean): string {
   const thesisLine = thesis?.trim()
     ? `\nTese a defender: "${thesis.trim()}".`
     : ''
-  return `ÂNGULO: Opinião. Defenda uma tese ancorada no lastro real (a evidência abaixo, incluindo o
+  if (hasEvidence) {
+    return `ÂNGULO: Opinião. Defenda uma tese ancorada no lastro real (a evidência abaixo, incluindo o
 [Lastro] quando houver). Toda afirmação da tese precisa apontar para um fato concreto seu, nunca
 opinião vazia: cada variante deve ter evidence_refs não-vazio. Proibido "hot take", "opinião
 impopular mas", "ninguém fala sobre isso" e qualquer pose de polêmica sem substância.${thesisLine}`
+  }
+  return `ÂNGULO: Opinião. Defenda a tese na primeira pessoa, a partir da sua experiência concreta,
+sem inventar fatos nem citar números que você não tem. Mesmo sem evidência registrada, fuja da
+opinião vazia: proibido "hot take", "opinião impopular mas", "ninguém fala sobre isso" e qualquer
+pose de polêmica sem substância.${thesisLine}`
 }
 
 /**
@@ -143,7 +149,7 @@ export function buildAngleBlock(input: ContentPromptInput): string {
     return `\n\n${STUDY_ANGLE_INSTRUCTION}`
   }
   if (input.angleKind === 'opinion') {
-    return `\n\n${opinionAngleInstruction(input.thesis)}`
+    return `\n\n${opinionAngleInstruction(input.thesis, input.evidence.length > 0)}`
   }
   return ''
 }

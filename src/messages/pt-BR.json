@@ -428,32 +428,28 @@
     "regenerate": "Gerar de novo",
     "angleLabel": "Ângulo",
     "angles": {
-      "label": "Escolha o ângulo do post",
-      "relato": "Relato",
-      "study": "Estudo",
+      "label": "Sobre o que é esse post?",
+      "relato": "O que fiz",
+      "study": "O que aprendi",
       "opinion": "Opinião"
     },
     "opinion": {
-      "thesisLabel": "Sua tese",
-      "thesisPlaceholder": "Uma afirmação que você quer defender...",
-      "lastroLabel": "Lastro",
-      "fromEntry": "Usar entrada registrada",
-      "writeNow": "Escrever agora",
-      "writeNowTitle": "Registre o que aconteceu",
-      "writeNowPlaceholder": "O que aconteceu? Seja específico — isso vira evidência real.",
-      "generateBtn": "Gerar",
-      "needsLastroError": "Adicione um lastro: selecione uma entrada ou descreva a vivência aqui."
+      "thesisLabel": "O que você quer dizer?",
+      "thesisPlaceholder": "Escreva aqui",
+      "exampleInvite": "Quer ancorar num exemplo seu?",
+      "examplePlaceholder": "Descreva o que aconteceu",
+      "generateBtn": "Gerar post"
     },
     "captureOffer": {
-      "question": "Salvar esta vivência?",
+      "question": "Salvar este exemplo?",
       "save": "Salvar",
       "dismiss": "Dispensar",
-      "saved": "Vivência salva!"
+      "saved": "Exemplo salvo!"
     },
     "formats": {
       "post": "Post",
-      "impactSummary": "Resumo de impacto",
-      "miniBio": "Mini-bio"
+      "impactSummary": "Pra falar do seu trabalho",
+      "miniBio": "Sua bio"
     },
     "adjust": {
       "label": "Ajustar os dois rascunhos",
@@ -538,8 +534,8 @@
       "arquivados": "Arquivados",
       "allFormats": "Todos",
       "post": "Post",
-      "impactSummary": "Resumo",
-      "miniBio": "Mini-bio"
+      "impactSummary": "Pra falar",
+      "miniBio": "Bio"
     },
     "deleteConfirm": {
       "title": "Excluir este rascunho?",

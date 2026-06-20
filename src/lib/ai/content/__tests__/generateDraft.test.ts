@@ -189,4 +189,17 @@ describe('generateDraft — guardrail de opinião (US2)', () => {
     const result = await generateDraft({ ...BASE_INPUT, format: 'post', angleKind: null }, complete)
     expect(result.variants).toHaveLength(2)
   })
+
+  // Revisão de produto 018: opinião sem nenhuma evidência disponível é válida (página em branco).
+  // O guardrail só morde quando há dado a usar; sem dado, libera numa única chamada.
+  it('opinião sem evidência disponível passa sem regerar (página em branco é válida)', async () => {
+    const complete = vi.fn().mockResolvedValue(jsonBlock(NO_ANCHOR_OUTPUT))
+
+    const result = await generateDraft(
+      { ...BASE_INPUT, evidence: [], format: 'post', angleKind: 'opinion', thesis: 'Retenção é confiança' },
+      complete
+    )
+    expect(result.variants).toHaveLength(2)
+    expect(complete).toHaveBeenCalledTimes(1)
+  })
 })

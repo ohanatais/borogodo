@@ -135,22 +135,20 @@ describe('POST /api/content/generate', () => {
     )
   })
 
-  // T018 — RED (Phase 4 US2): pré-check de lastro + injeção de lastroText
-  describe('US2: opinião com lastro', () => {
-    it('devolve 400 opinion_needs_lastro quando opinion sem evidência e sem lastroText', async () => {
+  // Revisão de produto 018: opinião não exige evidência. Página em branco é válida.
+  describe('US2: opinião (revisada — evidência sugerida, não exigida)', () => {
+    it('opinião sem evidência e sem exemplo gera normalmente (não bloqueia)', async () => {
       mockLoadSeed.mockResolvedValue({ seedSummary: 'produto 0→1', evidence: [] })
       const { POST } = await import('../route')
       const res = await POST(makeRequest({ ...VALID_BODY, angleKind: 'opinion', thesis: 'Retenção é confiança' }))
-      expect(res.status).toBe(400)
-      const body = (await res.json()) as { error: string }
-      expect(body.error).toBe('opinion_needs_lastro')
+      expect(res.status).toBe(200)
     })
 
-    it('não chama o motor quando falta lastro (sem custo de IA)', async () => {
+    it('opinião sem evidência ainda chama o motor (sem pré-check)', async () => {
       mockLoadSeed.mockResolvedValue({ seedSummary: 'produto 0→1', evidence: [] })
       const { POST } = await import('../route')
       await POST(makeRequest({ ...VALID_BODY, angleKind: 'opinion', thesis: 'Retenção é confiança' }))
-      expect(mockGenerateDraft).not.toHaveBeenCalled()
+      expect(mockGenerateDraft).toHaveBeenCalled()
     })
 
     it('injeta lastroText como { label: "Lastro" } no início da evidência antes do motor', async () => {
