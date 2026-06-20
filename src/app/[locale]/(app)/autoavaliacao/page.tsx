@@ -38,7 +38,7 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
   const period = from && to ? parsePeriodSeedRef(serializePeriodSeedRef(from, to)) : null
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-8">
+    <div className="max-w-[980px] mx-auto px-6 py-8">
       <header className="mb-8">
         <h1 className="text-3xl" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, color: 'var(--foreground)' }}>
           {t('title')}

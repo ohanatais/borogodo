@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Wand2, HelpCircle, Check, X, BookOpen, Save } from 'lucide-react'
 import type { PeriodRecapItem } from '@/lib/autoavaliacao/periodRecap'
 import type { SentenceStemAnchors } from '@/lib/autoavaliacao/sentenceStems'
@@ -11,8 +11,6 @@ import type { AssistSection } from '@/lib/ai/content/assist'
 interface SectionDef {
   key: 'entregas' | 'impacto' | 'evolucao' | 'pontosADesenvolver'
   api: AssistSection
-  /** âncora do stem (só entregas/impacto); ausente = placeholder neutro. */
-  anchor?: string
 }
 
 type SectionKey = SectionDef['key']
@@ -46,6 +44,9 @@ interface AssessmentEditorProps {
  */
 export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProps) {
   const t = useTranslations('autoavaliacao')
+  const locale = useLocale()
+  const monthFmt = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' })
+  const trailDateFmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short' })
   const [sections, setSections] = useState<Sections>(EMPTY_SECTIONS)
   const [card, setCard] = useState<AssistCard | null>(null)
   const [busy, setBusy] = useState(false)
@@ -53,15 +54,20 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
   const sectionDefs: SectionDef[] = [
-    { key: 'entregas', api: 'entregas', anchor: stems.entregas },
-    { key: 'impacto', api: 'impacto', anchor: stems.impacto },
+    { key: 'entregas', api: 'entregas' },
+    { key: 'impacto', api: 'impacto' },
     { key: 'evolucao', api: 'evolucao' },
     { key: 'pontosADesenvolver', api: 'pontos_a_desenvolver' },
   ]
 
   function placeholderFor(def: SectionDef): string {
-    if ((def.key === 'entregas' || def.key === 'impacto') && !def.anchor) return t('editor.placeholder')
-    return def.anchor ? t(`stems.${def.key}`, { anchor: def.anchor }) : t(`stems.${def.key}`)
+    // Só entregas tem âncora temporal (gramatical: "Em março de 2025, eu…"); sem registro, molde neutro.
+    if (def.key === 'entregas') {
+      return stems.entregasMonth
+        ? t('stems.entregas', { anchor: monthFmt.format(new Date(stems.entregasMonth)) })
+        : t('stems.entregasNeutro')
+    }
+    return t(`stems.${def.key}`)
   }
 
   function setSection(key: SectionKey, value: string) {
@@ -166,7 +172,7 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
                 disabled={busy || !sections[def.key].trim()}
                 onClick={() => callAssist(def, 'rephrase')}
                 className="inline-flex items-center gap-1.5 text-xs px-3 py-2 min-h-[40px] rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40"
-                style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+                style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
               >
                 <Wand2 size={13} aria-hidden="true" />
                 {t('assist.rephrase')}
@@ -176,7 +182,7 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
                 disabled={busy}
                 onClick={() => callAssist(def, 'unblock')}
                 className="inline-flex items-center gap-1.5 text-xs px-3 py-2 min-h-[40px] rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40"
-                style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+                style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
               >
                 <HelpCircle size={13} aria-hidden="true" />
                 {t('assist.unblock')}
@@ -244,9 +250,10 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
         </div>
       </div>
 
-      {/* Trilha de evidências: rail no desktop, gaveta no mobile */}
+      {/* Trilha de evidências: rail sticky no desktop, gaveta no mobile. Resumo curto (não repete o
+          recap completo acima): data + uma linha por registro, como índice de consulta. */}
       {recap.length > 0 && (
-        <aside className="lg:w-72 shrink-0">
+        <aside className="lg:w-72 shrink-0 lg:sticky lg:top-6 lg:self-start">
           <button
             type="button"
             onClick={() => setTrailOpen((v) => !v)}
@@ -261,10 +268,15 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
             <h4 className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--muted-foreground)' }}>
               {t('editor.trailTitle')}
             </h4>
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col gap-3">
               {recap.map((item) => (
-                <li key={item.sourceEntryId} className="text-xs" style={{ color: 'var(--foreground)' }}>
-                  {item.text}
+                <li key={item.sourceEntryId} className="flex flex-col gap-0.5">
+                  <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--muted-foreground)' }}>
+                    {trailDateFmt.format(new Date(item.occurredAt))}
+                  </span>
+                  <span className="text-xs line-clamp-2" style={{ color: 'var(--foreground)' }}>
+                    {item.text}
+                  </span>
                 </li>
               ))}
             </ul>

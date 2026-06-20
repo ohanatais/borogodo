@@ -574,7 +574,8 @@
     },
     "stems": {
       "entregas": "Em {anchor}, eu…",
-      "impacto": "O resultado de {anchor} foi…",
+      "entregasNeutro": "Comece pela entrega que mais te marcou…",
+      "impacto": "O que mudou por causa do seu trabalho? Se teve número, comece por ele.",
       "evolucao": "Ao longo do período, eu evoluí em…",
       "pontosADesenvolver": "Quero afiar…"
     },
