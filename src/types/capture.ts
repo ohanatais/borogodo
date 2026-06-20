@@ -30,3 +30,6 @@ export interface CaptureResult {
   entries: Entry[]
   reflection: Reflection
 }
+
+/** Subconjunto de uma entrada criada, exibido na revisão pós-captura multi-item. */
+export type BatchEntry = Pick<Entry, 'id' | 'title' | 'what_i_did' | 'company'>

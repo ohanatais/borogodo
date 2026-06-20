@@ -318,10 +318,14 @@
     },
     "batch": {
       "summary": "Criei {n, plural, one {# entrada} other {# entradas}}",
-      "undo": "Desfazer",
+      "reviewHint": "Revise e descarte o que não quiser manter.",
+      "reviewHintCompany": "{company} · revise e descarte o que não quiser.",
+      "undo": "Desfazer tudo",
       "undoAriaLabel": "Desfazer criação de {n, plural, one {# entrada} other {# entradas}}",
+      "discard": "Descartar",
+      "discardAriaLabel": "Descartar: {title}",
       "undone": "Entradas removidas.",
-      "viewHistory": "Ver no histórico →"
+      "viewFeed": "Ver registros →"
     },
     "recording": {
       "start": "Gravar",
