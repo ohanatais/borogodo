@@ -72,7 +72,7 @@ export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
   }
 
   return (
-    <li className="rounded-xl border" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
+    <li id={`registro-${item.id}`} className="scroll-mt-24 rounded-xl border" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
       <button
         type="button"
         aria-expanded={expanded}

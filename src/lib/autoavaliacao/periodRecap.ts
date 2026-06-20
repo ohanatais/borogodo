@@ -30,12 +30,18 @@ interface RecapRow {
   created_at: string
 }
 
+/** A data-only (`YYYY-MM-DD`) do `occurredAt`, seja ele date puro ou ISO timestamp. Compara como string. */
+function dayOf(occurredAt: string): string {
+  return occurredAt.slice(0, 10)
+}
+
 /**
- * Recap "o seu ano, em fatos" (019, US1) — DETERMINÍSTICO, sem LLM (research D2). É uma transformação
- * de apresentação sobre os registros do período: cada item é exatamente o `what_i_did` da entrada (zero
- * invenção, zero adjetivo por construção), com a fonte e a data. Colhe SÓ de `entries` (capturas reais),
- * escopado por `user_id` (RLS) — a autoavaliação escrita pela pessoa (em `drafts`) jamais entra aqui,
- * senão a interpretação dela voltaria como "fato" (isolamento).
+ * Recap "o seu ano, em fatos" (019, US1) — DETERMINÍSTICO, sem LLM (research D2). Cada item é exatamente
+ * o `what_i_did` do registro (zero invenção/adjetivo por construção), com a fonte e a data. Colhe SÓ de
+ * `entries` (capturas reais), escopado por `user_id` (RLS) — a autoavaliação escrita (em `drafts`) jamais
+ * entra aqui (isolamento). O recorte do período é por `occurredAt` = `entry_date` quando houver, senão
+ * `created_at` (data-model): registros sem data explícita ainda contam pelo momento da captura. A
+ * comparação é por string `YYYY-MM-DD` (estável a fuso — evita o off-by-one de `new Date('2026-01-01')`).
  */
 export async function loadPeriodRecap(
   supabase: SupabaseServerClient,
@@ -47,19 +53,22 @@ export async function loadPeriodRecap(
     .from('entries')
     .select(RECAP_COLUMNS)
     .eq('user_id', userId)
-    .gte('entry_date', from)
-    .lte('entry_date', to)
-    .order('entry_date', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(MAX_RECAP_ITEMS)
 
-  const items: PeriodRecapItem[] = (data ?? []).map((r) => {
-    const row = r as RecapRow
-    return {
-      text: row.what_i_did,
-      sourceEntryId: row.id,
-      occurredAt: row.entry_date ?? row.created_at,
-    }
-  })
+  const items: PeriodRecapItem[] = (data ?? [])
+    .map((r) => {
+      const row = r as RecapRow
+      return {
+        text: row.what_i_did,
+        sourceEntryId: row.id,
+        occurredAt: row.entry_date ?? row.created_at,
+      }
+    })
+    .filter((item) => {
+      const day = dayOf(item.occurredAt)
+      return day >= from && day <= to
+    })
 
   return { items, isLimited: items.length === 0 }
 }

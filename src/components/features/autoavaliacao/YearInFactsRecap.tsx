@@ -18,7 +18,9 @@ interface YearInFactsRecapProps {
 export function YearInFactsRecap({ items, isLimited }: YearInFactsRecapProps) {
   const t = useTranslations('autoavaliacao.recap')
   const locale = useLocale()
-  const dateFmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric' })
+  // timeZone UTC: occurredAt date-only (YYYY-MM-DD) é meia-noite UTC; sem isso, fusos negativos
+  // voltam um dia ("2026-01-01" → "31 dez 2025").
+  const dateFmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })
 
   if (isLimited) {
     return (

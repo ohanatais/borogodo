@@ -45,8 +45,9 @@ interface AssessmentEditorProps {
 export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProps) {
   const t = useTranslations('autoavaliacao')
   const locale = useLocale()
-  const monthFmt = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' })
-  const trailDateFmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short' })
+  // timeZone UTC: evita o off-by-one de datas date-only em fusos negativos (ver YearInFactsRecap).
+  const monthFmt = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  const trailDateFmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', timeZone: 'UTC' })
   const [sections, setSections] = useState<Sections>(EMPTY_SECTIONS)
   const [card, setCard] = useState<AssistCard | null>(null)
   const [busy, setBusy] = useState(false)
