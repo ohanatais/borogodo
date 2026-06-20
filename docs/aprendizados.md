@@ -446,3 +446,29 @@ ferramenta certa é `git worktree` (uma pasta por branch). E doc de discovery se
 **Por que importa:** é um aprendizado central de `build-with-claude` pra quem usa mais de uma janela. O
 reflexo "abro vários chats e toco tudo em paralelo" parece produtivo e na real cria colisão silenciosa. A
 regra: uma feature/branch por pasta por vez; pra paralelo real, worktrees.
+
+---
+
+## 2026-06-16 — Pra post visual bom, HTML exportável vence imagem de IA
+
+**O que aconteceu:** eu queria um carrossel pro LinkedIn explicando meu fluxo de trabalho e tinha gostado de
+uma arte que o Gemini gerou. Olhando de perto, o "tell" de imagem de IA estava lá: as caixas de código diziam
+`okich(70% 0.10 190)` e `claude (Feature Pis)` — texto embolado, valores errados, lindo de longe e quebrado
+no detalhe. Em vez de gerar imagem, montamos um arquivo HTML único: cada slide no tamanho do LinkedIn
+(1080×1080), usando os tokens reais do design system (cores `oklch`, Fraunces, Geist Mono), com um botão
+"Baixar todos como PNG" via `html-to-image`. Abro no navegador, clico, e saem os PNGs prontos pra subir.
+
+**O que aprendi:** modelo de imagem *desenha* letras, não escreve — então nunca acerta texto técnico, cor de
+marca exata, nem deixa editar uma palavra sem regenerar tudo. Pra conteúdo que é todo texto e precisão (um
+carrossel de processo), HTML/SVG é objetivamente superior: fonte real, cor exata, código legível, e edição de
+uma palavra é trocar uma linha. O "salvar como imagem", que parecia o bloqueio, se resolve com uma lib de
+print do DOM. E o ganho maior nem foi visual: como o conteúdo virou texto editável, deu pra iterar o *conteúdo*
+em camadas (cortar jargão de IA, achar a voz, reordenar a narrativa, trocar uma metáfora) sem perder a arte —
+coisa impossível quando o post é um PNG achatado.
+
+**Por que importa:** é material direto pro `build-with-claude`. A intuição comum ("peço pra IA gerar a imagem
+do post") entrega algo bonito que não escala e não se edita. A virada é tratar o post como **código**: um
+template HTML que vira a sua "máquina" de carrossel, reusável a cada post trocando só o conteúdo. Some-se a
+isso a régua de LinkedIn que destravou o conteúdo (capa que cria curiosidade em vez de rótulo; storytelling em
+primeira pessoa; fio narrativo entre slides; fechar entregando uma ideia, não um resumo) e o resultado é um
+ativo, não um post descartável.

@@ -17,12 +17,12 @@ primeiro e veja-o falhar antes de implementar.
 
 ## Phase 1: Foundational (compartilhado — bloqueia as histórias)
 
-- [ ] T001 [P] [FND] Criar `src/lib/content/intentions.ts`: `type Hub = 'mostrar'|'preparar'`;
+- [x] T001 [P] [FND] Criar `src/lib/content/intentions.ts`: `type Hub = 'mostrar'|'preparar'`;
   `type PrepMoment = 'entrevista'|'review'|'salario'`;
   `PREP_MOMENTS: Record<PrepMoment, { angleHint: string; labelKey: string; starters: string[] }>`;
   `isPrepMoment(x): x is PrepMoment`. Testes em `src/lib/content/__tests__/intentions.test.ts`
   (mapa completo, narrowing). **TDD: teste primeiro.**
-- [ ] T002 [FND] i18n: adicionar chaves novas em `src/messages/pt-BR.json` (+ stub `en.json`):
+- [x] T002 [FND] i18n: adicionar chaves novas em `src/messages/pt-BR.json` (+ stub `en.json`):
   nome "Repertório" (nav + header), títulos+exemplos dos hubs, rótulos dos momentos, textos da
   bifurcação ("Quero algo pronto agora" / "Quero treinar conversando"), copy do convite do Painel,
   botão "Criar minha bio". Convenções da Ohana (sem travessão/barra/fragmentação).
