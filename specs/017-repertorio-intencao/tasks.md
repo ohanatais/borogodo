@@ -35,15 +35,15 @@ primeiro e veja-o falhar antes de implementar.
 
 **Goal**: a seção vira "Repertório" com dois hubs + "Meus rascunhos" preservado.
 
-- [ ] T003 [US1] `src/components/layout/AppShellClient.tsx`: label do item `presenca` em
+- [x] T003 [US1] `src/components/layout/AppShellClient.tsx`: label do item `presenca` em
   `NAV_ITEMS` "Presença" → "Repertório" (path `/presenca` intacto).
-- [ ] T004 [P] [US1] Criar `src/components/features/presenca/UsarLaunchpad.tsx`: duas seções com
+- [x] T004 [P] [US1] Criar `src/components/features/presenca/UsarLaunchpad.tsx`: duas seções com
   título+exemplos — MOSTRAR (cards Post, Bio) e PREPARAR (cards Entrevista, Review, Salário; o
   clique abre a tela de momento da US2). Cards Mostrar disparam `openPresenca` (Post→`['post']`;
   Bio→`['mini_bio']`, reusando `PresencaCreate` p/ escolher tema quando houver +1). Âncoras
   `id="mostrar"`/`id="preparar"`. Máx. 3–4 cards/hub. Testes em `__tests__/UsarLaunchpad.test.tsx`
   (dois hubs; Post/Bio disparam evento certo). **TDD: teste primeiro.**
-- [ ] T005 [US1] `src/app/[locale]/(app)/presenca/page.tsx`: cabeçalho/`metadata.title` "Repertório";
+- [x] T005 [US1] `src/app/[locale]/(app)/presenca/page.tsx`: cabeçalho/`metadata.title` "Repertório";
   montar `UsarLaunchpad` acima do `PresencaHub` (sub-seção "Meus rascunhos") reusando
   `themes`/`entrySeeds` já carregados. Sem regressão no hub.
 
@@ -55,7 +55,7 @@ primeiro e veja-o falhar antes de implementar.
 
 **Goal**: cada momento oferece "pronto" (resumo com ângulo) e "conversar" (chat enquadrado).
 
-- [ ] T006 [US2] `src/components/features/content/presencaEvents.ts`: `PresencaOpenDetail` ganha
+- [x] T006 [US2] `src/components/features/content/presencaEvents.ts`: `PresencaOpenDetail` ganha
   `angle?: string` e `moment?: PrepMoment`.
 - [ ] T007 [US2] `src/components/features/content/GenerateSheet.tsx`: `generate()` envia
   `angle: detail.angle` no body quando presente (preservado em troca de formato/regenerar/adjust);
@@ -75,7 +75,7 @@ primeiro e veja-o falhar antes de implementar.
 - [ ] T011 [US2] `src/components/features/chat/StarterPrompts.tsx`: aceitar `context`/`moment`; em
   `preparacao` usar `PREP_MOMENTS[m].starters` (sem fetch). Teste: starters do momento sem chamar a
   rota. **TDD: teste primeiro.**
-- [ ] T012 [US2] Criar `src/components/features/presenca/PrepararMomento.tsx`: ao escolher um
+- [x] T012 [US2] Criar `src/components/features/presenca/PrepararMomento.tsx`: ao escolher um
   momento, dois caminhos (default em destaque = "Quero algo pronto agora" →
   `openPresenca({seedType:'theme',seedRef:<tema>,formats:['impact_summary'],angle:angleHint,moment})`;
   "Quero treinar conversando" → `openChatSheet({context:{type:'preparacao',moment}})`). Ligar ao

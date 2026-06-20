@@ -9,13 +9,16 @@ import { StarterPrompts } from './StarterPrompts'
 import { CorrectionConfirmCard } from './CorrectionConfirmCard'
 import { MarcoPreviewCard } from './MarcoPreviewCard'
 import type { Citation, CorrectionAction, MarcoPreview } from '@/lib/ai/chat/answerCareerQuestion'
+import type { PrepMoment } from '@/lib/content/intentions'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface ChatOpenDetail {
   context?: {
-    type: 'espelho' | 'historico' | 'empresa' | 'entry'
+    type: 'espelho' | 'historico' | 'empresa' | 'entry' | 'preparacao'
     entityId?: string
+    /** Momento de preparação (017) quando type === 'preparacao'. */
+    moment?: PrepMoment
   }
   prefillMessage?: string
   mode?: 'registro'
@@ -307,6 +310,7 @@ export function ChatSheet() {
 
   const isEmpty = state.messages.length === 0
   const isCorrectionMode = state.context?.type === 'entry'
+  const isPreparacaoMode = state.context?.type === 'preparacao'
   const isRegistroMode = state.mode === 'registro'
   // Suggestions don't make sense in correction/espelho context: the user needs to
   // type their own free-form correction, not pick a pre-canned response.
@@ -346,7 +350,7 @@ export function ChatSheet() {
           >
             <div className="flex items-center gap-2">
               <Dialog.Title className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-                {isCorrectionMode ? 'Corrigir entrada' : isRegistroMode ? 'Registrar sobre minha carreira' : 'Perguntar sobre minha carreira'}
+                {isCorrectionMode ? 'Corrigir entrada' : isPreparacaoMode ? 'Me preparar pra um momento' : isRegistroMode ? 'Registrar sobre minha carreira' : 'Perguntar sobre minha carreira'}
               </Dialog.Title>
               {isCorrectionMode && (
                 <span
@@ -390,7 +394,7 @@ export function ChatSheet() {
             style={{ minHeight: '200px' }}
           >
             {isEmpty ? (
-              <StarterPrompts onSelect={handleStarterClick} />
+              <StarterPrompts onSelect={handleStarterClick} moment={isPreparacaoMode ? state.context?.moment : undefined} />
             ) : (
               <div className="flex flex-col gap-4">
                 {(() => {

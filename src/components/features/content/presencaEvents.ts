@@ -1,4 +1,5 @@
 import type { DraftFormat, DraftStatus, SeedType } from '@/types/content'
+import type { PrepMoment } from '@/lib/content/intentions'
 
 // Contrato do evento que abre a superfície de geração. Mantido num módulo sem JSX para que o ponto
 // de entrada (UsarButton) e a superfície (GenerateSheet) compartilhem o tipo sem acoplar bundles.
@@ -12,6 +13,13 @@ export interface PresencaOpenDetail {
   seedSummary: string
   /** Formatos oferecidos: tema → ['post', 'mini_bio']; entrada → ['post', 'impact_summary']. */
   formats: DraftFormat[]
+  /**
+   * Ângulo opcional que orienta a geração (017): no fluxo de preparação é o enquadramento do
+   * momento (entrevista/review/salário). Repassado a `/api/content/generate` como `angle`.
+   */
+  angle?: string
+  /** Momento de preparação que originou a geração (017). Gravado em `drafts.qa.moment` ao salvar. */
+  moment?: PrepMoment
 }
 
 /** Dispara a abertura da superfície de geração com a evidência carregada (nunca página em branco). */
