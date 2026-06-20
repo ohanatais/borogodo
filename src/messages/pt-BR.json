@@ -427,10 +427,6 @@
     "generating": "Escrevendo na sua voz...",
     "regenerate": "Gerar de novo",
     "angleLabel": "Ângulo",
-    "limited": {
-      "message": "Ainda há pouco aqui pra colher neste período. Em vez de inventar, prefiro te mostrar isso: registre o que você fez e volte que eu monto sua autoavaliação fiel.",
-      "cta": "Registrar agora"
-    },
     "formats": {
       "post": "Post",
       "impactSummary": "Resumo de impacto",
@@ -490,6 +486,7 @@
         "description": "Gere seu primeiro rascunho a partir de um tema do seu Espelho ou de uma entrada sua, na sua voz."
       },
       "status": {
+        "draft": "Rascunho",
         "generated": "Gerado",
         "edited": "Editado",
         "copied": "Copiado",

@@ -9,10 +9,6 @@ import {
   buildImpactSummaryUserPrompt,
 } from '@/lib/ai/content/prompts/impactSummary'
 import { MINI_BIO_SYSTEM_PROMPT, buildMiniBioUserPrompt } from '@/lib/ai/content/prompts/miniBio'
-import {
-  SELF_ASSESSMENT_SYSTEM_PROMPT,
-  buildSelfAssessmentUserPrompt,
-} from '@/lib/ai/content/prompts/selfAssessment'
 import type { ContentPromptInput } from '@/lib/ai/content/prompts/discipline'
 import { GenerationFailedError } from '@/lib/errors'
 import type { ContentRulesetViolation, DraftFormat, DraftVariant } from '@/types/content'
@@ -38,9 +34,8 @@ function promptFor(format: DraftFormat): PromptParts {
   if (format === 'mini_bio') {
     return { system: MINI_BIO_SYSTEM_PROMPT, buildUser: buildMiniBioUserPrompt }
   }
-  if (format === 'self_assessment') {
-    return { system: SELF_ASSESSMENT_SYSTEM_PROMPT, buildUser: buildSelfAssessmentUserPrompt }
-  }
+  // 019: 'self_assessment' deixou de ser gerado (modelo cockpit — a pessoa escreve). O motor segue
+  // dono só das superfícies "pra fora" (post/impact_summary/mini_bio).
   return { system: POST_SYSTEM_PROMPT, buildUser: buildPostUserPrompt }
 }
 

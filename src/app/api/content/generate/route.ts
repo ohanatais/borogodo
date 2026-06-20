@@ -8,8 +8,11 @@ import { errorMessage, GenerationFailedError } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
 const generateRequestSchema = z.object({
-  format: z.enum(['post', 'impact_summary', 'mini_bio', 'self_assessment']),
-  seedType: z.enum(['entry', 'theme', 'project', 'period']),
+  // 019: 'self_assessment' saiu (a autoavaliação não é gerada — modelo cockpit). 'period' saiu junto:
+  // só servia à autoavaliação por intervalo; agora o seed de período alimenta o recap (loadPeriodRecap),
+  // não esta rota.
+  format: z.enum(['post', 'impact_summary', 'mini_bio']),
+  seedType: z.enum(['entry', 'theme', 'project']),
   seedRef: z.string().min(1),
   angle: z.string().max(200).nullish(),
   adjust: z.enum(['mais_curto', 'menos_formal', 'tira_jargao']).nullish(),
@@ -46,14 +49,6 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     const seed = await loadSeedEvidence(supabase, user.id, seedType, seedRef)
     if (!seed) return jsonError('seed_not_found', 404)
-
-    // Base limitada (019): um período sem nenhuma evidência não autoriza o motor a inventar para
-    // preencher. Em vez de um 422 genérico (que parece bug), devolvemos um sinal honesto que a UI
-    // traduz em "ainda há pouco aqui pra colher — registre e volte". Só para `period`: os demais
-    // seeds sempre carregam ao menos a entrada/tema/projeto que os originou.
-    if (seedType === 'period' && seed.evidence.length === 0) {
-      return NextResponse.json({ limited: true }, { status: 200 })
-    }
 
     const voiceProfile = await getVoiceProfile(supabase, user.id)
 

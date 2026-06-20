@@ -24,6 +24,7 @@ const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
 }
 
 const STATUS_LABEL_KEY: Record<DraftStatus, string> = {
+  draft: 'page.status.draft',
   generated: 'page.status.generated',
   edited: 'page.status.edited',
   copied: 'page.status.copied',

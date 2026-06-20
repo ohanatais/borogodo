@@ -307,10 +307,6 @@
     "generating": "Writing in your voice...",
     "regenerate": "Generate again",
     "angleLabel": "Angle",
-    "limited": {
-      "message": "There's still little to harvest in this period. Rather than make things up, I'd rather show you that: log what you did and come back, and I'll build a faithful self-assessment.",
-      "cta": "Log something now"
-    },
     "formats": {
       "post": "Post",
       "impactSummary": "Impact summary",
