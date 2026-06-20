@@ -548,8 +548,8 @@
     },
     "basedOnPeriod": "{from} a {to}",
     "recap": {
-      "label": "O seu ano, em fatos",
-      "intro": "O que você registrou neste período. Use como memória; escrever fica com você.",
+      "label": "Seu {year}, em fatos",
+      "labelRange": "Seus fatos entre {from} e {to}",
       "sourceChip": "Ver registro",
       "limited": {
         "message": "Ainda há pouco aqui pra colher neste período. Em vez de inventar, prefiro te mostrar isso: registre o que você fez e volte.",
