@@ -66,3 +66,52 @@ A cascata é multiplicativa: no cenário base, de cada 1.000 alcançados, ~4 vir
 3. **Brasilidade é estratégia, não enfeite:** marca que gruda + português de verdade + comunidades locais são o que você tem e os gringos não.
 4. **Receita de verdade mora no global em inglês** (ARPU em dólar, mercado ordens de grandeza maior). É a onda de expansão, não o ponto de partida.
 5. **Tradeoff do público amplo:** ganha-se mercado e relacionabilidade, perde-se a nitidez de uma única comunidade-alvo. Mitigação: entrar por uma "cabeça de praia" relacionável (ex.: começar pelas comunidades que você já tem) e expandir por área.
+
+---
+
+# Pesquisa de mercado — autoavaliação e posicionamento (jun/2026)
+
+> Pesquisa profunda (5 frentes, com fontes) feita a partir do redesign da feature de autoavaliação.
+> Material **para trabalhar no marketing**: dados, números e fontes verificadas. Cada item traz a
+> **força de evidência** (sólido / direcional / apócrifo) — use só o que está marcado como sólido em
+> copy pública. Estratégia detalhada do produto em `estrategia-autoavaliacao-cockpit.md`.
+
+## Dados para usar em copy/posicionamento
+
+### O gap de autopromoção (o caso de equidade) — SÓLIDO
+- **Exley & Kessler, *The Gender Gap in Self-Promotion*, Quarterly Journal of Economics, 2022** (4.000+ adultos, 10.000+ estudantes): com **desempenho igual**, mulheres avaliaram o próprio trabalho **~46 vs. ~61 dos homens** numa escala 0–100. O gap **persiste mesmo controlando confiança e incentivos estratégicos** e aparece já na 6ª série. Replicado por Harvard/Wharton.
+  - Fontes: https://academic.oup.com/qje/article/137/3/1345/6513425 · https://users.nber.org/~kesslerj/papers/ExleyKessler_SelfPromotion.pdf · https://penntoday.upenn.edu/news/why-dont-women-promote-themselves
+  - **Ângulo de mkt:** "pra quem tem dificuldade de se vender" — a ferramenta marshala o **fato** pra você nunca precisar soar arrogante. O lastro em evidência **neutraliza** a autossubavaliação (não é "tenha mais confiança", é "aqui está o que você fez").
+- ⚠️ **NÃO USAR — APÓCRIFO:** o dado famoso "mulheres se candidatam só com 100% dos requisitos vs. homens com 60%" **não tem estudo por trás** (origem foi um comentário informal de um exec da HP, espalhado por *Lean In*/HBR/McKinsey). Experimento do Behavioural Insights Team (10.000+ pessoas) achou gap **muito menor** (~56% vs. ~52%). Citar isso **mina credibilidade** com comprador informado.
+  - Fontes do desmonte: https://www.bi.team/blogs/women-only-apply-when-100-qualified-fact-or-fake-news/ · https://curt-rice.com/2014/04/22/
+
+### O problema de memória / viés de recência — SÓLIDO (mecanismo) + DIRECIONAL (números)
+- A heurística da disponibilidade (julgamentos pesam o que é recente e fácil de lembrar) é psicologia consolidada. Aplicada a reviews: o trabalho recente "ofusca" entregas consistentes do início do ciclo.
+- O número "gestores não lembram comportamentos além de ~60–90 dias" é **lore de prática, não estudo primário** — direcional.
+- O antídoto (documentação contínua, *brag documents*) é prática bem atestada, ainda que não provada por RCT.
+  - Fontes: https://datalligence.ai/blogs/recency-bias/ · https://github.com/readme/guides/document-success · https://www.thefountaininstitute.com/blog/brag-documents
+  - **Ângulo de mkt:** o recap "o seu ano, em fatos" transforma "lembrar" (problema de confiança) em "consultar" (problema de dado, já resolvido).
+
+### O que faz uma autoavaliação "colar" — PRÁTICA CONVERGENTE
+- Declarações de conquista **quantificadas e ancoradas em evidência** batem adjetivos; **STAR** (Situação-Tarefa-Ação-Resultado) é a estrutura dominante. Calibração/promoção pergunta "o que a pessoa **fez**"; métrica ancora a alegação contra ceticismo **e** contra a autossubavaliação.
+  - Fontes: https://www.askamanager.org/2015/12/how-to-write-a-self-assessment-for-your-performance-review.html · https://www.resumly.ai/blog/crafting-impactful-achievement-statements-using-the-star-method
+  - (O "2× mais entrevistas com conquistas quantificadas" é claim de fornecedor — direcional, não citar como fato.)
+
+### Cultura pt-BR — direcional, forte como posicionamento
+- O mercado de RH brasileiro (Gupy, Solides) trata autoavaliação como ferramenta de **protagonismo**; SBGP reporta que **87% das empresas com avaliação estruturada** relatam ganho de produtividade/engajamento (claim de mercado, direcional).
+- O registro relacional/humilde da cultura de trabalho brasileira faz a autopromoção explícita soar arrogante → uma ferramenta que **faz o bragging por você, ancorada em fato**, vale desproporcionalmente mais em pt-BR que nos EUA.
+  - Fontes: https://www.gupy.io/blog/autoavaliacao-de-desempenho · https://solides.com.br/blog/autoavaliacao-de-desempenho/
+
+## Posicionamento que a pesquisa reforça
+
+1. **Posicione contra as ferramentas do empregador, não contra journaling.** Em Lattice / 15Five / Leapsome / Culture Amp / Gupy a **narrativa é do empregador** — existe pra alimentar uma decisão de calibração/remuneração que a empresa controla, e o dado morre quando você sai. O Borogodó é a **camada de evidência de carreira do profissional**: portátil, privada e honesta porque **nenhum chefe lê**. Mensagem: "sua autoavaliação, escrita por você, sua, pronta pra colar no ciclo da empresa (Gupy/Lattice)".
+2. **A interseção segue vazia, agora com lastro:** captura contínua (valida brag docs) + ancoragem anti-invenção + dono do dado + espelho. Ninguém ocupa as quatro.
+3. **Lição do Polywork (encerrou jan/2025):** timeline-de-conquistas-como-rede-social **não retém** — ninguém loga em público pelo log em si. Corretivo: **privado e utilitário primeiro**; retenção vem do payoff de review/plano de ação, não de validação social.
+   - Fonte: https://www.producthunt.com/products/polywork/alternatives
+4. **Demanda validada pelos brag docs** (padrão Julia Evans, 2019; BragBook, BragDoc, Cruit) — mas todos apontam só "pra dentro", sem inteligência de forças nem presença, sem pt-BR.
+
+## Features adjacentes que o mercado valida (pipeline de mkt)
+
+- **Promotion case builder** — o momento de maior intenção. BragBook vende explicitamente "entre com meses de evidência, não com a página em branco". (https://bragbook.io/what-is-a-brag-document)
+- **Prep de 1:1 / conversa com gestor** — irmão de maior frequência do ciclo anual; conserta a retenção episódica. SHRM enquadra o 2025/26 como IA **aprofundando** a conversa, não substituindo. (https://www.shrm.org/topics-tools/news/hr-trends/ai-coaching)
+- **Pacote de evidência pra review** e **prep de negociação salarial / narrativa de carreira** — desdobramentos do mesmo lastro.

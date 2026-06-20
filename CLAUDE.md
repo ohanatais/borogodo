@@ -28,25 +28,41 @@ Features mergeadas em `main` (até PR #40):
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **019-autoavaliacao** (branch: `019-autoavaliacao`) — **planejamento em andamento; implementação não iniciada**
+Current feature: **019-autoavaliacao** (branch: `019-autoavaliacao`) — **REDESENHADA 2026-06-19 (modelo cockpit); re-spec feita, reimplementação pendente**
+
+> ⚠️ **Redesign (2026-06-19):** a autoavaliação deixou de ser "IA gera 2 variações → edita/copia"
+> (herdado do post) e virou **cockpit: lembrar → refletir → planejar** — **o usuário escreve a
+> própria autoavaliação**, a IA só ancora em fato e oferece um passo-pra-frente não-invasivo. Tese
+> dos **dois modos** (pra dentro = usuário escreve/IA ancora; pra fora = IA assiste). Direção +
+> pesquisa de mercado: `docs/estrategia-autoavaliacao-cockpit.md`, `docs/mercado.md`,
+> `docs/mapa-competitivo.md`. Spec reescrita: `specs/019-autoavaliacao/spec.md` (Clarifications
+> 2026-06-19 + user stories novas; as antigas estão no anexo "SUPERADAS"). **Fundação da PR 46 é
+> reaproveitada** (seed period, formato self_assessment, migration 013, nav, histórico, estado
+> limitado); o **fluxo de post (GenerateSheet/DraftCard) é descartado** como modelo da autoavaliação.
+> Próximo: `/speckit-tasks` (regerar — `tasks.md` atual é do modelo antigo) + `/impeccable shape` da
+> cabine de escrita; **Espelho v2** (incorporar autopercepção) é a propagação seguinte.
 Spec: [specs/019-autoavaliacao/spec.md](specs/019-autoavaliacao/spec.md) ·
 Plan: [specs/019-autoavaliacao/plan.md](specs/019-autoavaliacao/plan.md) ·
 Research: [specs/019-autoavaliacao/research.md](specs/019-autoavaliacao/research.md) ·
-Tasks: (pendente — `/speckit-tasks`)
+Tasks: (pendente — regerar com `/speckit-tasks`)
 
-Quarto elo de retenção — **segundo payoff episódico**. A pessoa escolhe um **período** e o motor
-**colhe as entradas do intervalo** e gera uma **autoavaliação estruturada por seções** (entregas,
-impacto, evolução, pontos a desenvolver), 2 variações, ancorada em evidência real. **Reusa o motor da
-013** (`generateDraft`) como **novo formato** `self_assessment` — não motor novo (constituição III).
-**US1** novo formato + novo seed por período (`loadPeriodSeed`, espelha `loadProjectSeed` mas por
-intervalo de datas); **US2** gatilho de calendário no painel via novo `getReviewCycleSignal` paralelo
-ao `getReturnSignal` da 016 (já em `main`), só painel, sem e-mail no v1; **US3** edição/chips/cópia =
-reuso total da 013. Spec ✅, clarify ✅, plan ✅, research ✅, data-model ✅, contracts ✅, quickstart ✅,
-tasks ⬜. **Gate antes de codar:** `/impeccable shape` da tela de autoavaliação (seletor de período +
-render por seções).
+Quarto elo de retenção — **segundo payoff episódico**, modelo **cockpit**. A pessoa escolhe um
+**período** → vê **"o seu ano, em fatos"** (recap determinístico, factual, com fonte — **sem LLM**) →
+**escreve** a própria autoavaliação por seções, com trilha de evidências ao lado e IA **não-invasiva**
+(reescreve com minhas palavras / "não sei por onde começar" = 1 pergunta cuja resposta vira o rascunho / nudge STAR — nunca gera bloco, nunca dá
+nota) → recebe **uma** oferta de **passo-pra-frente** (plano GROW+70-20-10 ou prep de 1:1) ancorada nas
+palavras dela. **US1** recap (`lib/autoavaliacao/periodRecap.ts`, sobre `loadPeriodSeed`) + escrita
+assistida (`lib/ai/content/assist.ts`, rota `/api/autoavaliacao/assist`); **US2** passo-pra-frente
+(`/api/autoavaliacao/forward-step`, único LLM gerador, anti-invenção bloqueante, salvo em
+`drafts.qa.forwardStep`) + gatilho de calendário (`getReviewCycleSignal` paralelo ao `getReturnSignal`
+da 016, só painel, sem e-mail); **US3** histórico em `drafts` (isolado do espelho). **Sai do código:** o
+ramo `self_assessment` de `generateDraft`, `prompts/selfAssessment.ts`, e a extensão de
+`/api/content/generate`. Spec ✅, clarify ✅, plan ✅, research ✅, data-model ✅, contracts ✅, quickstart
+✅, tasks ⬜ (regerar). **Gate antes de codar:** `/impeccable shape` da cabine de escrita.
 
-**Migration 012** (`011` já em `main` pela 016): estende o CHECK de `drafts.format` para
-`self_assessment` **e** adiciona `profiles.review_cycle_months` + `review_cycle_anchor` (aditivo,
-nullable). Sem recorrência configurada → gatilho proativo não dispara; geração sob demanda nunca
-bloqueia.
+**Migration 013** (renumerada de 012 — colidia com `012_entry_title.sql` da 017, já em `main`): estende
+os CHECKs de `drafts` (`format` += `self_assessment`, `seed_type` += `period`, `status` += `draft`) **e**
+adiciona `profiles.review_cycle_months` + `review_cycle_anchor` (aditivo, nullable). A autoavaliação
+**escrita** vive em `drafts` (`status='draft'`, `body` = texto humano, fora do ruleset anti-IA). Sem
+recorrência → gatilho proativo não dispara; escrita sob demanda nunca bloqueia.
 <!-- SPECKIT END -->

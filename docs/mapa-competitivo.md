@@ -68,3 +68,16 @@ Organiza a busca de emprego (processos, entrevistas, simulação) — único nat
 ## Síntese
 
 O pivô troca um moat estreito (a ponte captura→conteúdo) por **três fossos combinados**: inteligência com evidência, presença na voz, e brasilidade de marca — para um público muito maior. A colisão com brag docs cresce no eixo de captura, mas eles não têm nenhum dos três fossos. O risco competitivo mais real não vem deles, e sim de uma ferramenta de "career intelligence" com IA que decida localizar pro Brasil; a defesa é velocidade, comunidade e marca que gruda.
+
+---
+
+## Atualização jun/2026 — pesquisa do redesign da autoavaliação
+
+> Dados, fontes e números de mkt em `mercado.md`; estratégia de produto em `estrategia-autoavaliacao-cockpit.md`.
+
+**Lápides e lições competitivas:**
+- **Polywork encerrou (jan/2025).** Construiu a tese "timeline de conquistas, não cargo" como **rede social** e morreu — timeline pública não retém. Confirma a aposta privado/utilitário primeiro. (https://www.producthunt.com/products/polywork/alternatives)
+- **Lado empregador (Lattice, 15Five "Best-Self Review", Leapsome, Culture Amp, Betterworks, Gupy):** a narrativa é **do empregador**; o profissional é sujeito, não dono. É o contraste que define o nosso wedge — mesmo músculo reflexivo, mas **portátil, privado e honesto** porque nenhum chefe lê. Não competimos com eles, **alimentamos** o ciclo deles sem sermos controlados por ele.
+- **Journaling AI (Rosebud, Reflect, Mem):** provam o apetite por reflexão + propriedade do dado, mas são journals de vida — **sem dente profissional** (sem espelho de forças, sem artefato de ciclo, sem output de contexto de trabalho).
+
+**Quarto fosso revelado — a tese dos dois modos:** o diferencial não é só *o que* fazemos, é *quem é o autor*. Superfícies **"pra dentro"** (espelho, autoavaliação) são **escritas pela pessoa e ancoradas pela IA**; superfícies **"pra fora"** (post, bio) são **assistidas pela IA, dona a pessoa**. Brag docs (pra dentro, sem inteligência) e geradores (pra fora, sem trabalho real) ocupam só metade cada um; ninguém faz os dois modos com a fronteira certa. Isso também blinda contra o entrante de "career intelligence": um veredito de IA sobre você é justamente o que gera o "não sou eu" — co-autoria é mais difícil de copiar e mais on-brand.
