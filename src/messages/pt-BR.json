@@ -581,6 +581,9 @@
       "collapse": "Recolher",
       "usar": "Usar",
       "delete": "Excluir",
+      "edit": "Editar",
+      "save": "Salvar",
+      "cancelEdit": "Cancelar",
       "deleteConfirm": {
         "title": "Excluir este registro?",
         "description": "Esta ação é definitiva. Rascunhos gerados a partir dele não são apagados.",
@@ -593,6 +596,8 @@
       "loading": "Carregando..."
     },
     "noDate": "Sem data",
-    "viewAll": "Ver tudo →"
+    "viewAll": "Ver tudo →",
+    "deleteError": "Não consegui excluir esse registro. Ele continua aqui.",
+    "deleteErrorDismiss": "Ok"
   }
 }

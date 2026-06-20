@@ -461,6 +461,9 @@
       "collapse": "Collapse",
       "usar": "Use",
       "delete": "Delete",
+      "edit": "Edit",
+      "save": "Save",
+      "cancelEdit": "Cancel",
       "deleteConfirm": {
         "title": "Delete this record?",
         "description": "This action is permanent. Drafts generated from it are not deleted.",
@@ -473,6 +476,8 @@
       "loading": "Loading..."
     },
     "noDate": "No date",
-    "viewAll": "View all →"
+    "viewAll": "View all →",
+    "deleteError": "Couldn't delete this record. It's still here.",
+    "deleteErrorDismiss": "Ok"
   }
 }

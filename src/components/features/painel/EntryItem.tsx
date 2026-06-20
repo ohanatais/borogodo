@@ -35,6 +35,7 @@ export function EntryItem({ id, whatIDid, title, source, createdAt }: EntryItemP
     impact: null,
     decision: null,
     learning: null,
+    file_name: null,
   }
 
   return <EntryCard item={item} variant="panel" />

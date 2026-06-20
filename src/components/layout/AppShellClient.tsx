@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip, LayoutList } from 'lucide-react'
+import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip, LayoutList, User } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
@@ -133,7 +133,7 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                 style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
               >
-                {userName.charAt(0).toUpperCase()}
+                {userName.trim() ? userName.charAt(0).toUpperCase() : <User size={16} aria-hidden="true" />}
               </div>
               <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
                 {userName}
