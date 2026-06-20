@@ -11,6 +11,7 @@ import {
 import {
   resumePresenca,
   PRESENCA_DRAFT_UPDATED_EVENT,
+  PRESENCA_DRAFT_CREATED_EVENT,
   type DraftUpdatedDetail,
 } from '@/components/features/content/presencaEvents'
 import { patchDraft, deleteDraft } from '@/components/features/content/draftsClient'
@@ -116,6 +117,14 @@ export function PresencaHub({
     window.addEventListener(PRESENCA_DRAFT_UPDATED_EVENT, handler)
     return () => window.removeEventListener(PRESENCA_DRAFT_UPDATED_EVENT, handler)
   }, [status])
+
+  // Quando um rascunho novo é criado (primeiro save do DraftCard), recarrega a lista para
+  // exibi-lo — atualizar por id não basta porque o item não existia antes.
+  useEffect(() => {
+    function handleCreated() { void reload() }
+    window.addEventListener(PRESENCA_DRAFT_CREATED_EVENT, handleCreated)
+    return () => window.removeEventListener(PRESENCA_DRAFT_CREATED_EVENT, handleCreated)
+  }, [reload])
 
   async function loadMore() {
     if (!cursor || loading) return

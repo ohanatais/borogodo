@@ -554,5 +554,49 @@
       "pontosADesenvolver": "Pontos a desenvolver"
     },
     "limited": "Ainda há pouco aqui pra colher — registre o que você fez e volte."
+  },
+  "feed": {
+    "title": "Seus registros",
+    "empty": {
+      "heading": "Nenhum registro ainda",
+      "description": "Cada história que você conta vira um registro aqui. Comece pela mais recente.",
+      "filtered": "Nenhum registro com esses filtros.",
+      "cta": "Fazer minha primeira captura"
+    },
+    "axis": {
+      "created_at": "Quando anotei",
+      "entry_date": "Quando aconteceu"
+    },
+    "filters": {
+      "search": "Buscar registros…",
+      "period": "Período",
+      "company": "Empresa",
+      "tags": "Tags",
+      "metricOnly": "Com métrica",
+      "source": "Origem",
+      "clear": "Limpar filtros",
+      "today": "Hoje",
+      "week": "7 dias",
+      "month": "30 dias",
+      "quarter": "90 dias"
+    },
+    "card": {
+      "expand": "Ver detalhes",
+      "collapse": "Recolher",
+      "usar": "Usar",
+      "delete": "Excluir",
+      "deleteConfirm": {
+        "title": "Excluir este registro?",
+        "description": "Esta ação é definitiva. Rascunhos gerados a partir dele não são apagados.",
+        "cancel": "Cancelar",
+        "confirm": "Excluir"
+      }
+    },
+    "pagination": {
+      "loadMore": "Carregar mais",
+      "loading": "Carregando..."
+    },
+    "noDate": "Sem data",
+    "viewAll": "Ver tudo →"
   }
 }

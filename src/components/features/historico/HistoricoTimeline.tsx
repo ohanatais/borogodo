@@ -20,7 +20,7 @@ export function HistoricoTimeline({
   const isEmpty = data.companies.length === 0
 
   return (
-    <div className="max-w-[980px] mx-auto px-5 lg:px-9 pt-2 pb-8">
+    <div className="max-w-[980px] mx-auto px-6 pt-2 pb-8">
       <h1 className="text-2xl font-bold mb-1" style={{ fontFamily: 'var(--font-display)' }}>
         O fio da{' '}
         <em className="italic font-normal">sua carreira</em>

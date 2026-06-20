@@ -4,7 +4,7 @@ import { BorogodoCard } from '@/components/features/painel/BorogodoCard'
 import { ProactiveInsightCard } from '@/components/features/painel/ProactiveInsightCard'
 import { PanelEmptyState } from '@/components/features/painel/PanelEmptyState'
 import { MiniTimeline } from '@/components/features/painel/MiniTimeline'
-import { TrajectoryHighlights } from '@/components/features/painel/TrajectoryHighlights'
+import { RecentEntries } from '@/components/features/painel/RecentEntries'
 import { getPanelData } from '@/lib/panel/getPanelData'
 
 export default async function PainelPage() {
@@ -19,7 +19,7 @@ export default async function PainelPage() {
   const name = data.name || ''
 
   return (
-    <div className="px-5 lg:px-9 py-4 max-w-[980px] mx-auto w-full">
+    <div className="px-6 py-4 max-w-[980px] mx-auto w-full">
       {data.entryCount === 0 ? (
         <PanelEmptyState />
       ) : (
@@ -32,7 +32,7 @@ export default async function PainelPage() {
               mirror={data.mirror}
               entryCount={data.entryCount}
             />
-            <TrajectoryHighlights highlights={data.highlights} />
+            <RecentEntries entries={data.recentEntries} />
             <ProactiveInsightCard insight={data.insight} />
           </div>
 

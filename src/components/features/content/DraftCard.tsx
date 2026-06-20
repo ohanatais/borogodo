@@ -6,7 +6,7 @@ import { Pencil } from 'lucide-react'
 import type { DraftFormat, DraftVariant, SeedType, VoiceFeedback } from '@/types/content'
 import { CopyButton } from './CopyButton'
 import { createDraft, patchDraft } from './draftsClient'
-import { notifyDraftUpdated } from './presencaEvents'
+import { notifyDraftUpdated, notifyDraftCreated } from './presencaEvents'
 import { parseSelfAssessmentSections, type SelfAssessmentSection } from './selfAssessmentSections'
 
 /** Evidência base, necessária para persistir o rascunho escolhido (US4). */
@@ -105,6 +105,7 @@ export function DraftCard({ variant, index, format, seed, existingDraftId }: Dra
       }
       draftIdRef.current = created.id
       setSaveError(false)
+      notifyDraftCreated(created.id)
       return created.id
     })()
 

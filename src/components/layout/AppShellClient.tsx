@@ -2,14 +2,14 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip } from 'lucide-react'
+import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip, LayoutList } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
 import { FileButton } from '@/components/features/capture/FileButton'
 import { AudioButton } from '@/components/features/capture/AudioButton'
 import { CaptureConversation } from '@/components/features/capture/CaptureConversation'
-import { ChatSheet, openChatSheet } from '@/components/features/chat/ChatSheet'
+import { ChatSheet, openChatSheet, closeChatSheet } from '@/components/features/chat/ChatSheet'
 import { GenerateSheet } from '@/components/features/content/GenerateSheet'
 import type { CaptureInput as CapturePayload } from '@/types/capture'
 import { Logo } from '@/components/ui/Logo'
@@ -26,10 +26,11 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'painel',    label: 'Painel',         icon: <Home size={20} />,              path: '/painel'    },
-  { id: 'espelho',   label: 'Espelho',        icon: <Sparkles size={20} />,          path: '/espelho'   },
-  { id: 'historico', label: 'Linha do Tempo', icon: <GitCommitVertical size={20} />, path: '/historico' },
-  { id: 'presenca',  label: 'Presença',       icon: <PenLine size={20} />,           path: '/presenca'  },
+  { id: 'painel',     label: 'Painel',         icon: <Home size={20} />,              path: '/painel'     },
+  { id: 'espelho',    label: 'Espelho',         icon: <Sparkles size={20} />,          path: '/espelho'    },
+  { id: 'registros',  label: 'Registros',       icon: <LayoutList size={20} />,        path: '/registros'  },
+  { id: 'historico',  label: 'Linha do Tempo',  icon: <GitCommitVertical size={20} />, path: '/historico'  },
+  { id: 'presenca',   label: 'Presença',        icon: <PenLine size={20} />,           path: '/presenca'   },
 ]
 
 interface AppShellClientProps {
@@ -42,14 +43,23 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
   const t = useTranslations('capture')
   const [activeCapture, setActiveCapture] = useState<CapturePayload | null>(null)
   const [projectContext, setProjectContext] = useState<{ name: string; company: string } | null>(null)
+  const [chatOpen, setChatOpen] = useState(false)
 
   useEffect(() => {
     function handler(e: Event) {
       const detail = (e as CustomEvent<{ name: string; company: string }>).detail
       setProjectContext(detail)
     }
+    function chatStateHandler(e: Event) {
+      const detail = (e as CustomEvent<{ open: boolean }>).detail
+      setChatOpen(detail.open)
+    }
     window.addEventListener('borogodo:capture-context', handler)
-    return () => window.removeEventListener('borogodo:capture-context', handler)
+    window.addEventListener('borogodo:chat-state', chatStateHandler)
+    return () => {
+      window.removeEventListener('borogodo:capture-context', handler)
+      window.removeEventListener('borogodo:chat-state', chatStateHandler)
+    }
   }, [])
 
   function isActive(path: string | null): boolean {
@@ -165,28 +175,38 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
           }}
         >
           <div className="max-w-[980px] mx-auto px-6 pt-4 pb-5">
-            <div className="flex items-center gap-3 relative">
+            <div className="flex items-center gap-3">
               {/* Toggle */}
               <div
                 className="flex items-center p-0.5 rounded-full shrink-0"
                 style={{ background: 'oklch(100% 0 0 / 0.7)' }}
               >
-                <span
-                  className="text-xs px-3 py-1.5 rounded-full capitalize"
-                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+                <button
+                  type="button"
+                  onClick={() => closeChatSheet()}
+                  aria-pressed={!chatOpen}
+                  className="text-xs px-3 py-1.5 rounded-full capitalize transition-all hover:opacity-80"
+                  style={{
+                    background: chatOpen ? 'transparent' : 'var(--color-primary)',
+                    color: chatOpen ? 'var(--muted-foreground)' : 'var(--color-primary-fg)',
+                  }}
                 >
                   Registrar
-                </span>
+                </button>
                 <button
                   type="button"
                   onClick={() => openChatSheet()}
+                  aria-pressed={chatOpen}
                   className="text-xs px-3 py-1.5 rounded-full capitalize transition-all hover:opacity-80"
-                  style={{ color: 'var(--muted-foreground)' }}
+                  style={{
+                    background: chatOpen ? 'var(--color-primary)' : 'transparent',
+                    color: chatOpen ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
+                  }}
                 >
                   Perguntar
                 </button>
               </div>
-              <div className="flex-1 relative flex flex-col gap-1">
+              <div className="flex-1">
                 <CaptureInput
                   placeholder={t('composer.artifactPlaceholder')}
                   mode="registrar"
@@ -200,9 +220,6 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
                     }
                   }}
                 />
-                <p className="text-[11px] px-1" style={{ color: 'var(--muted-foreground)', opacity: 0.7 }}>
-                  {t('composer.privacyNotice')}
-                </p>
               </div>
               <AudioButton
                 onTranscript={(text) => setActiveCapture({ kind: 'text', content: text })}
@@ -214,6 +231,9 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
                 onFile={(file) => setActiveCapture({ kind: 'file', file })}
               />
             </div>
+            <p className="text-[11px] px-1 mt-1" style={{ color: 'var(--muted-foreground)', opacity: 0.7 }}>
+              {t('composer.privacyNotice')}
+            </p>
           </div>
         </div>
 
@@ -226,27 +246,41 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
             borderColor: 'var(--border)',
           }}
         >
-          {/* Row 1 — captura: toggle + input + enviar */}
-          <div className="flex items-center gap-2 px-3 pt-2 pb-1.5">
+          {/* Row 0 — toggle Registrar | Perguntar (linha própria no mobile) */}
+          <div className="px-3 pt-2 pb-1">
             <div
-              className="flex items-center p-0.5 rounded-full shrink-0"
+              className="inline-flex items-center p-0.5 rounded-full"
               style={{ background: 'oklch(100% 0 0 / 0.8)' }}
             >
-              <span
-                className="text-xs px-2.5 py-1 rounded-full"
-                style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+              <button
+                type="button"
+                onClick={() => closeChatSheet()}
+                aria-pressed={!chatOpen}
+                className="text-xs px-3 py-1 rounded-full transition-all hover:opacity-80"
+                style={{
+                  background: chatOpen ? 'transparent' : 'var(--color-primary)',
+                  color: chatOpen ? 'var(--muted-foreground)' : 'var(--color-primary-fg)',
+                }}
               >
                 Registrar
-              </span>
+              </button>
               <button
                 type="button"
                 onClick={() => openChatSheet()}
-                className="text-xs px-2.5 py-1 rounded-full transition-all hover:opacity-80"
-                style={{ color: 'var(--muted-foreground)' }}
+                aria-pressed={chatOpen}
+                className="text-xs px-3 py-1 rounded-full transition-all hover:opacity-80"
+                style={{
+                  background: chatOpen ? 'var(--color-primary)' : 'transparent',
+                  color: chatOpen ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
+                }}
               >
                 Perguntar
               </button>
             </div>
+          </div>
+
+          {/* Row 1 — captura: input + enviar + áudio + arquivo */}
+          <div className="flex items-center gap-2 px-3 pb-1.5">
             <div className="flex-1 min-w-0 flex flex-col gap-0.5">
               <CaptureInput
                 placeholder={t('composer.artifactPlaceholder')}
@@ -260,20 +294,24 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
                     openChatSheet({ prefillMessage: content, mode: 'registro' })
                   }
                 }}
+                trailing={
+                  <>
+                    <AudioButton
+                      onTranscript={(text) => setActiveCapture({ kind: 'text', content: text })}
+                    />
+                    <FileButton
+                      accept=".pdf"
+                      icon={Paperclip}
+                      ariaLabel="Carregar PDF ou CV"
+                      onFile={(file) => setActiveCapture({ kind: 'file', file })}
+                    />
+                  </>
+                }
               />
               <p className="text-[10px] px-1 hidden" style={{ color: 'var(--muted-foreground)' }}>
                 {t('composer.privacyNotice')}
               </p>
             </div>
-            <AudioButton
-              onTranscript={(text) => setActiveCapture({ kind: 'text', content: text })}
-            />
-            <FileButton
-              accept=".pdf"
-              icon={Paperclip}
-              ariaLabel="Carregar PDF ou CV"
-              onFile={(file) => setActiveCapture({ kind: 'file', file })}
-            />
           </div>
 
           {/* Row 2 — nav icons com labels */}

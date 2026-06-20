@@ -19,7 +19,7 @@ export default async function ConfiguracoesPage() {
   ])
 
   return (
-    <div className="max-w-[860px] mx-auto px-6 py-8 pb-32 lg:pb-8">
+    <div className="max-w-[980px] mx-auto px-6 py-8 pb-32 lg:pb-8">
       <h1
         className="text-2xl font-semibold mb-6"
         style={{ fontFamily: 'Fraunces, serif', color: 'var(--foreground)' }}

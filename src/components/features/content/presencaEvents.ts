@@ -59,3 +59,14 @@ export interface DraftUpdatedDetail {
 export function notifyDraftUpdated(detail: DraftUpdatedDetail): void {
   window.dispatchEvent(new CustomEvent(PRESENCA_DRAFT_UPDATED_EVENT, { detail }))
 }
+
+// ─── Rascunho criado (novo) ────────────────────────────────────────────────────
+// Quando um rascunho surge do zero (primeira ação no DraftCard), o hub precisa saber
+// para recarregar a lista — o item não existia antes, então atualizar por id não basta.
+
+export const PRESENCA_DRAFT_CREATED_EVENT = 'borogodo:presenca-draft-created'
+
+/** Notifica o hub que um rascunho novo foi criado, para ele recarregar a lista. */
+export function notifyDraftCreated(id: string): void {
+  window.dispatchEvent(new CustomEvent(PRESENCA_DRAFT_CREATED_EVENT, { detail: { id } }))
+}

@@ -45,20 +45,17 @@ export function TierSummaryCards({ comprovadas, consistentes, emergentes }: Tier
   const toggle = (tier: SkillTier) => setOpenTier((prev) => (prev === tier ? null : tier))
 
   return (
-    <div
-      className="rounded-xl border overflow-hidden mb-6"
-      style={{ borderColor: 'var(--border)' }}
-    >
-      {/* Three tier sections side by side, no gap */}
-      <div className="grid grid-cols-3">
-        {TIERS.map((tier, idx) => {
+    <div className="flex flex-col gap-3 mb-6">
+      {/* Three tier cards with gap between them */}
+      <div className="grid grid-cols-3 gap-3">
+        {TIERS.map((tier) => {
           const style = TIER_STYLE[tier]
           const isOpen = openTier === tier
 
           return (
             <div
               key={tier}
-              className={`flex flex-col${idx > 0 ? ' border-l' : ''}`}
+              className="flex flex-col rounded-xl border overflow-hidden"
               style={{ borderColor: 'var(--border)', background: style.cardBg }}
             >
               <div className="px-2.5 py-3 sm:px-3 flex-1">
@@ -109,10 +106,10 @@ export function TierSummaryCards({ comprovadas, consistentes, emergentes }: Tier
         })}
       </div>
 
-      {/* Criteria panel — inside the same container, full-width */}
+      {/* Criteria panel — separate card below the tier row */}
       {openTier && (
         <div
-          className="border-t px-4 py-3"
+          className="rounded-xl border px-4 py-3"
           style={{
             background: TIER_STYLE[openTier].hintBg,
             borderColor: 'var(--border)',

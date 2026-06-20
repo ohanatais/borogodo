@@ -40,6 +40,10 @@
     --ring:               var(--color-primary);
     --radius:             0.625rem;
 
+    /* Sobreposições */
+    --overlay-bg:     oklch(18% 0.02 260 / 0.4);
+    --shadow-modal:   0 8px 40px oklch(18% 0.02 260 / 0.25);
+
     /* Tipografia */
     --font-display: 'Fraunces', Georgia, serif;
     --font-sans:    var(--font-geist-sans), system-ui, sans-serif;
@@ -71,6 +75,11 @@
 
 @layer base {
   * { border-color: var(--border); }
+
+  html {
+    /* Fundo creme no html evita a faixa branca do rubber-band (overscroll) no macOS. */
+    background-color: var(--background);
+  }
 
   body {
     background-color: var(--background);

@@ -5,7 +5,7 @@ completo de produto, stack e processo de desenvolvimento está em `.claude/CLAUD
 
 ## Status do desenvolvimento
 
-Features mergeadas em `main` (até PR #24):
+Features mergeadas em `main` (até PR #40):
 - **001-landing-page** — landing page pública, design system e i18n
 - **002-user-auth** — autenticação (Google OAuth + e-mail/senha), painel protegido por middleware
 - **003-capture-pipeline** — captura de texto e PDF/LinkedIn, extração via IA com Zod
@@ -21,6 +21,8 @@ Features mergeadas em `main` (até PR #24):
 - **013-motor-de-voz** — fundação de conteúdo (`drafts`, `voice_profile` JSONB, motor `generateDraft`, post + resumo de impacto), migration `009` (PR #22)
 - **014-presenca** — hub `/presenca`, gestão total do rascunho, "Usar projeto" no histórico, sugestões (PR #23)
 - **015-refino-voz** — recalibração de voz com consentimento, golden set como gate de CI, mini-bio (3º formato), migration `010` (PR #24)
+- **016-captura-v2** — captura multi-item, ressurgimento por delta, áudio via Web Speech, pergunta cirúrgica (PR #40)
+- **017-feed-registros** — feed cru de registros (`/registros`), cards colapsáveis, dois eixos de tempo, busca/filtros, grade-faísca (PR #43)
 
 **Bloco da Presença (fechado):** 013 → 014 → 015 mergeadas. Migrations `009` e `010` aplicadas em
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).

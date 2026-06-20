@@ -434,5 +434,49 @@
       "pontosADesenvolver": "Areas to develop"
     },
     "limited": "There's still little to harvest here — log what you did and come back."
+  },
+  "feed": {
+    "title": "Your records",
+    "empty": {
+      "heading": "No records yet",
+      "description": "Every story you share becomes a record here. Start with the most recent one.",
+      "filtered": "No records match these filters.",
+      "cta": "Make my first capture"
+    },
+    "axis": {
+      "created_at": "When I noted it",
+      "entry_date": "When it happened"
+    },
+    "filters": {
+      "search": "Search records…",
+      "period": "Period",
+      "company": "Company",
+      "tags": "Tags",
+      "metricOnly": "With metric",
+      "source": "Source",
+      "clear": "Clear filters",
+      "today": "Today",
+      "week": "7 days",
+      "month": "30 days",
+      "quarter": "90 days"
+    },
+    "card": {
+      "expand": "View details",
+      "collapse": "Collapse",
+      "usar": "Use",
+      "delete": "Delete",
+      "deleteConfirm": {
+        "title": "Delete this record?",
+        "description": "This action is permanent. Drafts generated from it are not deleted.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      }
+    },
+    "pagination": {
+      "loadMore": "Load more",
+      "loading": "Loading..."
+    },
+    "noDate": "No date",
+    "viewAll": "View all →"
   }
 }

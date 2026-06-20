@@ -47,6 +47,22 @@ export default async function proxy(request: NextRequest) {
   }
 
   const intlResponse = intlMiddleware(request)
+
+  // next-intl com localePrefix:'never' pode retornar um redirect 307 para a mesma URL
+  // sem Set-Cookie (para "negociar" locale). Isso causa ERR_TOO_MANY_REDIRECTS.
+  // Detecta o self-redirect e usa o supabaseResponse (NextResponse.next) em vez disso.
+  const location = intlResponse.headers.get('location')
+  const isSelfRedirect =
+    intlResponse.status >= 300 &&
+    intlResponse.status < 400 &&
+    location !== null &&
+    new URL(location, request.url).pathname === pathname
+
+  if (isSelfRedirect) {
+    transferCookies(supabaseResponse, supabaseResponse)
+    return supabaseResponse
+  }
+
   transferCookies(supabaseResponse, intlResponse)
   return intlResponse
 }

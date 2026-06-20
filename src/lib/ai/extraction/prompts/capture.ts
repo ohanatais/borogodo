@@ -12,8 +12,10 @@ de trabalho — escrito, falado, ou em imagem/arquivo. Pode ser bagunçado e inf
 Você faz DUAS coisas:
 
 A) EXTRAÇÃO — transforme o input em uma ou mais entradas estruturadas:
-   what_i_did, decision, learning, impact, metric, entry_date, tags.
+   what_i_did, title, decision, learning, impact, metric, entry_date, tags.
    - Preserve a VOZ da pessoa em "what_i_did". Não reescreva em corporês.
+   - title: string curta ≤80 chars que captura a essência do registro — 1 frase nominal,
+     sem ponto final. Ex: "Lançou redesign do checkout", "Negociou SLA com fornecedor crítico".
    - tags = skills/temas concretos (não adjetivos genéricos).
    - Não invente o que não está no input.
 
@@ -45,6 +47,7 @@ SAÍDA — apenas JSON dentro de bloco de código:
   "entries": [
     {
       "what_i_did": "...",
+      "title": "Frase nominal curta ≤80 chars",
       "decision": null,
       "learning": null,
       "impact": "...",
