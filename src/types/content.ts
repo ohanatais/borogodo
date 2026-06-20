@@ -3,7 +3,9 @@
 
 export type DraftFormat = 'post' | 'impact_summary' | 'mini_bio' | 'self_assessment'
 export type SeedType = 'entry' | 'theme' | 'project' | 'period'
-export type DraftStatus = 'generated' | 'edited' | 'copied' | 'discarded'
+// 'draft' (019): a autoavaliação é ESCRITA pela pessoa, então nasce rascunho autorado — nunca
+// 'generated' (ninguém gera). Depois segue o lifecycle existente ('copied'/'discarded').
+export type DraftStatus = 'draft' | 'generated' | 'edited' | 'copied' | 'discarded'
 export type VoiceFeedback = 'soa' | 'nao_soa'
 export type LengthPref = 'curto' | 'medio' | 'longo'
 
@@ -62,6 +64,31 @@ export interface ContentRulesetViolation {
   assert: number
   field: string
   message: string
+}
+
+// ─── Autoavaliação cockpit (019) ────────────────────────────────────────────
+
+/** Tipo do passo-pra-frente. v1 entrega só o plano de ação; prep de 1:1 é fast-follow. */
+export type ForwardStepKind = 'action_plan' | 'one_on_one_prep'
+
+/**
+ * Passo-pra-frente opcional (US2), persistido em `drafts.qa.forwardStep`. Única IA geradora da
+ * feature → todo conteúdo deriva SÓ do `body` escrito pela pessoa; `anchoredOn` registra os
+ * trechos-fonte citados (anti-invenção bloqueante antes de persistir — research D5).
+ */
+export interface ForwardStep {
+  kind: ForwardStepKind
+  /** Trechos do que a PESSOA escreveu que ancoram o plano (prova de não-invenção). */
+  anchoredOn: string[]
+  /** Quando kind = 'action_plan' (GROW Will + 70-20-10, uma ação de experiência). */
+  actionPlan?: {
+    area: string
+    experienceAction: string
+    commitmentQuestion: string
+  }
+  /** Quando kind = 'one_on_one_prep' (fast-follow). */
+  talkingPoints?: string[]
+  generatedAt: string
 }
 
 // ─── Hub da Presença (014) ──────────────────────────────────────────────────
