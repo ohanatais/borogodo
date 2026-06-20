@@ -3,21 +3,29 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { listDrafts } from '@/lib/db/drafts'
+import { loadPeriodRecap } from '@/lib/autoavaliacao/periodRecap'
+import { buildSentenceStems } from '@/lib/autoavaliacao/sentenceStems'
+import { parsePeriodSeedRef, serializePeriodSeedRef } from '@/lib/content/period'
 import { PeriodPicker } from '@/components/features/autoavaliacao/PeriodPicker'
+import { YearInFactsRecap } from '@/components/features/autoavaliacao/YearInFactsRecap'
+import { AssessmentEditor } from '@/components/features/autoavaliacao/AssessmentEditor'
 import { SelfAssessmentHistory } from '@/components/features/autoavaliacao/SelfAssessmentHistory'
 
 export const metadata: Metadata = {
   title: 'Autoavaliação | Borogodó',
 }
 
+interface AutoavaliacaoPageProps {
+  searchParams: Promise<{ from?: string; to?: string }>
+}
+
 /**
- * Página dedicada da autoavaliação (019, US1). A "sala" onde a pessoa colhe o ano: escolhe um período
- * e gera duas autoavaliações estruturadas por seções, ancoradas na evidência real do intervalo. RSC:
- * só renderiza a moldura e a headline; a interação (seletor de período + disparo da geração) vive no
- * `PeriodPicker` client. O resultado reusa o `GenerateSheet` montado no AppShell (mesmo mecanismo da
- * Presença), via evento `openPresenca` com `seedType: 'period'`.
+ * Cabine da autoavaliação (019, US1, modelo cockpit). RSC: sem período (`?from=&to=`), mostra o seletor
+ * + o histórico; com período válido, carrega o recap DETERMINÍSTICO ("o seu ano, em fatos") e abre a
+ * cabine de escrita. A pessoa ESCREVE; a IA só ancora. O recap colhe de `entries` (capturas reais),
+ * isolado do espelho.
  */
-export default async function AutoavaliacaoPage() {
+export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoPageProps) {
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -26,10 +34,8 @@ export default async function AutoavaliacaoPage() {
   if (!user) redirect('/login')
 
   const t = await getTranslations('autoavaliacao')
-
-  // Histórico do próprio artefato: as autoavaliações já salvas (drafts `self_assessment`). Vivem na
-  // tabela `drafts`, separadas de `entries` — por isso nunca tocam o espelho.
-  const history = await listDrafts(supabase, user.id, { format: 'self_assessment' })
+  const { from, to } = await searchParams
+  const period = from && to ? parsePeriodSeedRef(serializePeriodSeedRef(from, to)) : null
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
@@ -42,9 +48,32 @@ export default async function AutoavaliacaoPage() {
         </p>
       </header>
 
-      <PeriodPicker />
+      {period ? (
+        <CockpitForPeriod userId={user.id} from={period.from} to={period.to} />
+      ) : (
+        <>
+          <PeriodPicker />
+          {/* Histórico em `drafts` (self_assessment), isolado de `entries`/espelho. */}
+          <div className="mt-10">
+            <SelfAssessmentHistory items={(await listDrafts(supabase, user.id, { format: 'self_assessment' })).items} />
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
-      <SelfAssessmentHistory items={history.items} />
+/** Carrega o recap do intervalo e monta a cabine. Separado para manter a página legível. */
+async function CockpitForPeriod({ userId, from, to }: { userId: string; from: string; to: string }) {
+  const supabase = await createServerClient()
+  const recap = await loadPeriodRecap(supabase, userId, from, to)
+  const stems = buildSentenceStems(recap.items)
+  const seedRef = serializePeriodSeedRef(from, to)
+
+  return (
+    <div className="flex flex-col gap-8">
+      <YearInFactsRecap items={recap.items} isLimited={recap.isLimited} />
+      <AssessmentEditor recap={recap.items} stems={stems} seedRef={seedRef} />
     </div>
   )
 }

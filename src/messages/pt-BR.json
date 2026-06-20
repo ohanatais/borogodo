@@ -563,6 +563,7 @@
       "save": "Salvar",
       "saving": "Salvando…",
       "saved": "Salvo",
+      "saveError": "Não consegui salvar agora. Tente de novo.",
       "placeholder": "Escreva do seu jeito…"
     },
     "sections": {

@@ -1,14 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Sparkles } from 'lucide-react'
-import {
-  resolvePeriodPreset,
-  serializePeriodSeedRef,
-  type PeriodPreset,
-} from '@/lib/content/period'
-import { openPresenca } from '@/components/features/content/presencaEvents'
+import { ArrowRight } from 'lucide-react'
+import { resolvePeriodPreset, type PeriodPreset } from '@/lib/content/period'
 
 type Choice = PeriodPreset | 'outro_periodo'
 
@@ -18,14 +14,15 @@ function defaultCustomRange(now: Date): { from: string; to: string } {
 }
 
 /**
- * Seletor de período da autoavaliação (019, US1). Presets como chips (≥48px) com "este ano"
- * pré-selecionado; "outro período" revela dois `<input type="date">` nativos inline (acessível,
- * mobile-friendly, sem dependência nova). "Gerar autoavaliação" dispara o MESMO mecanismo da
- * Presença — evento `openPresenca` com `seedType: 'period'` e o `seedRef` codificado pelo `period.ts`
- * — abrindo o `GenerateSheet` montado no AppShell, que já gera com a evidência do intervalo.
+ * Seletor de período da autoavaliação (019, US1, modelo cockpit). Presets como chips (≥48px) com
+ * "este ano" pré-selecionado; "outro período" revela dois `<input type="date">` nativos inline. Ao
+ * confirmar, navega para `?from=&to=` — a página (RSC) carrega o recap determinístico do intervalo e
+ * abre a cabine de escrita. NÃO gera nada (o modelo de geração saiu na Phase 2).
  */
 export function PeriodPicker() {
   const t = useTranslations('autoavaliacao')
+  const router = useRouter()
+  const pathname = usePathname()
   const now = useMemo(() => new Date(), [])
   const initialCustom = useMemo(() => defaultCustomRange(now), [now])
 
@@ -46,16 +43,9 @@ export function PeriodPicker() {
 
   const isValidRange = Boolean(range.from && range.to && range.from <= range.to)
 
-  function handleGenerate() {
+  function handleStart() {
     if (!isValidRange) return
-    const seedRef = serializePeriodSeedRef(range.from, range.to)
-    const seedSummary = t('basedOnPeriod', { from: range.from, to: range.to })
-    openPresenca({
-      seedType: 'period',
-      seedRef,
-      seedSummary,
-      formats: ['self_assessment'],
-    })
+    router.push(`${pathname}?from=${range.from}&to=${range.to}`)
   }
 
   return (
@@ -116,13 +106,13 @@ export function PeriodPicker() {
 
       <button
         type="button"
-        onClick={handleGenerate}
+        onClick={handleStart}
         disabled={!isValidRange}
         className="inline-flex items-center justify-center gap-2 self-start text-base font-medium px-5 py-3 min-h-[48px] rounded-xl transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
       >
-        <Sparkles size={16} aria-hidden="true" />
-        {t('generate')}
+        {t('editor.start')}
+        <ArrowRight size={16} aria-hidden="true" />
       </button>
     </div>
   )

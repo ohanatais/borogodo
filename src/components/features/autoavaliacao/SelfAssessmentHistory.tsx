@@ -90,7 +90,7 @@ export function SelfAssessmentHistory({ items }: SelfAssessmentHistoryProps) {
                     className="text-xs"
                     style={{ color: 'var(--muted-foreground)' }}
                   >
-                    {t('generatedOn', { date: dateFmt.format(new Date(draft.createdAt)) })}
+                    {t('writtenOn', { date: dateFmt.format(new Date(draft.createdAt)) })}
                   </time>
                 </span>
               </button>

@@ -14,7 +14,8 @@ const createDraftSchema = z.object({
   seedRef: z.string().max(500).nullable(),
   angle: z.string().max(200).default(''),
   body: z.string().min(1).max(MAX_BODY_CHARS),
-  status: z.enum(['generated', 'edited']),
+  // 'draft' (019): a autoavaliação escrita pela pessoa nasce rascunho autorado, não gerado.
+  status: z.enum(['draft', 'generated', 'edited']),
   qa: z.record(z.string(), z.unknown()).default({}),
 })
 

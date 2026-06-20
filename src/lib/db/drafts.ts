@@ -68,7 +68,7 @@ export interface InsertDraftInput {
   seedRef: string | null
   angle: string
   body: string
-  status: Extract<DraftStatus, 'generated' | 'edited'>
+  status: Extract<DraftStatus, 'draft' | 'generated' | 'edited'>
   qa: Record<string, unknown>
 }
 
