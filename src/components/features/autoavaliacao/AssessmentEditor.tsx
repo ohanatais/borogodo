@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Wand2, HelpCircle, Check, X, Save } from 'lucide-react'
 import type { SentenceStemAnchors } from '@/lib/autoavaliacao/sentenceStems'
 import type { AssistSection } from '@/lib/ai/content/assist'
+import { ForwardStepOffer } from './ForwardStepOffer'
 
 /** Uma seção do andaime. `key` indexa o i18n (sections/stems); `api` é o parâmetro da rota de assist. */
 interface SectionDef {
@@ -55,6 +56,8 @@ export function AssessmentEditor({ stems, seedRef }: AssessmentEditorProps) {
   const [answer, setAnswer] = useState('')
   const [busy, setBusy] = useState(false)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  /** Id da autoavaliação salva — habilita a oferta do passo-pra-frente (US2). */
+  const [savedDraftId, setSavedDraftId] = useState<string | null>(null)
 
   const sectionDefs: SectionDef[] = [
     { key: 'entregas', api: 'entregas' },
@@ -152,7 +155,13 @@ export function AssessmentEditor({ stems, seedRef }: AssessmentEditorProps) {
           qa: {},
         }),
       })
-      setSaveState(res.ok ? 'saved' : 'error')
+      if (res.ok) {
+        const data = (await res.json()) as { draft?: { id: string } }
+        setSaveState('saved')
+        if (data.draft?.id) setSavedDraftId(data.draft.id)
+      } else {
+        setSaveState('error')
+      }
     } catch {
       setSaveState('error')
     }
@@ -287,6 +296,9 @@ export function AssessmentEditor({ stems, seedRef }: AssessmentEditorProps) {
           </span>
         )}
       </div>
+
+      {/* Passo-pra-frente (US2): oferta única após salvar, ancorada no que a pessoa escreveu. */}
+      {savedDraftId && <ForwardStepOffer draftId={savedDraftId} />}
     </div>
   )
 }

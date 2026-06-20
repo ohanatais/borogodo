@@ -6,6 +6,7 @@ import type { MacroCategory } from '@/types/mirror'
 import { getMirrorStatus, type MirrorStatus } from './getMirrorStatus'
 import { getCapturePrompt } from './getCapturePrompt'
 import { getReturnSignal, type ReturnSignal, type ReturnSignalEntry } from './getReturnSignal'
+import { getReviewCycleSignal, type ReviewCycleSignal } from './getReviewCycleSignal'
 
 const MS_PER_DAY = 86_400_000
 const MS_PER_MONTH = MS_PER_DAY * 30
@@ -61,9 +62,13 @@ export interface PanelData {
   insight: ProactiveInsight | null
   composerPlaceholder: string
   returnSignal: ReturnSignal
+  reviewCycleSignal: ReviewCycleSignal
 }
 
-export type { ReturnSignal }
+export type { ReturnSignal, ReviewCycleSignal }
+
+/** Dias desde a última entrada que ainda contam como "tem material recente para escrever". */
+const RECENT_ENTRY_DAYS = 60
 
 function calculateMonthsSpan(oldestDate: string | null, newestDate: string | null): number | null {
   if (!oldestDate || !newestDate) return null
@@ -91,7 +96,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     timelineRes,
     returnEntriesRes,
   ] = await Promise.all([
-    supabase.from('profiles').select('name, avatar_url, last_panel_seen_at').eq('id', userId).single(),
+    supabase.from('profiles').select('name, avatar_url, last_panel_seen_at, review_cycle_months, review_cycle_anchor').eq('id', userId).single(),
     supabase.from('entries').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase
       .from('entries')
@@ -148,7 +153,13 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
   const recentEntries = (recentRes.data ?? []) as RecentEntryRow[]
   const entryCount = countRes.count ?? 0
   const mirrorRow = mirrorRes.data as MirrorRow | null
-  const profileData = profileRes.data as { name?: string | null; avatar_url?: string | null; last_panel_seen_at?: string | null } | null
+  const profileData = profileRes.data as {
+    name?: string | null
+    avatar_url?: string | null
+    last_panel_seen_at?: string | null
+    review_cycle_months?: number | null
+    review_cycle_anchor?: string | null
+  } | null
   const lastPanelSeenAt = profileData?.last_panel_seen_at ?? null
   const lastEntry = recentEntries[0]
   const daysSince = calculateDaysSince(lastEntry?.created_at)
@@ -184,6 +195,13 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     lastMirrorSeenAt: lastPanelSeenAt,
   })
 
+  const reviewCycleSignal = getReviewCycleSignal({
+    reviewCycleMonths: profileData?.review_cycle_months ?? null,
+    reviewCycleAnchor: profileData?.review_cycle_anchor ?? null,
+    now: new Date(),
+    hasRecentEntries: daysSince !== null && daysSince <= RECENT_ENTRY_DAYS,
+  })
+
   // Fire-and-forget: update last_panel_seen_at for next visit delta computation.
   void supabase
     .from('profiles')
@@ -214,5 +232,6 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     insight: (insightRes.data as ProactiveInsight | null) ?? null,
     composerPlaceholder: t(prompt.key, prompt.values),
     returnSignal,
+    reviewCycleSignal,
   }
 }

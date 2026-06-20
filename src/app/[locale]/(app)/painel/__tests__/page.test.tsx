@@ -46,6 +46,7 @@ const BASE_DATA: PanelData = {
   insight: null,
   composerPlaceholder: 'O que aconteceu no trabalho ontem?',
   returnSignal: { type: 'welcome', strengthAha: false, entry: null },
+  reviewCycleSignal: { type: 'none' },
 }
 
 describe('PainelPage', () => {

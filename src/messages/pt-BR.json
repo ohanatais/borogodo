@@ -592,12 +592,24 @@
       "failed": "Não consegui sugerir agora; segue escrevendo."
     },
     "forwardStep": {
-      "offer": "Você escreveu que quer afiar algumas coisas. Quer que isso vire um plano de ação?",
+      "offer": "Quer transformar o que você escreveu num plano de ação concreto?",
+      "offerHint": "Uma oferta opcional, ancorada no que você escreveu. Sem cobrança.",
       "accept": "Montar meu plano",
       "decline": "Agora não",
-      "reviewDateLabel": "Quando você quer revisar isso?",
+      "generating": "Montando seu plano…",
+      "areaLabel": "Onde afiar",
+      "actionLabel": "Uma ação de experiência",
+      "commitmentLabel": "Seu compromisso",
       "anchoredOn": "Ancorado no que você escreveu",
+      "reviewDateLabel": "Quando você quer revisar isso?",
+      "saveDate": "Marcar revisão",
+      "savedDate": "Revisão marcada. Vou te lembrar no painel quando chegar perto.",
       "failed": "Não consegui montar o plano agora. Tente de novo daqui a pouco."
+    },
+    "panelInvite": {
+      "title": "Seu ciclo de avaliação está chegando",
+      "write": "Que tal escrever sua autoavaliação?",
+      "feedFirst": "Registre o que você fez antes de escrever."
     },
     "history": {
       "title": "Suas autoavaliações",
