@@ -39,11 +39,14 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
 
   return (
     <div className="max-w-[980px] mx-auto px-6 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, color: 'var(--foreground)' }}>
+      <header className="mb-10">
+        <h1
+          className="text-4xl"
+          style={{ fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--foreground)' }}
+        >
           {t('title')}
         </h1>
-        <p className="text-base mt-2" style={{ color: 'var(--muted-foreground)' }}>
+        <p className="text-base mt-2 max-w-prose" style={{ color: 'var(--muted-foreground)' }}>
           {t('subtitle')}
         </p>
       </header>

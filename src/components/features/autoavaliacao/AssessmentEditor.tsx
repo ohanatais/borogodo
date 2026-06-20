@@ -142,12 +142,14 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
       {/* Coluna principal: a escrita da pessoa é a protagonista */}
-      <div className="flex-1 flex flex-col gap-6 min-w-0">
+      <div className="flex-1 flex flex-col gap-8 min-w-0">
         {sectionDefs.map((def) => (
           <section key={def.key} className="flex flex-col gap-2">
-            <h3 className="text-lg" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--foreground)' }}>
+            {/* Rótulo de seção = nível "Title" (Geist 600), distinto dos headings Fraunces acima —
+                desachata a hierarquia. Sobrescreve o Fraunces global de h3. */}
+            <h3 className="text-[1.0625rem] font-semibold tracking-tight" style={{ fontFamily: 'var(--font-sans)', color: 'var(--foreground)' }}>
               {t(`sections.${def.key}`)}
             </h3>
             <textarea
@@ -155,8 +157,8 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
               onChange={(e) => setSection(def.key, e.target.value)}
               placeholder={placeholderFor(def)}
               rows={4}
-              className="w-full rounded-xl border px-4 py-3 text-base resize-y focus:outline-none focus:ring-2"
-              style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+              className="w-full rounded-xl border px-4 py-3 text-base leading-relaxed resize-y transition-shadow focus:outline-none focus:shadow-[0_0_0_2px_var(--color-primary)]"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
             />
 
             {/* Nudge STAR: só pergunta, nunca preenche */}
@@ -251,31 +253,36 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
         </div>
       </div>
 
-      {/* Trilha de evidências: rail sticky no desktop, gaveta no mobile. Resumo curto (não repete o
-          recap completo acima): data + uma linha por registro, como índice de consulta. */}
+      {/* Trilha de evidências: índice QUIETO (sem card), sticky no desktop, gaveta no mobile. Resumo
+          curto (data + 1 linha por registro) — é consulta de relance enquanto escreve, distinto por
+          peso visual do recap completo lilás acima (não repete: clampa e cala). */}
       {recap.length > 0 && (
-        <aside className="lg:w-72 shrink-0 lg:sticky lg:top-6 lg:self-start">
+        <aside className="lg:w-64 shrink-0 lg:sticky lg:top-8 lg:self-start">
           <button
             type="button"
             onClick={() => setTrailOpen((v) => !v)}
             aria-expanded={trailOpen}
             className="lg:hidden inline-flex items-center gap-1.5 text-sm px-3 py-2 min-h-[48px] rounded-lg"
-            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+            style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
           >
             <BookOpen size={15} aria-hidden="true" />
             {t('editor.trailLabel')}
           </button>
-          <div className={`${trailOpen ? 'block' : 'hidden'} lg:block mt-3 lg:mt-0 rounded-xl border p-4`} style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
-            <h4 className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--muted-foreground)' }}>
+          <div className={`${trailOpen ? 'block' : 'hidden'} lg:block mt-3 lg:mt-0`}>
+            <h4 className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--muted-foreground)' }}>
               {t('editor.trailTitle')}
             </h4>
-            <ul className="flex flex-col gap-3">
-              {recap.map((item) => (
-                <li key={item.sourceEntryId} className="flex flex-col gap-0.5">
-                  <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--muted-foreground)' }}>
+            <ul className="flex flex-col">
+              {recap.map((item, i) => (
+                <li
+                  key={item.sourceEntryId}
+                  className="flex flex-col gap-0.5 py-2.5"
+                  style={i > 0 ? { borderTop: '1px solid var(--border)' } : undefined}
+                >
+                  <span className="text-[10px] uppercase tracking-wide tabular-nums" style={{ color: 'var(--muted-foreground)' }}>
                     {trailDateFmt.format(new Date(item.occurredAt))}
                   </span>
-                  <span className="text-xs line-clamp-2" style={{ color: 'var(--foreground)' }}>
+                  <span className="text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--muted-foreground)' }}>
                     {item.text}
                   </span>
                 </li>
