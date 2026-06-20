@@ -109,6 +109,35 @@ describe('GenerateSheet', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
+  it('017: abrir com um ângulo de momento envia o angle no POST de geração', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ variants: VARIANTS }),
+    })
+    global.fetch = fetchMock as unknown as typeof fetch
+
+    render(<GenerateSheet />)
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent(PRESENCA_OPEN_EVENT, {
+          detail: {
+            seedType: 'theme',
+            seedRef: 'produto 0→1',
+            seedSummary: 'Entrevista',
+            formats: ['impact_summary'],
+            angle: 'Enquadre para uma entrevista de emprego.',
+            moment: 'entrevista',
+          },
+        })
+      )
+    })
+
+    await screen.findAllByTestId('draft-card')
+    const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string)
+    expect(body.angle).toBe('Enquadre para uma entrevista de emprego.')
+    expect(body.format).toBe('impact_summary')
+  })
+
   it('US3: aplicar um chip de ajuste regera o par enviando o adjust', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

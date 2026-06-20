@@ -57,22 +57,22 @@ primeiro e veja-o falhar antes de implementar.
 
 - [x] T006 [US2] `src/components/features/content/presencaEvents.ts`: `PresencaOpenDetail` ganha
   `angle?: string` e `moment?: PrepMoment`.
-- [ ] T007 [US2] `src/components/features/content/GenerateSheet.tsx`: `generate()` envia
+- [x] T007 [US2] `src/components/features/content/GenerateSheet.tsx`: `generate()` envia
   `angle: detail.angle` no body quando presente (preservado em troca de formato/regenerar/adjust);
   passa `moment={detail.moment}` a cada `DraftCard`. Teste: com `detail.angle`, o POST inclui
   `angle` (mock do fetch). **TDD: teste primeiro.**
-- [ ] T008 [US2] `src/components/features/content/DraftCard.tsx`: prop `moment?: PrepMoment`; em
+- [x] T008 [US2] `src/components/features/content/DraftCard.tsx`: prop `moment?: PrepMoment`; em
   `ensureSaved`, `qa: { angle, evidenceRefs, ...(moment ? { moment } : {}) }`. Teste: `moment`
   inclui `qa.moment` no `createDraft`. **TDD: teste primeiro.**
-- [ ] T009 [US2] Contexto `preparacao` no chat (3 pontos): `ChatContext` (+`'preparacao'`,
+- [x] T009 [US2] Contexto `preparacao` no chat (3 pontos): `ChatContext` (+`'preparacao'`,
   `moment?`) em `src/lib/ai/chat/answerCareerQuestion.ts`; zod `context` em
   `src/app/api/chat/route.ts` (+enum, `moment` opcional); `ChatOpenDetail` + branch de título em
   `src/components/features/chat/ChatSheet.tsx`. Teste: zod aceita `{type:'preparacao',moment}` e
   rejeita momento inválido. **TDD: teste primeiro.**
-- [ ] T010 [US2] `src/lib/ai/chat/prompts/careerChat.ts`: `CareerChatContext` +`prepMoment?`;
+- [x] T010 [US2] `src/lib/ai/chat/prompts/careerChat.ts`: `CareerChatContext` +`prepMoment?`;
   injeta enquadramento do momento. `answerCareerQuestion` repassa `prepMoment` quando
   `type==='preparacao'`. Teste: prompt contém o enquadramento do momento. **TDD: teste primeiro.**
-- [ ] T011 [US2] `src/components/features/chat/StarterPrompts.tsx`: aceitar `context`/`moment`; em
+- [x] T011 [US2] `src/components/features/chat/StarterPrompts.tsx`: aceitar `context`/`moment`; em
   `preparacao` usar `PREP_MOMENTS[m].starters` (sem fetch). Teste: starters do momento sem chamar a
   rota. **TDD: teste primeiro.**
 - [x] T012 [US2] Criar `src/components/features/presenca/PrepararMomento.tsx`: ao escolher um

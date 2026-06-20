@@ -71,4 +71,22 @@ describe('DraftCard', () => {
     expect(mockCreateDraft).not.toHaveBeenCalled()
     expect(mockPatchDraft).not.toHaveBeenCalled()
   })
+
+  it('017: quando vem de um momento, grava o momento em qa ao salvar', async () => {
+    render(<DraftCard variant={VARIANT} index={0} format="impact_summary" seed={SEED} moment="entrevista" />)
+    fireEvent.click(screen.getByRole('button', { name: 'copy' }))
+
+    await waitFor(() => expect(mockCreateDraft).toHaveBeenCalledTimes(1))
+    expect(mockCreateDraft).toHaveBeenCalledWith(
+      expect.objectContaining({ qa: expect.objectContaining({ moment: 'entrevista' }) })
+    )
+  })
+
+  it('017: sem momento, o qa não carrega a chave moment', async () => {
+    renderCard()
+    fireEvent.click(screen.getByRole('button', { name: 'copy' }))
+
+    await waitFor(() => expect(mockCreateDraft).toHaveBeenCalledTimes(1))
+    expect(mockCreateDraft.mock.calls[0][0].qa).not.toHaveProperty('moment')
+  })
 })

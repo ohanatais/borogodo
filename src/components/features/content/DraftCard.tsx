@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Pencil } from 'lucide-react'
 import type { DraftFormat, DraftVariant, SeedType, VoiceFeedback } from '@/types/content'
+import type { PrepMoment } from '@/lib/content/intentions'
 import { CopyButton } from './CopyButton'
 import { createDraft, patchDraft } from './draftsClient'
 import { notifyDraftUpdated } from './presencaEvents'
@@ -24,6 +25,8 @@ interface DraftCardProps {
    * fazem PATCH neste id em vez de criar uma linha nova. Ausente = card de geração fresca (013).
    */
   existingDraftId?: string
+  /** Momento de preparação que originou o rascunho (017): gravado em `qa.moment` ao salvar. */
+  moment?: PrepMoment
 }
 
 const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
@@ -38,7 +41,7 @@ const FORMAT_LABEL_KEY: Record<DraftFormat, string> = {
  * `edited` → `copied`) e o feedback "soa como você?" — tudo escopado ao próprio usuário pela rota.
  * A persistência é resiliente: uma falha mantém o texto na tela e só sinaliza discretamente.
  */
-export function DraftCard({ variant, index, format, seed, existingDraftId }: DraftCardProps) {
+export function DraftCard({ variant, index, format, seed, existingDraftId, moment }: DraftCardProps) {
   const t = useTranslations('presenca')
   const [body, setBody] = useState(variant.body)
   const [isEditing, setIsEditing] = useState(false)
@@ -67,7 +70,7 @@ export function DraftCard({ variant, index, format, seed, existingDraftId }: Dra
         angle: variant.angle,
         body: currentBody,
         status: editedRef.current ? 'edited' : 'generated',
-        qa: { angle: variant.angle, evidenceRefs: variant.evidenceRefs },
+        qa: { angle: variant.angle, evidenceRefs: variant.evidenceRefs, ...(moment ? { moment } : {}) },
       })
 
       if (!created) {

@@ -12,8 +12,9 @@ const chatRequestSchema = z.object({
     .optional(),
   context: z
     .object({
-      type: z.enum(['espelho', 'historico', 'empresa', 'entry']),
+      type: z.enum(['espelho', 'historico', 'empresa', 'entry', 'preparacao']),
       entityId: z.string().optional(),
+      moment: z.enum(['entrevista', 'review', 'salario']).optional(),
     })
     .optional(),
 })
