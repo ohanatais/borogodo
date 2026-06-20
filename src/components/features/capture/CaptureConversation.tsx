@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
-import type { CaptureInput, Reflection } from '@/types/capture'
+import type { BatchEntry, CaptureInput, Reflection } from '@/types/capture'
 import { ReadingState } from './ReadingState'
 import { ReflectionCard } from './ReflectionCard'
 import { BatchSummary } from './BatchSummary'
@@ -37,7 +37,7 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
   const [phase, setPhase] = useState<Phase>('reading')
   const [reflection, setReflection] = useState<Reflection | null>(null)
   const [entryId, setEntryId] = useState<string | null>(null)
-  const [batchIds, setBatchIds] = useState<string[]>([])
+  const [batchEntries, setBatchEntries] = useState<BatchEntry[]>([])
   const [serverError, setServerError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -69,13 +69,12 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
           setPhase('error')
           return
         }
-        const data = (await res.json()) as { entries: Array<{ id: string }>; reflection: Reflection | null }
+        const data = (await res.json()) as { entries: BatchEntry[]; reflection: Reflection | null }
         if (cancelled) return
-        const savedIds = data.entries.map((e) => e.id)
         if (!data.reflection) {
           router.refresh()
-          if (savedIds.length > 1) {
-            setBatchIds(savedIds)
+          if (data.entries.length > 1) {
+            setBatchEntries(data.entries)
             setPhase('batch')
           } else {
             onResolved()
@@ -84,7 +83,7 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
         }
         setReflection(data.reflection)
         setEntryId(data.entries[0]?.id ?? null)
-        setBatchIds(savedIds)
+        setBatchEntries(data.entries)
         setPhase('reflecting')
         router.refresh()
       } catch {
@@ -120,7 +119,7 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
   const handleRetry = () => {
     setReflection(null)
     setEntryId(null)
-    setBatchIds([])
+    setBatchEntries([])
     setServerError(null)
     setRetryCount((n) => n + 1)
   }
@@ -173,12 +172,12 @@ export function CaptureConversation({ input, onResolved }: CaptureConversationPr
           <div className="flex justify-start">
             {phase === 'reading' && <ReadingState />}
             {phase === 'batch' && (
-              <BatchSummary ids={batchIds} onUndone={handleDismiss} />
+              <BatchSummary entries={batchEntries} onUndone={handleDismiss} />
             )}
             {phase === 'reflecting' && reflection && (
               <div className="space-y-4 w-full">
-                {batchIds.length > 1 && (
-                  <BatchSummary ids={batchIds} onUndone={handleDismiss} />
+                {batchEntries.length > 1 && (
+                  <BatchSummary entries={batchEntries} onUndone={handleDismiss} />
                 )}
                 <ReflectionCard reflection={reflection} onEnrich={handleEnrich} onDismiss={handleDismiss} />
               </div>

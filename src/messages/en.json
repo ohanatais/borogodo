@@ -205,8 +205,9 @@
     },
     "batch": {
       "summary": "Created {n, plural, one {# entry} other {# entries}}",
-      "undo": "Undo",
+      "undo": "Undo all",
       "undoAriaLabel": "Undo creation of {n, plural, one {# entry} other {# entries}}",
+      "discardAriaLabel": "Discard: {title}",
       "undone": "Entries removed.",
       "viewHistory": "View in history →"
     },

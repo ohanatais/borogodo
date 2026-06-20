@@ -318,8 +318,9 @@
     },
     "batch": {
       "summary": "Criei {n, plural, one {# entrada} other {# entradas}}",
-      "undo": "Desfazer",
+      "undo": "Desfazer tudo",
       "undoAriaLabel": "Desfazer criação de {n, plural, one {# entrada} other {# entradas}}",
+      "discardAriaLabel": "Descartar: {title}",
       "undone": "Entradas removidas.",
       "viewHistory": "Ver no histórico →"
     },
