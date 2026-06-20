@@ -582,11 +582,12 @@
     "assist": {
       "rephrase": "Reescrever com minhas palavras",
       "unblock": "Não sei por onde começar",
-      "unblockQuestionLabel": "Responda do seu jeito — a sua resposta vira o seu rascunho:",
+      "unblockAnswerLabel": "A sua resposta vira o seu rascunho:",
+      "unblockAnswerPlaceholder": "Escreva a sua resposta do seu jeito…",
+      "useAnswer": "Usar minha resposta",
       "starNudge": "Qual foi o resultado, número ou antes-depois?",
       "accept": "Usar",
       "reject": "Descartar",
-      "edit": "Editar",
       "loading": "Pensando com você…",
       "failed": "Não consegui sugerir agora; segue escrevendo."
     },

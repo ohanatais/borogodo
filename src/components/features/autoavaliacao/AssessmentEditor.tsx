@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
-import { Wand2, HelpCircle, Check, X, BookOpen, Save } from 'lucide-react'
-import type { PeriodRecapItem } from '@/lib/autoavaliacao/periodRecap'
+import { Wand2, HelpCircle, Check, X, Save } from 'lucide-react'
 import type { SentenceStemAnchors } from '@/lib/autoavaliacao/sentenceStems'
 import type { AssistSection } from '@/lib/ai/content/assist'
 
@@ -24,6 +23,10 @@ function looksVague(text: string): boolean {
   return !/\d/.test(text) && !/(resultado|de\s.+\spara\s|aument|reduz|cresc|dobr|%|R\$)/i.test(text)
 }
 
+/**
+ * Cartão de ajuda da IA. `rephrase`: `value` é a reescrita, "Usar" insere ela. `unblock`: `value` é a
+ * PERGUNTA (guia, não conteúdo) — a pessoa escreve a resposta em `answer`, e "Usar" insere a RESPOSTA.
+ */
 interface AssistCard {
   section: SectionKey
   kind: 'rephrase' | 'unblock'
@@ -31,27 +34,26 @@ interface AssistCard {
 }
 
 interface AssessmentEditorProps {
-  recap: PeriodRecapItem[]
   stems: SentenceStemAnchors
   seedRef: string
 }
 
 /**
  * Cabine de escrita da autoavaliação (019, US1, T020). A pessoa ESCREVE por seções (andaime opcional);
- * a IA só ancora: reescreve com as palavras dela ou faz 1 pergunta para destravar — nunca preenche
- * sozinha, nunca dá nota. A trilha de evidências fica ao lado (colapsável no mobile). Salva como
- * rascunho autorado (`status='draft'`), isolado do espelho.
+ * a IA só ancora: reescreve com as palavras dela, ou faz 1 pergunta para destravar (cuja RESPOSTA, que a
+ * pessoa escreve, vira o rascunho) — nunca preenche sozinha, nunca dá nota. Salva como rascunho autorado
+ * (`status='draft'`), isolado do espelho.
  */
-export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProps) {
+export function AssessmentEditor({ stems, seedRef }: AssessmentEditorProps) {
   const t = useTranslations('autoavaliacao')
   const locale = useLocale()
   // timeZone UTC: evita o off-by-one de datas date-only em fusos negativos (ver YearInFactsRecap).
   const monthFmt = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' })
-  const trailDateFmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', timeZone: 'UTC' })
   const [sections, setSections] = useState<Sections>(EMPTY_SECTIONS)
   const [card, setCard] = useState<AssistCard | null>(null)
+  /** Resposta da pessoa à pergunta do unblock (vira o rascunho ao "Usar"). */
+  const [answer, setAnswer] = useState('')
   const [busy, setBusy] = useState(false)
-  const [trailOpen, setTrailOpen] = useState(false)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
   const sectionDefs: SectionDef[] = [
@@ -76,9 +78,14 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
     setSaveState('idle')
   }
 
+  function closeCard() {
+    setCard(null)
+    setAnswer('')
+  }
+
   async function callAssist(def: SectionDef, kind: 'rephrase' | 'unblock') {
     setBusy(true)
-    setCard(null)
+    closeCard()
     try {
       const res = await fetch('/api/autoavaliacao/assist', {
         method: 'POST',
@@ -102,11 +109,21 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
     }
   }
 
+  /** Insere o texto na seção: substitui (rephrase) ou acrescenta ao que já houver (unblock). */
+  function applyToSection(key: SectionKey, text: string, append: boolean) {
+    const current = sections[key].trim()
+    setSection(key, append && current ? `${current}\n${text}` : text)
+  }
+
   function acceptCard() {
     if (!card) return
-    // rephrase substitui a frase; unblock vira o rascunho da seção (a pessoa edita depois).
-    setSection(card.section, card.value)
-    setCard(null)
+    if (card.kind === 'rephrase') {
+      applyToSection(card.section, card.value, false)
+    } else if (answer.trim()) {
+      // A RESPOSTA da pessoa vira o rascunho — nunca a pergunta da IA.
+      applyToSection(card.section, answer.trim(), true)
+    }
+    closeCard()
   }
 
   function buildBody(): string {
@@ -141,156 +158,135 @@ export function AssessmentEditor({ recap, stems, seedRef }: AssessmentEditorProp
     }
   }
 
+  const canAccept = card?.kind === 'rephrase' || !!answer.trim()
+
   return (
-    <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-      {/* Coluna principal: a escrita da pessoa é a protagonista */}
-      <div className="flex-1 flex flex-col gap-8 min-w-0">
-        {sectionDefs.map((def) => (
-          <section key={def.key} className="flex flex-col gap-2">
-            {/* Rótulo de seção = nível "Title" (Geist 600), distinto dos headings Fraunces acima —
-                desachata a hierarquia. Sobrescreve o Fraunces global de h3. */}
-            <h3 className="text-[1.0625rem] font-semibold tracking-tight" style={{ fontFamily: 'var(--font-sans)', color: 'var(--foreground)' }}>
-              {t(`sections.${def.key}`)}
-            </h3>
-            <textarea
-              value={sections[def.key]}
-              onChange={(e) => setSection(def.key, e.target.value)}
-              placeholder={placeholderFor(def)}
-              rows={4}
-              className="w-full rounded-xl border px-4 py-3 text-base leading-relaxed resize-y transition-shadow focus:outline-none focus:shadow-[0_0_0_2px_var(--color-primary)]"
-              style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-            />
+    <div className="flex flex-col gap-9">
+      {sectionDefs.map((def) => (
+        <section key={def.key} className="flex flex-col gap-2.5">
+          {/* Rótulo de seção = nível "Title" (Geist 600), distinto dos headings Fraunces acima —
+              desachata a hierarquia. Sobrescreve o Fraunces global de h3. */}
+          <h3 className="text-[1.0625rem] font-semibold tracking-tight" style={{ fontFamily: 'var(--font-sans)', color: 'var(--foreground)' }}>
+            {t(`sections.${def.key}`)}
+          </h3>
+          <textarea
+            value={sections[def.key]}
+            onChange={(e) => setSection(def.key, e.target.value)}
+            placeholder={placeholderFor(def)}
+            rows={4}
+            className="w-full rounded-xl border px-4 py-3 text-base leading-relaxed resize-y transition-shadow focus:outline-none focus:shadow-[0_0_0_2px_var(--color-primary)]"
+            style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+          />
 
-            {/* Nudge STAR: só pergunta, nunca preenche */}
-            {def.key === 'impacto' && looksVague(sections.impacto) && (
-              <p className="text-xs" style={{ color: 'var(--color-accent-text)' }}>
-                {t('assist.starNudge')}
-              </p>
-            )}
+          {/* Nudge STAR: só pergunta, nunca preenche */}
+          {def.key === 'impacto' && looksVague(sections.impacto) && (
+            <p className="text-xs" style={{ color: 'var(--color-accent-text)' }}>
+              {t('assist.starNudge')}
+            </p>
+          )}
 
-            {/* Ajudas opt-in da IA */}
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                disabled={busy || !sections[def.key].trim()}
-                onClick={() => callAssist(def, 'rephrase')}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-2 min-h-[40px] rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40"
-                style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
-              >
-                <Wand2 size={13} aria-hidden="true" />
-                {t('assist.rephrase')}
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => callAssist(def, 'unblock')}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-2 min-h-[40px] rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40"
-                style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
-              >
-                <HelpCircle size={13} aria-hidden="true" />
-                {t('assist.unblock')}
-              </button>
-            </div>
+          {/* Ajudas opt-in da IA */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={busy || !sections[def.key].trim()}
+              onClick={() => callAssist(def, 'rephrase')}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-2 min-h-[40px] rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40"
+              style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
+            >
+              <Wand2 size={13} aria-hidden="true" />
+              {t('assist.rephrase')}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => callAssist(def, 'unblock')}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-2 min-h-[40px] rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40"
+              style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
+            >
+              <HelpCircle size={13} aria-hidden="true" />
+              {t('assist.unblock')}
+            </button>
+          </div>
 
-            {/* Cartão de sugestão da IA: aceitar / rejeitar (verde-água = ancorado) */}
-            {card?.section === def.key && (
-              <div className="rounded-xl border p-3 flex flex-col gap-2" style={{ borderColor: 'var(--color-teal)', background: 'var(--card)' }}>
-                {card.kind === 'unblock' && (
-                  <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                    {t('assist.unblockQuestionLabel')}
-                  </span>
-                )}
-                <p className="text-sm" style={{ color: 'var(--foreground)' }}>
+          {/* Cartão da IA (verde-água = ancorado). rephrase: sugestão + Usar/Descartar.
+              unblock: pergunta-guia + campo de RESPOSTA da pessoa (a resposta vira o rascunho). */}
+          {card?.section === def.key && (
+            <div className="rounded-xl border p-4 flex flex-col gap-3" style={{ borderColor: 'var(--color-teal)', background: 'var(--card)' }}>
+              {card.kind === 'rephrase' ? (
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground)' }}>
                   {card.value}
                 </p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={acceptCard}
-                    className="inline-flex items-center gap-1 text-xs px-3 py-1.5 min-h-[40px] rounded-lg"
-                    style={{ background: 'var(--color-teal)', color: 'var(--foreground)' }}
-                  >
-                    <Check size={13} aria-hidden="true" />
-                    {t('assist.accept')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCard(null)}
-                    className="inline-flex items-center gap-1 text-xs px-3 py-1.5 min-h-[40px] rounded-lg"
-                    style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
-                  >
-                    <X size={13} aria-hidden="true" />
-                    {t('assist.reject')}
-                  </button>
-                </div>
-              </div>
-            )}
-          </section>
-        ))}
-
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            disabled={!hasContent || saveState === 'saving'}
-            onClick={handleSave}
-            className="inline-flex items-center gap-2 text-base font-medium px-5 py-3 min-h-[48px] rounded-xl transition-opacity hover:opacity-90 disabled:opacity-40"
-            style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-          >
-            <Save size={16} aria-hidden="true" />
-            {saveState === 'saving' ? t('editor.saving') : t('editor.save')}
-          </button>
-          {saveState === 'saved' && (
-            <span className="inline-flex items-center gap-1 text-sm" style={{ color: 'var(--foreground)' }}>
-              <Check size={15} aria-hidden="true" style={{ color: 'var(--color-teal)' }} />
-              {t('editor.saved')}
-            </span>
-          )}
-          {saveState === 'error' && (
-            <span className="text-sm" style={{ color: 'var(--destructive)' }}>
-              {t('editor.saveError')}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Trilha de evidências: índice QUIETO (sem card), sticky no desktop, gaveta no mobile. Resumo
-          curto (data + 1 linha por registro) — é consulta de relance enquanto escreve, distinto por
-          peso visual do recap completo lilás acima (não repete: clampa e cala). */}
-      {recap.length > 0 && (
-        <aside className="lg:w-64 shrink-0 lg:sticky lg:top-8 lg:self-start">
-          <button
-            type="button"
-            onClick={() => setTrailOpen((v) => !v)}
-            aria-expanded={trailOpen}
-            className="lg:hidden inline-flex items-center gap-1.5 text-sm px-3 py-2 min-h-[48px] rounded-lg"
-            style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
-          >
-            <BookOpen size={15} aria-hidden="true" />
-            {t('editor.trailLabel')}
-          </button>
-          <div className={`${trailOpen ? 'block' : 'hidden'} lg:block mt-3 lg:mt-0`}>
-            <h4 className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--muted-foreground)' }}>
-              {t('editor.trailTitle')}
-            </h4>
-            <ul className="flex flex-col">
-              {recap.map((item, i) => (
-                <li
-                  key={item.sourceEntryId}
-                  className="flex flex-col gap-0.5 py-2.5"
-                  style={i > 0 ? { borderTop: '1px solid var(--border)' } : undefined}
+              ) : (
+                <>
+                  <p className="text-sm font-medium leading-relaxed" style={{ color: 'var(--foreground)' }}>
+                    {card.value}
+                  </p>
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                      {t('assist.unblockAnswerLabel')}
+                    </span>
+                    <textarea
+                      value={answer}
+                      onChange={(e) => setAnswer(e.target.value)}
+                      placeholder={t('assist.unblockAnswerPlaceholder')}
+                      rows={3}
+                      autoFocus
+                      className="w-full rounded-lg border px-3 py-2 text-sm leading-relaxed resize-y transition-shadow focus:outline-none focus:shadow-[0_0_0_2px_var(--color-primary)]"
+                      style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    />
+                  </label>
+                </>
+              )}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={acceptCard}
+                  disabled={!canAccept}
+                  className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 min-h-[40px] rounded-lg transition-opacity hover:opacity-90 disabled:opacity-40"
+                  style={{ background: 'var(--color-teal)', color: 'var(--foreground)' }}
                 >
-                  <span className="text-[10px] uppercase tracking-wide tabular-nums" style={{ color: 'var(--muted-foreground)' }}>
-                    {trailDateFmt.format(new Date(item.occurredAt))}
-                  </span>
-                  <span className="text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--muted-foreground)' }}>
-                    {item.text}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </aside>
-      )}
+                  <Check size={13} aria-hidden="true" />
+                  {card.kind === 'unblock' ? t('assist.useAnswer') : t('assist.accept')}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeCard}
+                  className="inline-flex items-center gap-1 text-xs px-3 py-1.5 min-h-[40px] rounded-lg transition-opacity hover:opacity-80"
+                  style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+                >
+                  <X size={13} aria-hidden="true" />
+                  {t('assist.reject')}
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      ))}
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          disabled={!hasContent || saveState === 'saving'}
+          onClick={handleSave}
+          className="inline-flex items-center gap-2 text-base font-medium px-5 py-3 min-h-[48px] rounded-xl transition-opacity hover:opacity-90 disabled:opacity-40"
+          style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+        >
+          <Save size={16} aria-hidden="true" />
+          {saveState === 'saving' ? t('editor.saving') : t('editor.save')}
+        </button>
+        {saveState === 'saved' && (
+          <span className="inline-flex items-center gap-1 text-sm" style={{ color: 'var(--foreground)' }}>
+            <Check size={15} aria-hidden="true" style={{ color: 'var(--color-teal)' }} />
+            {t('editor.saved')}
+          </span>
+        )}
+        {saveState === 'error' && (
+          <span className="text-sm" style={{ color: 'var(--destructive)' }}>
+            {t('editor.saveError')}
+          </span>
+        )}
+      </div>
     </div>
   )
 }

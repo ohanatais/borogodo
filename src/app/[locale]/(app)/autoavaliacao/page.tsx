@@ -76,7 +76,7 @@ async function CockpitForPeriod({ userId, from, to }: { userId: string; from: st
   return (
     <div className="flex flex-col gap-8">
       <YearInFactsRecap items={recap.items} isLimited={recap.isLimited} />
-      <AssessmentEditor recap={recap.items} stems={stems} seedRef={seedRef} />
+      <AssessmentEditor stems={stems} seedRef={seedRef} />
     </div>
   )
 }

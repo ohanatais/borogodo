@@ -48,12 +48,9 @@ export function YearInFactsRecap({ items, isLimited }: YearInFactsRecapProps) {
 
   return (
     <section aria-label={t('label')}>
-      <h2 className="text-2xl" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--foreground)' }}>
+      <h2 className="text-2xl mb-4" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--foreground)' }}>
         {t('label')}
       </h2>
-      <p className="text-sm mt-1 mb-4" style={{ color: 'var(--muted-foreground)' }}>
-        {t('intro')}
-      </p>
       <ul className="rounded-2xl overflow-hidden" style={{ background: 'var(--color-lilas-nevoa)' }}>
         {items.map((item, i) => (
           <li

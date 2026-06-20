@@ -50,9 +50,12 @@ export function PeriodPicker() {
 
   return (
     <div className="flex flex-col gap-6">
-      <fieldset className="flex flex-col gap-3">
+      <fieldset>
         <legend className="sr-only">{t('presets.outroPeriodo')}</legend>
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('title')}>
+        {/* Chips e (quando "outro período") os campos De/Até na MESMA linha — datas ao lado do chip,
+            não embaixo; quebram para baixo só quando não cabem (mobile). */}
+        <div className="flex flex-wrap items-end gap-x-4 gap-y-3">
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('title')}>
           {presets.map((preset) => {
             const active = choice === preset.value
             return (
@@ -77,7 +80,7 @@ export function PeriodPicker() {
         </div>
 
         {choice === 'outro_periodo' && (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex flex-wrap gap-3 items-end">
             <label className="flex flex-col gap-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
               {t('range.from')}
               <input
@@ -102,6 +105,7 @@ export function PeriodPicker() {
             </label>
           </div>
         )}
+        </div>
       </fieldset>
 
       <button
