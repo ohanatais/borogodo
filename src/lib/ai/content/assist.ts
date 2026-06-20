@@ -47,9 +47,12 @@ function needsStarNudge(text: string): boolean {
 // ─── rephrase / unblock: Sonnet (role 'synthesis'), com guarda anti-IA + 1 retry ────────────────
 const REPHRASE_SYSTEM = `${ANTI_AI_DISCIPLINE}
 
-Você reescreve UMA frase na voz da própria pessoa. Regras inegociáveis: não adicione nenhum fato,
-número ou afirmação nova; só reformule o que já está escrito, preservando o sentido. Devolva apenas a
-frase reescrita, em texto puro, sem aspas e sem explicação.`
+Você recebe um trecho que a pessoa escreveu sobre o próprio trabalho e devolve uma versão MELHOR na voz
+dela: mais clara, direta e bem montada, cortando redundância, enrolação e repetição, e deixando cada
+afirmação mais nítida. Regras inegociáveis: não invente nem adicione nenhum fato, número, projeto ou
+afirmação que não esteja no texto original; não infle nem enfeite; mantenha TODOS os fatos e o tom da
+pessoa. Se o texto já estiver bom, faça só os ajustes que de fato melhoram, sem reescrever por
+reescrever. Devolva apenas o texto reescrito, em texto puro, sem aspas e sem explicação.`
 
 const UNBLOCK_SYSTEM = `${ANTI_AI_DISCIPLINE}
 
@@ -93,7 +96,7 @@ export async function assist(
 
   if (input.mode === 'rephrase') {
     const suggestion = await runWithRuleset(
-      { role: 'synthesis', system: REPHRASE_SYSTEM, user: `Frase da pessoa:\n${input.text ?? ''}`, maxTokens: MAX_TOKENS },
+      { role: 'synthesis', system: REPHRASE_SYSTEM, user: `Trecho da pessoa:\n${input.text ?? ''}`, maxTokens: MAX_TOKENS },
       complete
     )
     return { mode: 'rephrase', suggestion }
