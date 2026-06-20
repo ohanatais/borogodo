@@ -56,7 +56,8 @@ function reducer(state: State, action: Action): State {
       const newContext = action.payload.context ?? state.context
       const contextChanged =
         newContext?.type !== state.context?.type ||
-        newContext?.entityId !== state.context?.entityId
+        newContext?.entityId !== state.context?.entityId ||
+        newContext?.moment !== state.context?.moment
       const prefill = action.payload.prefillMessage ?? ''
       const hasPrefill = !!prefill
       const shouldReset = contextChanged || hasPrefill
