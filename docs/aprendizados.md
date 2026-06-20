@@ -446,3 +446,31 @@ ferramenta certa é `git worktree` (uma pasta por branch). E doc de discovery se
 **Por que importa:** é um aprendizado central de `build-with-claude` pra quem usa mais de uma janela. O
 reflexo "abro vários chats e toco tudo em paralelo" parece produtivo e na real cria colisão silenciosa. A
 regra: uma feature/branch por pasta por vez; pra paralelo real, worktrees.
+
+---
+
+## 2026-06-16 — Subagents em pipeline TDD: o handoff é o produto, não a paralelização
+
+**O que aconteceu:** quis testar se dava pra implementar uma fase inteira (US2 da 018: opinião com lastro,
+guardrail, 2 componentes novos, rota, i18n) delegando a subagents, de um jeito replicável pras próximas
+features. Montei dois papéis em `.claude/agents/`: um **test-author** (escreve só os testes RED e confirma
+que falham) e um **implementer** (recebe os RED e implementa até GREEN, sem regressão). Rodei em série:
+test-author primeiro, implementer depois. Deu certo na primeira — 701 testes verdes, tsc e eslint limpos,
+nenhum teste ajustado pra passar. O detalhe que fez funcionar: o test-author não só escreveu os testes, ele
+devolveu um **briefing com as assinaturas exatas** que o implementer teria que criar (props de cada
+componente, mudanças na rota e no motor). Esse briefing virou o contrato. O implementer não teve que
+adivinhar nada.
+
+**O que aprendi:** o valor do subagent aqui não foi rodar coisas em paralelo (a fase tinha dependências, foi
+tudo em série) — foi o **handoff estruturado**. Em TDD, o teste JÁ é a especificação executável; fazer um
+agente escrever o teste primeiro força o contrato a existir antes da implementação, e um segundo agente
+preenche esse contrato sem deriva de escopo. Também aprendi um limite da ferramenta: agente custom criado no
+meio de uma sessão não é carregado — o `.md` em `.claude/agents/` só vale em sessão nova; no meio do caminho
+tem que embutir o papel no prompt do general-purpose. E o orquestrador (eu) ainda precisa revisar o que
+volta: validei de novo a rota (auth + custo de IA) e o contrato do `/api/capture` que o implementer assumiu,
+porque "veio do subagent" não substitui revisão de superfície sensível.
+
+**Por que importa:** é o molde replicável pras próximas features e material direto de `build-with-claude`. A
+lição contraintuitiva: não delegue "implemente a feature" num agente só; quebre em **autor de teste → 
+implementador**, e exija que o autor de teste devolva as assinaturas. O gargalo de qualidade some quando o
+contrato vem antes do código. Paralelizar é bônus ocasional; o ganho real é o RED→GREEN com handoff limpo.

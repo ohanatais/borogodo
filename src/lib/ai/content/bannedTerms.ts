@@ -110,6 +110,13 @@ export const BIO_CLICHES: readonly RegExp[] = [
 export const METRIC_CHANGE_RE =
   /de\s+\d[\d.,]*\s*%?\s+(?:para|pra)\s+\d|(?:aument|reduz|cresc|caiu|\bcai\b|subiu|dobr|triplic|cort|economiz)\w*[^.]*?\d[\d.,]*\s*%/i
 
+/** Assert 11 (018) — jargão de opinião-vazia sem lastro real. */
+export const EMPTY_OPINION_TERMS: readonly RegExp[] = [
+  /\bhot\s+take\b/i,
+  /impopular\s+mas\b/i,
+  /ningu[eé]m\s+fala\s+sobre\s+isso\b/i,
+]
+
 /** Assert 7 — janela de tempo que legitima a métrica. */
 export const TIME_WINDOW_RE =
   /\b(trimestres?|m[êe]s|meses|semanas?|dias?|anos?|horas?|d[ée]cadas?|nos?\s+[úu]ltim|por\s+(?:m[êe]s|ano|semana|dia)|ao\s+(?:m[êe]s|ano|dia)|durante|desde)\b|em\s+\d/i

@@ -427,10 +427,29 @@
     "generating": "Escrevendo na sua voz...",
     "regenerate": "Gerar de novo",
     "angleLabel": "Ângulo",
+    "angles": {
+      "label": "Sobre o que é esse post?",
+      "relato": "O que fiz",
+      "study": "O que aprendi",
+      "opinion": "Opinião"
+    },
+    "opinion": {
+      "thesisLabel": "O que você quer dizer?",
+      "thesisPlaceholder": "Escreva aqui",
+      "exampleInvite": "Quer ancorar num exemplo seu?",
+      "examplePlaceholder": "Descreva o que aconteceu",
+      "generateBtn": "Gerar post"
+    },
+    "captureOffer": {
+      "question": "Salvar este exemplo?",
+      "save": "Salvar",
+      "dismiss": "Dispensar",
+      "saved": "Exemplo salvo!"
+    },
     "formats": {
       "post": "Post",
-      "impactSummary": "Resumo de impacto",
-      "miniBio": "Mini-bio"
+      "impactSummary": "Pra falar do seu trabalho",
+      "miniBio": "Sua bio"
     },
     "adjust": {
       "label": "Ajustar os dois rascunhos",
@@ -515,8 +534,8 @@
       "arquivados": "Arquivados",
       "allFormats": "Todos",
       "post": "Post",
-      "impactSummary": "Resumo",
-      "miniBio": "Mini-bio"
+      "impactSummary": "Pra falar",
+      "miniBio": "Bio"
     },
     "deleteConfirm": {
       "title": "Excluir este rascunho?",

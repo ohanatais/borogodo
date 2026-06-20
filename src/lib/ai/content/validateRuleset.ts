@@ -6,6 +6,7 @@ import {
   BIO_CLICHES,
   EMOJI_RE,
   EMPHASIS_ADVERBS,
+  EMPTY_OPINION_TERMS,
   LINKEDIN_JARGON,
   METRIC_CHANGE_RE,
   PRAISE_SLANG,
@@ -77,6 +78,9 @@ export function validateContentRuleset(text: string, field = 'body'): ContentRul
 
   // Assert 10 (015): sem clichê de bio (apaixonado por tecnologia, movido a desafios, etc.)
   checkPatterns(text, BIO_CLICHES, 10, field, (p) => `"${field}" contém clichê de bio (${p.source})`, violations)
+
+  // Assert 11 (018): sem jargão de opinião-vazia
+  checkPatterns(text, EMPTY_OPINION_TERMS, 11, field, (p) => `"${field}" contém jargão de opinião-vazia (${p.source})`, violations)
 
   return violations
 }

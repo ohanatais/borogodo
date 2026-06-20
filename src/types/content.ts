@@ -2,6 +2,7 @@
 // Reusados por 014 (hub) e 015 (refino de voz). Identificadores em inglês (constituição II).
 
 export type DraftFormat = 'post' | 'impact_summary' | 'mini_bio'
+export type AngleKind = 'study' | 'opinion'
 export type SeedType = 'entry' | 'theme' | 'project'
 export type DraftStatus = 'generated' | 'edited' | 'copied' | 'discarded'
 export type VoiceFeedback = 'soa' | 'nao_soa'
