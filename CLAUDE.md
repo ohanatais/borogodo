@@ -26,7 +26,19 @@ Features mergeadas em `main` (até PR #24):
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **016-captura-v2** (branch: `016-captura-v2`) — **planejamento concluído; implementação não iniciada**
+Current feature: **017-repertorio-intencao** (branch: `017-repertorio-intencao`) — **implementação concluída; aguardando `/impeccable audit` + `/pr-review` antes do merge**
+Spec: [specs/017-repertorio-intencao/spec.md](specs/017-repertorio-intencao/spec.md) ·
+Plan: [specs/017-repertorio-intencao/plan.md](specs/017-repertorio-intencao/plan.md) ·
+Tasks: [specs/017-repertorio-intencao/tasks.md](specs/017-repertorio-intencao/tasks.md)
+
+Pivô da camada "Usar" → **Repertório**: `/presenca` reorganizada num launchpad de dois hubs por
+intenção (MOSTRAR: post/bio · PREPARAR: entrevista/review/salário com bifurcação pronto/conversar),
+convite central no Painel e entrada de Bio no Espelho. **Reorganização de IA e pontos de entrada,
+não motor novo** — zero migration (o "momento" é um `angle` sobre `impact_summary` + rótulo em
+`drafts.qa.moment`). Gap real corrigido: `GenerateSheet` agora envia o `angle` que a API já aceitava.
+Rota `/presenca` intacta (rename só de rótulo). 684 testes passando, build e `tsc` limpos.
+
+Feature anterior: **016-captura-v2** — planejamento concluído; implementação não iniciada.
 Spec: [specs/016-captura-v2/spec.md](specs/016-captura-v2/spec.md) ·
 Plan: [specs/016-captura-v2/plan.md](specs/016-captura-v2/plan.md) ·
 Tasks: [specs/016-captura-v2/tasks.md](specs/016-captura-v2/tasks.md)

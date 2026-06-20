@@ -113,12 +113,13 @@ primeiro e veja-o falhar antes de implementar.
 
 ## Phase 6: Polish & Cross-Cutting
 
-- [ ] T016 [P] Revisão de i18n (pt-BR/en) e a11y dos componentes novos (alvos ≥48px, aria-labels,
+- [x] T016 [P] Revisão de i18n (pt-BR/en) e a11y dos componentes novos (alvos ≥48px, aria-labels,
   foco em Dialog) conforme padrões existentes.
-- [ ] T017 `npm test` (suites novas + regressão, ≥80%), `npm run build`, `npx tsc --noEmit`.
-- [ ] T018 `/impeccable audit` + web-design-guidelines nos componentes novos antes do PR.
-- [ ] T019 Atualizar bloco de status no `CLAUDE.md`; propor entrada em `docs/aprendizados.md`
-  (reorganizar IA por intenção sem tocar motor nem schema) — decisão de incluir é da Ohana.
+- [x] T017 `npm test` (684 passando, 1 skip), `npm run build` (ok), `npx tsc --noEmit` (ok).
+- [ ] T018 `/impeccable audit` + web-design-guidelines nos componentes novos — **gate com a Ohana
+  antes do merge** (revisão de design, não código).
+- [x] T019 Bloco de status no `CLAUDE.md` atualizado; entrada para `docs/aprendizados.md` proposta
+  no resumo do PR (decisão de incluir é da Ohana).
 
 ---
 
