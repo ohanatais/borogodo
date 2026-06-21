@@ -76,7 +76,10 @@ async function advanceAnchor(supabase: SupabaseServerClient, userId: string): Pr
   if (!profile?.review_cycle_months || !profile.review_cycle_anchor) return
 
   const next = advanceReviewAnchor(profile.review_cycle_anchor, profile.review_cycle_months)
-  await supabase.from('profiles').update({ review_cycle_anchor: next }).eq('id', userId)
+  const { error } = await supabase.from('profiles').update({ review_cycle_anchor: next }).eq('id', userId)
+  // Não bloqueia: o registro já foi salvo. Mas logamos — se o update falha, o card de check-in reaparece
+  // na próxima visita (re-nag), e o log ajuda a diagnosticar.
+  if (error) logger.error('review check-in: failed to advance anchor', { message: error.message })
 }
 
 function dispatchAsyncJobs(userId: string): void {

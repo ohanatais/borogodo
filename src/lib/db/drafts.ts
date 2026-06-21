@@ -237,6 +237,9 @@ export async function getSelfAssessment(
  * passo-pra-frente salvo (019, US2 follow-up). Alimenta o check-in de revisão: ao chegar a data marcada,
  * a pessoa revê o que prometeu. Escopado por `user_id` E `format='self_assessment'`; `null` se não houver
  * autoavaliação com plano. Varre as mais recentes e devolve a primeira com compromisso.
+ *
+ * Limite: olha só as 10 mais recentes. Se as 10 últimas não tiverem plano mas uma 11ª tiver, o check-in
+ * não aparece — aceitável (10 autoavaliações recentes sem plano = compromisso provavelmente abandonado).
  */
 export async function getLatestCommitment(
   supabase: SupabaseServerClient,
