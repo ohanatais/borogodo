@@ -20,24 +20,24 @@ export const impactSummaryDraftSchema = draftOutputSchema
 // Mini-bio (015): mesma forma (2 variantes); a disciplina de "curta + factual + sem clichê" vem do
 // prompt e do ruleset (assert 10), não da forma. Nomeado à parte para divergir sem tocar no motor.
 export const miniBioDraftSchema = draftOutputSchema
-// Autoavaliação (019): mesma forma (2 variantes); a disciplina das 4 seções vem do prompt, não da
-// forma. Nomeado à parte para divergir sem tocar no motor.
-export const selfAssessmentDraftSchema = draftOutputSchema
 
 export type DraftOutput = z.infer<typeof draftOutputSchema>
 export type DraftOutputVariant = DraftOutput['variants'][number]
 
-const SCHEMA_BY_FORMAT: Record<DraftFormat, typeof draftOutputSchema> = {
+// 019: 'self_assessment' deixou de ser um formato GERADO (modelo cockpit — a pessoa escreve, a IA só
+// ancora). Por isso não tem schema de saída de LLM aqui; segue apenas como formato persistido em `drafts`.
+const SCHEMA_BY_FORMAT: Partial<Record<DraftFormat, typeof draftOutputSchema>> = {
   post: postDraftSchema,
   impact_summary: impactSummaryDraftSchema,
   mini_bio: miniBioDraftSchema,
-  self_assessment: selfAssessmentDraftSchema,
 }
 
 /**
- * Valida o JSON bruto do Sonnet com o schema do formato. Lança em shape inválido —
- * quem chama não persiste nada parcial (constituição III).
+ * Valida o JSON bruto do Sonnet com o schema do formato. Lança em shape inválido — quem chama não
+ * persiste nada parcial (constituição III). Formato sem geração (ex.: self_assessment) também lança.
  */
 export function validateDraftOutput(raw: unknown, format: DraftFormat): DraftOutput {
-  return SCHEMA_BY_FORMAT[format].parse(raw)
+  const schema = SCHEMA_BY_FORMAT[format]
+  if (!schema) throw new Error(`Formato '${format}' não é gerado por LLM (sem schema de saída).`)
+  return schema.parse(raw)
 }

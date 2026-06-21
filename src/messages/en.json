@@ -415,7 +415,7 @@
   },
   "autoavaliacao": {
     "title": "Your self-assessment",
-    "subtitle": "Pick a period and harvest what you did. Two structured versions, anchored in your real work.",
+    "subtitle": "Recall your year and write it your way. I help you remember; the assessment is yours.",
     "presets": {
       "esteAno": "This year",
       "ultimoCiclo": "Last cycle",
@@ -425,20 +425,93 @@
       "from": "From",
       "to": "To"
     },
-    "generate": "Generate self-assessment",
     "basedOnPeriod": "{from} to {to}",
+    "recap": {
+      "label": "Your {year}, in facts",
+      "labelRange": "Your facts between {from} and {to}",
+      "sourceChip": "View record",
+      "limited": {
+        "message": "There's still little to harvest in this period. Rather than make things up, I'd rather show you this: log what you did and come back.",
+        "cta": "Log now"
+      }
+    },
+    "editor": {
+      "start": "Start writing",
+      "trailLabel": "View my year",
+      "trailTitle": "Evidence trail",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "saveError": "Couldn't save just now. Try again.",
+      "placeholder": "Write it your way…"
+    },
     "sections": {
       "entregas": "Deliverables",
       "impacto": "Impact",
       "evolucao": "Growth",
       "pontosADesenvolver": "Areas to develop"
     },
-    "limited": "There's still little to harvest here — log what you did and come back.",
+    "stems": {
+      "entregas": "In {anchor}, I…",
+      "entregasNeutro": "Start with the deliverable that meant the most to you…",
+      "impacto": "What changed because of your work? If there was a number, lead with it.",
+      "evolucao": "Over the period, I grew in…",
+      "pontosADesenvolver": "I want to sharpen…"
+    },
+    "assist": {
+      "rephrase": "Rewrite in my words",
+      "unblock": "I don't know where to start",
+      "unblockAnswerLabel": "Your answer becomes your draft:",
+      "unblockAnswerPlaceholder": "Write your answer your own way…",
+      "useAnswer": "Use my answer",
+      "starNudge": "What was the result, number, or before-and-after?",
+      "accept": "Use",
+      "reject": "Discard",
+      "loading": "Thinking with you…",
+      "failed": "Couldn't suggest right now; keep writing."
+    },
+    "forwardStep": {
+      "offer": "Want to turn what you wrote into a concrete action plan?",
+      "offerHint": "An optional offer, anchored in what you wrote. No pressure.",
+      "accept": "Build my plan",
+      "decline": "Not now",
+      "generating": "Building your plan…",
+      "areaLabel": "Where to sharpen",
+      "actionLabel": "One experience action",
+      "commitmentLabel": "Your commitment",
+      "edit": "Edit",
+      "regenerate": "Generate another version",
+      "savePlan": "Save plan",
+      "cancel": "Cancel",
+      "anchoredOn": "Anchored in what you wrote",
+      "reviewDateLabel": "When do you want to review this?",
+      "saveDate": "Set review",
+      "savedDate": "Review set. I'll remind you on the dashboard when it's close.",
+      "failed": "Couldn't build the plan right now. Try again shortly."
+    },
+    "panelInvite": {
+      "title": "Your review cycle is coming up",
+      "write": "How about writing your self-assessment?",
+      "feedFirst": "Log what you did before writing."
+    },
     "history": {
       "title": "Your self-assessments",
-      "empty": "Once you generate your first self-assessment, it'll be kept here.",
-      "generatedOn": "Generated on {date}",
+      "empty": "Once you write your first self-assessment, it'll be kept here.",
+      "nextReview": "Next review set for {date}",
+      "writtenOn": "Written on {date}",
       "untitled": "Self-assessment"
+    },
+    "reviewCheckIn": {
+      "title": "Review time",
+      "intro": "Last time, you committed to this:",
+      "prompt": "So, how did it go?",
+      "placeholder": "Tell us in your own words what happened since then…",
+      "submit": "Log how it went",
+      "submitting": "Saving…",
+      "done": "Noted. It became an entry and already feeds your next self-assessment.",
+      "dismiss": "Not now",
+      "error": "Could not save right now. Try again shortly.",
+      "writeNext": "Write this cycle’s self-assessment"
     }
   },
   "feed": {

@@ -3,7 +3,6 @@ import {
   validateDraftOutput,
   postDraftSchema,
   impactSummaryDraftSchema,
-  selfAssessmentDraftSchema,
 } from '../schemas'
 
 const VALID_RAW = {
@@ -40,18 +39,9 @@ describe('validateDraftOutput — forma válida', () => {
   })
 })
 
-describe('validateDraftOutput — self_assessment (US1, 019)', () => {
-  it('valida exatamente 2 variantes no formato self_assessment via SCHEMA_BY_FORMAT', () => {
-    const parsed = validateDraftOutput(VALID_RAW, 'self_assessment')
-    expect(parsed.variants).toHaveLength(2)
-  })
-
-  it('expõe o schema nomeado selfAssessmentDraftSchema', () => {
-    expect(selfAssessmentDraftSchema.safeParse(VALID_RAW).success).toBe(true)
-  })
-
-  it('rejeita malformado também no formato self_assessment', () => {
-    expect(() => validateDraftOutput({ variants: [VALID_RAW.variants[0]] }, 'self_assessment')).toThrow()
+describe('validateDraftOutput — self_assessment não é gerado (019, modelo cockpit)', () => {
+  it('lança: self_assessment deixou de ser formato gerável (a pessoa escreve, a IA só ancora)', () => {
+    expect(() => validateDraftOutput(VALID_RAW, 'self_assessment')).toThrow()
   })
 })
 
