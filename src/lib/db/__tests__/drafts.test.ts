@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { listDrafts, deleteDraft } from '../drafts'
+import { listDrafts, deleteDraft, getLatestCommitment } from '../drafts'
 
 // Mock encadeado do query builder do Supabase. Cada método devolve `this` até o terminador,
 // que resolve com { data, error }. Capturamos as chamadas para asserir escopo/filtro/paginação.
@@ -147,5 +147,41 @@ describe('deleteDraft', () => {
     const ok = await deleteDraft(supabase as never, 'user-1', 'other-id')
 
     expect(ok).toBe(false)
+  })
+})
+
+describe('getLatestCommitment — compromisso da autoavaliação mais recente (019, check-in de revisão)', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('escopa por user_id + self_assessment e devolve o compromisso da mais recente com plano', async () => {
+    const rows = [
+      { id: 'd2', qa: { forwardStep: { actionPlan: { commitmentQuestion: 'Vai mentorar 2h/semana?' } } } },
+      { id: 'd1', qa: null },
+    ]
+    const { builder, calls } = makeQuery({ data: rows, error: null })
+    const supabase = { from: vi.fn(() => builder) }
+
+    const result = await getLatestCommitment(supabase as never, 'user-1')
+
+    expect(supabase.from).toHaveBeenCalledWith('drafts')
+    expect(calls.eq).toEqual(['format', 'self_assessment'])
+    expect(result).toEqual({ draftId: 'd2', commitment: 'Vai mentorar 2h/semana?' })
+  })
+
+  it('pula autoavaliações sem plano e retorna a primeira que tem compromisso', async () => {
+    const rows = [
+      { id: 'd3', qa: { forwardStep: { kind: 'action_plan' } } }, // sem actionPlan.commitmentQuestion
+      { id: 'd2', qa: { forwardStep: { actionPlan: { commitmentQuestion: 'compromisso' } } } },
+    ]
+    const { builder } = makeQuery({ data: rows, error: null })
+    const supabase = { from: vi.fn(() => builder) }
+
+    expect(await getLatestCommitment(supabase as never, 'user-1')).toEqual({ draftId: 'd2', commitment: 'compromisso' })
+  })
+
+  it('sem autoavaliação com plano → null', async () => {
+    const { builder } = makeQuery({ data: [], error: null })
+    const supabase = { from: vi.fn(() => builder) }
+    expect(await getLatestCommitment(supabase as never, 'user-1')).toBeNull()
   })
 })

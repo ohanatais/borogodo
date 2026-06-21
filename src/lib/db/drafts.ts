@@ -233,6 +233,32 @@ export async function getSelfAssessment(
 }
 
 /**
+ * O compromisso (`commitmentQuestion`) da autoavaliação mais recente do usuário que tem um
+ * passo-pra-frente salvo (019, US2 follow-up). Alimenta o check-in de revisão: ao chegar a data marcada,
+ * a pessoa revê o que prometeu. Escopado por `user_id` E `format='self_assessment'`; `null` se não houver
+ * autoavaliação com plano. Varre as mais recentes e devolve a primeira com compromisso.
+ */
+export async function getLatestCommitment(
+  supabase: SupabaseServerClient,
+  userId: string
+): Promise<{ draftId: string; commitment: string } | null> {
+  const { data } = await supabase
+    .from('drafts')
+    .select('id, qa')
+    .eq('user_id', userId)
+    .eq('format', 'self_assessment')
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  const rows = (data ?? []) as Array<{ id: string; qa: { forwardStep?: ForwardStep } | null }>
+  for (const row of rows) {
+    const commitment = row.qa?.forwardStep?.actionPlan?.commitmentQuestion
+    if (commitment) return { draftId: row.id, commitment }
+  }
+  return null
+}
+
+/**
  * Persiste o passo-pra-frente em `drafts.qa.forwardStep` do próprio usuário (019, US2). Escopado por
  * `id` E `user_id` (RLS reforça). Sobrescreve `qa` (a autoavaliação só usa `qa` para o forwardStep).
  */

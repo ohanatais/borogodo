@@ -2,14 +2,16 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
-import { getSelfAssessment, listDrafts } from '@/lib/db/drafts'
+import { getSelfAssessment, getLatestCommitment, listDrafts } from '@/lib/db/drafts'
 import { loadPeriodRecap } from '@/lib/autoavaliacao/periodRecap'
 import { buildSentenceStems } from '@/lib/autoavaliacao/sentenceStems'
+import { getReviewCheckIn } from '@/lib/autoavaliacao/reviewCheckIn'
 import { getNextReviewDate } from '@/lib/panel/getReviewCycleSignal'
 import { parsePeriodSeedRef, serializePeriodSeedRef } from '@/lib/content/period'
 import { parseSelfAssessmentSections } from '@/components/features/content/selfAssessmentSections'
 import type { ForwardStep } from '@/types/content'
 import { PeriodPicker } from '@/components/features/autoavaliacao/PeriodPicker'
+import { ReviewCheckIn } from '@/components/features/autoavaliacao/ReviewCheckIn'
 import { YearInFactsRecap } from '@/components/features/autoavaliacao/YearInFactsRecap'
 import { AssessmentEditor } from '@/components/features/autoavaliacao/AssessmentEditor'
 import { SelfAssessmentHistory } from '@/components/features/autoavaliacao/SelfAssessmentHistory'
@@ -63,6 +65,21 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
         await supabase.from('profiles').select('review_cycle_months, review_cycle_anchor').eq('id', user.id).maybeSingle()
       ).data as { review_cycle_months?: number | null; review_cycle_anchor?: string | null } | null)
 
+  // Check-in de revisão (US2 follow-up): se a data marcada já chegou e há um compromisso anterior,
+  // recebe a pessoa com ele + "como foi?" (a resposta vira registro). Só na tela inicial e só quando há
+  // ciclo configurado — evita a query de compromisso para quem nunca marcou revisão (a maioria).
+  const hasCycle = !period && profile?.review_cycle_months != null && !!profile?.review_cycle_anchor
+  const latestCommitment = hasCycle ? await getLatestCommitment(supabase, user.id) : null
+  const checkIn = latestCommitment
+    ? getReviewCheckIn({
+        reviewCycleMonths: profile?.review_cycle_months ?? null,
+        reviewCycleAnchor: profile?.review_cycle_anchor ?? null,
+        now: new Date(),
+        latestCommitment: latestCommitment.commitment,
+        latestDraftId: latestCommitment.draftId,
+      })
+    : { show: false as const }
+
   return (
     <div className="max-w-[980px] mx-auto px-6 py-8 pb-28 lg:pb-8">
       <header className="mb-10">
@@ -88,6 +105,12 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
         />
       ) : (
         <>
+          {/* Loop da revisão: chegou a data + há compromisso → fecha o ciclo antes de abrir um novo. */}
+          {checkIn.show && (
+            <div className="mb-10">
+              <ReviewCheckIn commitment={checkIn.commitment} />
+            </div>
+          )}
           <PeriodPicker />
           {/* Histórico em `drafts` (self_assessment) = revisões passadas; topo = próxima agendada. */}
           <div className="mt-10">

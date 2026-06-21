@@ -621,6 +621,18 @@
       "nextReview": "Próxima revisão marcada para {date}",
       "writtenOn": "Escrita em {date}",
       "untitled": "Autoavaliação"
+    },
+    "reviewCheckIn": {
+      "title": "A revisão chegou",
+      "intro": "Da última vez, você se comprometeu com isto:",
+      "prompt": "E aí, como foi?",
+      "placeholder": "Conte do seu jeito o que aconteceu desde então…",
+      "submit": "Registrar como foi",
+      "submitting": "Registrando…",
+      "done": "Anotado. Isso virou um registro e já alimenta a sua próxima autoavaliação.",
+      "dismiss": "Agora não",
+      "error": "Não consegui registrar agora. Tente de novo daqui a pouco.",
+      "writeNext": "Escrever a autoavaliação deste ciclo"
     }
   },
   "feed": {
