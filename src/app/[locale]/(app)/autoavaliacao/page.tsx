@@ -5,6 +5,7 @@ import { createServerClient } from '@/lib/db/supabase/server'
 import { getSelfAssessment, listDrafts } from '@/lib/db/drafts'
 import { loadPeriodRecap } from '@/lib/autoavaliacao/periodRecap'
 import { buildSentenceStems } from '@/lib/autoavaliacao/sentenceStems'
+import { getNextReviewDate } from '@/lib/panel/getReviewCycleSignal'
 import { parsePeriodSeedRef, serializePeriodSeedRef } from '@/lib/content/period'
 import { parseSelfAssessmentSections } from '@/components/features/content/selfAssessmentSections'
 import { PeriodPicker } from '@/components/features/autoavaliacao/PeriodPicker'
@@ -53,6 +54,14 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
   const reopenedPeriod = reopened?.seedRef ? parsePeriodSeedRef(reopened.seedRef) : null
   const period = reopenedPeriod ?? (from && to ? parsePeriodSeedRef(serializePeriodSeedRef(from, to)) : null)
 
+  // Tela inicial (sem período): revisões passadas (drafts) + a recorrência para a próxima agendada.
+  const historyItems = period ? [] : (await listDrafts(supabase, user.id, { format: 'self_assessment' })).items
+  const profile = period
+    ? null
+    : ((
+        await supabase.from('profiles').select('review_cycle_months, review_cycle_anchor').eq('id', user.id).maybeSingle()
+      ).data as { review_cycle_months?: number | null; review_cycle_anchor?: string | null } | null)
+
   return (
     <div className="max-w-[980px] mx-auto px-6 py-8 pb-28 lg:pb-8">
       <header className="mb-10">
@@ -78,9 +87,16 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
       ) : (
         <>
           <PeriodPicker />
-          {/* Histórico em `drafts` (self_assessment), isolado de `entries`/espelho. */}
+          {/* Histórico em `drafts` (self_assessment) = revisões passadas; topo = próxima agendada. */}
           <div className="mt-10">
-            <SelfAssessmentHistory items={(await listDrafts(supabase, user.id, { format: 'self_assessment' })).items} />
+            <SelfAssessmentHistory
+              items={historyItems}
+              nextReviewDate={getNextReviewDate(
+                profile?.review_cycle_months ?? null,
+                profile?.review_cycle_anchor ?? null,
+                new Date()
+              )}
+            />
           </div>
         </>
       )}

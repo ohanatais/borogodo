@@ -600,6 +600,10 @@
       "areaLabel": "Onde afiar",
       "actionLabel": "Uma ação de experiência",
       "commitmentLabel": "Seu compromisso",
+      "edit": "Editar",
+      "regenerate": "Gerar outra versão",
+      "savePlan": "Salvar plano",
+      "cancel": "Cancelar",
       "anchoredOn": "Ancorado no que você escreveu",
       "reviewDateLabel": "Quando você quer revisar isso?",
       "saveDate": "Marcar revisão",
@@ -614,6 +618,7 @@
     "history": {
       "title": "Suas autoavaliações",
       "empty": "Quando você escrever sua primeira autoavaliação, ela fica guardada aqui.",
+      "nextReview": "Próxima revisão marcada para {date}",
       "writtenOn": "Escrita em {date}",
       "untitled": "Autoavaliação"
     }

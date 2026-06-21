@@ -43,3 +43,22 @@ export function getReviewCycleSignal({
 
   return { type: 'none' }
 }
+
+/**
+ * Próxima data de revisão agendada (ISO `YYYY-MM-DD`), ou `null` sem recorrência. Avança a âncora de
+ * `reviewCycleMonths` em `reviewCycleMonths` até a primeira ocorrência em/depois de agora. Usado na
+ * tela de autoavaliações para mostrar a revisão agendada (US2, follow-up).
+ */
+export function getNextReviewDate(
+  reviewCycleMonths: number | null,
+  reviewCycleAnchor: string | null,
+  now: Date
+): string | null {
+  if (reviewCycleMonths == null || !reviewCycleAnchor) return null
+
+  const next = new Date(reviewCycleAnchor)
+  while (next.getTime() < now.getTime()) {
+    next.setUTCMonth(next.getUTCMonth() + reviewCycleMonths)
+  }
+  return next.toISOString().slice(0, 10)
+}

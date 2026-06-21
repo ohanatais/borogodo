@@ -2,12 +2,14 @@
 
 import { useRouter, usePathname } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import { ClipboardCheck } from 'lucide-react'
+import { ClipboardCheck, CalendarClock } from 'lucide-react'
 import type { Draft } from '@/types/content'
 import { parsePeriodSeedRef } from '@/lib/content/period'
 
 interface SelfAssessmentHistoryProps {
   items: Draft[]
+  /** Próxima revisão agendada (ISO date), ou null sem recorrência. Mostrada no topo. */
+  nextReviewDate?: string | null
 }
 
 /** Rótulo legível do período a partir do `seedRef` (period:::from:::to). Sem range válido → vazio. */
@@ -31,7 +33,7 @@ function usePeriodLabel() {
  * na própria cabine para edição (`?draft=<id>`), nunca no fluxo de post (GenerateSheet) — coerente com
  * a separação do modelo cockpit.
  */
-export function SelfAssessmentHistory({ items }: SelfAssessmentHistoryProps) {
+export function SelfAssessmentHistory({ items, nextReviewDate }: SelfAssessmentHistoryProps) {
   const t = useTranslations('autoavaliacao.history')
   const locale = useLocale()
   const router = useRouter()
@@ -39,12 +41,24 @@ export function SelfAssessmentHistory({ items }: SelfAssessmentHistoryProps) {
   const periodLabel = usePeriodLabel()
   const dateFmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric' })
 
+  // Revisão agendada (do perfil) — o topo da visão; o histórico abaixo são as revisões passadas.
+  const scheduled = nextReviewDate ? (
+    <p
+      className="inline-flex items-center gap-1.5 text-sm rounded-lg px-3 py-2 mb-4"
+      style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
+    >
+      <CalendarClock size={15} aria-hidden="true" />
+      {t('nextReview', { date: dateFmt.format(new Date(`${nextReviewDate}T12:00:00`)) })}
+    </p>
+  ) : null
+
   if (items.length === 0) {
     return (
       <section className="mt-12">
         <h2 className="text-sm font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
           {t('title')}
         </h2>
+        {scheduled}
         <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
           {t('empty')}
         </p>
@@ -57,6 +71,7 @@ export function SelfAssessmentHistory({ items }: SelfAssessmentHistoryProps) {
       <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--foreground)' }}>
         {t('title')}
       </h2>
+      {scheduled}
       <ul className="flex flex-col rounded-xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
         {items.map((draft) => {
           const period = periodLabel(draft.seedRef) || t('untitled')

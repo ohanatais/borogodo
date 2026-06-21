@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Sparkles, Check, CalendarClock } from 'lucide-react'
+import { Sparkles, Check, CalendarClock, Pencil, RefreshCw, X } from 'lucide-react'
 import type { ForwardStep } from '@/types/content'
 
 interface ForwardStepOfferProps {
@@ -23,6 +23,9 @@ export function ForwardStepOffer({ draftId }: ForwardStepOfferProps) {
   const [plan, setPlan] = useState<ForwardStep | null>(null)
   const [reviewDate, setReviewDate] = useState('')
   const [dateSaved, setDateSaved] = useState(false)
+  /** Edição inline do plano: a pessoa pode refinar com as próprias palavras. */
+  const [editing, setEditing] = useState(false)
+  const [draftPlan, setDraftPlan] = useState({ area: '', experienceAction: '', commitmentQuestion: '' })
 
   async function generate() {
     setPhase('generating')
@@ -54,6 +57,29 @@ export function ForwardStepOffer({ draftId }: ForwardStepOfferProps) {
       if (res.ok) setDateSaved(true)
     } catch {
       // Silencioso: marcar a revisão é opcional; o plano já está salvo no draft.
+    }
+  }
+
+  function startEdit() {
+    if (!plan?.actionPlan) return
+    setDraftPlan(plan.actionPlan)
+    setEditing(true)
+  }
+
+  async function savePlan() {
+    if (!plan) return
+    try {
+      const res = await fetch('/api/autoavaliacao/forward-step', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ draftId, plan: { ...draftPlan, anchoredOn: plan.anchoredOn } }),
+      })
+      if (res.ok) {
+        setPlan((await res.json()) as ForwardStep)
+        setEditing(false)
+      }
+    } catch {
+      // Silencioso: o plano anterior continua válido.
     }
   }
 
@@ -116,18 +142,70 @@ export function ForwardStepOffer({ draftId }: ForwardStepOfferProps) {
   const action = plan?.actionPlan
   return (
     <section className="rounded-2xl border p-6 flex flex-col gap-5" style={{ borderColor: 'var(--color-teal)', background: 'var(--card)' }}>
-      {action && (
+      {editing ? (
         <div className="flex flex-col gap-4">
-          <Field label={t('areaLabel')} value={action.area} />
-          <Field label={t('actionLabel')} value={action.experienceAction} />
-          <Field label={t('commitmentLabel')} value={action.commitmentQuestion} />
+          <EditField label={t('areaLabel')} value={draftPlan.area} rows={2} onChange={(v) => setDraftPlan((p) => ({ ...p, area: v }))} />
+          <EditField label={t('actionLabel')} value={draftPlan.experienceAction} rows={3} onChange={(v) => setDraftPlan((p) => ({ ...p, experienceAction: v }))} />
+          <EditField label={t('commitmentLabel')} value={draftPlan.commitmentQuestion} rows={2} onChange={(v) => setDraftPlan((p) => ({ ...p, commitmentQuestion: v }))} />
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={savePlan}
+              className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 min-h-[44px] rounded-lg transition-opacity hover:opacity-90"
+              style={{ background: 'var(--color-teal)', color: 'var(--foreground)' }}
+            >
+              <Check size={14} aria-hidden="true" />
+              {t('savePlan')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="inline-flex items-center gap-1.5 text-sm px-4 py-2 min-h-[44px] rounded-lg transition-opacity hover:opacity-80"
+              style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+            >
+              <X size={14} aria-hidden="true" />
+              {t('cancel')}
+            </button>
+          </div>
         </div>
-      )}
+      ) : (
+        <>
+          {action && (
+            <div className="flex flex-col gap-4">
+              <Field label={t('areaLabel')} value={action.area} />
+              <Field label={t('actionLabel')} value={action.experienceAction} />
+              <Field label={t('commitmentLabel')} value={action.commitmentQuestion} />
+            </div>
+          )}
 
-      {plan && plan.anchoredOn.length > 0 && (
-        <p className="text-xs italic" style={{ color: 'var(--muted-foreground)' }}>
-          {t('anchoredOn')}: {plan.anchoredOn.map((q) => `“${q}”`).join(' ')}
-        </p>
+          {plan && plan.anchoredOn.length > 0 && (
+            <p className="text-xs italic" style={{ color: 'var(--muted-foreground)' }}>
+              {t('anchoredOn')}: {plan.anchoredOn.map((q) => `“${q}”`).join(' ')}
+            </p>
+          )}
+
+          {/* Controle: a pessoa pode refinar com as próprias palavras ou gerar outra versão. */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={startEdit}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-2 min-h-[40px] rounded-lg transition-opacity hover:opacity-80"
+              style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
+            >
+              <Pencil size={13} aria-hidden="true" />
+              {t('edit')}
+            </button>
+            <button
+              type="button"
+              onClick={generate}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-2 min-h-[40px] rounded-lg transition-opacity hover:opacity-80"
+              style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
+            >
+              <RefreshCw size={13} aria-hidden="true" />
+              {t('regenerate')}
+            </button>
+          </div>
+        </>
       )}
 
       {/* Gatilho ético: a recorrência só nasce quando A PESSOA marca a data. */}
@@ -174,5 +252,32 @@ function Field({ label, value }: { label: string; value: string }) {
       </span>
       <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground)' }}>{value}</p>
     </div>
+  )
+}
+
+function EditField({
+  label,
+  value,
+  rows,
+  onChange,
+}: {
+  label: string
+  value: string
+  rows: number
+  onChange: (v: string) => void
+}) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted-foreground)' }}>
+        {label}
+      </span>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={rows}
+        className="w-full rounded-lg border px-3 py-2 text-sm leading-relaxed resize-y transition-shadow focus:outline-none focus:shadow-[0_0_0_2px_var(--color-primary)]"
+        style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+      />
+    </label>
   )
 }
