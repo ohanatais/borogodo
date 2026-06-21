@@ -111,7 +111,7 @@ function CellButton({
 }
 
 export function ActivityGrid({ cells, onCellClick }: ActivityGridProps) {
-  const desktopGrid = useMemo(() => buildGrid(cells, WEEKS_DESKTOP).reverse(), [cells])
+  const desktopGrid = useMemo(() => buildGrid(cells, WEEKS_DESKTOP).toReversed(), [cells])
   const mobileGrid  = useMemo(() => buildGrid(cells, WEEKS_MOBILE), [cells])
 
   return (

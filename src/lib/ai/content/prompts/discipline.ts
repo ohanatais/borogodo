@@ -1,4 +1,4 @@
-import type { AdjustKind, VoiceProfile } from '@/types/content'
+import type { AdjustKind, AngleKind, VoiceProfile } from '@/types/content'
 
 /** Uma evidência rotulada que o modelo deve ancorar (rótulo [E1] → texto do fato). */
 export interface EvidenceItem {
@@ -17,6 +17,10 @@ export interface ContentPromptInput {
   angle?: string | null
   /** Chip de ajuste que regera mantendo a evidência (opcional, US3). */
   adjust?: AdjustKind | null
+  /** Tipo de ângulo do post: estudo/aprendizado ou opinião/tese (opcional, 018). */
+  angleKind?: AngleKind | null
+  /** Tese a defender, usada no ângulo de opinião (opcional, 018 US2). */
+  thesis?: string | null
 }
 
 /**
@@ -113,4 +117,39 @@ export function buildEvidenceBlock(evidence: EvidenceItem[]): string {
 export function buildAdjustBlock(adjust?: AdjustKind | null): string {
   if (!adjust) return ''
   return `\n\nAJUSTE PEDIDO: ${ADJUST_INSTRUCTIONS[adjust]}`
+}
+
+const STUDY_ANGLE_INSTRUCTION = `ÂNGULO: Estudo. Conte algo que você estudou ou aprendeu, ancorado na evidência real (o que você
+fez de fato). O foco é o aprendizado concreto, não a auto-bajulação: o que mudou no seu jeito de
+pensar ou fazer, sempre colado a um fato das suas entradas. Nada de lição genérica de coach.`
+
+function opinionAngleInstruction(thesis: string | null | undefined, hasEvidence: boolean): string {
+  const thesisLine = thesis?.trim()
+    ? `\nTese a defender: "${thesis.trim()}".`
+    : ''
+  if (hasEvidence) {
+    return `ÂNGULO: Opinião. Defenda uma tese ancorada no lastro real (a evidência abaixo, incluindo o
+[Lastro] quando houver). Toda afirmação da tese precisa apontar para um fato concreto seu, nunca
+opinião vazia: cada variante deve ter evidence_refs não-vazio. Proibido "hot take", "opinião
+impopular mas", "ninguém fala sobre isso" e qualquer pose de polêmica sem substância.${thesisLine}`
+  }
+  return `ÂNGULO: Opinião. Defenda a tese na primeira pessoa, a partir da sua experiência concreta,
+sem inventar fatos nem citar números que você não tem. Mesmo sem evidência registrada, fuja da
+opinião vazia: proibido "hot take", "opinião impopular mas", "ninguém fala sobre isso" e qualquer
+pose de polêmica sem substância.${thesisLine}`
+}
+
+/**
+ * Bloco de ângulo do post (018). Vazio para o ângulo padrão (relato). Estudo reorienta as duas
+ * variantes para o aprendizado ancorado na evidência. Opinião (US2) defende uma tese ancorada no
+ * lastro, sem opinião vazia (assert 11).
+ */
+export function buildAngleBlock(input: ContentPromptInput): string {
+  if (input.angleKind === 'study') {
+    return `\n\n${STUDY_ANGLE_INSTRUCTION}`
+  }
+  if (input.angleKind === 'opinion') {
+    return `\n\n${opinionAngleInstruction(input.thesis, input.evidence.length > 0)}`
+  }
+  return ''
 }

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useTranslations } from 'next-intl'
-import { Trash2, Pencil, Check, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { Trash2, Pencil, Check, X, ChevronDown, ChevronUp, Paperclip } from 'lucide-react'
 import type { FeedItem } from '@/lib/feed/types'
 import type { EntrySource } from '@/types/entry'
 import { UsarButton } from '@/components/features/content/UsarButton'
@@ -117,7 +117,7 @@ export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
                   style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
                 >
                   <Check size={12} aria-hidden="true" />
-                  {saving ? '…' : 'Salvar'}
+                  {saving ? '…' : t('card.save')}
                 </button>
                 <button
                   type="button"
@@ -126,7 +126,7 @@ export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
                   style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
                 >
                   <X size={12} aria-hidden="true" />
-                  Cancelar
+                  {t('card.cancelEdit')}
                 </button>
               </div>
             </div>
@@ -134,6 +134,17 @@ export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
             <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
               {editValue}
             </p>
+          )}
+
+          {item.source === 'linkedin_pdf' && item.file_name && (
+            <span
+              className="inline-flex items-center gap-1.5 self-start text-xs px-2 py-0.5 rounded-full max-w-full"
+              style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+              title={item.file_name}
+            >
+              <Paperclip size={12} aria-hidden="true" className="shrink-0" />
+              <span className="truncate">{item.file_name}</span>
+            </span>
           )}
 
           {item.tags.length > 0 && (
@@ -166,7 +177,7 @@ export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
                 style={{ color: 'var(--muted-foreground)' }}
               >
                 <Pencil size={12} aria-hidden="true" />
-                Editar
+                {t('card.edit')}
               </button>
             )}
 

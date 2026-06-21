@@ -18,131 +18,135 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
   const firstName = name.trim().split(' ')[0] || name
 
   const hasData = mirror !== null
-  const specialties = mirror?.strengthThemes?.slice(0, 5) ?? []
-  const growthCount = (mirror?.skillSummary?.emergentes ?? 0) + (mirror?.skillSummary?.consistentes ?? 0)
+  const specialties = mirror?.strengthThemes?.slice(0, 3) ?? []
+  const skillSummary = mirror?.skillSummary ?? null
+  const growthCount = (skillSummary?.emergentes ?? 0) + (skillSummary?.consistentes ?? 0)
 
   return (
     <section
       aria-label={firstName ? t('ariaLabel', { name: firstName }) : t('subtitleSelf')}
-      className="rounded-xl p-6 lg:p-8 mb-6"
+      className="rounded-xl px-6 py-5 lg:px-8 lg:py-6"
       style={{ background: 'var(--color-primary)' }}
     >
-      {/* Avatar + heading */}
-      <div className="flex items-center gap-4 mb-6">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={name}
-            className="w-14 h-14 rounded-full shrink-0 object-cover"
-          />
-        ) : (
-          <div
-            className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shrink-0"
-            style={{ background: 'var(--background)', color: 'var(--color-primary)' }}
-            aria-hidden="true"
-          >
-            {firstName ? firstName[0].toUpperCase() : <User size={22} />}
-          </div>
-        )}
-        <div className="min-w-0">
-          {hasData ? (
-            <h2
-              className="font-display text-2xl lg:text-[1.75rem] font-semibold leading-tight tracking-tight"
-              style={{ color: 'var(--color-primary-fg)' }}
+      {hasData ? (
+        <>
+          {/* Identity eyebrow — name steps back so the headline can lead */}
+          <div className="flex items-center gap-3 mb-3">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={name}
+                className="w-10 h-10 rounded-full shrink-0 object-cover"
+              />
+            ) : (
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+                style={{ background: 'var(--background)', color: 'var(--color-primary)' }}
+                aria-hidden="true"
+              >
+                {firstName ? firstName[0].toUpperCase() : <User size={16} />}
+              </div>
+            )}
+            <p
+              className="text-sm font-medium min-w-0 truncate"
+              style={{ color: 'var(--color-primary-fg)', opacity: 0.85 }}
             >
               {firstName
                 ? <>{t('subtitle')} <em className="font-normal italic">{firstName}</em></>
                 : t('subtitleSelf')}
-            </h2>
-          ) : (
+            </p>
+          </div>
+
+          {/* Career pattern — the hero line. Display, but tight (2 lines on a wide column). */}
+          {mirror?.headline && (
+            <p
+              className="font-display text-xl lg:text-2xl font-semibold leading-snug tracking-tight mb-3 max-w-[54ch]"
+              style={{ color: 'var(--color-primary-fg)' }}
+            >
+              {mirror.headline}
+            </p>
+          )}
+
+          {/* Themes — light caption (max 3), wraps as text, never a stack of pills */}
+          {specialties.length > 0 && (
+            <p
+              className="text-sm leading-snug mb-4"
+              style={{ color: 'var(--color-primary-fg)', opacity: 0.75 }}
+            >
+              {specialties.join('  ·  ')}
+            </p>
+          )}
+
+          {/* Triggers row — tier counts (the growth signals) back in view, one line, + the CTA */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {skillSummary && (
+              <div className="flex flex-wrap gap-1.5">
+                {skillSummary.comprovadas > 0 && (
+                  <span
+                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={{ background: TIER_STYLE.Comprovada.chipBg, color: TIER_STYLE.Comprovada.chipText }}
+                  >
+                    <CheckCircle2 size={10} aria-hidden="true" />
+                    {t('skills.comprovadas', { count: skillSummary.comprovadas })}
+                  </span>
+                )}
+                {skillSummary.consistentes > 0 && (
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={{ background: TIER_STYLE.Consistente.chipBg, color: TIER_STYLE.Consistente.chipText }}
+                  >
+                    {t('skills.consistentes', { count: skillSummary.consistentes })}
+                  </span>
+                )}
+                {skillSummary.emergentes > 0 && (
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={{ background: TIER_STYLE.Emergente.chipBg, color: TIER_STYLE.Emergente.chipText }}
+                  >
+                    {t('skills.emergentes', { count: skillSummary.emergentes })}
+                  </span>
+                )}
+              </div>
+            )}
+            <Link
+              href="/espelho"
+              className="sm:ml-auto inline-flex items-center gap-1.5 text-sm font-semibold transition-opacity hover:opacity-70"
+              style={{ color: 'var(--color-primary-fg)' }}
+            >
+              {growthCount > 0
+                ? t('viewMirrorGrowth', { count: growthCount })
+                : t('viewMirror')}
+            </Link>
+          </div>
+        </>
+      ) : (
+        /* Empty / forming state — keeps the welcoming big heading */
+        <>
+          <div className="flex items-center gap-4 mb-5">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={name}
+                className="w-14 h-14 rounded-full shrink-0 object-cover"
+              />
+            ) : (
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shrink-0"
+                style={{ background: 'var(--background)', color: 'var(--color-primary)' }}
+                aria-hidden="true"
+              >
+                {firstName ? firstName[0].toUpperCase() : <User size={22} />}
+              </div>
+            )}
             <h2
-              className="font-display text-2xl lg:text-[1.75rem] font-semibold leading-tight tracking-tight"
+              className="font-display text-2xl lg:text-[1.75rem] font-semibold leading-tight tracking-tight min-w-0"
               style={{ color: 'var(--color-primary-fg)' }}
             >
               {firstName
                 ? <>{t('formingOf')} <em className="font-normal italic">{firstName}</em>{t('formingSuffix')}</>
                 : t('formingSelf')}
             </h2>
-          )}
-        </div>
-      </div>
-
-      {hasData ? (
-        <>
-          {/* Specialty chips */}
-          {specialties.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {specialties.map((theme) => (
-                <span
-                  key={theme}
-                  className="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap"
-                  style={{
-                    background: 'oklch(98% 0.01 320 / 0.15)',
-                    color: 'var(--color-primary-fg)',
-                  }}
-                >
-                  {theme}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Skill summary strip */}
-          {mirror?.skillSummary && (
-            <div className="mb-6 pt-2 border-t" style={{ borderColor: 'oklch(98% 0.01 320 / 0.15)' }}>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {mirror.skillSummary.comprovadas > 0 && (
-                  <span
-                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium"
-                    style={{ background: TIER_STYLE.Comprovada.chipBg, color: TIER_STYLE.Comprovada.chipText }}
-                  >
-                    <CheckCircle2 size={10} aria-hidden="true" />
-                    {t('skills.comprovadas', { count: mirror.skillSummary.comprovadas })}
-                  </span>
-                )}
-                {mirror.skillSummary.consistentes > 0 && (
-                  <span
-                    className="text-xs px-2.5 py-1 rounded-full font-medium"
-                    style={{ background: TIER_STYLE.Consistente.chipBg, color: TIER_STYLE.Consistente.chipText }}
-                  >
-                    {t('skills.consistentes', { count: mirror.skillSummary.consistentes })}
-                  </span>
-                )}
-                {mirror.skillSummary.emergentes > 0 && (
-                  <span
-                    className="text-xs px-2.5 py-1 rounded-full font-medium"
-                    style={{ background: TIER_STYLE.Emergente.chipBg, color: TIER_STYLE.Emergente.chipText }}
-                  >
-                    {t('skills.emergentes', { count: mirror.skillSummary.emergentes })}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Career pattern — display font, hero size */}
-          {mirror?.headline && (
-            <p
-              className="font-display text-lg lg:text-xl leading-snug mb-6 max-w-[44ch]"
-              style={{ color: 'var(--color-primary-fg)', opacity: 0.95 }}
-            >
-              {mirror.headline}
-            </p>
-          )}
-
-          <Link
-            href="/espelho"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold transition-opacity hover:opacity-70"
-            style={{ color: 'var(--color-primary-fg)' }}
-          >
-            {growthCount > 0
-              ? t('viewMirrorGrowth', { count: growthCount })
-              : t('viewMirror')}
-          </Link>
-        </>
-      ) : (
-        /* Empty / forming state */
-        <div>
+          </div>
           <p
             className="text-sm opacity-70"
             style={{ color: 'var(--color-primary-fg)' }}
@@ -157,7 +161,7 @@ export function BorogodoCard({ name, avatarUrl, mirror, entryCount }: BorogodoCa
           >
             Contar uma história agora ↓
           </button>
-        </div>
+        </>
       )}
     </section>
   )

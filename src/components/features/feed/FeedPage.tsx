@@ -37,6 +37,7 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
   const [nextCursor, setNextCursor] = useState<string | null>(initialPage.nextCursor)
   const [isLoading, setIsLoading] = useState(false)
   const [activityCells, setActivityCells] = useState<ActivityCell[]>([])
+  const [deleteError, setDeleteError] = useState(false)
 
   // Resync feed state when filters change — the server returned a fresh page.
   // Adjusting state during render (React's recommended pattern) instead of a
@@ -50,10 +51,12 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
   }
 
   useEffect(() => {
-    fetch('/api/feed/activity')
+    const controller = new AbortController()
+    fetch('/api/feed/activity', { signal: controller.signal })
       .then((r) => r.ok ? r.json() : [])
       .then((cells: ActivityCell[]) => setActivityCells(cells))
       .catch(() => {})
+    return () => controller.abort()
   }, [])
 
   // Deep-link "Ver registro" (autoavaliação, 019): o feed vem por SSR, então o alvo #registro-<id> já
@@ -100,12 +103,31 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
   }, [nextCursor, isLoading, searchParams])
 
   const handleDelete = useCallback(async (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id))
+    // Remoção otimista: guarda o item e sua posição para reverter se a chamada falhar.
+    let removed: { item: FeedItem; index: number } | null = null
+    setItems((prev) => {
+      const index = prev.findIndex((item) => item.id === id)
+      if (index === -1) return prev
+      removed = { item: prev[index], index }
+      return prev.filter((item) => item.id !== id)
+    })
+
+    const rollback = () => {
+      if (!removed) return
+      const { item, index } = removed
+      setItems((prev) => {
+        const next = [...prev]
+        next.splice(Math.min(index, next.length), 0, item)
+        return next
+      })
+      setDeleteError(true)
+    }
 
     try {
-      await fetch(`/api/entries/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/entries/${id}`, { method: 'DELETE' })
+      if (!res.ok) rollback()
     } catch {
-      // Silently ignore — the item is already removed from UI.
+      rollback()
     }
   }, [])
 
@@ -131,6 +153,23 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
 
   return (
     <div className="flex flex-col gap-4">
+      {deleteError && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 text-sm rounded-lg px-4 py-3"
+          style={{ background: 'var(--destructive-muted, var(--muted))', color: 'var(--destructive)' }}
+        >
+          <span>{t('deleteError')}</span>
+          <button
+            type="button"
+            onClick={() => setDeleteError(false)}
+            className="font-medium underline underline-offset-2 transition-opacity hover:opacity-80"
+          >
+            {t('deleteErrorDismiss')}
+          </button>
+        </div>
+      )}
+
       <FeedFilters currentAxis={currentAxis} />
 
       {items.length === 0 && filtersActive ? (

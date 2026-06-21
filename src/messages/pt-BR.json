@@ -318,10 +318,14 @@
     },
     "batch": {
       "summary": "Criei {n, plural, one {# entrada} other {# entradas}}",
-      "undo": "Desfazer",
+      "reviewHint": "Revise e descarte o que não quiser manter.",
+      "reviewHintCompany": "{company} · revise e descarte o que não quiser.",
+      "undo": "Desfazer tudo",
       "undoAriaLabel": "Desfazer criação de {n, plural, one {# entrada} other {# entradas}}",
+      "discard": "Descartar",
+      "discardAriaLabel": "Descartar: {title}",
       "undone": "Entradas removidas.",
-      "viewHistory": "Ver no histórico →"
+      "viewFeed": "Ver registros →"
     },
     "recording": {
       "start": "Gravar",
@@ -427,10 +431,29 @@
     "generating": "Escrevendo na sua voz...",
     "regenerate": "Gerar de novo",
     "angleLabel": "Ângulo",
+    "angles": {
+      "label": "Sobre o que é esse post?",
+      "relato": "O que fiz",
+      "study": "O que aprendi",
+      "opinion": "Opinião"
+    },
+    "opinion": {
+      "thesisLabel": "O que você quer dizer?",
+      "thesisPlaceholder": "Escreva aqui",
+      "exampleInvite": "Quer ancorar num exemplo seu?",
+      "examplePlaceholder": "Descreva o que aconteceu",
+      "generateBtn": "Gerar post"
+    },
+    "captureOffer": {
+      "question": "Salvar este exemplo?",
+      "save": "Salvar",
+      "dismiss": "Dispensar",
+      "saved": "Exemplo salvo!"
+    },
     "formats": {
       "post": "Post",
-      "impactSummary": "Resumo de impacto",
-      "miniBio": "Mini-bio",
+      "impactSummary": "Pra falar do seu trabalho",
+      "miniBio": "Sua bio",
       "selfAssessment": "Autoavaliação"
     },
     "adjust": {
@@ -479,8 +502,9 @@
       "goRegister": "Ir para o Painel"
     },
     "page": {
-      "title": "Presença",
-      "subtitle": "Os rascunhos que você gerou a partir do seu trabalho.",
+      "title": "Repertório",
+      "subtitle": "Seu histórico pronto pra usar: mostrar valor e se preparar pra um momento.",
+      "myDrafts": "Meus rascunhos",
       "empty": {
         "title": "Nenhum rascunho por aqui ainda",
         "description": "Gere seu primeiro rascunho a partir de um tema do seu Espelho ou de uma entrada sua, na sua voz."
@@ -517,8 +541,8 @@
       "arquivados": "Arquivados",
       "allFormats": "Todos",
       "post": "Post",
-      "impactSummary": "Resumo",
-      "miniBio": "Mini-bio"
+      "impactSummary": "Pra falar",
+      "miniBio": "Bio"
     },
     "deleteConfirm": {
       "title": "Excluir este rascunho?",
@@ -635,6 +659,45 @@
       "writeNext": "Escrever a autoavaliação deste ciclo"
     }
   },
+  "repertorio": {
+    "nav": "Repertório",
+    "hubs": {
+      "mostrar": {
+        "title": "Mostrar meu valor",
+        "examples": "Post pro LinkedIn, bio profissional"
+      },
+      "preparar": {
+        "title": "Me preparar pra um momento",
+        "examples": "Entrevista, conversa de avaliação, pedir aumento"
+      }
+    },
+    "cards": {
+      "post": "Post",
+      "bio": "Bio",
+      "chooseTheme": "Escolher um tema"
+    },
+    "moments": {
+      "entrevista": "Entrevista",
+      "review": "Conversa de avaliação",
+      "salario": "Pedir aumento"
+    },
+    "prepare": {
+      "heading": "Como você quer se preparar?",
+      "ready": "Quero algo pronto agora",
+      "readyHint": "Um resumo dos seus feitos com o ângulo desse momento.",
+      "talk": "Quero treinar conversando",
+      "talkHint": "Uma conversa pra ensaiar, no seu ritmo.",
+      "back": "Voltar",
+      "noTheme": "Gere seu Espelho primeiro pra eu conhecer sua trajetória."
+    },
+    "invite": {
+      "title": "Pronto pra usar?",
+      "cta": "Abrir"
+    },
+    "bio": {
+      "cta": "Criar minha bio"
+    }
+  },
   "feed": {
     "title": "Seus registros",
     "empty": {
@@ -665,6 +728,9 @@
       "collapse": "Recolher",
       "usar": "Usar",
       "delete": "Excluir",
+      "edit": "Editar",
+      "save": "Salvar",
+      "cancelEdit": "Cancelar",
       "deleteConfirm": {
         "title": "Excluir este registro?",
         "description": "Esta ação é definitiva. Rascunhos gerados a partir dele não são apagados.",
@@ -677,6 +743,8 @@
       "loading": "Carregando..."
     },
     "noDate": "Sem data",
-    "viewAll": "Ver tudo →"
+    "viewAll": "Ver tudo →",
+    "deleteError": "Não consegui excluir esse registro. Ele continua aqui.",
+    "deleteErrorDismiss": "Ok"
   }
 }

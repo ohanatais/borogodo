@@ -228,7 +228,10 @@ describe('POST /api/capture', () => {
     expect(response.status).toBe(200)
     expect(mockExtractTextFromPDF).toHaveBeenCalled()
     expect(mockExtractFromLinkedIn).toHaveBeenCalledWith('texto extraído do PDF')
-    expect(mockSaveEntries).toHaveBeenCalledWith(expect.anything(), 'user-1', [EXTRACTED_FILE_ENTRY])
+    // O nome do arquivo de origem é gravado em cada entrada (issue #42).
+    expect(mockSaveEntries).toHaveBeenCalledWith(expect.anything(), 'user-1', [
+      { ...EXTRACTED_FILE_ENTRY, file_name: 'curriculo.pdf' },
+    ])
     expect(body.entries).toHaveLength(1)
     expect(body.reflection).toBeNull()
   })

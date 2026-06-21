@@ -15,6 +15,7 @@ export interface FeedItem {
   impact: string | null
   decision: string | null
   learning: string | null
+  file_name: string | null
 }
 
 export type FeedAxis = 'created_at' | 'entry_date'

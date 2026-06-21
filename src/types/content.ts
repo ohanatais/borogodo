@@ -2,6 +2,7 @@
 // Reusados por 014 (hub) e 015 (refino de voz). Identificadores em inglês (constituição II).
 
 export type DraftFormat = 'post' | 'impact_summary' | 'mini_bio' | 'self_assessment'
+export type AngleKind = 'study' | 'opinion'
 export type SeedType = 'entry' | 'theme' | 'project' | 'period'
 // 'draft' (019): a autoavaliação é ESCRITA pela pessoa, então nasce rascunho autorado — nunca
 // 'generated' (ninguém gera). Depois segue o lifecycle existente ('copied'/'discarded').

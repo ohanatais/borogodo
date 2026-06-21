@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { PREP_MOMENTS, type PrepMoment } from '@/lib/content/intentions'
 
 const DEFAULT_STARTERS = [
   'Quais foram meus maiores projetos?',
@@ -10,23 +11,37 @@ const DEFAULT_STARTERS = [
 
 interface StarterPromptsProps {
   onSelect: (prompt: string) => void
+  /** Quando o chat abre num momento de preparação (017), usa starters próprios do momento. */
+  moment?: PrepMoment
 }
 
-export function StarterPrompts({ onSelect }: StarterPromptsProps) {
-  const [starters, setStarters] = useState<string[] | null>(null)
+export function StarterPrompts({ onSelect, moment }: StarterPromptsProps) {
+  const [starters, setStarters] = useState<string[] | null>(
+    moment ? PREP_MOMENTS[moment].starters : null
+  )
 
   useEffect(() => {
+    // No modo preparação os starters são constantes do momento — sem ida ao servidor.
+    if (moment) {
+      setStarters(PREP_MOMENTS[moment].starters)
+      return
+    }
+    let active = true
     fetch('/api/chat/starters')
       .then((r) => r.json())
       .then((data: { starters?: string[] }) => {
+        if (!active) return
         if (Array.isArray(data.starters) && data.starters.length > 0) {
           setStarters(data.starters)
         } else {
           setStarters(DEFAULT_STARTERS)
         }
       })
-      .catch(() => setStarters(DEFAULT_STARTERS))
-  }, [])
+      .catch(() => active && setStarters(DEFAULT_STARTERS))
+    return () => {
+      active = false
+    }
+  }, [moment])
 
   return (
     <div className="flex flex-col items-center gap-5 py-8 px-4">

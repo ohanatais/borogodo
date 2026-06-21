@@ -113,6 +113,24 @@ describe('validateContentRuleset — assert 10: clichê de bio (015)', () => {
   })
 })
 
+describe('validateContentRuleset — assert 11: jargão de opinião-vazia (018)', () => {
+  function asserts(text: string): number[] {
+    return validateContentRuleset(text).map((v) => v.assert)
+  }
+
+  it('pega "hot take"', () => {
+    expect(asserts('Isso é um hot take que vai incomodar')).toContain(11)
+  })
+
+  it('pega "impopular mas"', () => {
+    expect(asserts('Opinião impopular mas alguém tinha que falar')).toContain(11)
+  })
+
+  it('pega "ninguém fala sobre isso"', () => {
+    expect(asserts('Ninguém fala sobre isso mas é crucial')).toContain(11)
+  })
+})
+
 describe('validateContentRuleset — acumula múltiplas violações', () => {
   it('retorna uma violação por classe quando o texto peca em várias', () => {
     const ruim = 'Esse projeto data-driven foi simplesmente um game changer 🚀'

@@ -20,7 +20,7 @@ export function MiniTimeline({ entries, showLink = true }: MiniTimelineProps) {
   if (entries.length === 0) return null
 
   return (
-    <aside aria-label={t('title')} className="md:pl-4">
+    <aside aria-label={t('title')}>
       <SectionLabel>{t('title')}</SectionLabel>
 
       <div className="space-y-3">

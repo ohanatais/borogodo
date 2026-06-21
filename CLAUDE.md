@@ -22,13 +22,13 @@ Features mergeadas em `main` (até PR #40):
 - **014-presenca** — hub `/presenca`, gestão total do rascunho, "Usar projeto" no histórico, sugestões (PR #23)
 - **015-refino-voz** — recalibração de voz com consentimento, golden set como gate de CI, mini-bio (3º formato), migration `010` (PR #24)
 - **016-captura-v2** — captura multi-item, ressurgimento por delta, áudio via Web Speech, pergunta cirúrgica (PR #40)
-- **017-feed-registros** — feed cru de registros (`/registros`), cards colapsáveis, dois eixos de tempo, busca/filtros, grade-faísca (PR #43)
+- **017-feed-registros** — feed cru de registros (`/registros`), cards colapsáveis, busca/filtros, grade-faísca (PR #51)
 
 **Bloco da Presença (fechado):** 013 → 014 → 015 mergeadas. Migrations `009` e `010` aplicadas em
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **019-autoavaliacao** (branch: `019-autoavaliacao`) — **REDESENHADA 2026-06-19 (modelo cockpit); re-spec feita, reimplementação pendente**
+Current feature: **019-autoavaliacao** (branch: `019-autoavaliacao`) — **modelo cockpit; US1–US3 + interação de revisão IMPLEMENTADAS (PR #46, ready)**
 
 > ⚠️ **Redesign (2026-06-19):** a autoavaliação deixou de ser "IA gera 2 variações → edita/copia"
 > (herdado do post) e virou **cockpit: lembrar → refletir → planejar** — **o usuário escreve a

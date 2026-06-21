@@ -205,10 +205,14 @@
     },
     "batch": {
       "summary": "Created {n, plural, one {# entry} other {# entries}}",
-      "undo": "Undo",
+      "reviewHint": "Review and discard anything you don't want to keep.",
+      "reviewHintCompany": "{company} · review and discard anything you don't want.",
+      "undo": "Undo all",
       "undoAriaLabel": "Undo creation of {n, plural, one {# entry} other {# entries}}",
+      "discard": "Discard",
+      "discardAriaLabel": "Discard: {title}",
       "undone": "Entries removed.",
-      "viewHistory": "View in history →"
+      "viewFeed": "View entries →"
     },
     "recording": {
       "listening": "Listening…",
@@ -307,10 +311,29 @@
     "generating": "Writing in your voice...",
     "regenerate": "Generate again",
     "angleLabel": "Angle",
+    "angles": {
+      "label": "What's this post about?",
+      "relato": "What I did",
+      "study": "What I learned",
+      "opinion": "Opinion"
+    },
+    "opinion": {
+      "thesisLabel": "What do you want to say?",
+      "thesisPlaceholder": "Write here",
+      "exampleInvite": "Want to anchor it in an example of yours?",
+      "examplePlaceholder": "Describe what happened",
+      "generateBtn": "Generate post"
+    },
+    "captureOffer": {
+      "question": "Save this example?",
+      "save": "Save",
+      "dismiss": "Dismiss",
+      "saved": "Example saved!"
+    },
     "formats": {
       "post": "Post",
-      "impactSummary": "Impact summary",
-      "miniBio": "Mini-bio",
+      "impactSummary": "To talk about your work",
+      "miniBio": "Your bio",
       "selfAssessment": "Self-assessment"
     },
     "adjust": {
@@ -359,8 +382,9 @@
       "goRegister": "Go to the Panel"
     },
     "page": {
-      "title": "Presence",
-      "subtitle": "The drafts you generated from your own work.",
+      "title": "Repertoire",
+      "subtitle": "Your history ready to use: show your value and prepare for a moment.",
+      "myDrafts": "My drafts",
       "empty": {
         "title": "No drafts here yet",
         "description": "Generate your first draft from a theme in your Mirror or one of your entries, in your voice."
@@ -396,8 +420,8 @@
       "arquivados": "Archived",
       "allFormats": "All",
       "post": "Post",
-      "impactSummary": "Summary",
-      "miniBio": "Mini-bio"
+      "impactSummary": "To talk",
+      "miniBio": "Bio"
     },
     "deleteConfirm": {
       "title": "Delete this draft?",
@@ -514,6 +538,45 @@
       "writeNext": "Write this cycle’s self-assessment"
     }
   },
+  "repertorio": {
+    "nav": "Repertoire",
+    "hubs": {
+      "mostrar": {
+        "title": "Show my value",
+        "examples": "LinkedIn post, professional bio"
+      },
+      "preparar": {
+        "title": "Prepare for a moment",
+        "examples": "Interview, performance review, asking for a raise"
+      }
+    },
+    "cards": {
+      "post": "Post",
+      "bio": "Bio",
+      "chooseTheme": "Choose a theme"
+    },
+    "moments": {
+      "entrevista": "Interview",
+      "review": "Performance review",
+      "salario": "Ask for a raise"
+    },
+    "prepare": {
+      "heading": "How do you want to prepare?",
+      "ready": "I want something ready now",
+      "readyHint": "A summary of your wins angled for this moment.",
+      "talk": "I want to practice by chatting",
+      "talkHint": "A conversation to rehearse, at your own pace.",
+      "back": "Back",
+      "noTheme": "Generate your Mirror first so I know your trajectory."
+    },
+    "invite": {
+      "title": "Ready to use what you've recorded?",
+      "cta": "Open"
+    },
+    "bio": {
+      "cta": "Create my bio"
+    }
+  },
   "feed": {
     "title": "Your records",
     "empty": {
@@ -544,6 +607,9 @@
       "collapse": "Collapse",
       "usar": "Use",
       "delete": "Delete",
+      "edit": "Edit",
+      "save": "Save",
+      "cancelEdit": "Cancel",
       "deleteConfirm": {
         "title": "Delete this record?",
         "description": "This action is permanent. Drafts generated from it are not deleted.",
@@ -556,6 +622,8 @@
       "loading": "Loading..."
     },
     "noDate": "No date",
-    "viewAll": "View all →"
+    "viewAll": "View all →",
+    "deleteError": "Couldn't delete this record. It's still here.",
+    "deleteErrorDismiss": "Ok"
   }
 }
