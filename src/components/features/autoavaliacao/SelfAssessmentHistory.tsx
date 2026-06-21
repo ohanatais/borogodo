@@ -42,15 +42,30 @@ export function SelfAssessmentHistory({ items, nextReviewDate }: SelfAssessmentH
   const dateFmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric' })
 
   // Revisão agendada (do perfil) — o topo da visão; o histórico abaixo são as revisões passadas.
-  const scheduled = nextReviewDate ? (
+  // Clicável quando há uma autoavaliação para abrir: reabre a mais recente e rola até o plano.
+  const reviewLabel = nextReviewDate
+    ? t('nextReview', { date: dateFmt.format(new Date(`${nextReviewDate}T12:00:00`)) })
+    : null
+  const mostRecentId = items[0]?.id
+  const scheduled = !reviewLabel ? null : mostRecentId ? (
+    <button
+      type="button"
+      onClick={() => router.push(`${pathname}?draft=${mostRecentId}#passo-pra-frente`)}
+      className="inline-flex items-center gap-1.5 text-sm rounded-lg px-3 py-2 mb-4 transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+      style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
+    >
+      <CalendarClock size={15} aria-hidden="true" />
+      {reviewLabel}
+    </button>
+  ) : (
     <p
       className="inline-flex items-center gap-1.5 text-sm rounded-lg px-3 py-2 mb-4"
       style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
     >
       <CalendarClock size={15} aria-hidden="true" />
-      {t('nextReview', { date: dateFmt.format(new Date(`${nextReviewDate}T12:00:00`)) })}
+      {reviewLabel}
     </p>
-  ) : null
+  )
 
   if (items.length === 0) {
     return (

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Wand2, HelpCircle, Check, X, Save, Target } from 'lucide-react'
 import type { SentenceStemAnchors } from '@/lib/autoavaliacao/sentenceStems'
 import type { AssistSection } from '@/lib/ai/content/assist'
+import type { ForwardStep } from '@/types/content'
 import { ForwardStepOffer } from './ForwardStepOffer'
 
 /** Uma seção do andaime. `key` indexa o i18n (sections/stems); `api` é o parâmetro da rota de assist. */
@@ -40,6 +41,8 @@ interface AssessmentEditorProps {
   /** Reabertura (US3): id e seções de uma autoavaliação já salva, para editar em vez de criar nova. */
   initialDraftId?: string
   initialSections?: Sections
+  /** Passo-pra-frente já gerado (reabertura) — mostra o plano salvo, não a oferta de um novo. */
+  initialForwardStep?: ForwardStep
 }
 
 /**
@@ -48,7 +51,7 @@ interface AssessmentEditorProps {
  * pessoa escreve, vira o rascunho) — nunca preenche sozinha, nunca dá nota. Salva como rascunho autorado
  * (`status='draft'`), isolado do espelho.
  */
-export function AssessmentEditor({ stems, seedRef, initialDraftId, initialSections }: AssessmentEditorProps) {
+export function AssessmentEditor({ stems, seedRef, initialDraftId, initialSections, initialForwardStep }: AssessmentEditorProps) {
   const t = useTranslations('autoavaliacao')
   const locale = useLocale()
   // timeZone UTC: evita o off-by-one de datas date-only em fusos negativos (ver YearInFactsRecap).
@@ -312,8 +315,9 @@ export function AssessmentEditor({ stems, seedRef, initialDraftId, initialSectio
         )}
       </div>
 
-      {/* Passo-pra-frente (US2): oferta única após salvar, ancorada no que a pessoa escreveu. */}
-      {savedDraftId && <ForwardStepOffer draftId={savedDraftId} />}
+      {/* Passo-pra-frente (US2): oferta única após salvar, ancorada no que a pessoa escreveu. Na
+          reabertura com plano salvo, mostra o plano (não a oferta). */}
+      {savedDraftId && <ForwardStepOffer draftId={savedDraftId} initialPlan={initialForwardStep} />}
     </div>
   )
 }

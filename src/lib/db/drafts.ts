@@ -218,18 +218,18 @@ export async function getSelfAssessment(
   supabase: SupabaseServerClient,
   userId: string,
   draftId: string
-): Promise<{ body: string; seedRef: string | null } | null> {
+): Promise<{ body: string; seedRef: string | null; forwardStep: ForwardStep | null } | null> {
   const { data } = await supabase
     .from('drafts')
-    .select('body, seed_ref')
+    .select('body, seed_ref, qa')
     .eq('id', draftId)
     .eq('user_id', userId)
     .eq('format', 'self_assessment')
     .maybeSingle()
 
   if (!data) return null
-  const row = data as { body: string; seed_ref: string | null }
-  return { body: row.body, seedRef: row.seed_ref }
+  const row = data as { body: string; seed_ref: string | null; qa: { forwardStep?: ForwardStep } | null }
+  return { body: row.body, seedRef: row.seed_ref, forwardStep: row.qa?.forwardStep ?? null }
 }
 
 /**

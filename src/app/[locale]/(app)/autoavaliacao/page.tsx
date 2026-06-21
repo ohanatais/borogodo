@@ -8,6 +8,7 @@ import { buildSentenceStems } from '@/lib/autoavaliacao/sentenceStems'
 import { getNextReviewDate } from '@/lib/panel/getReviewCycleSignal'
 import { parsePeriodSeedRef, serializePeriodSeedRef } from '@/lib/content/period'
 import { parseSelfAssessmentSections } from '@/components/features/content/selfAssessmentSections'
+import type { ForwardStep } from '@/types/content'
 import { PeriodPicker } from '@/components/features/autoavaliacao/PeriodPicker'
 import { YearInFactsRecap } from '@/components/features/autoavaliacao/YearInFactsRecap'
 import { AssessmentEditor } from '@/components/features/autoavaliacao/AssessmentEditor'
@@ -83,6 +84,7 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
           to={period.to}
           initialDraftId={reopened ? draft : undefined}
           initialSections={reopened ? sectionsFromBody(reopened.body) : undefined}
+          initialForwardStep={reopened?.forwardStep ?? undefined}
         />
       ) : (
         <>
@@ -110,10 +112,11 @@ interface CockpitForPeriodProps {
   to: string
   initialDraftId?: string
   initialSections?: EditorSections
+  initialForwardStep?: ForwardStep
 }
 
 /** Carrega o recap do intervalo e monta a cabine (escrita nova ou reabertura para edição). */
-async function CockpitForPeriod({ userId, from, to, initialDraftId, initialSections }: CockpitForPeriodProps) {
+async function CockpitForPeriod({ userId, from, to, initialDraftId, initialSections, initialForwardStep }: CockpitForPeriodProps) {
   const supabase = await createServerClient()
   const recap = await loadPeriodRecap(supabase, userId, from, to)
   const stems = buildSentenceStems(recap.items)
@@ -122,7 +125,13 @@ async function CockpitForPeriod({ userId, from, to, initialDraftId, initialSecti
   return (
     <div className="flex flex-col gap-8">
       <YearInFactsRecap items={recap.items} isLimited={recap.isLimited} from={from} to={to} />
-      <AssessmentEditor stems={stems} seedRef={seedRef} initialDraftId={initialDraftId} initialSections={initialSections} />
+      <AssessmentEditor
+        stems={stems}
+        seedRef={seedRef}
+        initialDraftId={initialDraftId}
+        initialSections={initialSections}
+        initialForwardStep={initialForwardStep}
+      />
     </div>
   )
 }

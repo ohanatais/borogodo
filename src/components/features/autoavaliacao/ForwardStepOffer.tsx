@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Sparkles, Check, CalendarClock, Pencil, RefreshCw, X } from 'lucide-react'
 import type { ForwardStep } from '@/types/content'
@@ -8,21 +8,32 @@ import type { ForwardStep } from '@/types/content'
 interface ForwardStepOfferProps {
   /** O draft da autoavaliação já salva — insumo do passo-pra-frente. */
   draftId: string
+  /** Plano já gerado (reabertura): mostra ele direto, em vez da oferta de um novo. */
+  initialPlan?: ForwardStep
 }
 
 type Phase = 'offer' | 'generating' | 'done' | 'error' | 'declined'
+
+/** Âncora para o banner de "próxima revisão" rolar até o plano ao reabrir a autoavaliação. */
+const ANCHOR_ID = 'passo-pra-frente'
 
 /**
  * Passo-pra-frente (019, US2, T030). UMA oferta opcional, in-flow, ancorada no que a pessoa ESCREVEU.
  * Recusar = some sem nag (gatilho ético). Aceitar gera o plano (GROW + 70-20-10); definir a data de
  * revisão grava a recorrência (o único gatilho do convite de painel).
  */
-export function ForwardStepOffer({ draftId }: ForwardStepOfferProps) {
+export function ForwardStepOffer({ draftId, initialPlan }: ForwardStepOfferProps) {
   const t = useTranslations('autoavaliacao.forwardStep')
-  const [phase, setPhase] = useState<Phase>('offer')
-  const [plan, setPlan] = useState<ForwardStep | null>(null)
+  const [phase, setPhase] = useState<Phase>(initialPlan ? 'done' : 'offer')
+  const [plan, setPlan] = useState<ForwardStep | null>(initialPlan ?? null)
   const [reviewDate, setReviewDate] = useState('')
   const [dateSaved, setDateSaved] = useState(false)
+
+  // Rola até o plano quando a reabertura veio do banner "próxima revisão" (#passo-pra-frente).
+  useEffect(() => {
+    if (window.location.hash !== `#${ANCHOR_ID}`) return
+    document.getElementById(ANCHOR_ID)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+  }, [])
   /** Edição inline do plano: a pessoa pode refinar com as próprias palavras. */
   const [editing, setEditing] = useState(false)
   const [draftPlan, setDraftPlan] = useState({ area: '', experienceAction: '', commitmentQuestion: '' })
@@ -87,7 +98,7 @@ export function ForwardStepOffer({ draftId }: ForwardStepOfferProps) {
 
   if (phase === 'offer') {
     return (
-      <section className="rounded-2xl px-5 py-5" style={{ background: 'var(--color-lilas-nevoa)' }}>
+      <section id={ANCHOR_ID} className="scroll-mt-20 rounded-2xl px-5 py-5" style={{ background: 'var(--color-lilas-nevoa)' }}>
         <p className="text-base font-medium" style={{ color: 'var(--foreground)' }}>
           {t('offer')}
         </p>
@@ -141,7 +152,7 @@ export function ForwardStepOffer({ draftId }: ForwardStepOfferProps) {
 
   const action = plan?.actionPlan
   return (
-    <section className="rounded-2xl border p-6 flex flex-col gap-5" style={{ borderColor: 'var(--color-teal)', background: 'var(--card)' }}>
+    <section id={ANCHOR_ID} className="scroll-mt-20 rounded-2xl border p-6 flex flex-col gap-5" style={{ borderColor: 'var(--color-teal)', background: 'var(--card)' }}>
       {editing ? (
         <div className="flex flex-col gap-4">
           <EditField label={t('areaLabel')} value={draftPlan.area} rows={2} onChange={(v) => setDraftPlan((p) => ({ ...p, area: v }))} />
