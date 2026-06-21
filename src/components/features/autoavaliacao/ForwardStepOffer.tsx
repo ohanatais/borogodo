@@ -28,6 +28,8 @@ export function ForwardStepOffer({ draftId, initialPlan }: ForwardStepOfferProps
   const [plan, setPlan] = useState<ForwardStep | null>(initialPlan ?? null)
   const [reviewDate, setReviewDate] = useState('')
   const [dateSaved, setDateSaved] = useState(false)
+  // Revisão é compromisso futuro: o input só aceita de amanhã em diante. Calculado uma vez (puro no render).
+  const [minReviewDate] = useState(() => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10))
 
   // Rola até o plano quando a reabertura veio do banner "próxima revisão" (#passo-pra-frente).
   useEffect(() => {
@@ -151,8 +153,6 @@ export function ForwardStepOffer({ draftId, initialPlan }: ForwardStepOfferProps
   }
 
   const action = plan?.actionPlan
-  // Revisão é compromisso futuro: o input só aceita de amanhã em diante (marcar hoje não dispara o ciclo).
-  const minReviewDate = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10)
   return (
     <section id={ANCHOR_ID} className="scroll-mt-20 rounded-2xl border p-6 flex flex-col gap-5" style={{ borderColor: 'var(--color-teal)', background: 'var(--card)' }}>
       {editing ? (
