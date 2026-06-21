@@ -103,4 +103,33 @@ describe('MirrorContent', () => {
     render(<MirrorContent snapshot={snapshot} />)
     expect(screen.getByTestId('mirror-feedback')).toBeInTheDocument()
   })
+
+  it('017: "Criar minha bio" gera uma mini-bio a partir do tema de força principal', () => {
+    let captured: { seedType?: string; seedRef?: string; formats?: string[] } | null = null
+    const listener = (e: Event) => {
+      captured = (e as CustomEvent<typeof captured>).detail
+    }
+    window.addEventListener('borogodo:presenca-open', listener)
+    render(<MirrorContent snapshot={snapshot} />)
+
+    screen.getByRole('button', { name: /bio\.cta/ }).click()
+    window.removeEventListener('borogodo:presenca-open', listener)
+
+    expect(captured).toEqual({
+      seedType: 'theme',
+      seedRef: 'Clareza',
+      seedSummary: 'Clareza',
+      formats: ['mini_bio'],
+    })
+  })
+
+  it('017: sem temas de força, a entrada de bio não aparece', () => {
+    const noThemes: MirrorSnapshot = {
+      ...snapshot,
+      mirror: { ...snapshot.mirror, strength_themes: [] },
+      strength_themes: [],
+    }
+    render(<MirrorContent snapshot={noThemes} />)
+    expect(screen.queryByRole('button', { name: /bio\.cta/ })).not.toBeInTheDocument()
+  })
 })

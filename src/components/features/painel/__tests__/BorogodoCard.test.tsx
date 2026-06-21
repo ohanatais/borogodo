@@ -16,15 +16,15 @@ describe('BorogodoCard', () => {
     expect(screen.getByText('A')).toBeInTheDocument()
   })
 
-  it('renders first name in heading', () => {
+  it('renders first name in the identity eyebrow', () => {
     render(<BorogodoCard name="Ana Silva" mirror={MIRROR} entryCount={5} />)
-    const heading = screen.getByRole('heading', { level: 2 })
-    expect(heading.textContent).toContain('Ana')
+    // hasData no longer uses an h2 — the name steps back into a caption so the headline leads
+    expect(screen.getByText('Ana')).toBeInTheDocument()
   })
 
-  it('renders specialty chips from strengthThemes when hasData', () => {
+  it('renders strength themes as a light caption when hasData', () => {
     render(<BorogodoCard name="Ana" mirror={MIRROR} entryCount={5} />)
-    expect(screen.getByText('liderança')).toBeInTheDocument()
+    expect(screen.getByText(/liderança/)).toBeInTheDocument()
   })
 
   it('renders the career pattern headline', () => {
@@ -50,8 +50,9 @@ describe('BorogodoCard', () => {
 
   it('shows mirror content when mirror is present, regardless of entryCount', () => {
     render(<BorogodoCard name="Ana" mirror={MIRROR} entryCount={2} />)
-    const heading = screen.getByRole('heading', { level: 2 })
-    expect(heading.textContent).not.toMatch(/formingOf/)
+    // hasData renders the headline, not the forming heading
+    expect(screen.getByText('Você estabiliza times em momentos críticos.')).toBeInTheDocument()
+    expect(screen.queryByText('formingSubtitle')).not.toBeInTheDocument()
   })
 
   it('shows view-mirror link when mirror is present, regardless of entryCount', () => {
@@ -64,16 +65,16 @@ describe('BorogodoCard', () => {
     expect(screen.getByRole('link')).toBeInTheDocument()
   })
 
-  it('limits specialty chips to 5', () => {
+  it('limits strength themes to 3', () => {
     const mirror: PanelMirror = {
       headline: null,
-      strengthThemes: ['a', 'b', 'c', 'd', 'e', 'f'],
+      strengthThemes: ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta'],
       skillSummary: null,
     }
     render(<BorogodoCard name="Ana" mirror={mirror} entryCount={5} />)
-    // specialty chips: slice(0,5) → a–e visible; 'f' not shown
-    expect(screen.getByText('e')).toBeInTheDocument()
-    expect(screen.queryByText('f')).not.toBeInTheDocument()
+    // themes are joined into one caption: slice(0,3) → alpha · beta · gamma; 'delta' onward dropped
+    expect(screen.getByText('alpha · beta · gamma')).toBeInTheDocument()
+    expect(screen.queryByText(/delta/)).not.toBeInTheDocument()
   })
 
   it('renders user icon when name is empty', () => {

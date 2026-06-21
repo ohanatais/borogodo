@@ -96,6 +96,7 @@ export function GenerateSheet() {
             format: fmt,
             seedType: seed.seedType,
             seedRef: seed.seedRef,
+            ...(seed.angle ? { angle: seed.angle } : {}),
             ...(adjust ? { adjust } : {}),
             ...(angle ? { angleKind: angle } : {}),
             ...(opinion?.thesis.trim() ? { thesis: opinion.thesis.trim() } : {}),
@@ -329,6 +330,7 @@ export function GenerateSheet() {
                       index={i}
                       format={format}
                       seed={{ seedType: detail.seedType, seedRef: detail.seedRef }}
+                      moment={detail.moment}
                       existingDraftId={mode === 'resume' && existingDraftId ? existingDraftId : undefined}
                     />
                   ))}

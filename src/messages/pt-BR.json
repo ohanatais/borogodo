@@ -501,8 +501,9 @@
       "goRegister": "Ir para o Painel"
     },
     "page": {
-      "title": "Presença",
-      "subtitle": "Os rascunhos que você gerou a partir do seu trabalho.",
+      "title": "Repertório",
+      "subtitle": "Seu histórico pronto pra usar: mostrar valor e se preparar pra um momento.",
+      "myDrafts": "Meus rascunhos",
       "empty": {
         "title": "Nenhum rascunho por aqui ainda",
         "description": "Gere seu primeiro rascunho a partir de um tema do seu Espelho ou de uma entrada sua, na sua voz."
@@ -554,6 +555,45 @@
     "resumeTitle": "Retomar rascunho",
     "useProject": "Usar este projeto",
     "projectSeed": "projeto {name} ({count, plural, one {# entrada} other {# entradas}})"
+  },
+  "repertorio": {
+    "nav": "Repertório",
+    "hubs": {
+      "mostrar": {
+        "title": "Mostrar meu valor",
+        "examples": "Post pro LinkedIn, bio profissional"
+      },
+      "preparar": {
+        "title": "Me preparar pra um momento",
+        "examples": "Entrevista, conversa de avaliação, pedir aumento"
+      }
+    },
+    "cards": {
+      "post": "Post",
+      "bio": "Bio",
+      "chooseTheme": "Escolher um tema"
+    },
+    "moments": {
+      "entrevista": "Entrevista",
+      "review": "Conversa de avaliação",
+      "salario": "Pedir aumento"
+    },
+    "prepare": {
+      "heading": "Como você quer se preparar?",
+      "ready": "Quero algo pronto agora",
+      "readyHint": "Um resumo dos seus feitos com o ângulo desse momento.",
+      "talk": "Quero treinar conversando",
+      "talkHint": "Uma conversa pra ensaiar, no seu ritmo.",
+      "back": "Voltar",
+      "noTheme": "Gere seu Espelho primeiro pra eu conhecer sua trajetória."
+    },
+    "invite": {
+      "title": "Pronto pra usar?",
+      "cta": "Abrir"
+    },
+    "bio": {
+      "cta": "Criar minha bio"
+    }
   },
   "feed": {
     "title": "Seus registros",

@@ -42,6 +42,15 @@ export interface SkillSummary {
   total: number
 }
 
+/** Conquistas com impacto preenchido — alimentam o TrajectoryHighlights (redesign 017 do Painel). */
+export interface HighlightEntry {
+  id: string
+  what_i_did: string
+  impact: string | null
+  metric: string | null
+  entry_date: string | null
+}
+
 export interface PanelMirror {
   headline: string | null
   strengthThemes: string[]
@@ -57,6 +66,7 @@ export interface PanelData {
   daysSince: number | null
   recentEntries: RecentEntryRow[]
   timelineEntries: TimelineEntry[]
+  highlights: HighlightEntry[]
   mirror: PanelMirror | null
   insight: ProactiveInsight | null
   composerPlaceholder: string
@@ -89,6 +99,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     mirrorRes,
     insightRes,
     timelineRes,
+    highlightsRes,
     oldestByCreatedRes,
   ] = await Promise.all([
     supabase.from('profiles').select('name, avatar_url, last_panel_seen_at').eq('id', userId).single(),
@@ -137,6 +148,13 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .not('role_title', 'is', null)
       .order('entry_date', { ascending: false })
       .limit(10),
+    supabase
+      .from('entries')
+      .select('id, what_i_did, impact, metric, entry_date')
+      .eq('user_id', userId)
+      .not('impact', 'is', null)
+      .order('entry_date', { ascending: false })
+      .limit(3),
     // Entrada mais antiga por created_at — alimenta o ramo "old-victory" do sinal
     // de retorno. A mais nova já vem em `recentRes`, então não precisamos varrer
     // as 50 últimas entradas só para computar o sinal.
@@ -227,6 +245,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     daysSince,
     recentEntries,
     timelineEntries,
+    highlights: (highlightsRes.data ?? []) as HighlightEntry[],
     mirror,
     insight: (insightRes.data as ProactiveInsight | null) ?? null,
     composerPlaceholder: t(prompt.key, prompt.values),

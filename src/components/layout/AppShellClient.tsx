@@ -30,7 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'espelho',    label: 'Espelho',         icon: <Sparkles size={20} />,          path: '/espelho'    },
   { id: 'registros',  label: 'Registros',       icon: <LayoutList size={20} />,        path: '/registros'  },
   { id: 'historico',  label: 'Linha do Tempo',  icon: <GitCommitVertical size={20} />, path: '/historico'  },
-  { id: 'presenca',   label: 'Presença',        icon: <PenLine size={20} />,           path: '/presenca'   },
+  { id: 'presenca',   label: 'Repertório',      icon: <PenLine size={20} />,           path: '/presenca'   },
 ]
 
 interface AppShellClientProps {

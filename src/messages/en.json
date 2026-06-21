@@ -381,8 +381,9 @@
       "goRegister": "Go to the Panel"
     },
     "page": {
-      "title": "Presence",
-      "subtitle": "The drafts you generated from your own work.",
+      "title": "Repertoire",
+      "subtitle": "Your history ready to use: show your value and prepare for a moment.",
+      "myDrafts": "My drafts",
       "empty": {
         "title": "No drafts here yet",
         "description": "Generate your first draft from a theme in your Mirror or one of your entries, in your voice."
@@ -434,6 +435,45 @@
     "resumeTitle": "Resume draft",
     "useProject": "Use this project",
     "projectSeed": "project {name} ({count, plural, one {# entry} other {# entries}})"
+  },
+  "repertorio": {
+    "nav": "Repertoire",
+    "hubs": {
+      "mostrar": {
+        "title": "Show my value",
+        "examples": "LinkedIn post, professional bio"
+      },
+      "preparar": {
+        "title": "Prepare for a moment",
+        "examples": "Interview, performance review, asking for a raise"
+      }
+    },
+    "cards": {
+      "post": "Post",
+      "bio": "Bio",
+      "chooseTheme": "Choose a theme"
+    },
+    "moments": {
+      "entrevista": "Interview",
+      "review": "Performance review",
+      "salario": "Ask for a raise"
+    },
+    "prepare": {
+      "heading": "How do you want to prepare?",
+      "ready": "I want something ready now",
+      "readyHint": "A summary of your wins angled for this moment.",
+      "talk": "I want to practice by chatting",
+      "talkHint": "A conversation to rehearse, at your own pace.",
+      "back": "Back",
+      "noTheme": "Generate your Mirror first so I know your trajectory."
+    },
+    "invite": {
+      "title": "Ready to use what you've recorded?",
+      "cta": "Open"
+    },
+    "bio": {
+      "cta": "Create my bio"
+    }
   },
   "feed": {
     "title": "Your records",

@@ -74,13 +74,16 @@ describe('T039 — getPanelData US6', () => {
     expect('title' in firstEntry || firstEntry).toBeTruthy()
   })
 
-  it('PanelData não tem campo highlights', async () => {
+  // O redesign do Painel (017-repertorio) reintroduz o TrajectoryHighlights, então `highlights`
+  // volta ao PanelData (conquistas com impacto, até 3) — convivendo com o recentEntries do feed.
+  it('PanelData tem campo highlights (array)', async () => {
     const { getPanelData } = await import('../getPanelData')
     const supabase = makeSupabase()
 
     const data = await getPanelData(supabase as never, 'user-1')
 
-    expect(data).not.toHaveProperty('highlights')
+    expect(data).toHaveProperty('highlights')
+    expect(Array.isArray(data.highlights)).toBe(true)
   })
 
   it('shape correto: tem recentEntries, status, entryCount', async () => {

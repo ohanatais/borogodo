@@ -5,6 +5,7 @@ import { getProfile } from '@/lib/db/profiles'
 import { buildCareerChatSystemPrompt } from '@/lib/ai/chat/prompts/careerChat'
 import { logger } from '@/lib/log'
 import type { Entry } from '@/types/entry'
+import type { PrepMoment } from '@/lib/content/intentions'
 import type { createServerClient } from '@/lib/db/supabase/server'
 
 export type ChatMessage = { role: 'user' | 'assistant'; content: string }
@@ -32,8 +33,10 @@ export interface MarcoPreview {
 }
 
 export interface ChatContext {
-  type: 'espelho' | 'historico' | 'empresa' | 'entry'
+  type: 'espelho' | 'historico' | 'empresa' | 'entry' | 'preparacao'
   entityId?: string
+  /** Momento de preparação (017) quando type === 'preparacao'. */
+  moment?: PrepMoment
 }
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
@@ -173,6 +176,7 @@ export async function answerCareerQuestion(
     relevantEntries,
     companyEntries,
     correctionEntry,
+    prepMoment: context?.type === 'preparacao' ? context.moment : undefined,
   })
 
   const apiMessages: Anthropic.MessageParam[] = [

@@ -1,10 +1,12 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { BorogodoCard } from '@/components/features/painel/BorogodoCard'
+import { UsarInvite } from '@/components/features/painel/UsarInvite'
 import { ProactiveInsightCard } from '@/components/features/painel/ProactiveInsightCard'
 import { PanelEmptyState } from '@/components/features/painel/PanelEmptyState'
 import { MiniTimeline } from '@/components/features/painel/MiniTimeline'
 import { RecentEntries } from '@/components/features/painel/RecentEntries'
+import { TrajectoryHighlights } from '@/components/features/painel/TrajectoryHighlights'
 import { getPanelData } from '@/lib/panel/getPanelData'
 
 export default async function PainelPage() {
@@ -19,28 +21,34 @@ export default async function PainelPage() {
   const name = data.name || ''
 
   return (
-    <div className="px-6 py-4 max-w-[980px] mx-auto w-full">
+    <div className="px-5 lg:px-9 pt-4 pb-36 lg:pb-40 max-w-[980px] mx-auto w-full">
       {data.entryCount === 0 ? (
         <PanelEmptyState />
       ) : (
-        <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-8 lg:items-start">
-          {/* Main column */}
-          <div className="min-w-0">
-            <BorogodoCard
-              name={name}
-              avatarUrl={data.avatarUrl}
-              mirror={data.mirror}
-              entryCount={data.entryCount}
-            />
-            <RecentEntries entries={data.recentEntries} />
-            <ProactiveInsightCard insight={data.insight} />
-          </div>
+        <>
+          {/* Identity hero — slim, the headline is the star */}
+          <BorogodoCard
+            name={name}
+            avatarUrl={data.avatarUrl}
+            mirror={data.mirror}
+            entryCount={data.entryCount}
+          />
 
-          {/* MiniTimeline — sticky sidebar on lg+, stacked below on mobile */}
-          <div className="mt-6 lg:mt-0 lg:sticky lg:top-4">
-            <MiniTimeline entries={data.timelineEntries} />
+          <div className="mt-6 lg:grid lg:grid-cols-[1fr_300px] lg:gap-8 lg:items-start">
+            {/* Main — the proof: concrete wins, the proactive insight, then recent activity → feed */}
+            <div className="min-w-0 flex flex-col gap-6">
+              <TrajectoryHighlights highlights={data.highlights} />
+              <ProactiveInsightCard insight={data.insight} />
+              <RecentEntries entries={data.recentEntries} />
+            </div>
+
+            {/* Rail — action first (Repertório), context second (timeline). Sticky on lg+ */}
+            <aside className="mt-6 lg:mt-0 lg:sticky lg:top-4 flex flex-col gap-6">
+              <UsarInvite />
+              <MiniTimeline entries={data.timelineEntries} />
+            </aside>
           </div>
-        </div>
+        </>
       )}
     </div>
   )

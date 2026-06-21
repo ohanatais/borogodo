@@ -1,6 +1,7 @@
 import type { Profile } from '@/types/profile'
 import type { MirrorSnapshot } from '@/types/mirror'
 import type { Entry } from '@/types/entry'
+import type { PrepMoment } from '@/lib/content/intentions'
 
 export interface CareerChatContext {
   profile: Profile | null
@@ -8,6 +9,18 @@ export interface CareerChatContext {
   relevantEntries: Entry[]
   companyEntries: Entry[]
   correctionEntry?: Entry | null
+  /** Momento de preparação (017): quando presente, enquadra a conversa para ensaiar aquele momento. */
+  prepMoment?: PrepMoment
+}
+
+/** Enquadramento injetado quando a conversa abre num momento de preparação (017). */
+const PREP_MOMENT_FRAMING: Record<PrepMoment, string> = {
+  entrevista:
+    'A pessoa está se preparando para uma ENTREVISTA DE EMPREGO. Ajude-a a contar os próprios feitos com naturalidade e confiança, sem soar arrogante. Sugira como estruturar respostas (situação, o que fez, resultado) usando as entradas reais dela. Faça perguntas de treino quando útil.',
+  review:
+    'A pessoa está se preparando para uma CONVERSA DE AVALIAÇÃO DE DESEMPENHO com o gestor. Ajude-a a reunir evidências de impacto e evolução, e a defender o próprio valor (inclusive promoção) com base nas entradas reais dela.',
+  salario:
+    'A pessoa está se preparando para PEDIR UM AUMENTO ou negociar salário. Ajude-a a construir o argumento com evidências concretas do valor entregue, números quando houver, e a antecipar objeções. Use as entradas reais dela.',
 }
 
 export function buildCareerChatSystemPrompt(ctx: CareerChatContext): string {
@@ -95,6 +108,13 @@ Modo de correção ativo:
   if (ctx.relevantEntries.length === 0 && !ctx.latestMirror) {
     lines.push(`
 AVISO: Esta pessoa ainda não tem registros de carreira. Seja honesto e sugira que ela comece a registrar histórias para que você possa ajudá-la melhor.`)
+  }
+
+  if (ctx.prepMoment) {
+    lines.push(`
+MODO PREPARAÇÃO (foco desta conversa):
+${PREP_MOMENT_FRAMING[ctx.prepMoment]}
+Conduza a conversa com esse objetivo em mente, sempre ancorado nas entradas reais da pessoa.`)
   }
 
   lines.push(`
