@@ -39,6 +39,10 @@ export async function POST(request: Request): Promise<NextResponse> {
   const parsed = reviewCycleSchema.safeParse(body)
   if (!parsed.success) return jsonError('invalid_request', 400)
 
+  // Revisão é compromisso futuro: hoje ou no passado não é aceito (e marcar hoje nem dispararia o ciclo).
+  const today = new Date().toISOString().slice(0, 10)
+  if (parsed.data.anchor <= today) return jsonError('invalid_request', 400)
+
   try {
     const { error } = await supabase
       .from('profiles')

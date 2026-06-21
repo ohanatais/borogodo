@@ -151,6 +151,8 @@ export function ForwardStepOffer({ draftId, initialPlan }: ForwardStepOfferProps
   }
 
   const action = plan?.actionPlan
+  // Revisão é compromisso futuro: o input só aceita de amanhã em diante (marcar hoje não dispara o ciclo).
+  const minReviewDate = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10)
   return (
     <section id={ANCHOR_ID} className="scroll-mt-20 rounded-2xl border p-6 flex flex-col gap-5" style={{ borderColor: 'var(--color-teal)', background: 'var(--card)' }}>
       {editing ? (
@@ -233,6 +235,7 @@ export function ForwardStepOffer({ draftId, initialPlan }: ForwardStepOfferProps
               <input
                 type="date"
                 value={reviewDate}
+                min={minReviewDate}
                 onChange={(e) => setReviewDate(e.target.value)}
                 className="min-h-[48px] rounded-lg border px-3 text-base"
                 style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
