@@ -65,9 +65,6 @@ export function ForwardStepOffer({ draftId }: ForwardStepOfferProps) {
         <p className="text-base font-medium" style={{ color: 'var(--foreground)' }}>
           {t('offer')}
         </p>
-        <p className="text-sm mt-1" style={{ color: 'var(--color-lilas-nevoa-text)' }}>
-          {t('offerHint')}
-        </p>
         <div className="flex flex-wrap gap-2 mt-4">
           <button
             type="button"
