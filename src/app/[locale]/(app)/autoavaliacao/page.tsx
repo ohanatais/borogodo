@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
-import { listDrafts } from '@/lib/db/drafts'
+import { getSelfAssessment, listDrafts } from '@/lib/db/drafts'
 import { loadPeriodRecap } from '@/lib/autoavaliacao/periodRecap'
 import { buildSentenceStems } from '@/lib/autoavaliacao/sentenceStems'
 import { parsePeriodSeedRef, serializePeriodSeedRef } from '@/lib/content/period'
+import { parseSelfAssessmentSections } from '@/components/features/content/selfAssessmentSections'
 import { PeriodPicker } from '@/components/features/autoavaliacao/PeriodPicker'
 import { YearInFactsRecap } from '@/components/features/autoavaliacao/YearInFactsRecap'
 import { AssessmentEditor } from '@/components/features/autoavaliacao/AssessmentEditor'
@@ -15,15 +16,26 @@ export const metadata: Metadata = {
   title: 'Autoavaliação | Borogodó',
 }
 
+type EditorSections = { entregas: string; impacto: string; evolucao: string; pontosADesenvolver: string }
+
 interface AutoavaliacaoPageProps {
-  searchParams: Promise<{ from?: string; to?: string }>
+  searchParams: Promise<{ from?: string; to?: string; draft?: string }>
+}
+
+/** Reconstrói as 4 seções do editor a partir do `body` salvo (cabeçalhos "Entregas:" etc). */
+function sectionsFromBody(body: string): EditorSections {
+  const out: EditorSections = { entregas: '', impacto: '', evolucao: '', pontosADesenvolver: '' }
+  for (const section of parseSelfAssessmentSections(body)) {
+    if (section.key) out[section.key] = section.body
+  }
+  return out
 }
 
 /**
- * Cabine da autoavaliação (019, US1, modelo cockpit). RSC: sem período (`?from=&to=`), mostra o seletor
- * + o histórico; com período válido, carrega o recap DETERMINÍSTICO ("o seu ano, em fatos") e abre a
- * cabine de escrita. A pessoa ESCREVE; a IA só ancora. O recap colhe de `entries` (capturas reais),
- * isolado do espelho.
+ * Cabine da autoavaliação (019, modelo cockpit). RSC: sem período, mostra o seletor + o histórico; com
+ * período válido, carrega o recap determinístico e abre a cabine de escrita; com `?draft=<id>`, REABRE
+ * a autoavaliação salva para edição (US3), na própria cabine (nunca no fluxo de post). A pessoa ESCREVE;
+ * a IA só ancora. O recap colhe de `entries`, isolado do espelho.
  */
 export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoPageProps) {
   const supabase = await createServerClient()
@@ -34,14 +46,18 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
   if (!user) redirect('/login')
 
   const t = await getTranslations('autoavaliacao')
-  const { from, to } = await searchParams
-  const period = from && to ? parsePeriodSeedRef(serializePeriodSeedRef(from, to)) : null
+  const { from, to, draft } = await searchParams
+
+  // Reabertura (US3): carrega o draft e resolve o período a partir do seedRef salvo.
+  const reopened = draft ? await getSelfAssessment(supabase, user.id, draft) : null
+  const reopenedPeriod = reopened?.seedRef ? parsePeriodSeedRef(reopened.seedRef) : null
+  const period = reopenedPeriod ?? (from && to ? parsePeriodSeedRef(serializePeriodSeedRef(from, to)) : null)
 
   return (
-    <div className="max-w-[980px] mx-auto px-6 py-8">
+    <div className="max-w-[980px] mx-auto px-6 py-8 pb-28 lg:pb-8">
       <header className="mb-10">
         <h1
-          className="text-4xl"
+          className="text-3xl sm:text-4xl"
           style={{ fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--foreground)' }}
         >
           {t('title')}
@@ -52,7 +68,13 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
       </header>
 
       {period ? (
-        <CockpitForPeriod userId={user.id} from={period.from} to={period.to} />
+        <CockpitForPeriod
+          userId={user.id}
+          from={period.from}
+          to={period.to}
+          initialDraftId={reopened ? draft : undefined}
+          initialSections={reopened ? sectionsFromBody(reopened.body) : undefined}
+        />
       ) : (
         <>
           <PeriodPicker />
@@ -66,8 +88,16 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
   )
 }
 
-/** Carrega o recap do intervalo e monta a cabine. Separado para manter a página legível. */
-async function CockpitForPeriod({ userId, from, to }: { userId: string; from: string; to: string }) {
+interface CockpitForPeriodProps {
+  userId: string
+  from: string
+  to: string
+  initialDraftId?: string
+  initialSections?: EditorSections
+}
+
+/** Carrega o recap do intervalo e monta a cabine (escrita nova ou reabertura para edição). */
+async function CockpitForPeriod({ userId, from, to, initialDraftId, initialSections }: CockpitForPeriodProps) {
   const supabase = await createServerClient()
   const recap = await loadPeriodRecap(supabase, userId, from, to)
   const stems = buildSentenceStems(recap.items)
@@ -76,7 +106,7 @@ async function CockpitForPeriod({ userId, from, to }: { userId: string; from: st
   return (
     <div className="flex flex-col gap-8">
       <YearInFactsRecap items={recap.items} isLimited={recap.isLimited} from={from} to={to} />
-      <AssessmentEditor stems={stems} seedRef={seedRef} />
+      <AssessmentEditor stems={stems} seedRef={seedRef} initialDraftId={initialDraftId} initialSections={initialSections} />
     </div>
   )
 }

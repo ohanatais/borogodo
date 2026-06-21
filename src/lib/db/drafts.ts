@@ -210,6 +210,29 @@ export async function getSelfAssessmentBody(
 }
 
 /**
+ * Reabre uma autoavaliação ESCRITA do próprio usuário para edição na cabine (019, US3): devolve o
+ * `body` e o `seedRef` (período). Escopado por `id` E `user_id` E `format='self_assessment'` — nunca
+ * abre artefato de outro usuário/formato. `null` quando não é do usuário.
+ */
+export async function getSelfAssessment(
+  supabase: SupabaseServerClient,
+  userId: string,
+  draftId: string
+): Promise<{ body: string; seedRef: string | null } | null> {
+  const { data } = await supabase
+    .from('drafts')
+    .select('body, seed_ref')
+    .eq('id', draftId)
+    .eq('user_id', userId)
+    .eq('format', 'self_assessment')
+    .maybeSingle()
+
+  if (!data) return null
+  const row = data as { body: string; seed_ref: string | null }
+  return { body: row.body, seedRef: row.seed_ref }
+}
+
+/**
  * Persiste o passo-pra-frente em `drafts.qa.forwardStep` do próprio usuário (019, US2). Escopado por
  * `id` E `user_id` (RLS reforça). Sobrescreve `qa` (a autoavaliação só usa `qa` para o forwardStep).
  */

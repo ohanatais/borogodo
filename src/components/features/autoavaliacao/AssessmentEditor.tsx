@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
-import { Wand2, HelpCircle, Check, X, Save } from 'lucide-react'
+import { Wand2, HelpCircle, Check, X, Save, Target } from 'lucide-react'
 import type { SentenceStemAnchors } from '@/lib/autoavaliacao/sentenceStems'
 import type { AssistSection } from '@/lib/ai/content/assist'
 import { ForwardStepOffer } from './ForwardStepOffer'
@@ -37,6 +37,9 @@ interface AssistCard {
 interface AssessmentEditorProps {
   stems: SentenceStemAnchors
   seedRef: string
+  /** Reabertura (US3): id e seções de uma autoavaliação já salva, para editar em vez de criar nova. */
+  initialDraftId?: string
+  initialSections?: Sections
 }
 
 /**
@@ -45,19 +48,19 @@ interface AssessmentEditorProps {
  * pessoa escreve, vira o rascunho) — nunca preenche sozinha, nunca dá nota. Salva como rascunho autorado
  * (`status='draft'`), isolado do espelho.
  */
-export function AssessmentEditor({ stems, seedRef }: AssessmentEditorProps) {
+export function AssessmentEditor({ stems, seedRef, initialDraftId, initialSections }: AssessmentEditorProps) {
   const t = useTranslations('autoavaliacao')
   const locale = useLocale()
   // timeZone UTC: evita o off-by-one de datas date-only em fusos negativos (ver YearInFactsRecap).
   const monthFmt = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' })
-  const [sections, setSections] = useState<Sections>(EMPTY_SECTIONS)
+  const [sections, setSections] = useState<Sections>(initialSections ?? EMPTY_SECTIONS)
   const [card, setCard] = useState<AssistCard | null>(null)
   /** Resposta da pessoa à pergunta do unblock (vira o rascunho ao "Usar"). */
   const [answer, setAnswer] = useState('')
   const [busy, setBusy] = useState(false)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  /** Id da autoavaliação salva — habilita a oferta do passo-pra-frente (US2). */
-  const [savedDraftId, setSavedDraftId] = useState<string | null>(null)
+  /** Id da autoavaliação salva. Reabertura já começa com id (edita em vez de criar) — evita duplicar. */
+  const [savedDraftId, setSavedDraftId] = useState<string | null>(initialDraftId ?? null)
 
   const sectionDefs: SectionDef[] = [
     { key: 'entregas', api: 'entregas' },
@@ -142,19 +145,27 @@ export function AssessmentEditor({ stems, seedRef }: AssessmentEditorProps) {
     if (!hasContent) return
     setSaveState('saving')
     try {
-      const res = await fetch('/api/content/drafts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          format: 'self_assessment',
-          seedType: 'period',
-          seedRef,
-          angle: '',
-          body: buildBody(),
-          status: 'draft',
-          qa: {},
-        }),
-      })
+      // Já existe um draft (criado nesta sessão ou reaberto) → PATCH (edita o MESMO registro, não
+      // duplica). Senão, POST cria um novo.
+      const res = savedDraftId
+        ? await fetch(`/api/content/drafts/${savedDraftId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ body: buildBody() }),
+          })
+        : await fetch('/api/content/drafts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              format: 'self_assessment',
+              seedType: 'period',
+              seedRef,
+              angle: '',
+              body: buildBody(),
+              status: 'draft',
+              qa: {},
+            }),
+          })
       if (res.ok) {
         const data = (await res.json()) as { draft?: { id: string } }
         setSaveState('saved')
@@ -187,9 +198,13 @@ export function AssessmentEditor({ stems, seedRef }: AssessmentEditorProps) {
             style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
           />
 
-          {/* Nudge STAR: só pergunta, nunca preenche */}
+          {/* Nudge STAR: faísca coral que só pergunta pelo impacto, nunca preenche o número. */}
           {def.key === 'impacto' && looksVague(sections.impacto) && (
-            <p className="text-xs" style={{ color: 'var(--color-accent-text)' }}>
+            <p
+              className="self-start inline-flex items-start gap-1.5 text-xs rounded-lg px-3 py-2"
+              style={{ background: 'oklch(62% 0.22 28 / 0.1)', color: 'var(--color-accent-text)' }}
+            >
+              <Target size={14} aria-hidden="true" className="mt-px shrink-0" />
               {t('assist.starNudge')}
             </p>
           )}

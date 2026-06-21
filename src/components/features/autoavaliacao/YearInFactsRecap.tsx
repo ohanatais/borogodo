@@ -66,12 +66,12 @@ export function YearInFactsRecap({ items, isLimited, from, to }: YearInFactsReca
         {items.map((item, i) => (
           <li
             key={item.sourceEntryId}
-            className="group flex items-baseline gap-4 px-5 py-4 sm:gap-6"
+            className="group flex flex-col gap-1.5 px-4 py-4 sm:flex-row sm:items-baseline sm:gap-5 sm:px-5"
             style={i > 0 ? { borderTop: '1px solid oklch(90% 0.01 320)' } : undefined}
           >
             <time
               dateTime={item.occurredAt}
-              className="shrink-0 w-20 text-xs tabular-nums leading-relaxed"
+              className="shrink-0 text-xs tabular-nums leading-relaxed sm:w-24"
               style={{ color: 'var(--color-lilas-nevoa-text)' }}
             >
               {dateFmt.format(new Date(item.occurredAt))}
@@ -82,7 +82,7 @@ export function YearInFactsRecap({ items, isLimited, from, to }: YearInFactsReca
             <Link
               href={`/registros#registro-${item.sourceEntryId}`}
               aria-label={t('sourceChip')}
-              className="shrink-0 inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 min-h-[40px] rounded-lg opacity-70 transition-opacity hover:opacity-100"
+              className="self-start shrink-0 inline-flex items-center gap-1 text-xs font-medium py-1.5 rounded-lg opacity-80 transition-opacity hover:opacity-100 sm:px-2.5"
               style={{ color: 'var(--color-primary)' }}
             >
               {t('sourceChip')}

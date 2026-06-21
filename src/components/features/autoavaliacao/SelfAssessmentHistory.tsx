@@ -1,10 +1,10 @@
 'use client'
 
+import { useRouter, usePathname } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { ClipboardCheck } from 'lucide-react'
 import type { Draft } from '@/types/content'
 import { parsePeriodSeedRef } from '@/lib/content/period'
-import { resumePresenca } from '@/components/features/content/presencaEvents'
 
 interface SelfAssessmentHistoryProps {
   items: Draft[]
@@ -26,14 +26,16 @@ function usePeriodLabel() {
 }
 
 /**
- * Histórico de autoavaliações (019). Lista as autoavaliações já geradas/salvas da pessoa — o
- * registro próprio do artefato episódico, separado do feed de registros (`entries`) e, portanto,
- * fora do espelho. Cada linha reabre o texto salvo no fluxo de edição/cópia da 013 (sem regerar),
- * via `resumePresenca` — o `DraftCard` renderiza o `self_assessment` por seções.
+ * Histórico de autoavaliações (019, US3). Lista as autoavaliações ESCRITAS da pessoa — o registro
+ * próprio do artefato episódico, separado do feed (`entries`) e do espelho. Cada linha REABRE o texto
+ * na própria cabine para edição (`?draft=<id>`), nunca no fluxo de post (GenerateSheet) — coerente com
+ * a separação do modelo cockpit.
  */
 export function SelfAssessmentHistory({ items }: SelfAssessmentHistoryProps) {
   const t = useTranslations('autoavaliacao.history')
   const locale = useLocale()
+  const router = useRouter()
+  const pathname = usePathname()
   const periodLabel = usePeriodLabel()
   const dateFmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric' })
 
@@ -62,17 +64,7 @@ export function SelfAssessmentHistory({ items }: SelfAssessmentHistoryProps) {
             <li key={draft.id} className="border-b last:border-b-0" style={{ borderColor: 'var(--border)' }}>
               <button
                 type="button"
-                onClick={() =>
-                  resumePresenca({
-                    draftId: draft.id,
-                    format: draft.format,
-                    seedType: draft.seedType,
-                    seedRef: draft.seedRef ?? '',
-                    angle: draft.angle,
-                    body: draft.body,
-                    seedSummary: period,
-                  })
-                }
+                onClick={() => router.push(`${pathname}?draft=${draft.id}`)}
                 className="w-full flex items-center gap-3 min-h-[56px] text-left px-4 py-3 transition-colors hover:bg-[var(--muted)] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
               >
                 <span
