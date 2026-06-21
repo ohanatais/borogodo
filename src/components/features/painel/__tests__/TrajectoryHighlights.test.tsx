@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, it, expect } from 'vitest'
 import type { HighlightEntry } from '@/lib/panel/getPanelData'
 
@@ -27,46 +28,45 @@ describe('TrajectoryHighlights', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders metric as badge and impact separately', () => {
+  it('shows only the title collapsed; detail (metric + impact) is hidden until expanded', () => {
     render(<TrajectoryHighlights highlights={[HIGHLIGHTS[0]]} />)
+    expect(screen.getByText('Implementei o sistema de pagamentos do zero.')).toBeInTheDocument()
+    expect(screen.queryByText('99.99% uptime')).not.toBeInTheDocument()
+    expect(screen.queryByText('Zero incidentes em 6 meses')).not.toBeInTheDocument()
+  })
+
+  it('reveals metric and impact after expanding the item', async () => {
+    const user = userEvent.setup()
+    render(<TrajectoryHighlights highlights={[HIGHLIGHTS[0]]} />)
+    await user.click(screen.getByRole('button'))
     expect(screen.getByText('99.99% uptime')).toBeInTheDocument()
     expect(screen.getByText('Zero incidentes em 6 meses')).toBeInTheDocument()
   })
 
-  it('renders impact only when metric is null', () => {
+  it('reveals only impact when metric is null', async () => {
+    const user = userEvent.setup()
     render(<TrajectoryHighlights highlights={[HIGHLIGHTS[1]]} />)
+    await user.click(screen.getByRole('button'))
     expect(screen.getByText('Reduziu latência em 40%')).toBeInTheDocument()
-    expect(screen.queryByText(/·/)).not.toBeInTheDocument()
   })
 
-  it('renders what_i_did as secondary text', () => {
+  it('toggles aria-expanded on the row button', async () => {
+    const user = userEvent.setup()
+    render(<TrajectoryHighlights highlights={[HIGHLIGHTS[0]]} />)
+    const button = screen.getByRole('button')
+    expect(button).toHaveAttribute('aria-expanded', 'false')
+    await user.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('renders every highlight title as a row', () => {
     render(<TrajectoryHighlights highlights={HIGHLIGHTS} />)
     expect(screen.getByText('Implementei o sistema de pagamentos do zero.')).toBeInTheDocument()
     expect(screen.getByText('Liderou a migração do banco de dados sem downtime.')).toBeInTheDocument()
   })
 
-  it('renders long what_i_did in full without truncation', () => {
-    const longText = 'a'.repeat(150)
-    const longHighlight: HighlightEntry = {
-      id: 'h-long',
-      what_i_did: longText,
-      impact: 'Impacto',
-      metric: null,
-      entry_date: null,
-    }
-    render(<TrajectoryHighlights highlights={[longHighlight]} />)
-    expect(screen.getByText(longText)).toBeInTheDocument()
-  })
-
   it('renders the section title via i18n key', () => {
     render(<TrajectoryHighlights highlights={HIGHLIGHTS} />)
     expect(screen.getByText('title')).toBeInTheDocument()
-  })
-
-  it('renders all highlight items', () => {
-    render(<TrajectoryHighlights highlights={HIGHLIGHTS} />)
-    expect(screen.getByText('99.99% uptime')).toBeInTheDocument()
-    expect(screen.getByText('Zero incidentes em 6 meses')).toBeInTheDocument()
-    expect(screen.getByText('Reduziu latência em 40%')).toBeInTheDocument()
   })
 })

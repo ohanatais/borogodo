@@ -74,13 +74,13 @@ export function ProactiveInsightCard({ insight }: ProactiveInsightCardProps) {
 
     return (
       <section
-        className="mb-6 flex flex-col gap-2 rounded-2xl border p-5"
+        className="flex flex-col gap-2 rounded-2xl border p-5"
         style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
       >
         <span className="text-sm font-medium" style={{ color: 'var(--color-accent-text)' }}>
           {tn('nudge.label')}
         </span>
-        <p className="text-base" style={{ color: 'var(--foreground)' }}>
+        <p className="text-base line-clamp-2" style={{ color: 'var(--foreground)' }}>
           {insight.headline}
         </p>
         <button
@@ -98,16 +98,16 @@ export function ProactiveInsightCard({ insight }: ProactiveInsightCardProps) {
   return (
     <section
       ref={cardRef}
-      className="mb-6 space-y-2 rounded-2xl border p-5"
+      className="space-y-2 rounded-2xl border p-5"
       style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
     >
       <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
         {t('insight.label')}
       </span>
-      <p className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
+      <p className="text-lg font-semibold line-clamp-2" style={{ color: 'var(--foreground)' }}>
         {insight.headline}
       </p>
-      <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+      <p className="text-sm line-clamp-3" style={{ color: 'var(--muted-foreground)' }}>
         {insight.body}
       </p>
     </section>
@@ -160,7 +160,7 @@ function EnrichmentNudgeCard({
 
   return (
     <section
-      className="mb-6 rounded-2xl border px-4 py-3"
+      className="rounded-2xl border px-4 py-3"
       style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
     >
       <div className="flex items-start justify-between gap-2 mb-2">

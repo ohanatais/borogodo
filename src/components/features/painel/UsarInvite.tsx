@@ -28,31 +28,31 @@ export function UsarInvite() {
   ]
 
   return (
-    <section aria-label={t('invite.title')} className="mb-6">
+    <section aria-label={t('invite.title')}>
       <SectionLabel className="px-4">{t('invite.title')}</SectionLabel>
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2">
         {cards.map((card) => (
           <Link
             key={card.href}
             href={card.href}
-            className="group flex items-start gap-3 px-4 py-3 rounded-lg border transition-opacity hover:opacity-80"
-            style={{ borderColor: 'var(--border)', background: 'var(--background)' }}
+            className="group flex items-start gap-3 px-4 py-3 rounded-lg border transition-all hover:shadow-sm hover:-translate-y-px"
+            style={{ borderColor: 'var(--color-primary)', background: 'var(--color-lilas-nevoa)' }}
           >
             <span className="mt-0.5 shrink-0" style={{ color: 'var(--color-primary)' }}>
               {card.icon}
             </span>
             <span className="flex-1 min-w-0">
-              <span className="block text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+              <span className="block text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
                 {card.title}
               </span>
-              <span className="block text-xs leading-snug" style={{ color: 'var(--muted-foreground)' }}>
+              <span className="block text-xs leading-snug" style={{ color: 'var(--color-lilas-nevoa-text)' }}>
                 {card.examples}
               </span>
             </span>
             <ArrowRight
               size={16}
               aria-hidden="true"
-              className="shrink-0 mt-0.5"
+              className="shrink-0 mt-0.5 transition-transform group-hover:translate-x-0.5"
               style={{ color: 'var(--color-primary)' }}
             />
           </Link>

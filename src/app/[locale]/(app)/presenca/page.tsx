@@ -7,8 +7,7 @@ import { shouldSuggestRecalibration } from '@/lib/ai/content/recalibrateVoice'
 import { getLatestSnapshot } from '@/lib/db/mirror'
 import { getRecentEntries } from '@/lib/db/entries'
 import { PresencaCreate, type PresencaSeedEntry } from '@/components/features/content/PresencaCreate'
-import { PresencaHub } from '@/components/features/presenca/PresencaHub'
-import { UsarLaunchpad } from '@/components/features/presenca/UsarLaunchpad'
+import { RepertorioContent } from '@/components/features/presenca/RepertorioContent'
 
 export const metadata: Metadata = {
   title: 'Repertório | Borogodó',
@@ -64,24 +63,14 @@ export default async function PresencaPage() {
         </div>
       </header>
 
-      <UsarLaunchpad themes={themes} />
-
-      <section className="mt-10">
-        <h2
-          className="text-lg font-semibold mb-3"
-          style={{ fontFamily: 'var(--font-display)', color: 'var(--foreground)' }}
-        >
-          {t('myDrafts')}
-        </h2>
-        <PresencaHub
-          initialPage={page}
-          hasAnyDrafts={anyDrafts}
-          themes={themes}
-          entries={entrySeeds}
-          suggestRecalibration={suggestRecalibration}
-          recalibrateSignalKey={voiceSignal.lastFeedbackAt}
-        />
-      </section>
+      <RepertorioContent
+        themes={themes}
+        initialPage={page}
+        hasAnyDrafts={anyDrafts}
+        entries={entrySeeds}
+        suggestRecalibration={suggestRecalibration}
+        recalibrateSignalKey={voiceSignal.lastFeedbackAt}
+      />
     </div>
   )
 }

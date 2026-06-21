@@ -1,28 +1,47 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
-import { Sparkles, FileText, UserSquare, ArrowRight } from 'lucide-react'
+import { FileText, UserSquare, MessagesSquare, Target, TrendingUp, ArrowRight } from 'lucide-react'
 import type { DraftFormat } from '@/types/content'
 import { PREP_MOMENT_ORDER, type PrepMoment } from '@/lib/content/intentions'
 import { openPresenca } from '@/components/features/content/presencaEvents'
+import { SectionLabel } from '@/components/ui/SectionLabel'
 import { PrepararMomento } from './PrepararMomento'
 
 interface UsarLaunchpadProps {
   /** Temas de força do Espelho — seed das gerações rápidas e âncora dos momentos. */
   themes: string[]
+  /**
+   * Avisa o pai quando entra/sai do fluxo de preparação de um momento (bifurcação). O pai usa isso
+   * pra esconder "Meus rascunhos" — preparar um momento é outro fluxo, a lista de rascunhos só ruído.
+   */
+  onPreparingChange?: (preparing: boolean) => void
+}
+
+/** Ícone distinto por momento — âncora visual pra escanear, não um Sparkles genérico repetido. */
+const MOMENT_ICON: Record<PrepMoment, ReactNode> = {
+  entrevista: <MessagesSquare size={18} aria-hidden="true" />,
+  review: <Target size={18} aria-hidden="true" />,
+  salario: <TrendingUp size={18} aria-hidden="true" />,
 }
 
 /**
  * Launchpad do Repertório (017): organiza a camada "Usar" por intenção, não por formato. Dois hubs
- * — MOSTRAR (público: Post, Bio) e PREPARAR (privado: entrevista, review, salário). Os cards de
- * MOSTRAR disparam a geração com o tema de força principal; os de PREPARAR abrem a bifurcação
- * pronto/conversar. Reusa o motor existente via `openPresenca`/chat — nada de motor novo.
+ * — MOSTRAR (público: Post, Bio) e PREPARAR (privado: entrevista, review, salário) — agora numa
+ * linguagem de card única: a mesma "zona de ação" tintada do convite no Painel. Os cards de MOSTRAR
+ * disparam a geração com o tema de força principal; os de PREPARAR abrem a bifurcação pronto/conversar.
+ * Reusa o motor existente via `openPresenca`/chat — nada de motor novo.
  */
-export function UsarLaunchpad({ themes }: UsarLaunchpadProps) {
+export function UsarLaunchpad({ themes, onPreparingChange }: UsarLaunchpadProps) {
   const t = useTranslations('repertorio')
   const [selectedMoment, setSelectedMoment] = useState<PrepMoment | null>(null)
   const primaryTheme = themes[0] ?? null
+
+  // Mantém o pai em sincronia: preparando um momento = esconder "Meus rascunhos" (outro fluxo).
+  useEffect(() => {
+    onPreparingChange?.(selectedMoment !== null)
+  }, [selectedMoment, onPreparingChange])
 
   if (selectedMoment) {
     return (
@@ -45,10 +64,10 @@ export function UsarLaunchpad({ themes }: UsarLaunchpadProps) {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       {/* Hub MOSTRAR */}
-      <section id="mostrar" className="flex flex-col gap-3" aria-label={t('hubs.mostrar.title')}>
-        <HubHeading title={t('hubs.mostrar.title')} examples={t('hubs.mostrar.examples')} />
+      <section id="mostrar" aria-label={t('hubs.mostrar.title')}>
+        <SectionLabel>{t('hubs.mostrar.title')}</SectionLabel>
         {!primaryTheme && <NoThemeHint text={t('prepare.noTheme')} />}
         <div className="grid grid-cols-2 gap-3">
           <ActionCard
@@ -67,21 +86,16 @@ export function UsarLaunchpad({ themes }: UsarLaunchpadProps) {
       </section>
 
       {/* Hub PREPARAR */}
-      <section id="preparar" className="flex flex-col gap-3" aria-label={t('hubs.preparar.title')}>
-        <HubHeading title={t('hubs.preparar.title')} examples={t('hubs.preparar.examples')} />
-        <div className="flex flex-col gap-2">
+      <section id="preparar" aria-label={t('hubs.preparar.title')}>
+        <SectionLabel>{t('hubs.preparar.title')}</SectionLabel>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {PREP_MOMENT_ORDER.map((moment) => (
-            <button
+            <ActionCard
               key={moment}
-              type="button"
+              icon={MOMENT_ICON[moment]}
+              label={t(`moments.${moment}`)}
               onClick={() => setSelectedMoment(moment)}
-              className="flex items-center gap-3 text-left rounded-xl px-4 py-3 min-h-[48px] border transition-opacity hover:opacity-80"
-              style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-            >
-              <Sparkles size={16} aria-hidden="true" style={{ color: 'var(--color-primary)' }} className="shrink-0" />
-              <span className="flex-1 text-sm font-medium">{t(`moments.${moment}`)}</span>
-              <ArrowRight size={16} aria-hidden="true" style={{ color: 'var(--color-primary)' }} className="shrink-0" />
-            </button>
+            />
           ))}
         </div>
       </section>
@@ -89,45 +103,44 @@ export function UsarLaunchpad({ themes }: UsarLaunchpadProps) {
   )
 }
 
-function HubHeading({ title, examples }: { title: string; examples: string }) {
-  return (
-    <div>
-      <h2 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>
-        {title}
-      </h2>
-      <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-        {examples}
-      </p>
-    </div>
-  )
-}
-
 function NoThemeHint({ text }: { text: string }) {
   return (
-    <p className="text-sm rounded-lg p-3" style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}>
+    <p className="text-sm rounded-lg p-3 mb-3" style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}>
       {text}
     </p>
   )
 }
 
 interface ActionCardProps {
-  icon: React.ReactNode
+  icon: ReactNode
   label: string
   disabled?: boolean
   onClick: () => void
 }
 
+/** Card de ação único — tintado (lilás-névoa), borda e título em primary, com micro-interação no
+ *  hover (sobe 1px, seta desliza). Mesma linguagem dos dois hubs e do convite no Painel. */
 function ActionCard({ icon, label, disabled = false, onClick }: ActionCardProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex flex-col items-start gap-2 rounded-xl p-4 min-h-[48px] border transition-opacity hover:opacity-80 disabled:opacity-50"
-      style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+      className="group flex items-center gap-2.5 rounded-xl border px-4 py-3 min-h-[56px] text-left transition-all hover:shadow-sm hover:-translate-y-px disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+      style={{ background: 'var(--color-lilas-nevoa)', borderColor: 'var(--color-primary)' }}
     >
-      <span style={{ color: 'var(--color-primary)' }}>{icon}</span>
-      <span className="text-sm font-medium">{label}</span>
+      <span className="shrink-0" style={{ color: 'var(--color-primary)' }}>
+        {icon}
+      </span>
+      <span className="flex-1 text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
+        {label}
+      </span>
+      <ArrowRight
+        size={16}
+        aria-hidden="true"
+        className="shrink-0 transition-transform group-hover:translate-x-0.5"
+        style={{ color: 'var(--color-primary)' }}
+      />
     </button>
   )
 }
