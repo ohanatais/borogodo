@@ -16,28 +16,26 @@ interface StarterPromptsProps {
 }
 
 export function StarterPrompts({ onSelect, moment }: StarterPromptsProps) {
-  const [starters, setStarters] = useState<string[] | null>(
-    moment ? PREP_MOMENTS[moment].starters : null
-  )
+  // No modo preparação os starters são constantes do momento → derivados da prop (sem estado nem
+  // servidor). O estado guarda só os starters buscados no servidor (modo chat livre).
+  const [fetchedStarters, setFetchedStarters] = useState<string[] | null>(null)
+  const starters = moment ? PREP_MOMENTS[moment].starters : fetchedStarters
 
   useEffect(() => {
-    // No modo preparação os starters são constantes do momento — sem ida ao servidor.
-    if (moment) {
-      setStarters(PREP_MOMENTS[moment].starters)
-      return
-    }
+    // Só busca no servidor fora do modo preparação.
+    if (moment) return
     let active = true
     fetch('/api/chat/starters')
       .then((r) => r.json())
       .then((data: { starters?: string[] }) => {
         if (!active) return
         if (Array.isArray(data.starters) && data.starters.length > 0) {
-          setStarters(data.starters)
+          setFetchedStarters(data.starters)
         } else {
-          setStarters(DEFAULT_STARTERS)
+          setFetchedStarters(DEFAULT_STARTERS)
         }
       })
-      .catch(() => active && setStarters(DEFAULT_STARTERS))
+      .catch(() => active && setFetchedStarters(DEFAULT_STARTERS))
     return () => {
       active = false
     }

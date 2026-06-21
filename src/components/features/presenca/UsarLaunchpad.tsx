@@ -50,6 +50,9 @@ export function UsarLaunchpad({ themes, onPreparingChange }: UsarLaunchpadProps)
   useEffect(() => {
     if (selectedMoment === null && restoreFocusMoment) {
       momentCardRefs.current[restoreFocusMoment]?.focus()
+      // Reset one-shot do flag após restaurar o foco: é exatamente sincronizar foco (sistema externo)
+      // e limpar o gatilho, não um loop de render. Por isso o disable pontual da regra.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRestoreFocusMoment(null)
     }
   }, [selectedMoment, restoreFocusMoment])
