@@ -5,6 +5,7 @@ import { UsarInvite } from '@/components/features/painel/UsarInvite'
 import { ProactiveInsightCard } from '@/components/features/painel/ProactiveInsightCard'
 import { PanelEmptyState } from '@/components/features/painel/PanelEmptyState'
 import { MiniTimeline } from '@/components/features/painel/MiniTimeline'
+import { RecentEntries } from '@/components/features/painel/RecentEntries'
 import { TrajectoryHighlights } from '@/components/features/painel/TrajectoryHighlights'
 import { getPanelData } from '@/lib/panel/getPanelData'
 
@@ -34,10 +35,11 @@ export default async function PainelPage() {
           />
 
           <div className="mt-6 lg:grid lg:grid-cols-[1fr_300px] lg:gap-8 lg:items-start">
-            {/* Main — the proof: concrete wins, then the proactive insight */}
+            {/* Main — the proof: concrete wins, the proactive insight, then recent activity → feed */}
             <div className="min-w-0 flex flex-col gap-6">
               <TrajectoryHighlights highlights={data.highlights} />
               <ProactiveInsightCard insight={data.insight} />
+              <RecentEntries entries={data.recentEntries} />
             </div>
 
             {/* Rail — action first (Repertório), context second (timeline). Sticky on lg+ */}
