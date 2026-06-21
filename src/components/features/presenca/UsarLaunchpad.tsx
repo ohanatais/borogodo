@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import { FileText, UserSquare, MessagesSquare, Target, TrendingUp, ArrowRight } from 'lucide-react'
 import type { DraftFormat } from '@/types/content'
@@ -36,6 +36,8 @@ const MOMENT_ICON: Record<PrepMoment, ReactNode> = {
 export function UsarLaunchpad({ themes, onPreparingChange }: UsarLaunchpadProps) {
   const t = useTranslations('repertorio')
   const [selectedMoment, setSelectedMoment] = useState<PrepMoment | null>(null)
+  const [restoreFocusMoment, setRestoreFocusMoment] = useState<PrepMoment | null>(null)
+  const momentCardRefs = useRef<Partial<Record<PrepMoment, HTMLButtonElement | null>>>({})
   const primaryTheme = themes[0] ?? null
 
   // Mantém o pai em sincronia: preparando um momento = esconder "Meus rascunhos" (outro fluxo).
@@ -43,12 +45,24 @@ export function UsarLaunchpad({ themes, onPreparingChange }: UsarLaunchpadProps)
     onPreparingChange?.(selectedMoment !== null)
   }, [selectedMoment, onPreparingChange])
 
+  // Ao sair da preparação, o card que abriu a tela já desmontou e remonta aqui — devolve o foco a ele
+  // pra não jogar o teclado/leitor de tela de volta ao topo do documento.
+  useEffect(() => {
+    if (selectedMoment === null && restoreFocusMoment) {
+      momentCardRefs.current[restoreFocusMoment]?.focus()
+      setRestoreFocusMoment(null)
+    }
+  }, [selectedMoment, restoreFocusMoment])
+
   if (selectedMoment) {
     return (
       <PrepararMomento
         moment={selectedMoment}
         themeRef={primaryTheme}
-        onBack={() => setSelectedMoment(null)}
+        onBack={() => {
+          setRestoreFocusMoment(selectedMoment)
+          setSelectedMoment(null)
+        }}
       />
     )
   }
@@ -92,6 +106,9 @@ export function UsarLaunchpad({ themes, onPreparingChange }: UsarLaunchpadProps)
           {PREP_MOMENT_ORDER.map((moment) => (
             <ActionCard
               key={moment}
+              buttonRef={(el) => {
+                momentCardRefs.current[moment] = el
+              }}
               icon={MOMENT_ICON[moment]}
               label={t(`moments.${moment}`)}
               onClick={() => setSelectedMoment(moment)}
@@ -116,13 +133,16 @@ interface ActionCardProps {
   label: string
   disabled?: boolean
   onClick: () => void
+  /** Permite ao pai capturar o nó do botão (ex.: devolver foco ao voltar da preparação). */
+  buttonRef?: (el: HTMLButtonElement | null) => void
 }
 
 /** Card de ação único — tintado (lilás-névoa), borda e título em primary, com micro-interação no
  *  hover (sobe 1px, seta desliza). Mesma linguagem dos dois hubs e do convite no Painel. */
-function ActionCard({ icon, label, disabled = false, onClick }: ActionCardProps) {
+function ActionCard({ icon, label, disabled = false, onClick, buttonRef }: ActionCardProps) {
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={onClick}
       disabled={disabled}

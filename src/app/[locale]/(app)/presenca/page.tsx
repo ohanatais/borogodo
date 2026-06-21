@@ -1,12 +1,11 @@
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { listDrafts, hasAnyDraft, getVoiceSignal, getVoiceProfile } from '@/lib/db/drafts'
 import { shouldSuggestRecalibration } from '@/lib/ai/content/recalibrateVoice'
 import { getLatestSnapshot } from '@/lib/db/mirror'
 import { getRecentEntries } from '@/lib/db/entries'
-import { PresencaCreate, type PresencaSeedEntry } from '@/components/features/content/PresencaCreate'
+import type { PresencaSeedEntry } from '@/components/features/content/PresencaCreate'
 import { RepertorioContent } from '@/components/features/presenca/RepertorioContent'
 
 export const metadata: Metadata = {
@@ -30,14 +29,13 @@ export default async function PresencaPage() {
 
   if (!user) redirect('/login')
 
-  const [page, anyDrafts, snapshot, recentEntries, voiceSignal, voiceProfile, t] = await Promise.all([
+  const [page, anyDrafts, snapshot, recentEntries, voiceSignal, voiceProfile] = await Promise.all([
     listDrafts(supabase, user.id, { limit: HUB_PAGE_SIZE }),
     hasAnyDraft(supabase, user.id),
     getLatestSnapshot(supabase, user.id),
     getRecentEntries(supabase, user.id, RECENT_ENTRY_SEEDS),
     getVoiceSignal(supabase, user.id),
     getVoiceProfile(supabase, user.id),
-    getTranslations('presenca.page'),
   ])
 
   const themes = snapshot?.strength_themes ?? []
@@ -46,23 +44,6 @@ export default async function PresencaPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
-      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1
-            className="text-2xl font-semibold"
-            style={{ fontFamily: 'var(--font-display)', color: 'var(--foreground)' }}
-          >
-            {t('title')}
-          </h1>
-          <p className="text-base mt-1" style={{ color: 'var(--muted-foreground)' }}>
-            {t('subtitle')}
-          </p>
-        </div>
-        <div className="shrink-0">
-          <PresencaCreate themes={themes} entries={entrySeeds} />
-        </div>
-      </header>
-
       <RepertorioContent
         themes={themes}
         initialPage={page}

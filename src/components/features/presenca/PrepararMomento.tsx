@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { ArrowLeft, FileText, MessageSquare } from 'lucide-react'
 import { PREP_MOMENTS, type PrepMoment } from '@/lib/content/intentions'
@@ -22,6 +23,13 @@ interface PrepararMomentoProps {
 export function PrepararMomento({ moment, themeRef, onBack }: PrepararMomentoProps) {
   const t = useTranslations('repertorio')
   const momentLabel = t(`moments.${moment}`)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+
+  // Ao entrar na bifurcação, o cabeçalho da seção some — esta é a tela primária agora. Move o foco
+  // pro título do momento pra que teclado/leitor de tela não fique preso no card que já desmontou.
+  useEffect(() => {
+    headingRef.current?.focus()
+  }, [])
 
   function handleReady() {
     if (!themeRef) return
@@ -54,9 +62,14 @@ export function PrepararMomento({ moment, themeRef, onBack }: PrepararMomentoPro
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-lg font-semibold focus:outline-none"
+          style={{ color: 'var(--foreground)' }}
+        >
           {momentLabel}
-        </h3>
+        </h2>
         <p className="text-sm mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
           {t('prepare.heading')}
         </p>
