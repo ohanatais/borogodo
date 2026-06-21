@@ -15,6 +15,8 @@ export interface ExtractedEntry {
   project_name?: string | null
   raw_content: string
   source: EntrySource
+  title?: string | null
+  file_name?: string | null
 }
 
 export interface Entry extends ExtractedEntry {

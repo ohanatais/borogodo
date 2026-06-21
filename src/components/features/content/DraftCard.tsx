@@ -7,7 +7,7 @@ import type { DraftFormat, DraftVariant, SeedType, VoiceFeedback } from '@/types
 import type { PrepMoment } from '@/lib/content/intentions'
 import { CopyButton } from './CopyButton'
 import { createDraft, patchDraft } from './draftsClient'
-import { notifyDraftUpdated } from './presencaEvents'
+import { notifyDraftUpdated, notifyDraftCreated } from './presencaEvents'
 
 /** Evidência base, necessária para persistir o rascunho escolhido (US4). */
 export interface DraftSeed {
@@ -80,6 +80,7 @@ export function DraftCard({ variant, index, format, seed, existingDraftId, momen
       }
       draftIdRef.current = created.id
       setSaveError(false)
+      notifyDraftCreated(created.id)
       return created.id
     })()
 

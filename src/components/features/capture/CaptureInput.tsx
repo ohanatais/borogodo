@@ -15,6 +15,8 @@ interface CaptureInputProps {
   projectContext?: ProjectContext | null
   onClearProjectContext?: () => void
   onCapture?: (content: string) => void
+  /** Ações renderizadas entre o textarea e o botão de enviar (ex.: áudio, arquivo). */
+  trailing?: React.ReactNode
 }
 
 export function CaptureInput({
@@ -23,6 +25,7 @@ export function CaptureInput({
   projectContext,
   onClearProjectContext,
   onCapture,
+  trailing,
 }: CaptureInputProps) {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
@@ -132,6 +135,7 @@ export function CaptureInput({
             el.style.height = `${el.scrollHeight}px`
           }}
         />
+        {trailing}
         <button
           type="button"
           onClick={() => void handleSubmit()}

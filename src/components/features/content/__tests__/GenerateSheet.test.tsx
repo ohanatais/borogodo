@@ -18,6 +18,14 @@ function openWith(formats: ('post' | 'impact_summary')[] = ['post']) {
   })
 }
 
+/** Post abre no seletor de ângulo (018 US1); escolher "Relato" dispara a geração padrão. */
+async function pickRelato() {
+  const relato = await screen.findByRole('button', { name: 'angles.relato' })
+  await act(async () => {
+    relato.click()
+  })
+}
+
 beforeAll(() => {
   // Radix Dialog + react-remove-scroll dependem destes em jsdom.
   global.ResizeObserver = class {
@@ -52,6 +60,7 @@ describe('GenerateSheet', () => {
 
     render(<GenerateSheet />)
     await openWith()
+    await pickRelato()
 
     const cards = await screen.findAllByTestId('draft-card')
     expect(cards).toHaveLength(2)
@@ -78,6 +87,7 @@ describe('GenerateSheet', () => {
 
     render(<GenerateSheet />)
     await openWith()
+    await pickRelato()
 
     // i18n mockado devolve a chave; o estado de erro renderiza a chave de erro específica.
     expect(await screen.findByText('errors.generationFailed')).toBeInTheDocument()
@@ -147,6 +157,7 @@ describe('GenerateSheet', () => {
 
     render(<GenerateSheet />)
     await openWith()
+    await pickRelato()
     await screen.findAllByTestId('draft-card')
 
     await act(async () => {

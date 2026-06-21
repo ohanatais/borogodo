@@ -190,7 +190,9 @@ async function handleFileCapture(
   try {
     const buffer = Buffer.from(await fileInput.file.arrayBuffer())
     const pdfText = await extractTextFromPDF(buffer)
-    const entries = await extractFromDocument(pdfText)
+    const extracted = await extractFromDocument(pdfText)
+    // Registra o arquivo de origem em cada entrada para rastreabilidade no feed.
+    const entries = extracted.map((entry) => ({ ...entry, file_name: fileInput.file.name }))
     const saved = await saveEntries(supabase, userId, entries)
 
     dispatchAsyncJobs(userId)

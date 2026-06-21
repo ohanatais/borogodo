@@ -449,26 +449,28 @@ regra: uma feature/branch por pasta por vez; pra paralelo real, worktrees.
 
 ---
 
-## 2026-06-16 — Pra post visual bom, HTML exportável vence imagem de IA
+## 2026-06-16 — Subagents em pipeline TDD: o handoff é o produto, não a paralelização
 
-**O que aconteceu:** eu queria um carrossel pro LinkedIn explicando meu fluxo de trabalho e tinha gostado de
-uma arte que o Gemini gerou. Olhando de perto, o "tell" de imagem de IA estava lá: as caixas de código diziam
-`okich(70% 0.10 190)` e `claude (Feature Pis)` — texto embolado, valores errados, lindo de longe e quebrado
-no detalhe. Em vez de gerar imagem, montamos um arquivo HTML único: cada slide no tamanho do LinkedIn
-(1080×1080), usando os tokens reais do design system (cores `oklch`, Fraunces, Geist Mono), com um botão
-"Baixar todos como PNG" via `html-to-image`. Abro no navegador, clico, e saem os PNGs prontos pra subir.
+**O que aconteceu:** quis testar se dava pra implementar uma fase inteira (US2 da 018: opinião com lastro,
+guardrail, 2 componentes novos, rota, i18n) delegando a subagents, de um jeito replicável pras próximas
+features. Montei dois papéis em `.claude/agents/`: um **test-author** (escreve só os testes RED e confirma
+que falham) e um **implementer** (recebe os RED e implementa até GREEN, sem regressão). Rodei em série:
+test-author primeiro, implementer depois. Deu certo na primeira — 701 testes verdes, tsc e eslint limpos,
+nenhum teste ajustado pra passar. O detalhe que fez funcionar: o test-author não só escreveu os testes, ele
+devolveu um **briefing com as assinaturas exatas** que o implementer teria que criar (props de cada
+componente, mudanças na rota e no motor). Esse briefing virou o contrato. O implementer não teve que
+adivinhar nada.
 
-**O que aprendi:** modelo de imagem *desenha* letras, não escreve — então nunca acerta texto técnico, cor de
-marca exata, nem deixa editar uma palavra sem regenerar tudo. Pra conteúdo que é todo texto e precisão (um
-carrossel de processo), HTML/SVG é objetivamente superior: fonte real, cor exata, código legível, e edição de
-uma palavra é trocar uma linha. O "salvar como imagem", que parecia o bloqueio, se resolve com uma lib de
-print do DOM. E o ganho maior nem foi visual: como o conteúdo virou texto editável, deu pra iterar o *conteúdo*
-em camadas (cortar jargão de IA, achar a voz, reordenar a narrativa, trocar uma metáfora) sem perder a arte —
-coisa impossível quando o post é um PNG achatado.
+**O que aprendi:** o valor do subagent aqui não foi rodar coisas em paralelo (a fase tinha dependências, foi
+tudo em série) — foi o **handoff estruturado**. Em TDD, o teste JÁ é a especificação executável; fazer um
+agente escrever o teste primeiro força o contrato a existir antes da implementação, e um segundo agente
+preenche esse contrato sem deriva de escopo. Também aprendi um limite da ferramenta: agente custom criado no
+meio de uma sessão não é carregado — o `.md` em `.claude/agents/` só vale em sessão nova; no meio do caminho
+tem que embutir o papel no prompt do general-purpose. E o orquestrador (eu) ainda precisa revisar o que
+volta: validei de novo a rota (auth + custo de IA) e o contrato do `/api/capture` que o implementer assumiu,
+porque "veio do subagent" não substitui revisão de superfície sensível.
 
-**Por que importa:** é material direto pro `build-with-claude`. A intuição comum ("peço pra IA gerar a imagem
-do post") entrega algo bonito que não escala e não se edita. A virada é tratar o post como **código**: um
-template HTML que vira a sua "máquina" de carrossel, reusável a cada post trocando só o conteúdo. Some-se a
-isso a régua de LinkedIn que destravou o conteúdo (capa que cria curiosidade em vez de rótulo; storytelling em
-primeira pessoa; fio narrativo entre slides; fechar entregando uma ideia, não um resumo) e o resultado é um
-ativo, não um post descartável.
+**Por que importa:** é o molde replicável pras próximas features e material direto de `build-with-claude`. A
+lição contraintuitiva: não delegue "implemente a feature" num agente só; quebre em **autor de teste → 
+implementador**, e exija que o autor de teste devolva as assinaturas. O gargalo de qualidade some quando o
+contrato vem antes do código. Paralelizar é bônus ocasional; o ganho real é o RED→GREEN com handoff limpo.

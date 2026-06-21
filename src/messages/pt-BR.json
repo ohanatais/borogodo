@@ -318,10 +318,14 @@
     },
     "batch": {
       "summary": "Criei {n, plural, one {# entrada} other {# entradas}}",
-      "undo": "Desfazer",
+      "reviewHint": "Revise e descarte o que não quiser manter.",
+      "reviewHintCompany": "{company} · revise e descarte o que não quiser.",
+      "undo": "Desfazer tudo",
       "undoAriaLabel": "Desfazer criação de {n, plural, one {# entrada} other {# entradas}}",
+      "discard": "Descartar",
+      "discardAriaLabel": "Descartar: {title}",
       "undone": "Entradas removidas.",
-      "viewHistory": "Ver no histórico →"
+      "viewFeed": "Ver registros →"
     },
     "recording": {
       "start": "Gravar",
@@ -427,10 +431,29 @@
     "generating": "Escrevendo na sua voz...",
     "regenerate": "Gerar de novo",
     "angleLabel": "Ângulo",
+    "angles": {
+      "label": "Sobre o que é esse post?",
+      "relato": "O que fiz",
+      "study": "O que aprendi",
+      "opinion": "Opinião"
+    },
+    "opinion": {
+      "thesisLabel": "O que você quer dizer?",
+      "thesisPlaceholder": "Escreva aqui",
+      "exampleInvite": "Quer ancorar num exemplo seu?",
+      "examplePlaceholder": "Descreva o que aconteceu",
+      "generateBtn": "Gerar post"
+    },
+    "captureOffer": {
+      "question": "Salvar este exemplo?",
+      "save": "Salvar",
+      "dismiss": "Dispensar",
+      "saved": "Exemplo salvo!"
+    },
     "formats": {
       "post": "Post",
-      "impactSummary": "Resumo de impacto",
-      "miniBio": "Mini-bio"
+      "impactSummary": "Pra falar do seu trabalho",
+      "miniBio": "Sua bio"
     },
     "adjust": {
       "label": "Ajustar os dois rascunhos",
@@ -516,8 +539,8 @@
       "arquivados": "Arquivados",
       "allFormats": "Todos",
       "post": "Post",
-      "impactSummary": "Resumo",
-      "miniBio": "Mini-bio"
+      "impactSummary": "Pra falar",
+      "miniBio": "Bio"
     },
     "deleteConfirm": {
       "title": "Excluir este rascunho?",
@@ -571,5 +594,54 @@
     "bio": {
       "cta": "Criar minha bio"
     }
+  },
+  "feed": {
+    "title": "Seus registros",
+    "empty": {
+      "heading": "Nenhum registro ainda",
+      "description": "Cada história que você conta vira um registro aqui. Comece pela mais recente.",
+      "filtered": "Nenhum registro com esses filtros.",
+      "cta": "Fazer minha primeira captura"
+    },
+    "axis": {
+      "created_at": "Quando anotei",
+      "entry_date": "Quando aconteceu"
+    },
+    "filters": {
+      "search": "Buscar registros…",
+      "period": "Período",
+      "company": "Empresa",
+      "tags": "Tags",
+      "metricOnly": "Com métrica",
+      "source": "Origem",
+      "clear": "Limpar filtros",
+      "today": "Hoje",
+      "week": "7 dias",
+      "month": "30 dias",
+      "quarter": "90 dias"
+    },
+    "card": {
+      "expand": "Ver detalhes",
+      "collapse": "Recolher",
+      "usar": "Usar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "save": "Salvar",
+      "cancelEdit": "Cancelar",
+      "deleteConfirm": {
+        "title": "Excluir este registro?",
+        "description": "Esta ação é definitiva. Rascunhos gerados a partir dele não são apagados.",
+        "cancel": "Cancelar",
+        "confirm": "Excluir"
+      }
+    },
+    "pagination": {
+      "loadMore": "Carregar mais",
+      "loading": "Carregando..."
+    },
+    "noDate": "Sem data",
+    "viewAll": "Ver tudo →",
+    "deleteError": "Não consegui excluir esse registro. Ele continua aqui.",
+    "deleteErrorDismiss": "Ok"
   }
 }

@@ -43,7 +43,7 @@ export default async function PresencaPage() {
   const suggestRecalibration = shouldSuggestRecalibration(voiceSignal, voiceProfile)
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8">
+    <div className="max-w-[980px] mx-auto px-6 py-8">
       <RepertorioContent
         themes={themes}
         initialPage={page}

@@ -15,6 +15,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 interface RecentEntryRow {
   id: string
   what_i_did: string
+  title: string | null
   source: Entry['source']
   entry_date: string | null
   created_at: string
@@ -24,14 +25,6 @@ export interface TimelineEntry {
   id: string
   role_title: string | null
   company: string | null
-  entry_date: string | null
-}
-
-export interface HighlightEntry {
-  id: string
-  what_i_did: string
-  impact: string | null
-  metric: string | null
   entry_date: string | null
 }
 
@@ -47,6 +40,15 @@ export interface SkillSummary {
   consistentes: number
   emergentes: number
   total: number
+}
+
+/** Conquistas com impacto preenchido — alimentam o TrajectoryHighlights (redesign 017 do Painel). */
+export interface HighlightEntry {
+  id: string
+  what_i_did: string
+  impact: string | null
+  metric: string | null
+  entry_date: string | null
 }
 
 export interface PanelMirror {
@@ -98,16 +100,16 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     insightRes,
     timelineRes,
     highlightsRes,
-    returnEntriesRes,
+    oldestByCreatedRes,
   ] = await Promise.all([
     supabase.from('profiles').select('name, avatar_url, last_panel_seen_at').eq('id', userId).single(),
     supabase.from('entries').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase
       .from('entries')
-      .select('id, what_i_did, source, entry_date, created_at')
+      .select('id, what_i_did, title, source, entry_date, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .limit(3),
+      .limit(5),
     supabase
       .from('entries')
       .select('entry_date')
@@ -153,12 +155,16 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .not('impact', 'is', null)
       .order('entry_date', { ascending: false })
       .limit(3),
+    // Entrada mais antiga por created_at — alimenta o ramo "old-victory" do sinal
+    // de retorno. A mais nova já vem em `recentRes`, então não precisamos varrer
+    // as 50 últimas entradas só para computar o sinal.
     supabase
       .from('entries')
       .select('id, what_i_did, entry_date, created_at')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(50),
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const recentEntries = (recentRes.data ?? []) as RecentEntryRow[]
@@ -192,7 +198,20 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       }
     : null
 
-  const returnSignalEntries = (returnEntriesRes.data ?? []) as ReturnSignalEntry[]
+  // O sinal de retorno só precisa da entrada mais nova (detecta "has-new" e é a que
+  // ele exibe) e da mais antiga (ramo "old-victory"). A mais nova já está em
+  // `recentEntries[0]`; a mais antiga vem de `oldestByCreatedRes`. Deduplicamos por
+  // id para a base com uma única entrada.
+  const oldestByCreated = (oldestByCreatedRes.data as ReturnSignalEntry | null) ?? null
+  const returnSignalCandidates = [recentEntries[0] ?? null, oldestByCreated].filter(
+    (e): e is ReturnSignalEntry => e !== null
+  )
+  const returnSignalEntries =
+    entryCount === 0
+      ? []
+      : returnSignalCandidates.filter(
+          (e, i) => returnSignalCandidates.findIndex((x) => x.id === e.id) === i
+        )
   const returnSignal = getReturnSignal({
     entries: returnSignalEntries,
     lastPanelSeenAt,
