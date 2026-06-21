@@ -8,6 +8,9 @@ import { errorMessage, GenerationFailedError } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
 const generateRequestSchema = z.object({
+  // 019: 'self_assessment' saiu (a autoavaliação não é gerada — modelo cockpit). 'period' saiu junto:
+  // só servia à autoavaliação por intervalo; agora o seed de período alimenta o recap (loadPeriodRecap),
+  // não esta rota.
   format: z.enum(['post', 'impact_summary', 'mini_bio']),
   seedType: z.enum(['entry', 'theme', 'project']),
   seedRef: z.string().min(1),

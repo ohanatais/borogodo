@@ -5,6 +5,7 @@ import type {
   DraftListPage,
   DraftStatus,
   DraftStatusFilter,
+  ForwardStep,
   LengthPref,
   SeedType,
   VoiceFeedback,
@@ -68,7 +69,7 @@ export interface InsertDraftInput {
   seedRef: string | null
   angle: string
   body: string
-  status: Extract<DraftStatus, 'generated' | 'edited'>
+  status: Extract<DraftStatus, 'draft' | 'generated' | 'edited'>
   qa: Record<string, unknown>
 }
 
@@ -183,6 +184,98 @@ export async function deleteDraft(
   draftId: string
 ): Promise<boolean> {
   const { error } = await supabase.from('drafts').delete().eq('id', draftId).eq('user_id', userId)
+
+  return !error
+}
+
+/**
+ * Lê só o `body` de uma autoavaliação ESCRITA do próprio usuário (019, US2). Filtra por `id` E
+ * `user_id` E `format='self_assessment'`: insumo do passo-pra-frente, escopado (a IA nunca vê texto de
+ * outro usuário nem de outro formato). `null` quando não é do usuário → a rota mapeia 404.
+ */
+export async function getSelfAssessmentBody(
+  supabase: SupabaseServerClient,
+  userId: string,
+  draftId: string
+): Promise<string | null> {
+  const { data } = await supabase
+    .from('drafts')
+    .select('body')
+    .eq('id', draftId)
+    .eq('user_id', userId)
+    .eq('format', 'self_assessment')
+    .maybeSingle()
+
+  return (data as { body?: string } | null)?.body ?? null
+}
+
+/**
+ * Reabre uma autoavaliação ESCRITA do próprio usuário para edição na cabine (019, US3): devolve o
+ * `body` e o `seedRef` (período). Escopado por `id` E `user_id` E `format='self_assessment'` — nunca
+ * abre artefato de outro usuário/formato. `null` quando não é do usuário.
+ */
+export async function getSelfAssessment(
+  supabase: SupabaseServerClient,
+  userId: string,
+  draftId: string
+): Promise<{ body: string; seedRef: string | null; forwardStep: ForwardStep | null } | null> {
+  const { data } = await supabase
+    .from('drafts')
+    .select('body, seed_ref, qa')
+    .eq('id', draftId)
+    .eq('user_id', userId)
+    .eq('format', 'self_assessment')
+    .maybeSingle()
+
+  if (!data) return null
+  const row = data as { body: string; seed_ref: string | null; qa: { forwardStep?: ForwardStep } | null }
+  return { body: row.body, seedRef: row.seed_ref, forwardStep: row.qa?.forwardStep ?? null }
+}
+
+/**
+ * O compromisso (`commitmentQuestion`) da autoavaliação mais recente do usuário que tem um
+ * passo-pra-frente salvo (019, US2 follow-up). Alimenta o check-in de revisão: ao chegar a data marcada,
+ * a pessoa revê o que prometeu. Escopado por `user_id` E `format='self_assessment'`; `null` se não houver
+ * autoavaliação com plano. Varre as mais recentes e devolve a primeira com compromisso.
+ *
+ * Limite: olha só as 10 mais recentes. Se as 10 últimas não tiverem plano mas uma 11ª tiver, o check-in
+ * não aparece — aceitável (10 autoavaliações recentes sem plano = compromisso provavelmente abandonado).
+ */
+export async function getLatestCommitment(
+  supabase: SupabaseServerClient,
+  userId: string
+): Promise<{ draftId: string; commitment: string } | null> {
+  const { data } = await supabase
+    .from('drafts')
+    .select('id, qa')
+    .eq('user_id', userId)
+    .eq('format', 'self_assessment')
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  const rows = (data ?? []) as Array<{ id: string; qa: { forwardStep?: ForwardStep } | null }>
+  for (const row of rows) {
+    const commitment = row.qa?.forwardStep?.actionPlan?.commitmentQuestion
+    if (commitment) return { draftId: row.id, commitment }
+  }
+  return null
+}
+
+/**
+ * Persiste o passo-pra-frente em `drafts.qa.forwardStep` do próprio usuário (019, US2). Escopado por
+ * `id` E `user_id` (RLS reforça). Sobrescreve `qa` (a autoavaliação só usa `qa` para o forwardStep).
+ */
+export async function saveForwardStep(
+  supabase: SupabaseServerClient,
+  userId: string,
+  draftId: string,
+  forwardStep: ForwardStep
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('drafts')
+    .update({ qa: { forwardStep }, updated_at: new Date().toISOString() })
+    .eq('id', draftId)
+    .eq('user_id', userId)
 
   return !error
 }

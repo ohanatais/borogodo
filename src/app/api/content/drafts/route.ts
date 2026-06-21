@@ -9,12 +9,13 @@ const MAX_BODY_CHARS = 10000
 const MAX_PAGE_LIMIT = 20
 
 const createDraftSchema = z.object({
-  format: z.enum(['post', 'impact_summary', 'mini_bio']),
-  seedType: z.enum(['entry', 'theme', 'project']),
+  format: z.enum(['post', 'impact_summary', 'mini_bio', 'self_assessment']),
+  seedType: z.enum(['entry', 'theme', 'project', 'period']),
   seedRef: z.string().max(500).nullable(),
   angle: z.string().max(200).default(''),
   body: z.string().min(1).max(MAX_BODY_CHARS),
-  status: z.enum(['generated', 'edited']),
+  // 'draft' (019): a autoavaliação escrita pela pessoa nasce rascunho autorado, não gerado.
+  status: z.enum(['draft', 'generated', 'edited']),
   qa: z.record(z.string(), z.unknown()).default({}),
 })
 
@@ -22,7 +23,7 @@ const listQuerySchema = z.object({
   cursor: z.string().max(40).optional(),
   limit: z.coerce.number().int().min(1).max(MAX_PAGE_LIMIT).optional(),
   status: z.enum(['ativos', 'copiados', 'arquivados']).optional(),
-  format: z.enum(['post', 'impact_summary', 'mini_bio']).optional(),
+  format: z.enum(['post', 'impact_summary', 'mini_bio', 'self_assessment']).optional(),
 })
 
 function jsonError(error: string, status: number): NextResponse {

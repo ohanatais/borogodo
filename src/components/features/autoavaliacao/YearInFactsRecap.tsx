@@ -1,0 +1,96 @@
+'use client'
+
+import Link from 'next/link'
+import { useLocale, useTranslations } from 'next-intl'
+import { ArrowUpRight, PenLine } from 'lucide-react'
+import type { PeriodRecapItem } from '@/lib/autoavaliacao/periodRecap'
+
+interface YearInFactsRecapProps {
+  items: PeriodRecapItem[]
+  isLimited: boolean
+  /** ISO `from`/`to` do período — o título adapta: ano único vs. intervalo que cruza anos. */
+  from: string
+  to: string
+}
+
+/**
+ * "O seu ano, em fatos" (019, US1, T019). Lista factual e DETERMINÍSTICA dos registros do período,
+ * cada item com a fonte. Superfície "memória" (tint lilás-névoa) — distinta por TEMPERATURA do branco
+ * do editor ("escrever"), não por repetição. Zero adjetivo: é lembrança, não avaliação. Base limitada
+ * reconhece e convida a registrar (FR-006), nunca fabrica.
+ */
+export function YearInFactsRecap({ items, isLimited, from, to }: YearInFactsRecapProps) {
+  const t = useTranslations('autoavaliacao.recap')
+  const locale = useLocale()
+  // timeZone UTC: occurredAt date-only é meia-noite UTC; sem isso fusos negativos voltam um dia.
+  const dateFmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })
+
+  // Título adaptativo: período num único ano civil → "Seu 2024, em fatos"; intervalo que cruza anos →
+  // "Seus fatos entre nov. de 2025 e jun. de 2026". Nunca diz "ano" para um recorte que não é um ano.
+  const monthYearFmt = new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric', timeZone: 'UTC' })
+  const label =
+    from.slice(0, 4) === to.slice(0, 4)
+      ? t('label', { year: from.slice(0, 4) })
+      : t('labelRange', { from: monthYearFmt.format(new Date(from)), to: monthYearFmt.format(new Date(to)) })
+
+  if (isLimited) {
+    return (
+      <section
+        className="rounded-2xl px-6 py-7 text-center"
+        style={{ background: 'var(--color-lilas-nevoa)' }}
+      >
+        <h2 className="text-2xl" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--foreground)' }}>
+          {label}
+        </h2>
+        <p className="text-sm mt-2 mx-auto max-w-md" style={{ color: 'var(--color-lilas-nevoa-text)' }}>
+          {t('limited.message')}
+        </p>
+        <Link
+          href="/registros"
+          className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium px-5 py-2.5 min-h-[48px] rounded-lg transition-colors"
+          style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+        >
+          <PenLine size={16} aria-hidden="true" />
+          {t('limited.cta')}
+        </Link>
+      </section>
+    )
+  }
+
+  return (
+    <section aria-label={label}>
+      <h2 className="text-2xl mb-4" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--foreground)' }}>
+        {label}
+      </h2>
+      <ul className="rounded-2xl overflow-hidden" style={{ background: 'var(--color-lilas-nevoa)' }}>
+        {items.map((item, i) => (
+          <li
+            key={item.sourceEntryId}
+            className="group flex flex-col gap-1.5 px-4 py-4 sm:flex-row sm:items-baseline sm:gap-5 sm:px-5"
+            style={i > 0 ? { borderTop: '1px solid oklch(90% 0.01 320)' } : undefined}
+          >
+            <time
+              dateTime={item.occurredAt}
+              className="shrink-0 text-xs tabular-nums leading-relaxed sm:w-24"
+              style={{ color: 'var(--color-lilas-nevoa-text)' }}
+            >
+              {dateFmt.format(new Date(item.occurredAt))}
+            </time>
+            <p className="flex-1 text-sm leading-relaxed" style={{ color: 'var(--foreground)' }}>
+              {item.text}
+            </p>
+            <Link
+              href={`/registros#registro-${item.sourceEntryId}`}
+              aria-label={t('sourceChip')}
+              className="self-start shrink-0 inline-flex items-center gap-1 text-xs font-medium py-1.5 rounded-lg opacity-80 transition-opacity hover:opacity-100 sm:px-2.5"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              {t('sourceChip')}
+              <ArrowUpRight size={13} aria-hidden="true" />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

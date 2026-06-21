@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip, LayoutList, User } from 'lucide-react'
+import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip, LayoutList, ClipboardCheck, User } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
@@ -31,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'registros',  label: 'Registros',       icon: <LayoutList size={20} />,        path: '/registros'  },
   { id: 'historico',  label: 'Linha do Tempo',  icon: <GitCommitVertical size={20} />, path: '/historico'  },
   { id: 'presenca',   label: 'Repertório',      icon: <PenLine size={20} />,           path: '/presenca'   },
+  { id: 'autoavaliacao', label: 'Autoavaliação', icon: <ClipboardCheck size={20} />,   path: '/autoavaliacao' },
 ]
 
 interface AppShellClientProps {
@@ -66,6 +67,10 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
     if (!path) return false
     return pathname.includes(path)
   }
+
+  // A autoavaliação é a única superfície "pra dentro" (a pessoa ESCREVE). A barra de captura ("pra
+  // fora") sobreporia o editor e brigaria de modo: escondida aqui. A nav mobile permanece.
+  const hideCapture = pathname.includes('/autoavaliacao')
 
   return (
     <div className="flex min-h-screen" style={{ background: 'var(--color-creme)' }}>
@@ -168,6 +173,7 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
         </main>
 
         {/* ── Desktop: capture footer sticky ─────────── */}
+        {!hideCapture && (
         <div
           className="hidden lg:block sticky bottom-0"
           style={{
@@ -236,6 +242,7 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
             </p>
           </div>
         </div>
+        )}
 
         {/* ── Mobile bottom bar ──────────────────────── */}
         <div
@@ -246,6 +253,7 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
             borderColor: 'var(--border)',
           }}
         >
+          {!hideCapture && (<>
           {/* Row 0 — toggle Registrar | Perguntar (linha própria no mobile) */}
           <div className="px-3 pt-2 pb-1">
             <div
@@ -313,6 +321,7 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
               </p>
             </div>
           </div>
+          </>)}
 
           {/* Row 2 — nav icons com labels */}
           <nav

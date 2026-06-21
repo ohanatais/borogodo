@@ -453,7 +453,8 @@
     "formats": {
       "post": "Post",
       "impactSummary": "Pra falar do seu trabalho",
-      "miniBio": "Sua bio"
+      "miniBio": "Sua bio",
+      "selfAssessment": "Autoavaliação"
     },
     "adjust": {
       "label": "Ajustar os dois rascunhos",
@@ -509,6 +510,7 @@
         "description": "Gere seu primeiro rascunho a partir de um tema do seu Espelho ou de uma entrada sua, na sua voz."
       },
       "status": {
+        "draft": "Rascunho",
         "generated": "Gerado",
         "edited": "Editado",
         "copied": "Copiado",
@@ -555,6 +557,107 @@
     "resumeTitle": "Retomar rascunho",
     "useProject": "Usar este projeto",
     "projectSeed": "projeto {name} ({count, plural, one {# entrada} other {# entradas}})"
+  },
+  "autoavaliacao": {
+    "title": "Sua autoavaliação",
+    "subtitle": "Relembre o seu ano e escreva do seu jeito. Eu te ajudo a lembrar; a avaliação é sua.",
+    "presets": {
+      "esteAno": "Este ano",
+      "ultimoCiclo": "Último ciclo",
+      "outroPeriodo": "Outro período"
+    },
+    "range": {
+      "from": "De",
+      "to": "Até"
+    },
+    "basedOnPeriod": "{from} a {to}",
+    "recap": {
+      "label": "Seu {year}, em fatos",
+      "labelRange": "Seus fatos entre {from} e {to}",
+      "sourceChip": "Ver registro",
+      "limited": {
+        "message": "Ainda há pouco aqui pra colher neste período. Em vez de inventar, prefiro te mostrar isso: registre o que você fez e volte.",
+        "cta": "Registrar agora"
+      }
+    },
+    "editor": {
+      "start": "Começar a escrever",
+      "trailLabel": "Ver meu ano",
+      "trailTitle": "Trilha de evidências",
+      "save": "Salvar",
+      "saving": "Salvando…",
+      "saved": "Salvo",
+      "saveError": "Não consegui salvar agora. Tente de novo.",
+      "placeholder": "Escreva do seu jeito…"
+    },
+    "sections": {
+      "entregas": "Entregas",
+      "impacto": "Impacto",
+      "evolucao": "Evolução",
+      "pontosADesenvolver": "Pontos a desenvolver"
+    },
+    "stems": {
+      "entregas": "Em {anchor}, eu…",
+      "entregasNeutro": "Comece pela entrega que mais te marcou…",
+      "impacto": "O que mudou por causa do seu trabalho? Se teve número, comece por ele.",
+      "evolucao": "Ao longo do período, eu evoluí em…",
+      "pontosADesenvolver": "Quero afiar…"
+    },
+    "assist": {
+      "rephrase": "Reescrever com minhas palavras",
+      "unblock": "Não sei por onde começar",
+      "unblockAnswerLabel": "A sua resposta vira o seu rascunho:",
+      "unblockAnswerPlaceholder": "Escreva a sua resposta do seu jeito…",
+      "useAnswer": "Usar minha resposta",
+      "starNudge": "Qual foi o resultado, número ou antes-depois?",
+      "accept": "Usar",
+      "reject": "Descartar",
+      "loading": "Pensando com você…",
+      "failed": "Não consegui sugerir agora; segue escrevendo."
+    },
+    "forwardStep": {
+      "offer": "Quer transformar o que você escreveu num plano de ação concreto?",
+      "offerHint": "Uma oferta opcional, ancorada no que você escreveu. Sem cobrança.",
+      "accept": "Montar meu plano",
+      "decline": "Agora não",
+      "generating": "Montando seu plano…",
+      "areaLabel": "Onde afiar",
+      "actionLabel": "Uma ação de experiência",
+      "commitmentLabel": "Seu compromisso",
+      "edit": "Editar",
+      "regenerate": "Gerar outra versão",
+      "savePlan": "Salvar plano",
+      "cancel": "Cancelar",
+      "anchoredOn": "Ancorado no que você escreveu",
+      "reviewDateLabel": "Quando você quer revisar isso?",
+      "saveDate": "Marcar revisão",
+      "savedDate": "Revisão marcada. Vou te lembrar no painel quando chegar perto.",
+      "failed": "Não consegui montar o plano agora. Tente de novo daqui a pouco."
+    },
+    "panelInvite": {
+      "title": "Seu ciclo de avaliação está chegando",
+      "write": "Que tal escrever sua autoavaliação?",
+      "feedFirst": "Registre o que você fez antes de escrever."
+    },
+    "history": {
+      "title": "Suas autoavaliações",
+      "empty": "Quando você escrever sua primeira autoavaliação, ela fica guardada aqui.",
+      "nextReview": "Próxima revisão marcada para {date}",
+      "writtenOn": "Escrita em {date}",
+      "untitled": "Autoavaliação"
+    },
+    "reviewCheckIn": {
+      "title": "A revisão chegou",
+      "intro": "Da última vez, você se comprometeu com isto:",
+      "prompt": "E aí, como foi?",
+      "placeholder": "Conte do seu jeito o que aconteceu desde então…",
+      "submit": "Registrar como foi",
+      "submitting": "Registrando…",
+      "done": "Anotado. Isso virou um registro e já alimenta a sua próxima autoavaliação.",
+      "dismiss": "Agora não",
+      "error": "Não consegui registrar agora. Tente de novo daqui a pouco.",
+      "writeNext": "Escrever a autoavaliação deste ciclo"
+    }
   },
   "repertorio": {
     "nav": "Repertório",

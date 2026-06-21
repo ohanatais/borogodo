@@ -6,6 +6,7 @@ import { ProactiveInsightCard } from '@/components/features/painel/ProactiveInsi
 import { PanelEmptyState } from '@/components/features/painel/PanelEmptyState'
 import { MiniTimeline } from '@/components/features/painel/MiniTimeline'
 import { RecentEntries } from '@/components/features/painel/RecentEntries'
+import { ReviewCycleInvite } from '@/components/features/painel/ReviewCycleInvite'
 import { TrajectoryHighlights } from '@/components/features/painel/TrajectoryHighlights'
 import { getPanelData } from '@/lib/panel/getPanelData'
 
@@ -26,6 +27,8 @@ export default async function PainelPage() {
         <PanelEmptyState />
       ) : (
         <>
+          {/* Convite do ciclo de avaliação (019) — banner sensível a calendário, no topo do painel. */}
+          <ReviewCycleInvite signal={data.reviewCycleSignal} />
           {/* Identity hero — slim, the headline is the star */}
           <BorogodoCard
             name={name}

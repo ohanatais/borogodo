@@ -59,6 +59,21 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
     return () => controller.abort()
   }, [])
 
+  // Deep-link "Ver registro" (autoavaliação, 019): o feed vem por SSR, então o alvo #registro-<id> já
+  // existe no mount. O Next App Router não rola para hash em container de scroll próprio, então o
+  // fazemos aqui — rola e realça por 2s. Best-effort: se o registro não está na 1ª página, nada ocorre.
+  useEffect(() => {
+    const hash = window.location.hash
+    if (!hash.startsWith('#registro-')) return
+    const el = document.getElementById(hash.slice(1))
+    if (!el) return
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    el.style.transition = 'box-shadow 300ms ease-out'
+    el.style.boxShadow = '0 0 0 2px var(--color-primary)'
+    const timer = setTimeout(() => { el.style.boxShadow = '' }, 2000)
+    return () => clearTimeout(timer)
+  }, [])
+
   const distinctDays90 = useMemo(() => {
     const cutoff = new Date()
     cutoff.setDate(cutoff.getDate() - 90)

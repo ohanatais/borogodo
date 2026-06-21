@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { validateDraftOutput, postDraftSchema, impactSummaryDraftSchema } from '../schemas'
+import {
+  validateDraftOutput,
+  postDraftSchema,
+  impactSummaryDraftSchema,
+} from '../schemas'
 
 const VALID_RAW = {
   variants: [
@@ -32,6 +36,12 @@ describe('validateDraftOutput — forma válida', () => {
   it('expõe os dois schemas nomeados', () => {
     expect(postDraftSchema.safeParse(VALID_RAW).success).toBe(true)
     expect(impactSummaryDraftSchema.safeParse(VALID_RAW).success).toBe(true)
+  })
+})
+
+describe('validateDraftOutput — self_assessment não é gerado (019, modelo cockpit)', () => {
+  it('lança: self_assessment deixou de ser formato gerável (a pessoa escreve, a IA só ancora)', () => {
+    expect(() => validateDraftOutput(VALID_RAW, 'self_assessment')).toThrow()
   })
 })
 

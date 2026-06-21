@@ -34,6 +34,8 @@ function promptFor(format: DraftFormat): PromptParts {
   if (format === 'mini_bio') {
     return { system: MINI_BIO_SYSTEM_PROMPT, buildUser: buildMiniBioUserPrompt }
   }
+  // 019: 'self_assessment' deixou de ser gerado (modelo cockpit — a pessoa escreve). O motor segue
+  // dono só das superfícies "pra fora" (post/impact_summary/mini_bio).
   return { system: POST_SYSTEM_PROMPT, buildUser: buildPostUserPrompt }
 }
 
