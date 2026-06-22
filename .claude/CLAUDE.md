@@ -70,6 +70,13 @@ múltiplas features possam evoluir ao mesmo tempo sem interferir uma na outra.
 ---
 
 ## Processo obrigatório por feature
+0. /product-north → **pensar produto antes da spec** (camada estratégica pré-spec). Discovery
+   (JTBD, tensões), enquadramento com trade-offs, advogado do diabo (pré-mortem, 2ª ordem,
+   risco de retenção), protótipo visual conceitual, e GTM. Contrapõe por padrão e estuda o
+   código/dados reais antes de opinar. Fecha num decision record em `docs/decisions/` que vira
+   o input do /speckit-specify. **Usar** quando a direção não está óbvia, numa pivotagem, ou
+   pra pressionar uma ideia antes de comprometer. **Pular** quando a feature já está clara e
+   decidida. Termina onde o /speckit-specify começa — não refaz a spec nem a UI (/impeccable).
 1. /speckit-specify → descrever o quê/por quê
 2. /speckit-clarify → fechar ambiguidades
 3. /speckit-plan → arquitetura técnica
