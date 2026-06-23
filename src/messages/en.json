@@ -285,6 +285,17 @@
       "error": "Error saving. Please try again."
     }
   },
+  "support": {
+    "heading": "Need help?",
+    "emailLabel": "Get in touch",
+    "copyButton": "Copy email",
+    "copied": "Copied!",
+    "copyFailed": "Couldn't copy, the email is right there to select.",
+    "linkedinLabel": "Rather chat?",
+    "linkedinCta": "Find me on LinkedIn",
+    "sla": "There's a real person on the other side, me. I reply within 2 business days.",
+    "credits": "Borogodó · made in Brazil · {ano}"
+  },
   "bemvindo": {
     "step1": {
       "headline": "Hello, {nome}.",

@@ -21,9 +21,9 @@ Web app Next.js (monolito): código em `src/`, testes em `__tests__/` colocaliza
 
 **Purpose**: base de conteúdo e i18n que todas as stories consomem. **Bloqueia todas as US.**
 
-- [ ] T001 Criar `src/lib/support/channels.ts` exportando as constantes `SUPPORT_EMAIL = "admin@borogodo.ai"` e `LINKEDIN_URL = "https://www.linkedin.com/in/ohana-ta%C3%ADs/"` (URL percent-encoded, ver research.md R3), com tipos explícitos.
-- [ ] T002 [P] Adicionar o namespace `support` em `src/messages/pt-BR.json` (chaves: `heading`, `emailLabel`, `copyButton`, `copied`, `copyFailed`, `linkedinLabel`, `linkedinCta`, `sla`).
-- [ ] T003 [P] Adicionar o mesmo namespace `support` em `src/messages/en.json` com as traduções correspondentes (pt-BR é fallback).
+- [x] T001 Criar `src/lib/support/channels.ts` exportando as constantes `SUPPORT_EMAIL = "admin@borogodo.ai"` e `LINKEDIN_URL = "https://www.linkedin.com/in/ohana-ta%C3%ADs/"` (URL percent-encoded, ver research.md R3), com tipos explícitos.
+- [x] T002 [P] Adicionar o namespace `support` em `src/messages/pt-BR.json` (chaves: `heading`, `emailLabel`, `copyButton`, `copied`, `copyFailed`, `linkedinLabel`, `linkedinCta`, `sla`).
+- [x] T003 [P] Adicionar o mesmo namespace `support` em `src/messages/en.json` com as traduções correspondentes (pt-BR é fallback).
 
 **Checkpoint**: conteúdo e strings disponíveis para os componentes.
 
@@ -36,12 +36,12 @@ Web app Next.js (monolito): código em `src/`, testes em `__tests__/` colocaliza
 **Independent Test**: abrir rodapé da LP e `/configuracoes`, ver o e-mail como texto, clicar "copiar" e confirmar cópia + feedback, sem app de e-mail nativo abrir.
 
 ### Tests (RED first)
-- [ ] T004 [P] [US1] Teste de `CopyButton` em `src/components/ui/__tests__/CopyButton.test.tsx`: copia o texto via clipboard (mock de `navigator.clipboard.writeText`), mostra feedback de sucesso, e mostra mensagem de falha quando a API rejeita/está ausente (FR-002, FR-009).
-- [ ] T005 [P] [US1] Teste de `ContactCard` em `src/components/features/support/__tests__/ContactCard.test.tsx`: renderiza o e-mail como texto, inclui o `CopyButton`, e NÃO renderiza nenhum `href="mailto:"` como gesto principal (FR-001, FR-003).
+- [x] T004 [P] [US1] Teste de `CopyButton` em `src/components/ui/__tests__/CopyButton.test.tsx`: copia o texto via clipboard (mock de `navigator.clipboard.writeText`), mostra feedback de sucesso, e mostra mensagem de falha quando a API rejeita/está ausente (FR-002, FR-009).
+- [x] T005 [P] [US1] Teste de `ContactCard` em `src/components/features/support/__tests__/ContactCard.test.tsx`: renderiza o e-mail como texto, inclui o `CopyButton`, e NÃO renderiza nenhum `href="mailto:"` como gesto principal (FR-001, FR-003).
 
 ### Implementation (GREEN)
-- [ ] T006 [US1] Criar `src/components/ui/CopyButton.tsx` (`"use client"`): recebe `value` e rótulos via props, usa `navigator.clipboard.writeText`, estado de feedback com `aria-live="polite"`, fallback de falha sem travar, acessível por teclado (FR-002, FR-009, WCAG AA).
-- [ ] T007 [US1] Criar `src/components/features/support/ContactCard.tsx` (Server Component): exibe `heading`, o e-mail (`SUPPORT_EMAIL`) como texto selecionável + `CopyButton`; consome `lib/support/channels.ts` e i18n `support`. (LinkedIn e SLA entram em US2/US3.)
+- [x] T006 [US1] Criar `src/components/ui/CopyButton.tsx` (`"use client"`): recebe `value` e rótulos via props, usa `navigator.clipboard.writeText`, estado de feedback com `aria-live="polite"`, fallback de falha sem travar, acessível por teclado (FR-002, FR-009, WCAG AA).
+- [x] T007 [US1] Criar `src/components/features/support/ContactCard.tsx` (Server Component): exibe `heading`, o e-mail (`SUPPORT_EMAIL`) como texto selecionável + `CopyButton`; consome `lib/support/channels.ts` e i18n `support`. (LinkedIn e SLA entram em US2/US3.)
 
 **Checkpoint**: o bloco de contato com e-mail copiável funciona isoladamente.
 
@@ -54,10 +54,10 @@ Web app Next.js (monolito): código em `src/`, testes em `__tests__/` colocaliza
 **Independent Test**: ver o link de LinkedIn na seção, rotulado como secundário, abrindo o perfil correto em nova aba.
 
 ### Tests
-- [ ] T008 [P] [US2] Estender `ContactCard.test.tsx`: quando `LINKEDIN_URL` está definida, renderiza um link com `target="_blank"` e `rel="noopener noreferrer"` apontando para a URL; quando ausente/vazia, o link é omitido (FR-005, edge case).
+- [x] T008 [P] [US2] Estender `ContactCard.test.tsx`: quando `LINKEDIN_URL` está definida, renderiza um link com `target="_blank"` e `rel="noopener noreferrer"` apontando para a URL; quando ausente/vazia, o link é omitido (FR-005, edge case).
 
 ### Implementation
-- [ ] T009 [US2] Adicionar ao `ContactCard.tsx` o link secundário de LinkedIn (rótulo `linkedinLabel`/`linkedinCta`), aberto em nova aba com `rel="noopener noreferrer"`, omitido quando a URL não está configurada (FR-005).
+- [x] T009 [US2] Adicionar ao `ContactCard.tsx` o link secundário de LinkedIn (rótulo `linkedinLabel`/`linkedinCta`), aberto em nova aba com `rel="noopener noreferrer"`, omitido quando a URL não está configurada (FR-005).
 
 **Checkpoint**: contato com e-mail + LinkedIn completo no componente.
 
@@ -70,10 +70,10 @@ Web app Next.js (monolito): código em `src/`, testes em `__tests__/` colocaliza
 **Independent Test**: ver a frase de SLA na seção; trocar idioma para `en` e confirmar todos os textos traduzidos.
 
 ### Tests
-- [ ] T010 [P] [US3] Estender `ContactCard.test.tsx`: renderiza a microcopy de SLA (chave `support.sla`); validar que renderiza com o provider de i18n nos dois idiomas sem chave faltante (FR-007, FR-008).
+- [x] T010 [P] [US3] Estender `ContactCard.test.tsx`: renderiza a microcopy de SLA (chave `support.sla`); validar que renderiza com o provider de i18n nos dois idiomas sem chave faltante (FR-007, FR-008).
 
 ### Implementation
-- [ ] T011 [US3] Adicionar a microcopy de SLA ao `ContactCard.tsx` usando a chave `support.sla` (FR-007). Revisar pt-BR/en das chaves do namespace `support` (FR-008).
+- [x] T011 [US3] Adicionar a microcopy de SLA ao `ContactCard.tsx` usando a chave `support.sla` (FR-007). Revisar pt-BR/en das chaves do namespace `support` (FR-008).
 
 **Checkpoint**: `ContactCard` completo (e-mail + LinkedIn + SLA), bilíngue.
 
@@ -83,10 +83,10 @@ Web app Next.js (monolito): código em `src/`, testes em `__tests__/` colocaliza
 
 **Purpose**: plugar o `ContactCard` no rodapé da LP e na Central de Configurações.
 
-- [ ] T012 [P] Criar `src/components/features/landing/Footer.tsx` (Server Component) que renderiza `ContactCard` + créditos mínimos, mobile-first.
-- [ ] T013 Editar `src/app/[locale]/page.tsx` para renderizar `<Footer />` ao fim da landing (após `CtaSection`).
-- [ ] T014 Editar `src/app/[locale]/(app)/configuracoes/page.tsx` para incluir o `ContactCard` na grade de cards (junto de `IdentityCard`/`LinksCard`).
-- [ ] T015 [P] Teste de `Footer` em `src/components/features/landing/__tests__/Footer.test.tsx`: renderiza o `ContactCard`.
+- [x] T012 [P] Criar `src/components/features/landing/Footer.tsx` (Server Component) que renderiza `ContactCard` + créditos mínimos, mobile-first.
+- [x] T013 Editar `src/app/[locale]/page.tsx` para renderizar `<Footer />` ao fim da landing (após `CtaSection`).
+- [x] T014 Editar `src/app/[locale]/(app)/configuracoes/page.tsx` para incluir o `ContactCard` na grade de cards (junto de `IdentityCard`/`LinksCard`).
+- [x] T015 [P] Teste de `Footer` em `src/components/features/landing/__tests__/Footer.test.tsx`: renderiza o `ContactCard`.
 
 **Checkpoint**: canal acessível dos dois pontos de entrada.
 
@@ -94,7 +94,7 @@ Web app Next.js (monolito): código em `src/`, testes em `__tests__/` colocaliza
 
 ## Phase 6: Polish & Validação
 
-- [ ] T016 Rodar a suíte de testes e garantir cobertura ≥ 80% nos arquivos novos (`npm test`).
+- [x] T016 Rodar a suíte de testes e garantir cobertura ≥ 80% nos arquivos novos (`npm test`).
 - [ ] T017 `/code-review medium` nos arquivos novos/editados; checar `vercel-react-best-practices` (island client mínimo) e WCAG AA via `/impeccable audit`.
 - [ ] T018 Validação manual seguindo `quickstart.md` (rodapé LP, copiar, LinkedIn, SLA, Configurações, i18n, teclado/leitor de tela).
 

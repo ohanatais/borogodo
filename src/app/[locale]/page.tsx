@@ -6,6 +6,7 @@ import { MirrorMockup } from '@/components/features/landing/MirrorMockup'
 import { CareerMapMockup } from '@/components/features/landing/CareerMapMockup'
 import { ContentGenSection } from '@/components/features/landing/ContentGenSection'
 import { CtaSection } from '@/components/features/landing/CtaSection'
+import { Footer } from '@/components/features/landing/Footer'
 import { AnimatedSection } from '@/components/ui/AnimatedSection'
 
 export default function LandingPage() {
@@ -27,6 +28,7 @@ export default function LandingPage() {
         </AnimatedSection>
         <CtaSection />
       </main>
+      <Footer />
     </>
   )
 }
