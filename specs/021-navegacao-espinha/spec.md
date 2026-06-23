@@ -10,6 +10,17 @@
 arquitetura de navegação para que o menu reflita a espinha do produto (Descobrir → Entender →
 Provar → Usar), colapsando de 6 destinos para 4, em fases independentes e testáveis.
 
+## Clarifications
+
+### Session 2026-06-22
+
+- Q: Como a porta de conversa do topo do Painel (US3) se relaciona com a barra global
+  "Registrar | Perguntar"? → A: Aditiva — a porta no topo do Painel é um convite a mais; a barra
+  global permanece intacta em todas as páginas (é a ferramenta onipresente).
+- Q: "Curar o que o Painel mostra" remove/reorganiza cards, ou só adiciona a porta? → A: Só
+  adiciona a porta de conversa nesta feature; curadoria/remoção de cards do Painel fica para o
+  `/impeccable shape` (fora de escopo aqui).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Menu enxuto de 4 destinos com uma casa clara pra "usar" (Priority: P1)
@@ -76,27 +87,30 @@ continua acessível e funcional.
 
 ### User Story 3 - O Painel como casa que chama de volta (Priority: P3)
 
-Ao entrar, a pessoa encontra o **Painel** como centro de gravidade: o que ela acumulou, o
-insight proativo, o lembrete de um momento de carreira chegando, e uma **porta de conversa** no
-topo ("fala com o seu borogodó") que abre o chat já enquadrado. A Home mostra o essencial
-curado — não tudo —, e o chat continua disponível em todo o app como ferramenta, sem nunca virar
-a tela principal.
+Ao entrar, a pessoa encontra o **Painel** com uma **porta de conversa** no topo ("fala com o seu
+borogodó") que abre o chat já enquadrado, somada ao que o Painel já mostra hoje (acúmulo, insight
+proativo, lembrete de um momento de carreira chegando). A porta é **aditiva**: a barra global
+"Registrar | Perguntar" continua intacta em todas as páginas, e o chat segue como ferramenta
+onipresente, sem nunca virar a tela principal. A curadoria/reorganização dos cards do Painel fica
+fora desta feature (é trabalho de UX no `/impeccable shape`).
 
 **Why this priority**: Fortalece o motor de retorno, mas o ganho de legibilidade já vem das
 fases anteriores; pode ser incremental e vir por último.
 
 **Independent Test**: Abrir o Painel e confirmar que existe um campo de conversa no topo que
-abre o chat; confirmar que a Home apresenta um conjunto curado (não uma lista exaustiva) e que o
-chat segue acessível nas outras páginas como antes.
+abre o chat; confirmar que os cards atuais do Painel seguem presentes (não foram removidos) e que
+a barra global de chat continua acessível no Painel e nas outras páginas como antes.
 
 **Acceptance Scenarios**:
 
 1. **Given** a pessoa autenticada, **When** abre o Painel, **Then** vê uma porta de conversa no
    topo que, ao ser acionada, abre o chat já no modo de pergunta.
-2. **Given** a pessoa no Painel, **When** olha a página, **Then** encontra o acúmulo, o insight
-   proativo e o lembrete de ciclo de review de forma curada, sem virar uma lista sem fim.
-3. **Given** a pessoa em qualquer outra página, **When** usa o chat, **Then** ele funciona como
-   ferramenta onipresente, sem substituir o conteúdo da página por uma tela de conversa.
+2. **Given** a pessoa no Painel, **When** olha a página, **Then** a porta de conversa aparece
+   somada aos cards atuais (acúmulo, insight proativo, lembrete de ciclo de review), que
+   permanecem como estão.
+3. **Given** a pessoa no Painel ou em qualquer outra página, **When** usa o chat, **Then** a
+   barra global "Registrar | Perguntar" continua intacta e o chat funciona como ferramenta
+   onipresente, sem substituir o conteúdo da página por uma tela de conversa.
 
 ---
 
@@ -178,11 +192,13 @@ gerar os formatos restantes segue funcionando.
 **Painel como Home (US3)**
 
 - **FR-011**: O Painel MUST apresentar uma porta de conversa no topo que abre o chat já
-  enquadrado no modo de pergunta.
-- **FR-012**: O Painel MUST apresentar um conjunto curado (acúmulo, insight proativo, lembrete de
-  ciclo de review), sem se tornar uma lista exaustiva.
-- **FR-013**: O chat MUST permanecer disponível como ferramenta onipresente nas demais páginas e
-  MUST NOT substituir o conteúdo de uma página por uma tela de conversa.
+  enquadrado no modo de pergunta, **adicionada** aos cards atuais.
+- **FR-012**: A feature MUST NOT remover nem reorganizar os cards atuais do Painel — só acrescenta
+  a porta de conversa; a curadoria do Painel é trabalho de UX posterior (`/impeccable shape`),
+  fora desta feature.
+- **FR-013**: A barra global "Registrar | Perguntar" MUST permanecer intacta em todas as páginas
+  (inclusive no Painel); o chat MUST permanecer ferramenta onipresente e MUST NOT substituir o
+  conteúdo de uma página por uma tela de conversa.
 
 **Higiene de formatos (US4)**
 
