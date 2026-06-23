@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Check, Copy } from 'lucide-react'
+import { copyText } from '@/lib/clipboard'
 
 interface CopyButtonProps {
   /** Texto que vai para a área de transferência. */
@@ -17,33 +18,6 @@ interface CopyButtonProps {
 }
 
 const CONFIRM_MS = 2000
-
-/** Copia via Clipboard API; em ambiente sem permissão, cai para `execCommand` com textarea oculto. */
-async function copyText(text: string): Promise<boolean> {
-  if (navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(text)
-      return true
-    } catch {
-      // segue para o fallback
-    }
-  }
-
-  try {
-    const area = document.createElement('textarea')
-    area.value = text
-    area.setAttribute('readonly', '')
-    area.style.position = 'fixed'
-    area.style.opacity = '0'
-    document.body.appendChild(area)
-    area.select()
-    const ok = document.execCommand('copy')
-    document.body.removeChild(area)
-    return ok
-  } catch {
-    return false
-  }
-}
 
 /**
  * Botão de copiar com confirmação acessível (US3, FR-014). "Copiar" → "Copiado" com região

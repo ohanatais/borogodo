@@ -16,11 +16,14 @@ interface ContactCardProps {
  */
 export function ContactCard({ brand = false, className = '' }: ContactCardProps) {
   const t = useTranslations('support')
+  // Server Component (sem hooks): id estável e único por superfície, para o caso de o rodapé
+  // (brand) e o card do app coexistirem na mesma árvore sem colidir o `aria-labelledby`.
+  const headingId = `contact-card-heading-${brand ? 'brand' : 'app'}`
   const hasLinkedin = LINKEDIN_URL.length > 0
 
   return (
     <section
-      aria-labelledby="contact-card-heading"
+      aria-labelledby={headingId}
       className={`rounded-xl p-6 flex flex-col gap-4 ${className}`}
       style={
         brand
@@ -29,7 +32,7 @@ export function ContactCard({ brand = false, className = '' }: ContactCardProps)
       }
     >
       <h2
-        id="contact-card-heading"
+        id={headingId}
         className="text-base font-semibold"
         style={{ fontFamily: 'var(--font-display), serif', color: 'var(--foreground)' }}
       >

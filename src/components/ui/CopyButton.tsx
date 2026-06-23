@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
+import { copyText } from '@/lib/clipboard'
 
 interface CopyButtonProps {
   /** Texto que vai para a área de transferência. */
@@ -20,8 +21,9 @@ const CONFIRM_MS = 2000
 /**
  * Botão de copiar genérico com confirmação acessível. Os rótulos vêm via props (i18n fica
  * a cargo de quem usa) para o componente servir tanto à LP quanto ao app sem acoplar a um
- * namespace. Em ambiente sem Clipboard API ou com permissão negada, mostra a instrução de
- * seleção manual em vez de travar — o e-mail continua selecionável ao lado (FR-002, FR-009).
+ * namespace. A cópia usa o helper `copyText` (Clipboard API + fallback `execCommand`); só quando
+ * nem o fallback funciona mostra a instrução de seleção manual — o e-mail continua selecionável
+ * ao lado, sem travar (FR-002, FR-009).
  */
 export function CopyButton({ value, copyLabel, copiedLabel, failedLabel, className = '' }: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
@@ -38,21 +40,16 @@ export function CopyButton({ value, copyLabel, copiedLabel, failedLabel, classNa
   const handleCopy = useCallback(async () => {
     if (timer.current) clearTimeout(timer.current)
 
-    if (!navigator.clipboard?.writeText) {
+    const ok = await copyText(value)
+    if (!ok) {
       setCopied(false)
       setFailed(true)
       return
     }
 
-    try {
-      await navigator.clipboard.writeText(value)
-      setFailed(false)
-      setCopied(true)
-      timer.current = setTimeout(() => setCopied(false), CONFIRM_MS)
-    } catch {
-      setCopied(false)
-      setFailed(true)
-    }
+    setFailed(false)
+    setCopied(true)
+    timer.current = setTimeout(() => setCopied(false), CONFIRM_MS)
   }, [value])
 
   return (

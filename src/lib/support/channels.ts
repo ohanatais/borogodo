@@ -6,7 +6,7 @@
  */
 
 /** E-mail de suporte exibido como texto copiável (sem `mailto:` forçado, FR-001/FR-002). */
-export const SUPPORT_EMAIL: string = 'admin@borogodo.ai'
+export const SUPPORT_EMAIL = 'admin@borogodo.ai'
 
 /**
  * Perfil de LinkedIn da fundadora (canal secundário, FR-005).
