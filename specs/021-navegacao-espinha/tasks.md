@@ -18,9 +18,11 @@ independente (4 fases da reforma).
 
 ## Status da execução
 
-- **Passo atual**: `/impeccable shape` (planejamento de UX) — aguardando confirmação do design
-  brief. **Implementação NÃO iniciada**: 0/29 tarefas concluídas.
-- **Próximo**: `/speckit-implement` (T001→T029) após confirmar o brief.
+- **Passo atual**: `/impeccable shape` ✅ **confirmado** — design brief em
+  [design-brief.md](./design-brief.md). **Implementação NÃO iniciada**: 0/29 tarefas concluídas.
+- **Decisões de design (confirmadas)**: landing Usar = **Conteúdo** (→`/presenca`) + **Preparo**
+  (→`/autoavaliacao`); Espelho = segmented **Forças/Trajetória**; porta do Painel = **abaixo do hero**.
+- **Próximo**: `/speckit-implement` (T001→T029) — T002 (gate de shape) já satisfeito.
 - **Nota**: o arquivo não-rastreado `src/components/features/painel/__tests__/IndicatorStrip.test.tsx`
   já existia antes desta feature e **não pertence à 021** — não incorporar nos commits da reforma.
 
@@ -74,8 +76,8 @@ App Next.js (App Router), monorepo único: rotas em `src/app/[locale]/(app)/`, c
 ### Implementation for User Story 1
 
 - [ ] T008 [US1] Reescrever `NAV_ITEMS` para os 4 destinos usando `navModel` + labels `appNav`, e trocar `isActive` pelo helper, em `src/components/layout/AppShellClient.tsx` (GREEN) — vale desktop e barra inferior mobile
-- [ ] T009 [US1] Criar landing `src/app/[locale]/(app)/usar/page.tsx` (RSC): caminho "mostrar pra fora" → `/presenca`, "me preparar" → `/autoavaliacao`; textos via i18n
-- [ ] T010 [P] [US1] Adicionar chaves `usar.*` em `src/messages/pt-BR.json` + stub `en.json`
+- [ ] T009 [US1] Criar landing `src/app/[locale]/(app)/usar/page.tsx` (RSC): duas zonas lado a lado (empilha no mobile, sem card-grid) — **"Conteúdo"** → `/presenca`, **"Preparo"** → `/autoavaliacao`; cada uma com 1 linha de "quando"; textos via i18n
+- [ ] T010 [P] [US1] Adicionar chaves `usar.*` (título, Conteúdo/Preparo, 2 linhas de "quando") em `src/messages/pt-BR.json` + stub `en.json`
 - [ ] T011 [US1] Revisar menu e landing em 375px (mobile-first, constituição VIII) e a11y (labels, foco visível, alvos 48×48 — constituição V)
 
 **Checkpoint**: menu 4 destinos + landing funcionando e testados. **MVP entregável.**
