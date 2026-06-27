@@ -28,41 +28,23 @@ Features mergeadas em `main` (até PR #40):
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **019-autoavaliacao** (branch: `019-autoavaliacao`) — **modelo cockpit; US1–US3 + interação de revisão IMPLEMENTADAS (PR #46, ready)**
+Current feature: **022-landing-rebuild** (branch: `022-landing-rebuild`) — **rebuild da landing page: narrativa dos 4 verbos + pilar Provas + propriedade do dado + SEO/GEO 100% + mídia real via slots. Spec ✅ clarify ✅ plan ✅**
 
-> ⚠️ **Redesign (2026-06-19):** a autoavaliação deixou de ser "IA gera 2 variações → edita/copia"
-> (herdado do post) e virou **cockpit: lembrar → refletir → planejar** — **o usuário escreve a
-> própria autoavaliação**, a IA só ancora em fato e oferece um passo-pra-frente não-invasivo. Tese
-> dos **dois modos** (pra dentro = usuário escreve/IA ancora; pra fora = IA assiste). Direção +
-> pesquisa de mercado: `docs/estrategia-autoavaliacao-cockpit.md`, `docs/mercado.md`,
-> `docs/mapa-competitivo.md`. Spec reescrita: `specs/019-autoavaliacao/spec.md` (Clarifications
-> 2026-06-19 + user stories novas; as antigas estão no anexo "SUPERADAS"). **Fundação da PR 46 é
-> reaproveitada** (seed period, formato self_assessment, migration 013, nav, histórico, estado
-> limitado); o **fluxo de post (GenerateSheet/DraftCard) é descartado** como modelo da autoavaliação.
-> Próximo: `/speckit-tasks` (regerar — `tasks.md` atual é do modelo antigo) + `/impeccable shape` da
-> cabine de escrita; **Espelho v2** (incorporar autopercepção) é a propagação seguinte.
-Spec: [specs/019-autoavaliacao/spec.md](specs/019-autoavaliacao/spec.md) ·
-Plan: [specs/019-autoavaliacao/plan.md](specs/019-autoavaliacao/plan.md) ·
-Research: [specs/019-autoavaliacao/research.md](specs/019-autoavaliacao/research.md) ·
-Tasks: (pendente — regerar com `/speckit-tasks`)
-
-Quarto elo de retenção — **segundo payoff episódico**, modelo **cockpit**. A pessoa escolhe um
-**período** → vê **"o seu ano, em fatos"** (recap determinístico, factual, com fonte — **sem LLM**) →
-**escreve** a própria autoavaliação por seções, com trilha de evidências ao lado e IA **não-invasiva**
-(reescreve com minhas palavras / "não sei por onde começar" = 1 pergunta cuja resposta vira o rascunho / nudge STAR — nunca gera bloco, nunca dá
-nota) → recebe **uma** oferta de **passo-pra-frente** (plano GROW+70-20-10 ou prep de 1:1) ancorada nas
-palavras dela. **US1** recap (`lib/autoavaliacao/periodRecap.ts`, sobre `loadPeriodSeed`) + escrita
-assistida (`lib/ai/content/assist.ts`, rota `/api/autoavaliacao/assist`); **US2** passo-pra-frente
-(`/api/autoavaliacao/forward-step`, único LLM gerador, anti-invenção bloqueante, salvo em
-`drafts.qa.forwardStep`) + gatilho de calendário (`getReviewCycleSignal` paralelo ao `getReturnSignal`
-da 016, só painel, sem e-mail); **US3** histórico em `drafts` (isolado do espelho). **Sai do código:** o
-ramo `self_assessment` de `generateDraft`, `prompts/selfAssessment.ts`, e a extensão de
-`/api/content/generate`. Spec ✅, clarify ✅, plan ✅, research ✅, data-model ✅, contracts ✅, quickstart
-✅, tasks ⬜ (regerar). **Gate antes de codar:** `/impeccable shape` da cabine de escrita.
-
-**Migration 013** (renumerada de 012 — colidia com `012_entry_title.sql` da 017, já em `main`): estende
-os CHECKs de `drafts` (`format` += `self_assessment`, `seed_type` += `period`, `status` += `draft`) **e**
-adiciona `profiles.review_cycle_months` + `review_cycle_anchor` (aditivo, nullable). A autoavaliação
-**escrita** vive em `drafts` (`status='draft'`, `body` = texto humano, fora do ruleset anti-IA). Sem
-recorrência → gatilho proativo não dispara; escrita sob demanda nunca bloqueia.
+> Mescla decidida em `docs/decisions/001-landing-page-rebuild.md`: a issue #36 manda na
+> narrativa, voz e estrutura (headline da dor, eyebrow estilo dicionário, 4 verbos, CTA único,
+> sem depoimento fake); a auditoria de mercado entra como camada técnica de SEO/GEO (H1 único,
+> JSON-LD Software+Org+FAQ, llms.txt, SSR, crawlers de IA, meta/OG humanas) e reforço dos
+> diferenciais (Provas e "seu, não da sua empresa"). Os mockups fake (`MirrorMockup`,
+> `CareerMapMockup`, `ContentGenSection`) saem; entram slots de mídia (`MediaSlot`) com
+> placeholder agora, mídia real depois (vídeo do onboarding no hero + screenshot do card de
+> força em Provas). **Sem migration, sem API nova, sem dado de usuário.** Risco real é
+> conteúdo/voz (gate humano da Ohana). Hub de conteúdo e consenso off-site ficam FORA (trilha
+> GTM separada).
+Spec: [specs/022-landing-rebuild/spec.md](specs/022-landing-rebuild/spec.md) ·
+Plan: [specs/022-landing-rebuild/plan.md](specs/022-landing-rebuild/plan.md) ·
+Research: [specs/022-landing-rebuild/research.md](specs/022-landing-rebuild/research.md) ·
+Data-model: [specs/022-landing-rebuild/data-model.md](specs/022-landing-rebuild/data-model.md) ·
+Contracts: [specs/022-landing-rebuild/contracts/landing.md](specs/022-landing-rebuild/contracts/landing.md) ·
+Quickstart: [specs/022-landing-rebuild/quickstart.md](specs/022-landing-rebuild/quickstart.md) ·
+Tasks: (pendente — `/speckit-tasks`)
 <!-- SPECKIT END -->
