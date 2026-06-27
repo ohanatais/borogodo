@@ -23,8 +23,8 @@ independente (4 fases da reforma).
 - **Decisões de design (confirmadas)**: landing Usar = **Conteúdo** (→`/presenca`) + **Preparo**
   (→`/autoavaliacao`); Espelho = segmented **Forças/Trajetória**; porta do Painel = **abaixo do hero**.
 - **Próximo**: `/speckit-implement` (T001→T029) — T002 (gate de shape) já satisfeito.
-- **Nota**: o arquivo não-rastreado `src/components/features/painel/__tests__/IndicatorStrip.test.tsx`
-  já existia antes desta feature e **não pertence à 021** — não incorporar nos commits da reforma.
+- **Limpeza**: removido o teste órfão `src/components/features/painel/__tests__/IndicatorStrip.test.tsx`
+  (testava o `IndicatorStrip` deletado em `9209ca1`/017; quebraria o `npm test`). Confirmado pela Ohana.
 
 ## Format: `[ID] [P?] [Story] Description`
 
