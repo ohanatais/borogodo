@@ -17,6 +17,8 @@ export const NAV_DESTINOS: NavDestino[] = [
   { id: 'painel',    labelKey: 'appNav.painel',    icon: Home,       path: '/painel',    activePrefixes: ['/painel'] },
   { id: 'espelho',   labelKey: 'appNav.espelho',   icon: Sparkles,   path: '/espelho',   activePrefixes: ['/espelho'] },
   { id: 'registros', labelKey: 'appNav.registros', icon: LayoutList, path: '/registros', activePrefixes: ['/registros'] },
+  // "Usar" abre o splash de intenção (/usar); cada caminho leva a um hub ESCOPADO do Repertório
+  // (/presenca?hub=). /presenca e /autoavaliacao acendem o mesmo destino.
   { id: 'usar',      labelKey: 'appNav.usar',      icon: Compass,    path: '/usar',      activePrefixes: ['/usar', '/presenca', '/autoavaliacao'] },
 ]
 

@@ -54,12 +54,31 @@ describe('UsarLaunchpad', () => {
     })
   })
 
-  it('o card Bio gera uma mini-bio a partir do tema principal', () => {
+  it('o card Bio abre o seletor de foco; escolher um tema gera a mini-bio com esse ângulo', () => {
+    render(<UsarLaunchpad themes={['produto 0→1']} />)
+    // Clicar em Bio não gera direto — abre o seletor de foco (021).
+    act(() => {
+      screen.getByRole('button', { name: 'cards.bio' }).click()
+    })
+    expect(presenca).toBeNull()
+    // Escolher o tema como foco gera a mini-bio ancorada nesse ângulo.
+    act(() => {
+      screen.getByRole('button', { name: 'produto 0→1' }).click()
+    })
+    expect(presenca?.formats).toEqual(['mini_bio'])
+    expect(presenca?.angle).toBe('produto 0→1')
+  })
+
+  it('o foco "Geral" gera a mini-bio sem fixar num único tema', () => {
     render(<UsarLaunchpad themes={['produto 0→1']} />)
     act(() => {
       screen.getByRole('button', { name: 'cards.bio' }).click()
     })
+    act(() => {
+      screen.getByRole('button', { name: 'bioFocus.geral' }).click()
+    })
     expect(presenca?.formats).toEqual(['mini_bio'])
+    expect(presenca?.seedSummary).toBe('bioFocus.geral')
   })
 
   it('escolher um momento abre a bifurcação de preparação', () => {

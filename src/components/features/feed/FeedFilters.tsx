@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef } from 'react'
 import { Search, X } from 'lucide-react'
+import { Segmented } from '@/components/ui/Segmented'
 import type { FeedAxis } from '@/lib/feed/types'
 
 interface FeedFiltersProps {
@@ -78,34 +79,17 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Axis toggle */}
+      {/* Axis toggle — Segmented padrão do sistema (021) */}
       <div className="flex items-center gap-2">
-        <div
-          className="flex items-center p-0.5 rounded-full"
-          style={{ background: 'var(--muted)' }}
-          role="group"
-          aria-label="Eixo de ordenação"
-        >
-          {axes.map((axis) => {
-            const active = currentAxis === axis
-            return (
-              <button
-                key={axis}
-                type="button"
-                onClick={() => handleAxisChange(axis)}
-                aria-pressed={active}
-                className="text-xs px-3 py-1.5 rounded-full transition-all min-h-[44px] hover:opacity-80"
-                style={{
-                  background: active ? 'var(--color-primary)' : 'transparent',
-                  color: active ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
-                  fontWeight: active ? 600 : 400,
-                }}
-              >
-                {t(`axis.${axis}`)}
-              </button>
-            )
-          })}
-        </div>
+        <Segmented
+          ariaLabel="Eixo de ordenação"
+          items={axes.map((axis) => ({
+            key: axis,
+            label: t(`axis.${axis}`),
+            active: currentAxis === axis,
+            onClick: () => handleAxisChange(axis),
+          }))}
+        />
 
         {hasActiveFilters && (
           <button

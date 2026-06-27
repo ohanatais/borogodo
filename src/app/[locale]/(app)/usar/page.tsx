@@ -2,11 +2,16 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { Megaphone, ClipboardCheck } from 'lucide-react'
 
+/**
+ * Splash de intenção (021): a pessoa escolhe MOSTRAR (pra fora) ou PREPARAR (pra dentro) antes de
+ * entrar no Repertório. Cada caminho leva a um hub ESCOPADO (`?hub=`) — o destino mostra só aquele
+ * hub, não os dois. A clareza do splash + o foco do hub escopado é a ideia central da reforma.
+ */
 export default async function UsarPage() {
   const t = await getTranslations('usar')
 
   return (
-    <div className="max-w-3xl mx-auto px-5 lg:px-9 pt-10 pb-24 w-full">
+    <div className="max-w-[980px] mx-auto px-6 pt-10 pb-24 w-full">
       <header className="mb-8">
         <h1
           className="text-2xl lg:text-3xl font-semibold"
@@ -21,9 +26,9 @@ export default async function UsarPage() {
 
       {/* Duas zonas lado a lado, peso visual igual; empilham no mobile. Sem card-grid repetido. */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Pra fora — Conteúdo */}
+        {/* Pra fora — Conteúdo → hub MOSTRAR escopado */}
         <Link
-          href="/presenca"
+          href="/presenca?hub=mostrar"
           className="group flex flex-col gap-4 rounded-2xl p-6 min-h-44 transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           style={{ background: 'var(--color-lilas-nevoa)', outlineColor: 'var(--color-primary)' }}
         >
@@ -44,9 +49,9 @@ export default async function UsarPage() {
           </div>
         </Link>
 
-        {/* Pra dentro — Preparo */}
+        {/* Pra dentro — Preparo → hub PREPARAR escopado */}
         <Link
-          href="/autoavaliacao"
+          href="/presenca?hub=preparar"
           className="group flex flex-col gap-4 rounded-2xl p-6 min-h-44 transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           style={{ background: 'var(--color-warm)', outlineColor: 'var(--color-primary)' }}
         >

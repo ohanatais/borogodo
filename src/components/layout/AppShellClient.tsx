@@ -13,6 +13,7 @@ import { ChatSheet, openChatSheet, closeChatSheet } from '@/components/features/
 import { GenerateSheet } from '@/components/features/content/GenerateSheet'
 import type { CaptureInput as CapturePayload } from '@/types/capture'
 import { Logo } from '@/components/ui/Logo'
+import { Segmented } from '@/components/ui/Segmented'
 import { LogoutButton } from '@/components/features/auth/LogoutButton'
 import { NAV_DESTINOS, isActive } from './navModel'
 
@@ -53,10 +54,12 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
   const hideCapture = pathname.includes('/autoavaliacao')
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--color-creme)' }}>
+    // Frame de app com altura fixa: a janela não rola (sem rubber-band/barras brancas no topo e
+    // rodapé). Só o <main> rola; menu e barras ficam fixos. h-dvh acompanha a barra do mobile.
+    <div className="flex h-dvh overflow-hidden" style={{ background: 'var(--color-creme)' }}>
       {/* ── Desktop Sidebar ──────────────────────────── */}
       <aside
-        className="hidden lg:flex flex-col sticky top-0 h-screen shrink-0 border-r"
+        className="hidden lg:flex flex-col h-full shrink-0 border-r"
         style={{ width: '248px', background: 'var(--card)', borderColor: 'var(--border)' }}
       >
         {/* Logo */}
@@ -155,35 +158,16 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
         >
           <div className="max-w-[980px] mx-auto px-6 pt-4 pb-5">
             <div className="flex items-center gap-3">
-              {/* Toggle */}
-              <div
-                className="flex items-center p-0.5 rounded-full shrink-0"
-                style={{ background: 'oklch(100% 0 0 / 0.7)' }}
-              >
-                <button
-                  type="button"
-                  onClick={() => closeChatSheet()}
-                  aria-pressed={!chatOpen}
-                  className="text-xs px-3 py-1.5 rounded-full capitalize transition-all hover:opacity-80"
-                  style={{
-                    background: chatOpen ? 'transparent' : 'var(--color-primary)',
-                    color: chatOpen ? 'var(--muted-foreground)' : 'var(--color-primary-fg)',
-                  }}
-                >
-                  Registrar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openChatSheet()}
-                  aria-pressed={chatOpen}
-                  className="text-xs px-3 py-1.5 rounded-full capitalize transition-all hover:opacity-80"
-                  style={{
-                    background: chatOpen ? 'var(--color-primary)' : 'transparent',
-                    color: chatOpen ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
-                  }}
-                >
-                  Perguntar
-                </button>
+              {/* Toggle — Segmented padrão (021) */}
+              <div className="shrink-0">
+                <Segmented
+                  size="sm"
+                  ariaLabel="Modo da barra"
+                  items={[
+                    { key: 'registrar', label: 'Registrar', active: !chatOpen, onClick: () => closeChatSheet() },
+                    { key: 'perguntar', label: 'Perguntar', active: chatOpen, onClick: () => openChatSheet() },
+                  ]}
+                />
               </div>
               <div className="flex-1">
                 <CaptureInput
@@ -227,37 +211,16 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
           }}
         >
           {!hideCapture && (<>
-          {/* Row 0 — toggle Registrar | Perguntar (linha própria no mobile) */}
+          {/* Row 0 — toggle Registrar | Perguntar (Segmented padrão, linha própria no mobile) */}
           <div className="px-3 pt-2 pb-1">
-            <div
-              className="inline-flex items-center p-0.5 rounded-full"
-              style={{ background: 'oklch(100% 0 0 / 0.8)' }}
-            >
-              <button
-                type="button"
-                onClick={() => closeChatSheet()}
-                aria-pressed={!chatOpen}
-                className="text-xs px-3 py-1 rounded-full transition-all hover:opacity-80"
-                style={{
-                  background: chatOpen ? 'transparent' : 'var(--color-primary)',
-                  color: chatOpen ? 'var(--muted-foreground)' : 'var(--color-primary-fg)',
-                }}
-              >
-                Registrar
-              </button>
-              <button
-                type="button"
-                onClick={() => openChatSheet()}
-                aria-pressed={chatOpen}
-                className="text-xs px-3 py-1 rounded-full transition-all hover:opacity-80"
-                style={{
-                  background: chatOpen ? 'var(--color-primary)' : 'transparent',
-                  color: chatOpen ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
-                }}
-              >
-                Perguntar
-              </button>
-            </div>
+            <Segmented
+              size="sm"
+              ariaLabel="Modo da barra"
+              items={[
+                { key: 'registrar', label: 'Registrar', active: !chatOpen, onClick: () => closeChatSheet() },
+                { key: 'perguntar', label: 'Perguntar', active: chatOpen, onClick: () => openChatSheet() },
+              ]}
+            />
           </div>
 
           {/* Row 1 — captura: input + enviar + áudio + arquivo */}

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
 vi.mock('next-intl/server', () => ({
@@ -7,14 +7,15 @@ vi.mock('next-intl/server', () => ({
 
 import UsarPage from '../page'
 
-describe('UsarPage — landing de intenção', () => {
-  it('renderiza os dois caminhos: Conteúdo (pra fora) e Preparo (pra dentro)', async () => {
+describe('UsarPage — splash de intenção', () => {
+  it('renderiza os dois caminhos: Conteúdo e Preparo', async () => {
     render(await UsarPage())
     const links = Array.from(document.querySelectorAll('a[href]')).map(
       (a) => a.getAttribute('href') || ''
     )
-    expect(links).toContain('/presenca')
-    expect(links).toContain('/autoavaliacao')
+    // Cada caminho leva a um hub ESCOPADO do Repertório — não à tela com tudo (021).
+    expect(links).toContain('/presenca?hub=mostrar')
+    expect(links).toContain('/presenca?hub=preparar')
   })
 
   it('expõe exatamente dois caminhos (sem card-grid de opções extras)', async () => {

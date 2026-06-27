@@ -4,14 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
-import { RefreshCw, MessageSquare, Flag, UserSquare } from 'lucide-react'
+import { RefreshCw, MessageSquare, Flag } from 'lucide-react'
 import type { MirrorSnapshot } from '@/types/mirror'
 import { MirrorFeedback } from './MirrorFeedback'
 import { EvidenceText } from './EvidenceText'
 import { MacroCategoryTabs } from './MacroCategoryTabs'
 import { SectionLabel } from '@/components/ui/SectionLabel'
-import { UsarButton } from '@/components/features/content/UsarButton'
-import { openPresenca } from '@/components/features/content/presencaEvents'
 
 interface MirrorContentProps {
   snapshot: MirrorSnapshot
@@ -117,7 +115,6 @@ function MirrorHeader({ name, label, avatarUrl }: { name: string; label: string;
 
 export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorContentProps) {
   const t = useTranslations('espelho')
-  const tr = useTranslations('repertorio')
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [regenerateError, setRegenerateError] = useState<string | null>(null)
@@ -151,21 +148,11 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
     )
   }
 
-  // 017: o Espelho é onde a pessoa contempla quem é profissionalmente — o lugar certo pra virar
-  // isso numa bio. Reusa o motor de mini-bio com o tema de força principal como âncora da trajetória.
-  const primaryTheme = mirror.strength_themes[0]
-  function handleCreateBio() {
-    if (!primaryTheme) return
-    openPresenca({
-      seedType: 'theme',
-      seedRef: primaryTheme,
-      seedSummary: primaryTheme,
-      formats: ['mini_bio'],
-    })
-  }
-
   return (
-    <div className="max-w-[980px] mx-auto px-6 py-8">
+    // Container (largura/padding) é do /espelho: este é uma vista dentro do segmented control,
+    // não uma página própria. Só ritmo vertical aqui — assim Forças e Trajetória alinham na
+    // mesma margem esquerda do toggle (021).
+    <div className="pb-2">
       {personName && <MirrorHeader name={personName} label={t('mirrorOf')} avatarUrl={avatarUrl} />}
 
       <motion.div
@@ -232,28 +219,19 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
         {mirror.strength_themes.length > 0 && (
           <motion.div variants={item} className="pb-8">
             <SectionLabel>{t('themes')}</SectionLabel>
+            {/* Tags de leitura — só os temas, sem ação por item nem CTA de bio. A ação ("usar" um
+                tema, gerar bio) vive no destino Usar; aqui o Espelho é contemplação, não launchpad. */}
             <div className="flex flex-wrap gap-2">
               {mirror.strength_themes.map((theme) => (
                 <span
                   key={theme}
-                  className="inline-flex items-center gap-2 pl-3 pr-1.5 py-1 rounded-full text-sm font-medium border"
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border"
                   style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
                 >
                   {theme}
-                  <UsarButton seedType="theme" seedRef={theme} seedSummary={theme} formats={['post']} />
                 </span>
               ))}
             </div>
-
-            <button
-              type="button"
-              onClick={handleCreateBio}
-              className="mt-4 inline-flex items-center gap-2 text-sm font-medium px-4 py-2 min-h-[48px] rounded-full transition-opacity hover:opacity-80"
-              style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}
-            >
-              <UserSquare size={14} aria-hidden="true" />
-              {tr('bio.cta')}
-            </button>
           </motion.div>
         )}
 
