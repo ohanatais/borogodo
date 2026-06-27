@@ -34,16 +34,30 @@ mensal ficam adiadas até o produto provar retenção (#39 vira hipótese regist
 2. **Limite por hora nas ações caras (anti-robô):** espelho, post, autoavaliação, chat — no
    máximo *X por hora* por usuário (ex: 10). Humano normal nunca encosta; barra script/bot.
 3. **Trava geral de gasto diário (rede de segurança):** se o gasto total de IA do dia passar de
-   um valor configurável (ex: US$20), o sistema segura e avisa **a Ohana**. Protege contra bug
+   um valor configurável (**US$10**), o sistema segura e avisa **a Ohana**. Protege contra bug
    em loop. Não aparece pro usuário.
 4. **Mensagem honesta e gentil ao esbarrar num limite:** nunca corte seco, erro feio ou
    silêncio. Tom da marca ("você tá usando bastante, que bom — espera uns minutinhos").
+
+> **Refino na clarificação da spec (sessão 2026-06-27, `specs/023-freio-de-custo`):** o teto
+> diário caiu de US$20 → **US$10** (lançamento controlado, pouco uso esperado). E o "avisa a
+> Ohana" virou **dois e-mails para admin@borogodo.ai**: um **preventivo** ao cruzar um limiar
+> *antes* do teto (~70%), e outro ao **atingir** o teto. Os e-mails trazem retrato operacional do
+> dia: nº de usuários ativos, ranking de quem mais consome e quais usuários estão travados pelo
+> limite por hora.
 
 ### O que NÃO entra agora
 
 - Sem cobrança (preço, cartão, plano pago). Beta é grátis.
 - Sem cota mensal por usuário (ex: "30 posts/mês"). Ninguém sente teto mensal no beta.
-- Sem contagem de uso por ação pra pesquisar preço. Fica pra quando existir plano pago.
+- Sem contagem de uso por ação **para pesquisar preço (pricing)**. Isso fica pra quando existir
+  plano pago.
+
+> **Ampliação consciente (sessão 2026-06-27):** rastrear **gasto de IA por usuário** entra agora,
+> mas por propósito **operacional** (alimentar o ranking de consumo e a lista de "quem está
+> travado" nos e-mails de alerta — rodar o beta com segurança), **não** para calibrar preço. A
+> medição *para pricing* segue adiada junto da #39. A distinção é de finalidade: operação ≠
+> precificação.
 
 ### Decisão de monetização — registrada, não construída (#39)
 
