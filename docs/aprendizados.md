@@ -474,3 +474,59 @@ porque "veio do subagent" não substitui revisão de superfície sensível.
 lição contraintuitiva: não delegue "implemente a feature" num agente só; quebre em **autor de teste → 
 implementador**, e exija que o autor de teste devolva as assinaturas. O gargalo de qualidade some quando o
 contrato vem antes do código. Paralelizar é bônus ocasional; o ganho real é o RED→GREEN com handoff limpo.
+
+---
+
+## 2026-06-22 — Skill de projeto só roda de dentro do projeto
+
+**O que aconteceu:** comecei uma sessão na minha home (`~/Users/ohanatais`) e pedi `/product-north`
+aplicado a uma issue. O comando deu "Unknown skill", mesmo o skill existindo em
+`~/Documents/borogodo/.claude/skills/product-north`. O Claude carrega os skills a partir do
+diretório onde a sessão foi aberta — e a home não é o repo. Tive que rodar todo o pipeline
+(`product-north`, `speckit-specify`, `speckit-plan`, `speckit-tasks`, `impeccable shape`) na mão,
+lendo cada `SKILL.md` e executando os passos manualmente. Funcionou, mas é o caminho difícil.
+
+**O que aprendi:** os `/comandos` do projeto não são globais — eles vivem em `.claude/skills/` do
+repo e só viram comando de verdade quando o Claude é iniciado de dentro do repo (ou de uma worktree
+dele). Regra de bolso: antes de digitar `/qualquercoisa`, conferir com `pwd` se estou em
+`~/Documents/borogodo` (ou worktree). Se aparecer a home, `cd` pro repo e reabrir.
+
+**Por que importa:** explica um erro confuso ("o skill existe, por que não roda?") que custa tempo
+e abala a confiança de quem não é dev. O conserto é trivial uma vez que você sabe a causa — e a
+causa é onde você abriu o terminal, não o skill estar quebrado. Bom material de `build-with-claude`:
+"por que meu slash command sumiu?".
+
+---
+
+## 2026-06-27 — "Redundante" engana: pergunte o job do componente antes de deletar
+
+**O que aconteceu:** numa revisão de design da 021 pedi pra cortar tudo que parecia redundante no
+Painel, Espelho e menu Usar. Três cortes "óbvios" deram errado de jeitos diferentes — e cada erro
+ensinou a mesma coisa por um ângulo:
+1. **A porta de chat do Painel.** Parecia duplicar o "Perguntar" da barra global (os dois abrem o
+   mesmo chat). Removi. Estava errado: a redundância de *acesso* era real, mas a porta fazia outro
+   job — **descoberta** ("dá pra perguntar qualquer coisa?"). O conserto não foi trazer de volta
+   igual, foi trazer com copy que ensina, com exemplo de pergunta.
+2. **O splash /usar.** Parecia redundante com o Repertório (os dois separam mostrar/preparar).
+   Removi e mandei o menu direto pro /presenca. Errado de novo: o problema nunca foi o splash —
+   era o **destino não escopar** (clicava num caminho e via os dois hubs, "tudo tudo"). O splash
+   dava clareza; o bug era a tela seguinte. Voltei o splash e fiz cada caminho abrir só o seu hub.
+3. **A bio ancorada num tema.** A UI mostrava "Baseado em: <um tema>", então assumi que a geração
+   era estreita e ia redesenhar o seed. Fui ler o `loadSeed` antes: a evidência **já era ampla**
+   (entradas recentes) — o tema só dava o rótulo e o ângulo. O "redesign" virou uma mudança de
+   frontend de 20 linhas (deixar a pessoa escolher o foco), zero backend.
+
+**O que aprendi:** redundância *estrutural* (duas coisas que fazem a mesma ação) não é razão
+suficiente pra deletar. Antes de cortar, pergunte **qual job aquele elemento faz pro usuário** —
+acesso e descoberta são jobs diferentes; um splash de intenção e a tela que ele abre são jobs
+diferentes. E quando a UI sugere um comportamento "burro", **leia a camada de dados antes de
+redesenhar** — várias vezes o motor já fazia a coisa certa e o problema era só o rótulo. O loop que
+funcionou foi: analisar → propor e **confirmar** com a Ohana → implementar → reanalisar com ela
+olhando a tela real. Os erros só não viraram regressão porque cada corte voltou pra validação visual.
+
+**Por que importa:** "simplificar removendo o que parece repetido" é o conselho de design mais fácil
+de dar e o mais fácil de errar. O custo de deletar o que dá descoberta ou clareza só aparece quando
+um usuário real se perde — e aí já é tarde. Material direto de `product-thinking`: *a redundância
+boa existe* (reforço, descoberta, escopo progressivo); o trabalho é distinguir repetição de
+reforço, não caçar duplicatas. E de `build-with-claude`: peça pro agente ler o data layer antes de
+aceitar um redesenho baseado no que a tela aparenta.
