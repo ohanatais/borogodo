@@ -4,6 +4,7 @@ import { createServerClient } from '@/lib/db/supabase/server'
 import { getProfile } from '@/lib/db/profiles'
 import { IdentityCard } from '@/components/features/perfil/IdentityCard'
 import { LinksCard } from '@/components/features/perfil/LinksCard'
+import { ContactCard } from '@/components/features/support/ContactCard'
 
 export default async function ConfiguracoesPage() {
   const supabase = await createServerClient()
@@ -29,6 +30,7 @@ export default async function ConfiguracoesPage() {
       <div className="lg:grid lg:grid-cols-2 lg:gap-8 space-y-6 lg:space-y-0">
         <IdentityCard profile={profile} />
         <LinksCard profile={profile} />
+        <ContactCard />
       </div>
     </div>
   )

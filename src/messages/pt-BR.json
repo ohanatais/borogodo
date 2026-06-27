@@ -415,6 +415,17 @@
       "error": "Erro ao salvar. Tente de novo."
     }
   },
+  "support": {
+    "heading": "Precisa de ajuda?",
+    "emailLabel": "Fala com a gente",
+    "copyButton": "Copiar e-mail",
+    "copied": "Copiado!",
+    "copyFailed": "Não consegui copiar, o e-mail está aí pra selecionar.",
+    "linkedinLabel": "Prefere conversar?",
+    "linkedinCta": "Me chama no LinkedIn",
+    "sla": "Tem uma pessoa de verdade do outro lado, eu mesma. Respondo em até 2 dias úteis.",
+    "credits": "Borogodó · feito no Brasil · {ano}"
+  },
   "bemvindo": {
     "step1": {
       "headline": "Olá, {nome}.",
