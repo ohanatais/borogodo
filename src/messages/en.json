@@ -107,7 +107,11 @@
     "greeting": "Hello, {name}",
     "placeholder": "Your dashboard is coming. Everything's good for now.",
     "logout": "Sign out",
-    "logoutAriaLabel": "End session"
+    "logoutAriaLabel": "End session",
+    "chatDoor": {
+      "placeholder": "Ask your borogodó…",
+      "ariaLabel": "Open chat and ask"
+    }
   },
   "panel": {
     "status": {
@@ -175,6 +179,8 @@
   "appNav": {
     "painel": "Painel",
     "espelho": "Espelho",
+    "registros": "Registros",
+    "usar": "Usar",
     "historico": "Linha do Tempo",
     "conteudo": "Conteúdo",
     "verConta": "Ver conta",
@@ -183,6 +189,18 @@
     "captureHint": "Conte o que você fez hoje...",
     "askHint": "Pergunte algo sobre sua carreira...",
     "send": "Enviar"
+  },
+  "usar": {
+    "title": "O que você quer fazer com o seu borogodó?",
+    "subtitle": "Dois caminhos: mostrar pra fora ou se preparar pra dentro.",
+    "conteudo": {
+      "label": "Conteúdo",
+      "when": "Mostrar seu valor pra fora — post, bio."
+    },
+    "preparo": {
+      "label": "Preparo",
+      "when": "Chegar pronto num momento — review, entrevista."
+    }
   },
   "capture": {
     "composer": {

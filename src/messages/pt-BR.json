@@ -135,7 +135,11 @@
     "greeting": "Olá, {name}",
     "placeholder": "Seu painel está chegando. Por enquanto, tudo certo.",
     "logout": "Sair",
-    "logoutAriaLabel": "Encerrar sessão"
+    "logoutAriaLabel": "Encerrar sessão",
+    "chatDoor": {
+      "placeholder": "Pergunte ao seu borogodó…",
+      "ariaLabel": "Abrir conversa e perguntar"
+    }
   },
   "panel": {
     "status": {
@@ -220,6 +224,10 @@
     }
   },
   "espelho": {
+    "views": {
+      "forcas": "Forças",
+      "trajetoria": "Trajetória"
+    },
     "back": "← Voltar ao painel",
     "mirrorOf": "Espelho de",
     "regenerate": "Gerar novo espelho",
@@ -288,6 +296,8 @@
   "appNav": {
     "painel": "Painel",
     "espelho": "Espelho",
+    "registros": "Registros",
+    "usar": "Usar",
     "historico": "Linha do Tempo",
     "conteudo": "Conteúdo",
     "verConta": "Ver conta",
@@ -296,6 +306,18 @@
     "captureHint": "Conte o que você fez hoje...",
     "askHint": "Pergunte algo sobre sua carreira...",
     "send": "Enviar"
+  },
+  "usar": {
+    "title": "O que você quer fazer com o seu borogodó?",
+    "subtitle": "Dois caminhos: mostrar pra fora ou se preparar pra dentro.",
+    "conteudo": {
+      "label": "Conteúdo",
+      "when": "Mostrar seu valor pra fora — post, bio."
+    },
+    "preparo": {
+      "label": "Preparo",
+      "when": "Chegar pronto num momento — review, entrevista."
+    }
   },
   "capture": {
     "composer": {

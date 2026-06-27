@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/db/supabase/server'
 import { BorogodoCard } from '@/components/features/painel/BorogodoCard'
 import { UsarInvite } from '@/components/features/painel/UsarInvite'
 import { ProactiveInsightCard } from '@/components/features/painel/ProactiveInsightCard'
+import { PainelChatDoor } from '@/components/features/painel/PainelChatDoor'
 import { PanelEmptyState } from '@/components/features/painel/PanelEmptyState'
 import { MiniTimeline } from '@/components/features/painel/MiniTimeline'
 import { RecentEntries } from '@/components/features/painel/RecentEntries'
@@ -36,6 +37,11 @@ export default async function PainelPage() {
             mirror={data.mirror}
             entryCount={data.entryCount}
           />
+
+          {/* Porta de conversa (021) — aditiva, logo abaixo do hero; abre o chat em modo pergunta. */}
+          <div className="mt-4">
+            <PainelChatDoor />
+          </div>
 
           <div className="mt-6 lg:grid lg:grid-cols-[1fr_300px] lg:gap-8 lg:items-start">
             {/* Main — the proof: concrete wins, the proactive insight, then recent activity → feed */}

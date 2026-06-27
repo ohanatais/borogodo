@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Sparkles, GitCommitVertical, PenLine, Paperclip, LayoutList, ClipboardCheck, User } from 'lucide-react'
+import { Paperclip, User } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { CaptureInput } from '@/components/features/capture/CaptureInput'
@@ -14,25 +14,9 @@ import { GenerateSheet } from '@/components/features/content/GenerateSheet'
 import type { CaptureInput as CapturePayload } from '@/types/capture'
 import { Logo } from '@/components/ui/Logo'
 import { LogoutButton } from '@/components/features/auth/LogoutButton'
+import { NAV_DESTINOS, isActive } from './navModel'
 
 const ARTIFACT_THRESHOLD_CHARS = 150
-
-interface NavItem {
-  id: string
-  label: string
-  icon: React.ReactNode
-  path: string | null
-  disabled?: boolean
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { id: 'painel',     label: 'Painel',         icon: <Home size={20} />,              path: '/painel'     },
-  { id: 'espelho',    label: 'Espelho',         icon: <Sparkles size={20} />,          path: '/espelho'    },
-  { id: 'registros',  label: 'Registros',       icon: <LayoutList size={20} />,        path: '/registros'  },
-  { id: 'historico',  label: 'Linha do Tempo',  icon: <GitCommitVertical size={20} />, path: '/historico'  },
-  { id: 'presenca',   label: 'Repertório',      icon: <PenLine size={20} />,           path: '/presenca'   },
-  { id: 'autoavaliacao', label: 'Autoavaliação', icon: <ClipboardCheck size={20} />,   path: '/autoavaliacao' },
-]
 
 interface AppShellClientProps {
   userName: string
@@ -42,6 +26,7 @@ interface AppShellClientProps {
 export function AppShellClient({ userName, children }: AppShellClientProps) {
   const pathname = usePathname()
   const t = useTranslations('capture')
+  const tNav = useTranslations()
   const [activeCapture, setActiveCapture] = useState<CapturePayload | null>(null)
   const [projectContext, setProjectContext] = useState<{ name: string; company: string } | null>(null)
   const [chatOpen, setChatOpen] = useState(false)
@@ -63,11 +48,6 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
     }
   }, [])
 
-  function isActive(path: string | null): boolean {
-    if (!path) return false
-    return pathname.includes(path)
-  }
-
   // A autoavaliação é a única superfície "pra dentro" (a pessoa ESCREVE). A barra de captura ("pra
   // fora") sobreporia o editor e brigaria de modo: escondida aqui. A nav mobile permanece.
   const hideCapture = pathname.includes('/autoavaliacao')
@@ -88,8 +68,10 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
 
         {/* Nav */}
         <nav className="flex-1 py-4 px-3" aria-label="Navegação principal">
-          {NAV_ITEMS.map((item) => {
-            const active = isActive(item.path)
+          {NAV_DESTINOS.map((item) => {
+            const active = isActive(item, pathname)
+            const Icon = item.icon
+            const label = tNav(item.labelKey)
             return (
               <div key={item.id} className="relative mb-1">
                 {active && (
@@ -99,28 +81,19 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
                     aria-hidden="true"
                   />
                 )}
-                {item.disabled || !item.path ? (
-                  <span
-                    className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm cursor-not-allowed opacity-40"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    {item.icon}
-                    {item.label}
-                  </span>
-                ) : (
-                  <Link
-                    href={item.path}
-                    className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors"
-                    style={{
-                      background: active ? 'var(--color-lilas-nevoa)' : 'transparent',
-                      color: active ? 'var(--color-primary)' : 'var(--muted-foreground)',
-                      fontWeight: active ? 600 : 400,
-                    }}
-                  >
-                    {item.icon}
-                    {item.label}
-                  </Link>
-                )}
+                <Link
+                  href={item.path}
+                  aria-current={active ? 'page' : undefined}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors"
+                  style={{
+                    background: active ? 'var(--color-lilas-nevoa)' : 'transparent',
+                    color: active ? 'var(--color-primary)' : 'var(--muted-foreground)',
+                    fontWeight: active ? 600 : 400,
+                  }}
+                >
+                  <Icon size={20} />
+                  {label}
+                </Link>
               </div>
             )
           })}
@@ -328,28 +301,21 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
             className="flex items-center justify-around px-2 pb-2"
             aria-label="Navegação"
           >
-            {NAV_ITEMS.map((item) => {
-              const active = isActive(item.path)
-              return !item.path ? (
-                <span
-                  key={item.id}
-                  aria-label={item.label}
-                  className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg opacity-30 cursor-not-allowed"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  {item.icon}
-                  <span className="text-[10px] font-medium">{item.label}</span>
-                </span>
-              ) : (
+            {NAV_DESTINOS.map((item) => {
+              const active = isActive(item, pathname)
+              const Icon = item.icon
+              const label = tNav(item.labelKey)
+              return (
                 <Link
                   key={item.id}
                   href={item.path}
-                  aria-label={item.label}
-                  className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors"
+                  aria-label={label}
+                  aria-current={active ? 'page' : undefined}
+                  className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors min-w-12 min-h-12 justify-center"
                   style={{ color: active ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
                 >
-                  {item.icon}
-                  <span className="text-[10px] font-medium">{item.label}</span>
+                  <Icon size={20} />
+                  <span className="text-[10px] font-medium">{label}</span>
                 </Link>
               )
             })}

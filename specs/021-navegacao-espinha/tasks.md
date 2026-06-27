@@ -18,8 +18,9 @@ independente (4 fases da reforma).
 
 ## Status da execução
 
-- **Passo atual**: `/impeccable shape` ✅ **confirmado** — design brief em
-  [design-brief.md](./design-brief.md). **Implementação NÃO iniciada**: 0/29 tarefas concluídas.
+- **Passo atual**: `/speckit-implement` ✅ **código completo** — US1–US4 implementadas com TDD.
+  Verde: `npm test` 1686 passed, `npm run build` ok, `tsc --noEmit` ok. **Pendente (gates manuais)**:
+  T026 (quickstart fase a fase), T028 (`/impeccable audit` + `web-design-guidelines`), T029 (aprendizados).
 - **Decisões de design (confirmadas)**: landing Usar = **Conteúdo** (→`/presenca`) + **Preparo**
   (→`/autoavaliacao`); Espelho = segmented **Forças/Trajetória**; porta do Painel = **abaixo do hero**.
 - **Próximo**: `/speckit-implement` (T001→T029) — T002 (gate de shape) já satisfeito.
