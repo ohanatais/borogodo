@@ -16,6 +16,14 @@ quickstart.md ✅
 **Organization**: tarefas agrupadas por user story; cada uma é entregável e testável de forma
 independente (4 fases da reforma).
 
+## Status da execução
+
+- **Passo atual**: `/impeccable shape` (planejamento de UX) — aguardando confirmação do design
+  brief. **Implementação NÃO iniciada**: 0/29 tarefas concluídas.
+- **Próximo**: `/speckit-implement` (T001→T029) após confirmar o brief.
+- **Nota**: o arquivo não-rastreado `src/components/features/painel/__tests__/IndicatorStrip.test.tsx`
+  já existia antes desta feature e **não pertence à 021** — não incorporar nos commits da reforma.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: pode rodar em paralelo (arquivos diferentes, sem dependência pendente)
