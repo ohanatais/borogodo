@@ -1,21 +1,16 @@
-'use client'
-
-import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 
 const painPointKeys = [0, 1, 2, 3] as const
 
+/** Dores da landing (feature 022). Server Component. As 4 dores na voz nova. */
 export function PainPointsSection() {
   const t = useTranslations('painPoints')
 
   return (
-    <section
-      style={{ background: 'var(--background)' }}
-      className="px-6 py-20 md:py-28"
-    >
-      <div className="max-w-4xl mx-auto">
+    <section style={{ background: 'var(--background)' }} className="px-6 py-20 md:py-28">
+      <div className="mx-auto max-w-4xl">
         <h2
-          className="text-2xl md:text-3xl mb-16"
+          className="mb-16 text-2xl md:text-3xl"
           style={{
             fontFamily: 'var(--font-display)',
             color: 'var(--foreground)',
@@ -23,45 +18,27 @@ export function PainPointsSection() {
             letterSpacing: '-0.015em',
           }}
         >
-          <strong style={{ fontWeight: 700 }}>Você já sabe </strong>
-          <em style={{ fontWeight: 400, fontStyle: 'italic' }}>que tem mais para mostrar.</em>
+          {t('title')}
         </h2>
 
-        <div className="grid md:grid-cols-2 gap-x-16 gap-y-12">
+        <div className="grid gap-x-16 gap-y-12 md:grid-cols-2">
           {painPointKeys.map((i) => (
-            <motion.article
-              key={i}
-              initial={{ y: 16 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{
-                duration: 0.55,
-                ease: [0.16, 1, 0.3, 1],
-                delay: i * 0.09,
-              }}
-            >
+            <article key={i}>
               <span
-                className="block w-1.5 h-1.5 rounded-full mb-4"
+                className="mb-4 block h-1.5 w-1.5 rounded-full"
                 style={{ background: 'var(--color-accent)' }}
                 aria-hidden="true"
               />
               <h3
-                className="text-lg font-semibold mb-3"
-                style={{
-                  color: 'var(--foreground)',
-                  fontFamily: 'var(--font-display)',
-                  letterSpacing: '-0.01em',
-                }}
+                className="mb-3 text-lg font-semibold"
+                style={{ color: 'var(--foreground)', fontFamily: 'var(--font-display)', letterSpacing: '-0.01em' }}
               >
                 {t(`items.${i}.title`)}
               </h3>
-              <p
-                className="text-base leading-relaxed"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
+              <p className="text-base leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
                 {t(`items.${i}.description`)}
               </p>
-            </motion.article>
+            </article>
           ))}
         </div>
       </div>

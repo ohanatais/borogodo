@@ -2,19 +2,18 @@ import { render } from '@testing-library/react'
 import { CtaSection } from '../CtaSection'
 
 describe('CtaSection', () => {
-  it('T029: "Criar conta" links to /login?mode=signup', () => {
+  it('has a single signup CTA to /login?mode=signup', () => {
     const { container } = render(<CtaSection />)
     expect(container.querySelector('a[href="/login?mode=signup"]')).toBeInTheDocument()
   })
 
-  it('T029: "Já tenho conta" links to /login', () => {
+  it('does not render a secondary "Entrar" link (single CTA)', () => {
     const { container } = render(<CtaSection />)
-    expect(container.querySelector('a[href="/login"]')).toBeInTheDocument()
+    expect(container.querySelector('a[href="/login"]')).not.toBeInTheDocument()
   })
 
-  it('has no form or input elements', () => {
+  it('has exactly one link (single CTA)', () => {
     const { container } = render(<CtaSection />)
-    expect(container.querySelector('form')).not.toBeInTheDocument()
-    expect(container.querySelector('input')).not.toBeInTheDocument()
+    expect(container.querySelectorAll('a')).toHaveLength(1)
   })
 })

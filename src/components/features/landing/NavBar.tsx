@@ -5,6 +5,13 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Logo } from '@/components/ui/Logo'
 
+const anchors = [
+  { href: '#como-funciona', key: 'anchorHow' },
+  { href: '#provas', key: 'anchorProof' },
+  { href: '#privacidade', key: 'anchorPrivacy' },
+  { href: '#perguntas', key: 'anchorFaq' },
+] as const
+
 export function NavBar() {
   const [scrolled, setScrolled] = useState(false)
   const t = useTranslations('nav')
@@ -23,19 +30,29 @@ export function NavBar() {
         borderBottom: scrolled ? '1px solid var(--border)' : 'none',
       }}
     >
-      <div className="max-w-5xl mx-auto h-16 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto h-16 flex items-center justify-between gap-4">
         <Logo variant={scrolled ? 'light' : 'dark'} size="sm" />
 
+        <div className="hidden md:flex items-center gap-7">
+          {anchors.map((a) => (
+            <a
+              key={a.href}
+              href={a.href}
+              className="text-sm font-medium transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded"
+              style={{ color: scrolled ? 'var(--foreground)' : 'var(--color-primary-fg)' }}
+            >
+              {t(a.key)}
+            </a>
+          ))}
+        </div>
+
         <Link
-          href="/login?mode=signup"
-          aria-label={t('ctaAriaLabel')}
-          className="inline-flex items-center justify-center px-5 py-2 rounded-full text-sm font-semibold transition-colors duration-300"
-          style={{
-            background: scrolled ? 'var(--color-primary)' : 'var(--background)',
-            color: scrolled ? 'var(--color-primary-fg)' : 'var(--color-primary)',
-          }}
+          href="/login"
+          aria-label={t('signInAriaLabel')}
+          className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          style={{ color: scrolled ? 'var(--color-primary)' : 'var(--color-primary-fg)' }}
         >
-          {t('cta')}
+          {t('signIn')}
         </Link>
       </div>
     </nav>

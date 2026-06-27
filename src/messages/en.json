@@ -1,64 +1,56 @@
 {
   "metadata": {
-    "title": "",
-    "description": ""
+    "title": "Borogodó: descubra no que você é bom e aprenda a mostrar",
+    "description": "O Borogodó organiza o que você já fez no trabalho, mostra seus pontos fortes com a prova junto e te ajuda a falar do seu valor sem travar. Comece de graça.",
+    "ogTitle": "Você sabe trabalhar. Falar do seu trabalho é que trava.",
+    "ogDescription": "O Borogodó mostra no que você é bom, com a prova do lado e na sua voz. De graça pra começar."
   },
   "hero": {
-    "tagline": "",
-    "headline": "",
-    "headlineEmphasis": "",
-    "subheadline": "",
-    "cta": {
-      "primary": "",
-      "secondary": "",
-      "primaryAriaLabel": "",
-      "secondaryAriaLabel": ""
+    "eyebrow": "borogodó (substantivo): aquele quê que só você tem.",
+    "headline": "Você sabe trabalhar.",
+    "headlineEmphasis": "Falar do seu trabalho é que trava.",
+    "subheadline": "O Borogodó é a primeira inteligência de carreira com IA em português. Ele junta tudo que você já fez no trabalho, te mostra no que você é bom e por quê, e guarda com a prova junto. Quando você precisar falar de você, numa entrevista ou numa avaliação, a história já tá pronta.",
+    "cta": "Ver o meu borogodó",
+    "ctaAriaLabel": "Criar conta e ver o meu borogodó",
+    "microcopy": "É de graça. Em uns 5 minutos você já vê o primeiro resultado.",
+    "microTrust": "Feito no Brasil · Seus dados são seus",
+    "demo": {
+      "statusLabel": "analisando experiência",
+      "inputLabel": "o que você contou",
+      "inputText": "Organizei a força-tarefa na crise do servidor e alinhei os times em tempo real.",
+      "outputLabel": "o que o Borogodó viu",
+      "forceLabel": "Liderança sob pressão",
+      "proofPrefix": "você mesma contou:",
+      "proofText": "alinhei os times em tempo real na crise do servidor",
+      "placeholderNote": "Em breve, o vídeo real do seu primeiro borogodó aqui."
     }
   },
   "painPoints": {
-    "title": "",
+    "title": "Você já sabe que tem mais pra mostrar.",
     "items": [
-      { "title": "", "description": "" },
-      { "title": "", "description": "" },
-      { "title": "", "description": "" },
-      { "title": "", "description": "" }
+      {
+        "title": "Você entrega muito e o mundo vê pouco.",
+        "description": "Tem anos de trabalho bom acumulado, mas quem não te acompanha de perto não faz ideia. O problema não tá no que você fez. Tá no fato de que isso nunca ficou registrado em lugar nenhum."
+      },
+      {
+        "title": "Na hora de falar de você, dá branco.",
+        "description": "Você sabe que segurou aquele projeto quase sozinha. Aí chega na conversa de avaliação e os detalhes somem. Fica sem o número, sem o exemplo, sem o argumento na mão."
+      },
+      {
+        "title": "Você tem o que dizer, mas não sai.",
+        "description": "A experiência tá toda aí. Transformar isso num texto que parece você falando, e não um robô, trava antes mesmo de começar."
+      },
+      {
+        "title": "Você cresceu muito e não sabe explicar como.",
+        "description": "Hoje você é uma profissional bem diferente da que começou. Mas essa evolução tá só na sua cabeça, sem forma e sem nome."
+      }
     ]
-  },
-  "howItWorks": {
-    "title": "",
-    "subtitle": "",
-    "steps": [
-      { "number": "01", "title": "", "description": "" },
-      { "number": "02", "title": "", "description": "" },
-      { "number": "03", "title": "", "description": "" }
-    ]
-  },
-  "mirror": {
-    "title": "",
-    "subtitle": "",
-    "patternLabel": "",
-    "evidenceLabel": "",
-    "insightLabel": ""
-  },
-  "careerMap": {
-    "title": "",
-    "subtitle": "",
-    "clustersLabel": "",
-    "timelineLabel": ""
-  },
-  "contentGen": {
-    "title": "",
-    "subtitle": "",
-    "realLabel": "",
-    "genericLabel": ""
   },
   "cta": {
-    "title": "",
-    "subtitle": "",
-    "primary": "",
-    "secondary": "",
-    "primaryAriaLabel": "",
-    "secondaryAriaLabel": ""
+    "title": "O seu borogodó já existe.",
+    "subtitle": "Você só ainda não viu ele inteiro. Começa de graça e leva uns 5 minutos.",
+    "primary": "Ver o meu borogodó",
+    "primaryAriaLabel": "Criar conta e ver o meu borogodó"
   },
   "auth": {
     "headline": {
@@ -636,5 +628,93 @@
     "viewAll": "View all →",
     "deleteError": "Couldn't delete this record. It's still here.",
     "deleteErrorDismiss": "Ok"
+  },
+  "nav": {
+    "signIn": "Entrar",
+    "signInAriaLabel": "Entrar na minha conta",
+    "anchorHow": "Como funciona",
+    "anchorProof": "Provas",
+    "anchorPrivacy": "Privacidade",
+    "anchorFaq": "Perguntas"
+  },
+  "journey": {
+    "title": "Do silêncio ao \"é isso que eu faço de melhor\".",
+    "steps": [
+      {
+        "verb": "Descobrir",
+        "quote": "Eu não sabia que era boa nisso.",
+        "description": "Você conta o que fez, do seu jeito. O Borogodó acha a força que tava ali e você nem tinha percebido."
+      },
+      {
+        "verb": "Entender",
+        "quote": "Agora vejo a forma da minha carreira.",
+        "description": "Suas forças aparecem organizadas por tipo, cada uma com o exemplo real que provou ela."
+      },
+      {
+        "verb": "Provar",
+        "quote": "Tenho como comprovar.",
+        "description": "Toda força vem de algo que aconteceu de verdade. Quando não tem como comprovar, o Borogodó te pergunta em vez de inventar."
+      },
+      {
+        "verb": "Usar",
+        "quote": "Sei mostrar do meu jeito.",
+        "description": "Numa entrevista, numa avaliação, num post. Você pega o que precisa e fala com as suas palavras."
+      }
+    ]
+  },
+  "proof": {
+    "title": "Não inventa. Mostra a prova.",
+    "body": "IA generativa é boa em inventar coisa bonita sobre você. O Borogodó faz o contrário. Cada força que ele aponta nasce de algo que você registrou, e vem com a prova do lado. Se ele diz que você lidera bem na incerteza, é porque tem no seu registro três projetos de crise entregues no prazo e quatro feedbacks falando de calma sob pressão. Quando falta prova pra sustentar uma força, ele te pergunta em vez de chutar.",
+    "mediaLabel": "Card de força com a evidência citada",
+    "mediaNote": "Em breve, o print real do seu espelho aqui."
+  },
+  "ownership": {
+    "title": "Seu. Não da sua empresa.",
+    "body": "Ferramentas de avaliação trabalham pro empregador. Existem pra alimentar a decisão de calibração e salário que a empresa controla, e quando você sai, o dado fica lá. O Borogodó trabalha pra você. Seu registro é privado e portátil, e ninguém da empresa lê. Na hora da avaliação corporativa, você copia o que quiser pro sistema deles. A fonte continua sua.",
+    "signals": [
+      "Dados criptografados",
+      "Só você vê",
+      "Exportável quando quiser",
+      "Sem acesso do empregador"
+    ]
+  },
+  "manifesto": {
+    "title": "Mostrar o seu valor não é se gabar.",
+    "body": "Lá fora ensinam a se vender. Aqui no Brasil isso dá um desconforto danado, e tem razão de dar. Mostrar o seu borogodó é outra coisa. É deixar claro o que você já faz bem, com a prova do lado. O Borogodó faz a parte chata disso por você, sem floreio e sem aquele tom de IA que todo mundo reconhece de longe."
+  },
+  "socialProof": {
+    "title": "Feito à vista de todos.",
+    "body": "O Borogodó tá sendo construído no aberto por uma PM brasileira, que vai postando o processo conforme faz. Sem depoimento inventado e sem número de fachada. Se quiser ver como tá ficando, é só acompanhar.",
+    "link": "Ver os bastidores",
+    "linkAriaLabel": "Ver os bastidores no LinkedIn da fundadora"
+  },
+  "faq": {
+    "title": "Perguntas que todo mundo faz.",
+    "items": {
+      "free": {
+        "question": "É de graça?",
+        "answer": "Pra começar, é. Você cria a conta e monta o seu primeiro borogodó sem pagar nada."
+      },
+      "how": {
+        "question": "Como funciona na prática?",
+        "answer": "Você conta o que fez no trabalho, escrevendo, falando ou subindo um PDF. O Borogodó organiza, acha seus pontos fortes e guarda tudo com a prova junto."
+      },
+      "robot": {
+        "question": "A IA vai escrever por mim e ficar com cara de robô?",
+        "answer": "Não. Ela parte do que você contou e usa as suas palavras. Quando falta informação, ela pergunta em vez de inventar."
+      },
+      "chatgpt": {
+        "question": "É diferente de pedir pro ChatGPT?",
+        "answer": "É. O ChatGPT não conhece a sua trajetória e gera texto genérico a partir de um prompt solto. O Borogodó parte do seu registro acumulado e mostra quem você é de verdade, com prova e na sua voz."
+      },
+      "privacy": {
+        "question": "Meus dados ficam seguros?",
+        "answer": "Ficam. Só você vê o seu borogodó, e nada sai pra lugar nenhum sem você mandar. Sua empresa não vê o que você registra."
+      },
+      "effort": {
+        "question": "Preciso escrever muito pra valer a pena?",
+        "answer": "Não. Dá pra começar com uma coisa pequena que você fez essa semana e ir somando no seu ritmo."
+      }
+    }
   }
 }
