@@ -135,7 +135,11 @@
     "greeting": "Olá, {name}",
     "placeholder": "Seu painel está chegando. Por enquanto, tudo certo.",
     "logout": "Sair",
-    "logoutAriaLabel": "Encerrar sessão"
+    "logoutAriaLabel": "Encerrar sessão",
+    "chatDoor": {
+      "placeholder": "Pergunte qualquer coisa sobre sua carreira — ex.: \"o que me destaca?\"",
+      "ariaLabel": "Abrir conversa e perguntar sobre sua carreira"
+    }
   },
   "panel": {
     "status": {
@@ -220,6 +224,10 @@
     }
   },
   "espelho": {
+    "views": {
+      "forcas": "Forças",
+      "trajetoria": "Trajetória"
+    },
     "back": "← Voltar ao painel",
     "mirrorOf": "Espelho de",
     "regenerate": "Gerar novo espelho",
@@ -288,6 +296,8 @@
   "appNav": {
     "painel": "Painel",
     "espelho": "Espelho",
+    "registros": "Registros",
+    "usar": "Usar",
     "historico": "Linha do Tempo",
     "conteudo": "Conteúdo",
     "verConta": "Ver conta",
@@ -526,7 +536,8 @@
         "edited": "Editado",
         "copied": "Copiado",
         "discarded": "Arquivado"
-      }
+      },
+      "backToUsar": "Voltar"
     },
     "loadMore": "Carregar mais",
     "filterEmpty": "Nenhum rascunho neste filtro.",
@@ -690,7 +701,8 @@
     "moments": {
       "entrevista": "Entrevista",
       "review": "Conversa de avaliação",
-      "salario": "Pedir aumento"
+      "salario": "Pedir aumento",
+      "autoavaliacao": "Escrever autoavaliação"
     },
     "prepare": {
       "heading": "Como você quer se preparar?",
@@ -701,12 +713,12 @@
       "back": "Voltar",
       "noTheme": "Gere seu Espelho primeiro pra eu conhecer sua trajetória."
     },
-    "invite": {
-      "title": "Pronto pra usar?",
-      "cta": "Abrir"
-    },
     "bio": {
       "cta": "Criar minha bio"
+    },
+    "bioFocus": {
+      "title": "Sobre o que é a bio?",
+      "geral": "Geral (trajetória inteira)"
     }
   },
   "feed": {
@@ -757,5 +769,17 @@
     "viewAll": "Ver tudo →",
     "deleteError": "Não consegui excluir esse registro. Ele continua aqui.",
     "deleteErrorDismiss": "Ok"
+  },
+  "usar": {
+    "title": "O que você quer fazer com o seu borogodó?",
+    "subtitle": "Dois caminhos: mostrar pra fora ou se preparar pra dentro.",
+    "conteudo": {
+      "label": "Conteúdo",
+      "when": "Mostrar seu valor pra fora — post, bio."
+    },
+    "preparo": {
+      "label": "Preparo",
+      "when": "Chegar pronto num momento — entrevista, avaliação, aumento."
+    }
   }
 }

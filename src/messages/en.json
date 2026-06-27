@@ -18,19 +18,43 @@
   "painPoints": {
     "title": "",
     "items": [
-      { "title": "", "description": "" },
-      { "title": "", "description": "" },
-      { "title": "", "description": "" },
-      { "title": "", "description": "" }
+      {
+        "title": "",
+        "description": ""
+      },
+      {
+        "title": "",
+        "description": ""
+      },
+      {
+        "title": "",
+        "description": ""
+      },
+      {
+        "title": "",
+        "description": ""
+      }
     ]
   },
   "howItWorks": {
     "title": "",
     "subtitle": "",
     "steps": [
-      { "number": "01", "title": "", "description": "" },
-      { "number": "02", "title": "", "description": "" },
-      { "number": "03", "title": "", "description": "" }
+      {
+        "number": "01",
+        "title": "",
+        "description": ""
+      },
+      {
+        "number": "02",
+        "title": "",
+        "description": ""
+      },
+      {
+        "number": "03",
+        "title": "",
+        "description": ""
+      }
     ]
   },
   "mirror": {
@@ -107,7 +131,11 @@
     "greeting": "Hello, {name}",
     "placeholder": "Your dashboard is coming. Everything's good for now.",
     "logout": "Sign out",
-    "logoutAriaLabel": "End session"
+    "logoutAriaLabel": "End session",
+    "chatDoor": {
+      "placeholder": "Ask anything about your career — e.g. \"what makes me stand out?\"",
+      "ariaLabel": "Open chat and ask about your career"
+    }
   },
   "panel": {
     "status": {
@@ -175,6 +203,8 @@
   "appNav": {
     "painel": "Painel",
     "espelho": "Espelho",
+    "registros": "Registros",
+    "usar": "Usar",
     "historico": "Linha do Tempo",
     "conteudo": "Conteúdo",
     "verConta": "Ver conta",
@@ -405,7 +435,8 @@
         "edited": "Edited",
         "copied": "Copied",
         "discarded": "Archived"
-      }
+      },
+      "backToUsar": "Back"
     },
     "loadMore": "Load more",
     "filterEmpty": "No drafts in this filter.",
@@ -569,7 +600,8 @@
     "moments": {
       "entrevista": "Interview",
       "review": "Performance review",
-      "salario": "Ask for a raise"
+      "salario": "Ask for a raise",
+      "autoavaliacao": "Write self-assessment"
     },
     "prepare": {
       "heading": "How do you want to prepare?",
@@ -580,12 +612,12 @@
       "back": "Back",
       "noTheme": "Generate your Mirror first so I know your trajectory."
     },
-    "invite": {
-      "title": "Ready to use what you've recorded?",
-      "cta": "Open"
-    },
     "bio": {
       "cta": "Create my bio"
+    },
+    "bioFocus": {
+      "title": "What should the bio focus on?",
+      "geral": "General (whole trajectory)"
     }
   },
   "feed": {
@@ -636,5 +668,17 @@
     "viewAll": "View all →",
     "deleteError": "Couldn't delete this record. It's still here.",
     "deleteErrorDismiss": "Ok"
+  },
+  "usar": {
+    "title": "What do you want to do with your borogodó?",
+    "subtitle": "Two paths: show it outward or prepare inward.",
+    "conteudo": {
+      "label": "Content",
+      "when": "Show your value outward — post, bio."
+    },
+    "preparo": {
+      "label": "Prep",
+      "when": "Walk in ready — interview, review, raise."
+    }
   }
 }

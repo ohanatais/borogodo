@@ -21,13 +21,25 @@ const HUB_PAGE_SIZE = 20
  * página em branco). Server component: a 1ª página vem do servidor, escopada por `user_id` (RLS); a
  * interação (paginar/filtrar/gerir) vive no `PresencaHub`. Reusa o motor da 013.
  */
-export default async function PresencaPage() {
+interface PresencaPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+/** Normaliza `?hub`: só 'mostrar' | 'preparar' escopam a vista; qualquer outra coisa = ambos. */
+function parseHub(raw: string | string[] | undefined): 'mostrar' | 'preparar' | undefined {
+  return raw === 'mostrar' || raw === 'preparar' ? raw : undefined
+}
+
+export default async function PresencaPage({ searchParams }: PresencaPageProps) {
   const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  const { hub: hubParam } = await searchParams
+  const hub = parseHub(hubParam)
 
   const [page, anyDrafts, snapshot, recentEntries, voiceSignal, voiceProfile] = await Promise.all([
     listDrafts(supabase, user.id, { limit: HUB_PAGE_SIZE }),
@@ -51,6 +63,7 @@ export default async function PresencaPage() {
         entries={entrySeeds}
         suggestRecalibration={suggestRecalibration}
         recalibrateSignalKey={voiceSignal.lastFeedbackAt}
+        hub={hub}
       />
     </div>
   )

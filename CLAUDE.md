@@ -23,46 +23,49 @@ Features mergeadas em `main` (até PR #40):
 - **015-refino-voz** — recalibração de voz com consentimento, golden set como gate de CI, mini-bio (3º formato), migration `010` (PR #24)
 - **016-captura-v2** — captura multi-item, ressurgimento por delta, áudio via Web Speech, pergunta cirúrgica (PR #40)
 - **017-feed-registros** — feed cru de registros (`/registros`), cards colapsáveis, busca/filtros, grade-faísca (PR #51)
+- **020-canal-suporte** — canal de contato/suporte pré-launch: `ContactCard` reutilizável (e-mail copiável via `lib/clipboard.ts`, LinkedIn secundário, SLA) no rodapé da LP (`Footer`) e em `/configuracoes`; i18n namespace `support` (PR #54)
 
 **Bloco da Presença (fechado):** 013 → 014 → 015 mergeadas. Migrations `009` e `010` aplicadas em
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **019-autoavaliacao** (branch: `019-autoavaliacao`) — **modelo cockpit; US1–US3 + interação de revisão IMPLEMENTADAS (PR #46, ready)**
+Current feature: **021-navegacao-espinha** (branch: `021-navegacao-espinha`) — **reforma de IA: o menu expressa a espinha; 6 → 4 destinos. Spec ✅ clarify ✅ plan ✅ · IMPLEMENTADA + refinada numa revisão de design (PR aberto)**
 
-> ⚠️ **Redesign (2026-06-19):** a autoavaliação deixou de ser "IA gera 2 variações → edita/copia"
-> (herdado do post) e virou **cockpit: lembrar → refletir → planejar** — **o usuário escreve a
-> própria autoavaliação**, a IA só ancora em fato e oferece um passo-pra-frente não-invasivo. Tese
-> dos **dois modos** (pra dentro = usuário escreve/IA ancora; pra fora = IA assiste). Direção +
-> pesquisa de mercado: `docs/estrategia-autoavaliacao-cockpit.md`, `docs/mercado.md`,
-> `docs/mapa-competitivo.md`. Spec reescrita: `specs/019-autoavaliacao/spec.md` (Clarifications
-> 2026-06-19 + user stories novas; as antigas estão no anexo "SUPERADAS"). **Fundação da PR 46 é
-> reaproveitada** (seed period, formato self_assessment, migration 013, nav, histórico, estado
-> limitado); o **fluxo de post (GenerateSheet/DraftCard) é descartado** como modelo da autoavaliação.
-> Próximo: `/speckit-tasks` (regerar — `tasks.md` atual é do modelo antigo) + `/impeccable shape` da
-> cabine de escrita; **Espelho v2** (incorporar autopercepção) é a propagação seguinte.
-Spec: [specs/019-autoavaliacao/spec.md](specs/019-autoavaliacao/spec.md) ·
-Plan: [specs/019-autoavaliacao/plan.md](specs/019-autoavaliacao/plan.md) ·
-Research: [specs/019-autoavaliacao/research.md](specs/019-autoavaliacao/research.md) ·
-Tasks: (pendente — regerar com `/speckit-tasks`)
-
-Quarto elo de retenção — **segundo payoff episódico**, modelo **cockpit**. A pessoa escolhe um
-**período** → vê **"o seu ano, em fatos"** (recap determinístico, factual, com fonte — **sem LLM**) →
-**escreve** a própria autoavaliação por seções, com trilha de evidências ao lado e IA **não-invasiva**
-(reescreve com minhas palavras / "não sei por onde começar" = 1 pergunta cuja resposta vira o rascunho / nudge STAR — nunca gera bloco, nunca dá
-nota) → recebe **uma** oferta de **passo-pra-frente** (plano GROW+70-20-10 ou prep de 1:1) ancorada nas
-palavras dela. **US1** recap (`lib/autoavaliacao/periodRecap.ts`, sobre `loadPeriodSeed`) + escrita
-assistida (`lib/ai/content/assist.ts`, rota `/api/autoavaliacao/assist`); **US2** passo-pra-frente
-(`/api/autoavaliacao/forward-step`, único LLM gerador, anti-invenção bloqueante, salvo em
-`drafts.qa.forwardStep`) + gatilho de calendário (`getReviewCycleSignal` paralelo ao `getReturnSignal`
-da 016, só painel, sem e-mail); **US3** histórico em `drafts` (isolado do espelho). **Sai do código:** o
-ramo `self_assessment` de `generateDraft`, `prompts/selfAssessment.ts`, e a extensão de
-`/api/content/generate`. Spec ✅, clarify ✅, plan ✅, research ✅, data-model ✅, contracts ✅, quickstart
-✅, tasks ⬜ (regerar). **Gate antes de codar:** `/impeccable shape` da cabine de escrita.
-
-**Migration 013** (renumerada de 012 — colidia com `012_entry_title.sql` da 017, já em `main`): estende
-os CHECKs de `drafts` (`format` += `self_assessment`, `seed_type` += `period`, `status` += `draft`) **e**
-adiciona `profiles.review_cycle_months` + `review_cycle_anchor` (aditivo, nullable). A autoavaliação
-**escrita** vive em `drafts` (`status='draft'`, `body` = texto humano, fora do ruleset anti-IA). Sem
-recorrência → gatilho proativo não dispara; escrita sob demanda nunca bloqueia.
+> **Decisão:** `docs/decisions/001-arquitetura-de-navegacao.md`. O menu cresceu feature a feature
+> e virou 6 portas paralelas que misturam camadas. Esta reforma colapsa para **4 destinos = os
+> movimentos da espinha** (Descobrir→Entender→Provar→Usar): **Painel** (Home), **Espelho**
+> (absorve a Linha do Tempo como 2ª vista — Forças + Trajetória), **Registros** (log cru),
+> **Usar** (landing que roteia: pra fora → Repertório/`/presenca`; pra dentro → `/autoavaliacao`).
+> **Reorganização, não reescrita** — telas existentes são re-parentadas/re-roteadas (a Trajetória
+> reusa o `HistoricoPageClient` inteiro). **Sem migration.** `impact_summary` sai das listas
+> oferecidas, fica no enum/motor. Princípio fixado: a Home é estruturada/proativa; o **chat é
+> ferramenta onipresente, nunca a Home** (porta de conversa aditiva no topo do Painel).
+> **4 fases independentes e testáveis** (US1 menu+landing · US2 Espelho 2 vistas · US3 porta do
+> Painel · US4 limpeza de formato). **Me preparar** (generalizar a Autoavaliação para novos
+> momentos) é feature futura separada, fora desta.
+>
+> **Refinos de execução (revisão de design pós-implementação — o que ficou diferente da spec):**
+> - **Painel** colapsou pra coluna única (hero → porta de chat → conquistas → insight → recentes).
+>   Saíram o `UsarInvite` (vivia no destino Usar) e a `MiniTimeline` (vive no Espelho→Trajetória);
+>   query de timeline morta removida do `getPanelData`. A **porta de chat** (US3) ganhou copy que
+>   ensina ("Pergunte qualquer coisa… ex.: 'o que me destaca?'") — o gap real era descoberta.
+> - **Usar**: o splash de intenção foi mantido, mas cada caminho abre um **hub ESCOPADO**
+>   (`/presenca?hub=mostrar|preparar`) — antes mostrava os dois hubs ("tudo tudo"). Título e
+>   "Voltar" por hub. A **Autoavaliação** virou card permanente do hub PREPARAR (não se perde).
+> - **Espelho**: Forças/Trajetória alinham no mesmo container (sem `max-w/px` duplicado); título da
+>   Trajetória virou intro (h2). Temas de força viraram **tags de leitura** — saíram o "Usar" por
+>   tema e o "Criar bio" (o Espelho é contemplação, ação vive no Usar).
+> - **Design system**: um **`Segmented`** único (`components/ui/Segmented.tsx`) padroniza os 3
+>   toggles (Espelho, Registros, Registrar/Perguntar). `impact_summary` ("Pra falar") saiu também
+>   do filtro de rascunhos.
+> - **Bio**: deixou de ancorar num tema fixo — **a pessoa escolhe o foco** antes de gerar (Geral +
+>   temas). A evidência da mini-bio já era ampla; o prompt já mira formato LinkedIn ("Sobre").
+> - **Shell**: frame de altura fixa (`h-dvh`/overflow) — só o conteúdo rola, sem rubber-band.
+Spec: [specs/021-navegacao-espinha/spec.md](specs/021-navegacao-espinha/spec.md) ·
+Plan: [specs/021-navegacao-espinha/plan.md](specs/021-navegacao-espinha/plan.md) ·
+Research: [specs/021-navegacao-espinha/research.md](specs/021-navegacao-espinha/research.md) ·
+Data-model: [specs/021-navegacao-espinha/data-model.md](specs/021-navegacao-espinha/data-model.md) ·
+Contracts: [specs/021-navegacao-espinha/contracts/routes.md](specs/021-navegacao-espinha/contracts/routes.md) ·
+Quickstart: [specs/021-navegacao-espinha/quickstart.md](specs/021-navegacao-espinha/quickstart.md) ·
+Tasks: (pendente — `/speckit-tasks`)
 <!-- SPECKIT END -->

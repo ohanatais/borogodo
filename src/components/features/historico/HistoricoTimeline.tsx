@@ -20,11 +20,14 @@ export function HistoricoTimeline({
   const isEmpty = data.companies.length === 0
 
   return (
-    <div className="max-w-[980px] mx-auto px-6 pt-2 pb-8">
-      <h1 className="text-2xl font-bold mb-1" style={{ fontFamily: 'var(--font-display)' }}>
+    // Container (largura/padding) é do /espelho: a Trajetória é uma vista do segmented control,
+    // não uma página. O toggle "Forças | Trajetória" já nomeia a vista — o título vira intro
+    // leve (h2), sem competir como page-title duplicado logo abaixo do toggle (021).
+    <div className="pb-8">
+      <h2 className="text-base font-semibold mb-1" style={{ fontFamily: 'var(--font-display)' }}>
         O fio da{' '}
         <em className="italic font-normal">sua carreira</em>
-      </h1>
+      </h2>
       <p className="text-sm mb-8" style={{ color: 'var(--muted-foreground)' }}>
         Cada passo, com a evidência que ficou.
       </p>

@@ -24,7 +24,8 @@ interface PresencaCreateProps {
 // recentes), então é o seed certo para a mini-bio (sobre a pessoa como um todo, não um feito só).
 // A bio a partir de uma entrada única ficaria estreita demais, por isso não entra em ENTRY_FORMATS.
 const THEME_FORMATS: DraftFormat[] = ['post', 'mini_bio']
-const ENTRY_FORMATS: DraftFormat[] = ['post', 'impact_summary']
+// impact_summary saiu das opções oferecidas (021); permanece no enum/motor (FR-015).
+export const ENTRY_FORMATS: DraftFormat[] = ['post']
 
 /**
  * Ponto de geração dentro da Presença: deixa a pessoa começar um rascunho a partir de uma evidência
