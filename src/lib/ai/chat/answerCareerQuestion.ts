@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { recordUsageAndMaybeAlert } from '@/lib/ai/client'
 import { generateEmbedding, cosineSimilarity, parseEmbedding } from '@/lib/ai/embeddings'
 import { getLatestSnapshot } from '@/lib/db/mirror'
 import { getProfile } from '@/lib/db/profiles'
@@ -234,6 +235,22 @@ export async function answerCareerQuestion(
     const message = err instanceof Error ? err.message : 'Erro desconhecido'
     events.onError(message)
     return
+  }
+
+  // Registra o uso do chat para o freio de custo (023). O chat stream-a por fora do provider, então
+  // recordamos aqui após o streaming, lendo o usage da mensagem final. Best-effort.
+  try {
+    const final = await stream.finalMessage()
+    await recordUsageAndMaybeAlert({
+      userId,
+      action: 'chat',
+      role: 'synthesis',
+      model: MODEL,
+      inputTokens: final.usage.input_tokens,
+      outputTokens: final.usage.output_tokens,
+    })
+  } catch (err: unknown) {
+    logger.error('chat usage record failed', { reason: err instanceof Error ? err.message : 'unknown' })
   }
 
   const blocks = parseBlocks(blocksBuffer)

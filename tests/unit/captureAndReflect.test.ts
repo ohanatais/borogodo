@@ -2,10 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { captureAndReflect } from '@/lib/ai/extraction/captureAndReflect'
 import type { CaptureContext } from '@/types/capture'
 
-const mockComplete = vi.fn()
+const mockComplete = vi.hoisted(() => vi.fn())
 
-vi.mock('@/lib/ai/provider', () => ({
-  getProvider: () => ({ complete: mockComplete }),
+// Após a 023, captureAndReflect passa pelo guard (`client.complete`). Mockamos ele direto.
+vi.mock('@/lib/ai/client', () => ({
+  complete: mockComplete,
 }))
 
 const CONTEXT: CaptureContext = { strengthThemes: [], recentSummaries: [], entryCount: 0 }
@@ -38,7 +39,7 @@ describe('captureAndReflect', () => {
   it('extrai o bloco JSON, valida e retorna entries + reflection', async () => {
     mockComplete.mockResolvedValue(jsonBlock({ entries: [VALID_ENTRY], reflection: VALID_REFLECTION }))
 
-    const result = await captureAndReflect('Fechei a migração do banco no prazo', 'text', CONTEXT)
+    const result = await captureAndReflect('Fechei a migração do banco no prazo', 'text', CONTEXT, 'u1')
 
     expect(result.entries).toHaveLength(1)
     expect(result.entries[0]?.source).toBe('text')
@@ -48,7 +49,7 @@ describe('captureAndReflect', () => {
   it('lança erro quando a resposta não contém bloco JSON', async () => {
     mockComplete.mockResolvedValue('desculpe, não consigo ajudar com isso')
 
-    await expect(captureAndReflect('texto válido', 'text', CONTEXT)).rejects.toThrow(
+    await expect(captureAndReflect('texto válido', 'text', CONTEXT, 'u1')).rejects.toThrow(
       'JSON não encontrado na resposta do modelo'
     )
   })
@@ -56,7 +57,7 @@ describe('captureAndReflect', () => {
   it('lança erro quando o bloco contém JSON malformado', async () => {
     mockComplete.mockResolvedValue('```json\n{ entries: [ }\n```')
 
-    await expect(captureAndReflect('texto válido', 'text', CONTEXT)).rejects.toThrow()
+    await expect(captureAndReflect('texto válido', 'text', CONTEXT, 'u1')).rejects.toThrow()
   })
 
   it('aceita reflexo com pills vazio e retorna array vazio', async () => {
@@ -64,7 +65,7 @@ describe('captureAndReflect', () => {
       jsonBlock({ entries: [VALID_ENTRY], reflection: { ...VALID_REFLECTION, pills: [] } })
     )
 
-    const result = await captureAndReflect('texto válido', 'text', CONTEXT)
+    const result = await captureAndReflect('texto válido', 'text', CONTEXT, 'u1')
     expect(result.reflection.pills).toEqual([])
   })
 })

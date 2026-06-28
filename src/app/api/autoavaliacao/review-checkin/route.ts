@@ -46,7 +46,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     // A resposta vira registro pelo mesmo caminho do composer (extração Haiku + dedup + RLS).
     const context = await buildCaptureContext(supabase, user.id)
-    const { entries, reflection } = await captureAndReflect(parsed.data.text, 'text', context)
+    const { entries, reflection } = await captureAndReflect(parsed.data.text, 'text', context, user.id)
     const saved = await saveEntries(supabase, user.id, entries)
 
     await advanceAnchor(supabase, user.id)

@@ -1,6 +1,5 @@
-import { complete as defaultComplete } from '@/lib/ai/client'
+import { complete as defaultComplete, type GuardedRequest } from '@/lib/ai/client'
 import { extractJSONBlock } from '@/lib/ai/extractJSON'
-import type { LLMRequest } from '@/lib/ai/provider'
 import { validateDraftOutput, type DraftOutput } from '@/lib/ai/content/schemas'
 import { validateContentRuleset } from '@/lib/ai/content/validateRuleset'
 import { POST_SYSTEM_PROMPT, buildPostUserPrompt } from '@/lib/ai/content/prompts/post'
@@ -15,11 +14,13 @@ import type { ContentRulesetViolation, DraftFormat, DraftVariant } from '@/types
 
 const MAX_TOKENS = 2048
 
-/** Chamada de LLM injetável — default usa o client real; testes passam um mock. */
-export type CompleteFn = (req: LLMRequest) => Promise<string>
+/** Chamada de LLM injetável — default usa o guard real; testes passam um mock. */
+export type CompleteFn = (req: GuardedRequest) => Promise<string>
 
 export interface GenerateDraftInput extends ContentPromptInput {
   format: DraftFormat
+  /** Quem disparou — threaded até o guard de custo (023). */
+  userId: string
 }
 
 interface PromptParts {
@@ -53,9 +54,10 @@ async function attempt(
   system: string,
   user: string,
   format: DraftFormat,
+  userId: string,
   complete: CompleteFn
 ): Promise<AttemptResult> {
-  const raw = await complete({ role: 'synthesis', system, user, maxTokens: MAX_TOKENS })
+  const raw = await complete({ role: 'synthesis', action: 'post', userId, system, user, maxTokens: MAX_TOKENS })
 
   let output: DraftOutput
   try {
@@ -103,17 +105,17 @@ export async function generateDraft(
   input: GenerateDraftInput,
   complete: CompleteFn = defaultComplete
 ): Promise<{ variants: DraftVariant[] }> {
-  const { format, ...promptInput } = input
+  const { format, userId, ...promptInput } = input
   const { system, buildUser } = promptFor(format)
   const baseUser = buildUser(promptInput)
 
-  const first = await attempt(system, baseUser, format, complete)
+  const first = await attempt(system, baseUser, format, userId, complete)
   if (isClean(first) && passesOpinionGuardrail(input, first.output)) {
     return { variants: toVariants(first.output) }
   }
 
   const feedback = first.violations.length > 0 ? violationFeedback(first.violations) : MALFORMED_FEEDBACK
-  const second = await attempt(system, baseUser + feedback, format, complete)
+  const second = await attempt(system, baseUser + feedback, format, userId, complete)
   if (isClean(second) && passesOpinionGuardrail(input, second.output)) {
     return { variants: toVariants(second.output) }
   }

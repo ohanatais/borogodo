@@ -23,6 +23,7 @@ const DIRTY_OUTPUT = {
 
 const BASE_INPUT: GenerateDraftInput = {
   format: 'post',
+  userId: 'u1',
   seedSummary: 'produto 0→1',
   evidence: [
     { label: 'E1', text: 'Liderou 9 produtos de 0 a 1' },

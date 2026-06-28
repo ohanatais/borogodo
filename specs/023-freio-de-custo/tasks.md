@@ -22,7 +22,7 @@ custo são escritos e confirmados **falhando** (RED) antes da implementação.
 
 ## Phase 1: Setup
 
-- [ ] T001 Adicionar a dependência `resend` ao `package.json` (e lockfile) e registrar as envs
+- [x] T001 Adicionar a dependência `resend` ao `package.json` (e lockfile) e registrar as envs
   novas (`AI_RATE_LIMIT_PER_HOUR`, `AI_DAILY_CAP_USD`, `AI_DAILY_WARN_RATIO`, `OPS_ALERT_EMAIL`,
   `RESEND_API_KEY`) no `.env.example` com valores-default/placeholder. **Não** commitar segredos.
 - [ ] T002 [P] Documentar no topo de `specs/023-freio-de-custo/quickstart.md` os valores baixos de
@@ -38,7 +38,7 @@ custo são escritos e confirmados **falhando** (RED) antes da implementação.
 
 ### Migration & dados
 
-- [ ] T003 Criar `supabase/migrations/014_ai_usage_events.sql`: tabelas `ai_usage_events` e
+- [x] T003 Criar `supabase/migrations/014_ai_usage_events.sql`: tabelas `ai_usage_events` e
   `ai_daily_alert_state` conforme [data-model.md](./data-model.md) — colunas, CHECKs, índices
   (`(user_id, created_at)`, `(created_at)`, `(action, created_at)`), RLS habilitada **server-only**
   (sem policy para anon/authenticated). Cabeçalho explicando a renumeração para 014.
@@ -47,51 +47,51 @@ custo são escritos e confirmados **falhando** (RED) antes da implementação.
 
 ### Provider devolve uso de tokens
 
-- [ ] T005 [P] Testes (RED) em `src/lib/ai/__tests__/cost.test.ts` para o cálculo de custo:
+- [x] T005 [P] Testes (RED) em `src/lib/ai/__tests__/cost.test.ts` para o cálculo de custo:
   Haiku (1/5) e Sonnet (3/15), tokens → `cost_usd` exato.
-- [ ] T006 Adicionar mapa de preço por token e helper `costUsd(model, inputTokens, outputTokens)`
+- [x] T006 Adicionar mapa de preço por token e helper `costUsd(model, inputTokens, outputTokens)`
   em `src/lib/ai/models.ts` (ou `src/lib/ai/cost/cost.ts`) — fazer T005 passar (GREEN).
-- [ ] T007 Alterar o contrato do provider em `src/lib/ai/provider.ts`: `LLMRequest` ganha
+- [x] T007 Alterar o contrato do provider em `src/lib/ai/provider.ts`: `LLMRequest` ganha
   `userId: string` e `action: AIAction`; `LLMProvider.complete` passa a devolver
   `{ text, usage: { inputTokens, outputTokens } }`. Atualizar o type `AIAction`.
-- [ ] T008 [P] Atualizar `src/lib/ai/providers/anthropic.ts` para ler `message.usage` e devolver
+- [x] T008 [P] Atualizar `src/lib/ai/providers/anthropic.ts` para ler `message.usage` e devolver
   `{ text, usage }`.
-- [ ] T009 [P] Atualizar `src/lib/ai/providers/deepseek.ts` para devolver `{ text, usage }`
+- [x] T009 [P] Atualizar `src/lib/ai/providers/deepseek.ts` para devolver `{ text, usage }`
   (usage do SDK ou estimativa documentada — não é o caminho do beta).
 
 ### Queries de uso
 
-- [ ] T010 [P] Criar `src/lib/db/aiUsage.ts` com: `insertUsageEvent(...)`,
+- [x] T010 [P] Criar `src/lib/db/aiUsage.ts` com: `insertUsageEvent(...)`,
   `countGenerationsLastHour(userId)`, `sumDailyCostUsd()`, `dailyConsumersRanking()`,
   `activeUsersToday()`, `blockedUsersToday()` — conforme [data-model.md](./data-model.md).
   Nenhuma query expõe dado de outro usuário a um cliente (uso server-only).
 
 ### Config & erros
 
-- [ ] T011 [P] Criar `src/lib/ai/cost/limits.ts`: lê as envs com defaults (10 / 10 / 0.7) e
+- [x] T011 [P] Criar `src/lib/ai/cost/limits.ts`: lê as envs com defaults (10 / 10 / 0.7) e
   validação de número; expõe `getLimits()`.
-- [ ] T012 [P] Adicionar `RateLimitedError` (com `retryAfterSeconds`, `action`) e
+- [x] T012 [P] Adicionar `RateLimitedError` (com `retryAfterSeconds`, `action`) e
   `DailyCapReachedError` (com `action`) em `src/lib/errors.ts`, no padrão dos erros existentes.
 
 ### O guard único
 
-- [ ] T013 Testes (RED) em `src/lib/ai/cost/__tests__/guard.test.ts` cobrindo os contratos de
+- [x] T013 Testes (RED) em `src/lib/ai/cost/__tests__/guard.test.ts` cobrindo os contratos de
   [contracts/ai-guard.md](./contracts/ai-guard.md): abaixo do limite passa e registra 1 evento;
   N+1ª geração lança `RateLimitedError` sem chamar o provider; captura com usuário no limite
   **passa** mas é contabilizada; gasto ≥ teto lança `DailyCapReachedError` para geração e captura
   ainda passa. Mockar provider e `aiUsage`.
-- [ ] T014 Reescrever `src/lib/ai/client.ts` como o **guard**: `complete(request)` faz
+- [x] T014 Reescrever `src/lib/ai/client.ts` como o **guard**: `complete(request)` faz
   pré-checagem (só ações de geração) → `getProvider().complete()` → calcula custo e
   `insertUsageEvent` → dispara a avaliação de alerta (stub até US2) → devolve `text`. Quebrar em
   helpers <40 linhas. Fazer T013 passar (GREEN).
-- [ ] T015 Religar os call sites diretos ao guard (eliminar `getProvider().complete()` espalhado),
+- [x] T015 Religar os call sites diretos ao guard (eliminar `getProvider().complete()` espalhado),
   passando `userId` + `action`:
   `src/lib/ai/extraction/extractEntries.ts` e `captureAndReflect.ts` (`action:'capture'`),
   `src/lib/ai/mirror/generateMirror.ts` (`action:'mirror'`),
   `src/lib/ai/mirror/evaluateSufficiency.ts` (parte do fluxo do espelho),
   `src/lib/ai/insights/triggerProactiveInsight.ts` (`action:'insight'`).
   Ajustar assinaturas para receber/repassar `userId`.
-- [ ] T016 Religar os call sites que já usam o wrapper `complete()` para passar `userId`+`action`:
+- [x] T016 Religar os call sites que já usam o wrapper `complete()` para passar `userId`+`action`:
   `src/lib/ai/content/generateDraft.ts`, `forwardStep.ts`, `assist.ts`, `recalibrateVoice.ts`,
   `buildVoiceProfile.ts` (mapear cada um para a `action` correta).
 
@@ -110,7 +110,7 @@ nenhuma fura o chokepoint (validável pelo Cenário 6 do quickstart).
   `src/app/api/content/generate/__tests__/route.test.ts` (e equivalente p/ chat): com o guard
   lançando `RateLimitedError`, a rota responde **429** com `{ code: 'ai_rate_limited',
   retryAfterSeconds }` e header `Retry-After`.
-- [ ] T018 [US1] Mapear `RateLimitedError` → 429 nas rotas de geração:
+- [x] T018 [US1] Mapear `RateLimitedError` → 429 nas rotas de geração:
   `src/app/api/content/generate/route.ts`, `src/app/api/chat/route.ts`,
   `src/app/api/mirror/generate/route.ts`, `src/app/api/autoavaliacao/assist/route.ts`,
   `src/app/api/autoavaliacao/review-cycle/route.ts` — passando `userId`+`action` ao guard e
@@ -135,17 +135,17 @@ nenhuma fura o chokepoint (validável pelo Cenário 6 do quickstart).
 - [ ] T021 [P] [US2] Testes (RED) em `src/lib/ai/cost/__tests__/alert.test.ts`: cruzar o limiar
   envia preventivo **uma vez** (2ª chamada no mesmo dia não reenvia); atingir o teto envia
   cap **uma vez**; falha de envio não propaga (best-effort). Mockar Resend e `ai_daily_alert_state`.
-- [ ] T022 [P] [US2] Criar `src/lib/ai/cost/alert.ts`: monta o conteúdo (gasto, ativos, ranking,
+- [x] T022 [P] [US2] Criar `src/lib/ai/cost/alert.ts`: monta o conteúdo (gasto, ativos, ranking,
   travados via `aiUsage`) e envia via Resend para `OPS_ALERT_EMAIL`. Dois tipos: `preventive` e
   `cap_reached`. Conteúdo conforme [contracts/ai-guard.md](./contracts/ai-guard.md). Envio
   best-effort: erro logado (sem dado de usuário) e engolido. Fazer T021 passar.
-- [ ] T023 [US2] Implementar a idempotência em `src/lib/db/aiUsage.ts`: upsert em
+- [x] T023 [US2] Implementar a idempotência em `src/lib/db/aiUsage.ts`: upsert em
   `ai_daily_alert_state` com `on conflict (day)` setando `warned_at`/`capped_at` só se ainda null
   (evita e-mail duplicado sob concorrência).
-- [ ] T024 [US2] Ligar a avaliação de alerta no guard (`src/lib/ai/client.ts`, substituindo o stub
+- [x] T024 [US2] Ligar a avaliação de alerta no guard (`src/lib/ai/client.ts`, substituindo o stub
   do T014): após registrar o evento, ler o gasto diário e disparar `preventive`/`cap_reached`
   conforme limiar/teto e o estado do dia.
-- [ ] T025 [US2] Implementar o **bloqueio** da trava diária no guard: quando gasto diário ≥ teto,
+- [x] T025 [US2] Implementar o **bloqueio** da trava diária no guard: quando gasto diário ≥ teto,
   lançar `DailyCapReachedError` **apenas para ações de geração** (captura/insight passam). Mapear
   esse erro → 429 `{ code: 'ai_overloaded' }` nas mesmas rotas do T018 (usuário vê a mesma
   mensagem honesta de sobrecarga).

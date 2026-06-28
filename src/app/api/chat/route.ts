@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { answerCareerQuestion, type ChatMessage, type ChatContext, type CorrectionAction, type MarcoPreview } from '@/lib/ai/chat/answerCareerQuestion'
+import { assertWithinLimits } from '@/lib/ai/client'
+import { aiLimitResponse } from '@/lib/ai/cost/limitResponse'
 import { logger } from '@/lib/log'
 import { z } from 'zod'
 
@@ -46,6 +48,16 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const { message, history = [], context } = parsed.data
+
+  // Freio de custo (023): chat é ação de geração. Checa o limite ANTES de abrir o stream; o uso é
+  // registrado dentro de answerCareerQuestion após o streaming. Captura nunca passa por aqui.
+  try {
+    await assertWithinLimits(user.id, 'chat')
+  } catch (error: unknown) {
+    const limited = aiLimitResponse(error)
+    if (limited) return limited
+    throw error
+  }
 
   const stream = new ReadableStream({
     async start(controller) {

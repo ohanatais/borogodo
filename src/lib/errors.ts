@@ -37,3 +37,29 @@ export class GenerationFailedError extends Error {
     this.violations = violations
   }
 }
+
+/**
+ * Erro de domínio (023-freio-de-custo): o usuário atingiu o limite por hora de ações de geração.
+ * Tipado para a rota mapear 429 + Retry-After sem acoplar texto. Captura nunca lança isto.
+ */
+export class RateLimitedError extends Error {
+  readonly retryAfterSeconds: number
+
+  constructor(retryAfterSeconds: number) {
+    super('Limite por hora atingido')
+    this.name = 'RateLimitedError'
+    this.retryAfterSeconds = retryAfterSeconds
+  }
+}
+
+/**
+ * Erro de domínio (023-freio-de-custo): a trava global de gasto diário foi atingida; novas ações
+ * de geração ficam seguradas até virar o dia. O usuário vê uma mensagem de sobrecarga (não o
+ * motivo real). Captura/insight nunca lançam isto.
+ */
+export class DailyCapReachedError extends Error {
+  constructor() {
+    super('Teto diário de gasto de IA atingido')
+    this.name = 'DailyCapReachedError'
+  }
+}

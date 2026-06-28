@@ -1,13 +1,12 @@
 import { z } from 'zod'
-import { complete as defaultComplete } from '@/lib/ai/client'
+import { complete as defaultComplete, type GuardedRequest } from '@/lib/ai/client'
 import { extractJSONBlock } from '@/lib/ai/extractJSON'
-import type { LLMRequest } from '@/lib/ai/provider'
 import { validateContentRuleset } from '@/lib/ai/content/validateRuleset'
 import { ANTI_AI_DISCIPLINE } from '@/lib/ai/content/prompts/discipline'
 import type { ForwardStep } from '@/types/content'
 
-/** Chamada de LLM injetável — default usa o client real; testes passam um mock. */
-export type CompleteFn = (req: LLMRequest) => Promise<string>
+/** Chamada de LLM injetável — default usa o guard real; testes passam um mock. */
+export type CompleteFn = (req: GuardedRequest) => Promise<string>
 
 /** A saída inventou (âncora sem lastro no body) ou veio malformada após 1 retry → não persiste nada. */
 export class ForwardStepFailedError extends Error {
@@ -93,20 +92,20 @@ function evaluate(raw: string, body: string): AttemptResult {
  * (a rota mapeia 422). v1: só plano de ação (GROW Will + 70-20-10). `claude-sonnet-4-6`.
  */
 export async function forwardStep(
-  input: { body: string },
+  input: { body: string; userId: string },
   complete: CompleteFn = defaultComplete
 ): Promise<ForwardStep> {
   const user = `Texto que a pessoa escreveu na autoavaliação:\n\n${input.body}`
+  const base = { role: 'synthesis', action: 'self_assessment', userId: input.userId, maxTokens: MAX_TOKENS } as const
 
-  const first = evaluate(await complete({ role: 'synthesis', system: SYSTEM_PROMPT, user, maxTokens: MAX_TOKENS }), input.body)
+  const first = evaluate(await complete({ ...base, system: SYSTEM_PROMPT, user }), input.body)
   const result = first.ok
     ? first
     : evaluate(
         await complete({
-          role: 'synthesis',
+          ...base,
           system: SYSTEM_PROMPT,
           user: `${user}\n\nA tentativa anterior falhou (inventou algo sem lastro ou veio fora do formato). Refaça usando SÓ trechos literais do texto acima.`,
-          maxTokens: MAX_TOKENS,
         }),
         input.body
       )

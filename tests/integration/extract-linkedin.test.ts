@@ -2,8 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockComplete = vi.fn()
 
-vi.mock('@/lib/ai/provider', () => ({
-  getProvider: () => ({ complete: mockComplete }),
+// Após a 023, a extração passa pelo guard (`client.complete`). Mockamos ele direto.
+vi.mock('@/lib/ai/client', () => ({
+  complete: mockComplete,
 }))
 
 const ENTRY = {
@@ -31,7 +32,7 @@ describe('extractFromLinkedIn', () => {
     mockComplete.mockResolvedValue(jsonResponse([ENTRY, { ...ENTRY, what_i_did: 'Migrou o checkout para microsserviços' }]))
 
     const { extractFromLinkedIn } = await import('@/lib/ai/extraction/extractFromLinkedIn')
-    const entries = await extractFromLinkedIn('texto extraído do PDF do LinkedIn')
+    const entries = await extractFromLinkedIn('texto extraído do PDF do LinkedIn', 'u1')
 
     expect(entries).toHaveLength(2)
     expect(entries.every((entry) => entry.source === 'linkedin_pdf')).toBe(true)
@@ -43,7 +44,7 @@ describe('extractFromLinkedIn', () => {
     mockComplete.mockResolvedValue(jsonResponse(many))
 
     const { extractFromLinkedIn } = await import('@/lib/ai/extraction/extractFromLinkedIn')
-    const entries = await extractFromLinkedIn('texto extraído do PDF do LinkedIn')
+    const entries = await extractFromLinkedIn('texto extraído do PDF do LinkedIn', 'u1')
 
     expect(entries).toHaveLength(20)
   })
@@ -53,7 +54,7 @@ describe('extractFromLinkedIn', () => {
 
     const { extractFromLinkedIn } = await import('@/lib/ai/extraction/extractFromLinkedIn')
 
-    await expect(extractFromLinkedIn('texto extraído do PDF do LinkedIn')).rejects.toThrow()
+    await expect(extractFromLinkedIn('texto extraído do PDF do LinkedIn', 'u1')).rejects.toThrow()
   })
 
   it('lança erro (lote inválido) quando uma entrada falha na validação Zod', async () => {
@@ -61,6 +62,6 @@ describe('extractFromLinkedIn', () => {
 
     const { extractFromLinkedIn } = await import('@/lib/ai/extraction/extractFromLinkedIn')
 
-    await expect(extractFromLinkedIn('texto extraído do PDF do LinkedIn')).rejects.toThrow()
+    await expect(extractFromLinkedIn('texto extraído do PDF do LinkedIn', 'u1')).rejects.toThrow()
   })
 })

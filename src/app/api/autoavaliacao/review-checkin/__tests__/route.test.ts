@@ -59,7 +59,7 @@ describe('POST /api/autoavaliacao/review-checkin', () => {
     expect(res.status).toBe(200)
 
     // Reusa o pipeline de captura: extrai e persiste como entry do próprio usuário.
-    expect(mockCaptureAndReflect).toHaveBeenCalledWith(VALID.text, 'text', { ctx: true })
+    expect(mockCaptureAndReflect).toHaveBeenCalledWith(VALID.text, 'text', { ctx: true }, 'user-1')
     expect(mockSaveEntries).toHaveBeenCalledWith(expect.anything(), 'user-1', [{ what_i_did: 'mentorou' }])
 
     // Fecha o loop: âncora avança (sem coluna nova), some o re-nag.

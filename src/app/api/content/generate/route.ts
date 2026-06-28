@@ -5,6 +5,7 @@ import { loadSeedEvidence } from '@/lib/ai/content/loadSeed'
 import { generateDraft } from '@/lib/ai/content/generateDraft'
 import { getVoiceProfile } from '@/lib/db/drafts'
 import { errorMessage, GenerationFailedError } from '@/lib/errors'
+import { aiLimitResponse } from '@/lib/ai/cost/limitResponse'
 import { logger } from '@/lib/log'
 
 const generateRequestSchema = z.object({
@@ -64,6 +65,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const { variants } = await generateDraft({
       format,
+      userId: user.id,
       seedSummary: seed.seedSummary,
       evidence,
       voiceProfile,
@@ -75,6 +77,9 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({ variants }, { status: 200 })
   } catch (error: unknown) {
+    const limited = aiLimitResponse(error)
+    if (limited) return limited
+
     if (error instanceof GenerationFailedError) {
       return jsonError('generation_failed', 422)
     }

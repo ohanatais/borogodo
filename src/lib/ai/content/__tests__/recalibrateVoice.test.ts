@@ -20,7 +20,7 @@ describe('recalibrateVoice — aplica com consentimento, preservando amostras', 
     }
 
     const profile = await recalibrateVoice(
-      { existing, soaSamples: ['rascunho que soou'], naoSoaSamples: ['rascunho que não soou'] },
+      { existing, soaSamples: ['rascunho que soou'], naoSoaSamples: ['rascunho que não soou'], userId: 'u1' },
       complete
     )
 
@@ -37,7 +37,7 @@ describe('recalibrateVoice — aplica com consentimento, preservando amostras', 
     const complete = vi.fn().mockResolvedValue(NEW_SUMMARY)
 
     await recalibrateVoice(
-      { existing: null, soaSamples: ['ISSO SOOU'], naoSoaSamples: ['ISSO NAO SOOU'] },
+      { existing: null, soaSamples: ['ISSO SOOU'], naoSoaSamples: ['ISSO NAO SOOU'], userId: 'u1' },
       complete
     )
 
@@ -49,7 +49,7 @@ describe('recalibrateVoice — aplica com consentimento, preservando amostras', 
   it('lança quando o LLM volta em branco (não grava voz vazia nem finge sucesso)', async () => {
     const complete = vi.fn().mockResolvedValue('   ')
     await expect(
-      recalibrateVoice({ existing: null, soaSamples: ['x'], naoSoaSamples: ['y'] }, complete)
+      recalibrateVoice({ existing: null, soaSamples: ['x'], naoSoaSamples: ['y'], userId: 'u1' }, complete)
     ).rejects.toThrow()
   })
 
@@ -61,7 +61,7 @@ describe('recalibrateVoice — aplica com consentimento, preservando amostras', 
       updatedAt: '2026-01-01T00:00:00.000Z',
     }
 
-    const profile = await recalibrateVoice({ existing, soaSamples: [], naoSoaSamples: [] }, complete)
+    const profile = await recalibrateVoice({ existing, soaSamples: [], naoSoaSamples: [], userId: 'u1' }, complete)
 
     expect(complete).not.toHaveBeenCalled()
     expect(profile).toEqual(existing)

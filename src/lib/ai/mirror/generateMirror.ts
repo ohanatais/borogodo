@@ -1,4 +1,4 @@
-import { getProvider } from '@/lib/ai/provider'
+import { complete } from '@/lib/ai/client'
 import { extractJSONBlock } from '@/lib/ai/extractJSON'
 import { MIRROR_SYSTEM_PROMPT, buildMirrorUserPrompt } from '@/lib/ai/mirror/prompts/firstMirror'
 import { validateMirror } from '@/lib/ai/mirror/schemas'
@@ -98,8 +98,10 @@ async function generateMirror(
   const entryMap = new Map<string, string>()
   entries.forEach((e, i) => entryMap.set(`E${i + 1}`, e.id))
 
-  const raw = await getProvider().complete({
+  const raw = await complete({
     role: 'synthesis',
+    action: 'mirror',
+    userId,
     system: MIRROR_SYSTEM_PROMPT,
     user: buildMirrorUserPrompt(entries, userName, status),
     maxTokens: MAX_TOKENS,

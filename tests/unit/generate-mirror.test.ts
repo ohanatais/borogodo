@@ -5,8 +5,9 @@ const { mockComplete, mockInsertMirrorSnapshot } = vi.hoisted(() => ({
   mockInsertMirrorSnapshot: vi.fn(),
 }))
 
-vi.mock('@/lib/ai/provider', () => ({
-  getProvider: () => ({ complete: mockComplete }),
+// 023: generateMirror passa pelo guard (`client.complete`). Mockamos ele direto.
+vi.mock('@/lib/ai/client', () => ({
+  complete: mockComplete,
 }))
 
 vi.mock('@/lib/db/mirror', () => ({

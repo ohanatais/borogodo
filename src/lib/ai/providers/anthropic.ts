@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { modelFor } from '@/lib/ai/models'
-import type { LLMProvider, LLMRequest } from '@/lib/ai/provider'
+import type { CompletionResult, LLMProvider, LLMRequest } from '@/lib/ai/provider'
 
 let cachedClient: Anthropic | null = null
 
@@ -20,9 +20,10 @@ function getClient(): Anthropic {
 
 /** Provider default do MVP — Haiku para extração, Sonnet para síntese (Princípio III). */
 export class AnthropicProvider implements LLMProvider {
-  async complete(request: LLMRequest): Promise<string> {
+  async complete(request: LLMRequest): Promise<CompletionResult> {
+    const model = modelFor('anthropic', request.role)
     const message = await getClient().messages.create({
-      model: modelFor('anthropic', request.role),
+      model,
       max_tokens: request.maxTokens,
       system: request.system,
       messages: [{ role: 'user', content: request.user }],
@@ -33,6 +34,13 @@ export class AnthropicProvider implements LLMProvider {
       throw new Error('Resposta inesperada do modelo')
     }
 
-    return block.text
+    return {
+      text: block.text,
+      model,
+      usage: {
+        inputTokens: message.usage.input_tokens,
+        outputTokens: message.usage.output_tokens,
+      },
+    }
   }
 }

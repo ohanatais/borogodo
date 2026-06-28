@@ -25,7 +25,7 @@ export async function POST(): Promise<NextResponse> {
   }
 
   const entries = (data ?? []) as SufficiencyEntry[]
-  const result = await evaluateSufficiency(entries)
+  const result = await evaluateSufficiency(entries, user.id)
 
   return NextResponse.json(result)
 }

@@ -4,6 +4,7 @@ import { createServerClient } from '@/lib/db/supabase/server'
 import { recalibrateVoice, shouldSuggestRecalibration } from '@/lib/ai/content/recalibrateVoice'
 import { getVoiceFeedbackData, getVoiceSignal, getVoiceProfile, upsertVoiceProfile } from '@/lib/db/drafts'
 import { errorMessage } from '@/lib/errors'
+import { aiLimitResponse } from '@/lib/ai/cost/limitResponse'
 import { logger } from '@/lib/log'
 
 const recalibrateRequestSchema = z.object({
@@ -72,11 +73,15 @@ export async function POST(request: Request): Promise<NextResponse> {
       existing,
       soaSamples: feedback.soa,
       naoSoaSamples: feedback.naoSoa,
+      userId: user.id,
     })
     const saved = await upsertVoiceProfile(supabase, user.id, recalibrated)
 
     return NextResponse.json({ recalibrated: true, voiceProfile: saved }, { status: 200 })
   } catch (error: unknown) {
+    const limited = aiLimitResponse(error)
+    if (limited) return limited
+
     logger.error('voice recalibration failed', { message: errorMessage(error) })
     return jsonError('internal_error', 500)
   }

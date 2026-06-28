@@ -1,10 +1,9 @@
-import { complete as defaultComplete } from '@/lib/ai/client'
-import type { LLMRequest } from '@/lib/ai/provider'
+import { complete as defaultComplete, type GuardedRequest } from '@/lib/ai/client'
 import { validateContentRuleset } from '@/lib/ai/content/validateRuleset'
 import { ANTI_AI_DISCIPLINE } from '@/lib/ai/content/prompts/discipline'
 
-/** Chamada de LLM injetável — default usa o client real; testes passam um mock. */
-export type CompleteFn = (req: LLMRequest) => Promise<string>
+/** Chamada de LLM injetável — default usa o guard real; testes passam um mock. */
+export type CompleteFn = (req: GuardedRequest) => Promise<string>
 
 export type AssistMode = 'rephrase' | 'unblock' | 'star_nudge'
 export type AssistSection = 'entregas' | 'impacto' | 'evolucao' | 'pontos_a_desenvolver'
@@ -16,6 +15,8 @@ export interface AssistInput {
   text?: string
   /** Período em edição, para ancorar a pergunta do unblock. */
   seedRef?: string
+  /** Quem disparou — threaded até o guard de custo (023). */
+  userId: string
 }
 
 export type AssistResult =
@@ -71,7 +72,7 @@ const RETRY_FEEDBACK =
   '\n\nA resposta anterior violou as regras de voz (ex: travessão, jargão de IA). Reescreva corrigindo, sem adicionar nenhum fato novo.'
 
 /** Roda o LLM e valida a saída pelo ruleset anti-IA; regenera UMA vez; degrada com AssistFailedError. */
-async function runWithRuleset(req: LLMRequest, complete: CompleteFn): Promise<string> {
+async function runWithRuleset(req: GuardedRequest, complete: CompleteFn): Promise<string> {
   const first = (await complete(req)).trim()
   if (validateContentRuleset(first).length === 0) return first
 
@@ -94,9 +95,11 @@ export async function assist(
     return { mode: 'star_nudge', prompt: needsStarNudge(input.text ?? '') ? STAR_NUDGE_PROMPT : null }
   }
 
+  const base = { role: 'synthesis', action: 'self_assessment', userId: input.userId, maxTokens: MAX_TOKENS } as const
+
   if (input.mode === 'rephrase') {
     const suggestion = await runWithRuleset(
-      { role: 'synthesis', system: REPHRASE_SYSTEM, user: `Trecho da pessoa:\n${input.text ?? ''}`, maxTokens: MAX_TOKENS },
+      { ...base, system: REPHRASE_SYSTEM, user: `Trecho da pessoa:\n${input.text ?? ''}` },
       complete
     )
     return { mode: 'rephrase', suggestion }
@@ -104,10 +107,9 @@ export async function assist(
 
   const question = await runWithRuleset(
     {
-      role: 'synthesis',
+      ...base,
       system: UNBLOCK_SYSTEM,
       user: `Seção: ${SECTION_LABEL[input.section]}. Período: ${input.seedRef ?? 'não informado'}.`,
-      maxTokens: MAX_TOKENS,
     },
     complete
   )
