@@ -12,6 +12,8 @@ import { AngleSelector, type AngleValue } from './AngleSelector'
 import { OpinionPanel } from './OpinionPanel'
 import { CaptureOffer } from './CaptureOffer'
 import { VoiceCalibration } from './VoiceCalibration'
+import { AiLimitNotice } from '@/components/features/cost/AiLimitNotice'
+import { parseAiLimit, type AiLimitInfo } from '@/lib/ai/cost/clientLimit'
 import {
   PRESENCA_OPEN_EVENT,
   PRESENCA_RESUME_EVENT,
@@ -19,7 +21,7 @@ import {
   type PresencaResumeDetail,
 } from './presencaEvents'
 
-type Status = 'idle' | 'angle-select' | 'generating' | 'done' | 'error'
+type Status = 'idle' | 'angle-select' | 'generating' | 'done' | 'error' | 'limited'
 type ErrorKind = 'generationFailed' | 'generic'
 type Mode = 'generate' | 'resume'
 
@@ -66,6 +68,7 @@ export function GenerateSheet() {
   const [status, setStatus] = useState<Status>('idle')
   const [variants, setVariants] = useState<DraftVariant[]>([])
   const [errorKind, setErrorKind] = useState<ErrorKind>('generic')
+  const [aiLimit, setAiLimit] = useState<AiLimitInfo | null>(null)
   /** Id do rascunho em edição (modo "retomar"); `null` na geração fresca. */
   const [existingDraftId, setExistingDraftId] = useState<string | null>(null)
   /** Muda a cada geração/retomada para remontar os cards (evita estado de edição vazado entre rascunhos). */
@@ -106,6 +109,12 @@ export function GenerateSheet() {
         })
 
         if (!res.ok) {
+          const limit = await parseAiLimit(res)
+          if (limit) {
+            setAiLimit(limit)
+            setStatus('limited')
+            return
+          }
           setErrorKind(res.status === 422 ? 'generationFailed' : 'generic')
           setStatus('error')
           return
@@ -304,6 +313,10 @@ export function GenerateSheet() {
               )}
 
               {status === 'generating' && <GeneratingState label={t('generating')} />}
+
+              {status === 'limited' && aiLimit && (
+                <AiLimitNotice info={aiLimit} onDismiss={() => setStatus('angle-select')} />
+              )}
 
               {status === 'error' && (
                 <div className="flex flex-col gap-3">

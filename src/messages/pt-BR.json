@@ -3,6 +3,11 @@
     "title": "Borogodó",
     "description": "Descubra no que você é bom, por que você é bom nisso, e tenha o registro completo da carreira que você já construiu."
   },
+  "aiLimit": {
+    "rateLimited": "Você gerou bastante na última hora, que bom. Daqui a uns {minutes} min isso libera e você continua.",
+    "overloaded": "Tô um pouco sobrecarregado agora. Daqui a pouco volta ao normal, tenta de novo mais tarde.",
+    "dismiss": "Tá bom"
+  },
   "nav": {
     "cta": "Criar conta",
     "ctaAriaLabel": "Criar conta gratuita no Borogodó"

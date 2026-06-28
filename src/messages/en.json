@@ -3,6 +3,11 @@
     "title": "",
     "description": ""
   },
+  "aiLimit": {
+    "rateLimited": "You generated a lot in the last hour, nice. Give it about {minutes} min and you can keep going.",
+    "overloaded": "I'm a bit overloaded right now. Things should be back to normal soon, try again later.",
+    "dismiss": "Got it"
+  },
   "hero": {
     "tagline": "",
     "headline": "",

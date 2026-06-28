@@ -19,6 +19,16 @@ function buildSubject(type: AlertType, totalUsd: number, capUsd: number): string
   return `[Borogodó] Gasto de IA em ${pct}% do teto`
 }
 
+export interface AlertEmail {
+  subject: string
+  text: string
+}
+
+/** Compõe assunto + corpo do alerta (pura — sem I/O, testável direto). */
+export function composeAlertEmail(type: AlertType, snapshot: OpsSnapshot, capUsd: number): AlertEmail {
+  return { subject: buildSubject(type, snapshot.totalUsd, capUsd), text: buildBody(type, snapshot, capUsd) }
+}
+
 function buildBody(type: AlertType, snapshot: OpsSnapshot, capUsd: number): string {
   const pct = capUsd > 0 ? Math.round((snapshot.totalUsd / capUsd) * 100) : 0
   const ranking = snapshot.ranking.length
@@ -59,14 +69,15 @@ export async function sendOpsAlert(type: AlertType): Promise<void> {
   }
 
   try {
-    const { dailyCapUsd } = getLimits()
-    const snapshot = await dailyOpsSnapshot(getLimits().ratePerHour)
+    const { dailyCapUsd, ratePerHour } = getLimits()
+    const snapshot = await dailyOpsSnapshot(ratePerHour)
+    const email = composeAlertEmail(type, snapshot, dailyCapUsd)
     const resend = new Resend(apiKey)
     const { error } = await resend.emails.send({
       from: ALERT_FROM,
       to: OPS_ALERT_EMAIL,
-      subject: buildSubject(type, snapshot.totalUsd, dailyCapUsd),
-      text: buildBody(type, snapshot, dailyCapUsd),
+      subject: email.subject,
+      text: email.text,
     })
     if (error) {
       logger.error('ops_alert_send_failed', { type, reason: error.message })

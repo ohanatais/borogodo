@@ -106,7 +106,7 @@ nenhuma fura o chokepoint (validável pelo Cenário 6 do quickstart).
 > encosta; captura nunca bloqueia.
 > **Independent test:** Cenários 1, 2 e 3 do [quickstart.md](./quickstart.md).
 
-- [ ] T017 [P] [US1] Testes (RED) de rota em
+- [x] T017 [P] [US1] Testes (RED) de rota em
   `src/app/api/content/generate/__tests__/route.test.ts` (e equivalente p/ chat): com o guard
   lançando `RateLimitedError`, a rota responde **429** com `{ code: 'ai_rate_limited',
   retryAfterSeconds }` e header `Retry-After`.
@@ -115,10 +115,10 @@ nenhuma fura o chokepoint (validável pelo Cenário 6 do quickstart).
   `src/app/api/mirror/generate/route.ts`, `src/app/api/autoavaliacao/assist/route.ts`,
   `src/app/api/autoavaliacao/review-cycle/route.ts` — passando `userId`+`action` ao guard e
   traduzindo o erro no padrão `jsonError`. Fazer T017 passar.
-- [ ] T019 [P] [US1] Adicionar chaves i18n `errors.aiRateLimited` (e `errors.aiOverloaded` p/ US2)
+- [x] T019 [P] [US1] Adicionar chaves i18n `errors.aiRateLimited` (e `errors.aiOverloaded` p/ US2)
   em `src/messages/pt-BR.json` e `src/messages/en.json` — texto provisório no tom da marca
   (refino final no `/impeccable shape`).
-- [ ] T020 [US1] Tratar o 429 no cliente das superfícies de geração: ler `code`, exibir a mensagem
+- [x] T020 [US1] Tratar o 429 no cliente das superfícies de geração: ler `code`, exibir a mensagem
   i18n gentil (não erro cru, não tela vazia) e respeitar `Retry-After` quando houver. Localizar os
   componentes/handlers que chamam essas rotas e padronizar o tratamento.
 
@@ -132,7 +132,7 @@ nenhuma fura o chokepoint (validável pelo Cenário 6 do quickstart).
 > teto; ambos com retrato do dia; idempotente; captura sempre passa.
 > **Independent test:** Cenários 4 e 5 do [quickstart.md](./quickstart.md).
 
-- [ ] T021 [P] [US2] Testes (RED) em `src/lib/ai/cost/__tests__/alert.test.ts`: cruzar o limiar
+- [x] T021 [P] [US2] Testes (RED) em `src/lib/ai/cost/__tests__/alert.test.ts`: cruzar o limiar
   envia preventivo **uma vez** (2ª chamada no mesmo dia não reenvia); atingir o teto envia
   cap **uma vez**; falha de envio não propaga (best-effort). Mockar Resend e `ai_daily_alert_state`.
 - [x] T022 [P] [US2] Criar `src/lib/ai/cost/alert.ts`: monta o conteúdo (gasto, ativos, ranking,
@@ -158,7 +158,7 @@ nenhuma fura o chokepoint (validável pelo Cenário 6 do quickstart).
 
 - [ ] T026 [P] Rodar o [quickstart.md](./quickstart.md) inteiro em dev (Cenários 1–6) e anotar
   resultados; corrigir o que aparecer.
-- [ ] T027 [P] `/impeccable shape` da mensagem de limite (copy + estado acessível no tom da marca)
+- [x] T027 [P] `/impeccable shape` da mensagem de limite (copy + estado acessível no tom da marca)
   e aplicar o texto final nas chaves i18n do T019.
 - [ ] T028 [P] Verificar cobertura ≥80% em `src/lib/ai/cost/` e `src/lib/db/aiUsage.ts`; `tsc` e
   lint limpos; funções <40 linhas; nenhum dado de usuário no `logger`.
