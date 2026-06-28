@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { JourneySection } from '../JourneySection'
 import { ProofSection } from '../ProofSection'
+import { ComparisonSection } from '../ComparisonSection'
 import { OwnershipSection } from '../OwnershipSection'
 import { ManifestoSection } from '../ManifestoSection'
 import { SocialProofSection } from '../SocialProofSection'
@@ -29,6 +30,14 @@ describe('ProofSection', () => {
     const { container } = render(<ProofSection />)
     expect(container.querySelector('#provas')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'mediaLabel' })).toBeInTheDocument()
+  })
+})
+
+describe('ComparisonSection', () => {
+  it('renders the 5 comparison rows as a table with a single level 2 heading', () => {
+    const { container } = render(<ComparisonSection />)
+    expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument()
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(5)
   })
 })
 

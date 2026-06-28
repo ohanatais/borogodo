@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl'
 import { faqItems } from './faqData'
+import { SectionLabel } from './SectionLabel'
 
 /**
  * Perguntas frequentes (feature 022). Server Component; renderiza `faqData.ts`, a mesma fonte
@@ -10,8 +11,9 @@ export function FaqSection() {
   const t = useTranslations('faq')
 
   return (
-    <section id="perguntas" style={{ background: 'var(--background)' }} className="px-6 py-20 md:py-28">
-      <div className="mx-auto max-w-2xl">
+    <section id="perguntas" style={{ background: 'var(--color-cream-warm)' }} className="px-6 py-20 md:py-28">
+      <div className="mx-auto max-w-5xl">
+        <SectionLabel>{t('label')}</SectionLabel>
         <h2
           className="mb-12 text-2xl md:text-3xl"
           style={{ fontFamily: 'var(--font-display)', color: 'var(--foreground)', lineHeight: 1.2, letterSpacing: '-0.015em' }}
@@ -32,7 +34,10 @@ export function FaqSection() {
               >
                 {t(item.questionKey)}
               </summary>
-              <p className="mt-3 text-base leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+              <p
+                className="mt-3 text-base leading-relaxed"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
                 {t(item.answerKey)}
               </p>
             </details>

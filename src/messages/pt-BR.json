@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "title": "Borogodó: descubra no que você é bom e aprenda a mostrar",
+    "title": "Borogodó: descubra onde você manda bem e aprenda a mostrar",
     "description": "O Borogodó organiza o que você já fez no trabalho, mostra seus pontos fortes com a prova junto e te ajuda a falar do seu valor sem travar. Comece de graça.",
-    "ogTitle": "Você sabe trabalhar. Falar do seu trabalho é que trava.",
-    "ogDescription": "O Borogodó mostra no que você é bom, com a prova do lado e na sua voz. De graça pra começar."
+    "ogTitle": "Tudo sobre sua carreira num lugar só.",
+    "ogDescription": "Descubra no que você manda bem e use a seu favor. O Borogodó mostra seus pontos fortes com a prova do lado e na sua voz. De graça pra começar."
   },
   "nav": {
     "signIn": "Entrar",
@@ -14,10 +14,10 @@
     "anchorFaq": "Perguntas"
   },
   "hero": {
-    "eyebrow": "borogodó (substantivo): aquele quê que só você tem.",
-    "headline": "Você sabe trabalhar.",
-    "headlineEmphasis": "Falar do seu trabalho é que trava.",
-    "subheadline": "O Borogodó é a primeira inteligência de carreira com IA em português. Ele junta tudo que você já fez no trabalho, te mostra no que você é bom e por quê, e guarda com a prova junto. Quando você precisar falar de você, numa entrevista ou numa avaliação, a história já tá pronta.",
+    "eyebrow": "borogodó: aquele quê que só você tem.",
+    "headline": "Tudo sobre sua carreira num lugar só.",
+    "headlineEmphasis": "Descubra no que você manda bem e use a seu favor.",
+    "subheadline": "Registre todas as conquistas, projetos e feedbacks. O Borogodó, sua inteligência de carreira, encontra seus padrões de força, monta a evidência e te entrega tudo pronto pra autoavaliação, posts no LinkedIn, entrevista ou promoção.",
     "cta": "Ver o meu borogodó",
     "ctaAriaLabel": "Criar conta e ver o meu borogodó",
     "microcopy": "É de graça. Em uns 5 minutos você já vê o primeiro resultado.",
@@ -28,10 +28,11 @@
       "inputText": "Organizei a força-tarefa na crise do servidor e alinhei os times em tempo real.",
       "outputLabel": "o que o Borogodó viu",
       "forceLabel": "Liderança sob pressão",
-      "proofPrefix": "você mesma contou:",
+      "proofPrefix": "você contou:",
       "proofText": "alinhei os times em tempo real na crise do servidor",
       "placeholderNote": "Em breve, o vídeo real do seu primeiro borogodó aqui."
-    }
+    },
+    "videoAlt": "O espelho do Borogodó: suas forças organizadas por categoria, cada uma com a prova do lado."
   },
   "painPoints": {
     "title": "Você já sabe que tem mais pra mostrar.",
@@ -42,7 +43,7 @@
       },
       {
         "title": "Na hora de falar de você, dá branco.",
-        "description": "Você sabe que segurou aquele projeto quase sozinha. Aí chega na conversa de avaliação e os detalhes somem. Fica sem o número, sem o exemplo, sem o argumento na mão."
+        "description": "Você sabe que carregou aquele projeto quase inteiro. Aí chega na conversa de avaliação e os detalhes somem. Fica sem o número, sem o exemplo, sem o argumento na mão."
       },
       {
         "title": "Você tem o que dizer, mas não sai.",
@@ -50,9 +51,10 @@
       },
       {
         "title": "Você cresceu muito e não sabe explicar como.",
-        "description": "Hoje você é uma profissional bem diferente da que começou. Mas essa evolução tá só na sua cabeça, sem forma e sem nome."
+        "description": "Hoje você é bem diferente de quando começou. Mas essa evolução tá só na sua cabeça, sem forma e sem nome."
       }
-    ]
+    ],
+    "label": "O que trava hoje"
   },
   "cta": {
     "title": "O seu borogodó já existe.",
@@ -386,7 +388,8 @@
     "linkedinLabel": "Prefere conversar?",
     "linkedinCta": "Me chama no LinkedIn",
     "sla": "Tem uma pessoa de verdade do outro lado, eu mesma. Respondo em até 2 dias úteis.",
-    "credits": "Borogodó · feito no Brasil · {ano}"
+    "credits": "Borogodó · {ano}",
+    "brandTagline": "Inteligência de carreira com IA, feita no Brasil."
   },
   "bemvindo": {
     "step1": {
@@ -735,7 +738,7 @@
     "steps": [
       {
         "verb": "Descobrir",
-        "quote": "Eu não sabia que era boa nisso.",
+        "quote": "Eu nem sabia que mandava bem nisso.",
         "description": "Você conta o que fez, do seu jeito. O Borogodó acha a força que tava ali e você nem tinha percebido."
       },
       {
@@ -753,13 +756,15 @@
         "quote": "Sei mostrar do meu jeito.",
         "description": "Numa entrevista, numa avaliação, num post. Você pega o que precisa e fala com as suas palavras."
       }
-    ]
+    ],
+    "label": "Como funciona"
   },
   "proof": {
     "title": "Não inventa. Mostra a prova.",
-    "body": "IA generativa é boa em inventar coisa bonita sobre você. O Borogodó faz o contrário. Cada força que ele aponta nasce de algo que você registrou, e vem com a prova do lado. Se ele diz que você lidera bem na incerteza, é porque tem no seu registro três projetos de crise entregues no prazo e quatro feedbacks falando de calma sob pressão. Quando falta prova pra sustentar uma força, ele te pergunta em vez de chutar.",
+    "body": "Cada força que aparece no seu espelho nasce de algo que você mesmo registrou, e sempre vem com a prova do lado. E quando falta evidência pra sustentar uma força, o Borogodó te pergunta em vez de inventar.",
     "mediaLabel": "Card de força com a evidência citada",
-    "mediaNote": "Em breve, o print real do seu espelho aqui."
+    "mediaNote": "Em breve, o print real do seu espelho aqui.",
+    "label": "Provas"
   },
   "ownership": {
     "title": "Seu. Não da sua empresa.",
@@ -769,17 +774,20 @@
       "Só você vê",
       "Exportável quando quiser",
       "Sem acesso do empregador"
-    ]
+    ],
+    "label": "Privacidade"
   },
   "manifesto": {
     "title": "Mostrar o seu valor não é se gabar.",
-    "body": "Lá fora ensinam a se vender. Aqui no Brasil isso dá um desconforto danado, e tem razão de dar. Mostrar o seu borogodó é outra coisa. É deixar claro o que você já faz bem, com a prova do lado. O Borogodó faz a parte chata disso por você, sem floreio e sem aquele tom de IA que todo mundo reconhece de longe."
+    "body": "Lá fora ensinam a se vender. Aqui no Brasil isso dá um desconforto danado, e tem razão de dar. Mostrar o seu borogodó é outra coisa. É deixar claro o que você já faz bem, com a prova do lado. O Borogodó faz a parte chata disso por você, sem floreio e sem aquele tom de IA que todo mundo reconhece de longe.",
+    "label": "Manifesto"
   },
   "socialProof": {
     "title": "Feito à vista de todos.",
     "body": "O Borogodó tá sendo construído no aberto por uma PM brasileira, que vai postando o processo conforme faz. Sem depoimento inventado e sem número de fachada. Se quiser ver como tá ficando, é só acompanhar.",
     "link": "Ver os bastidores",
-    "linkAriaLabel": "Ver os bastidores no LinkedIn da fundadora"
+    "linkAriaLabel": "Ver os bastidores no LinkedIn da fundadora",
+    "label": "Bastidores"
   },
   "faq": {
     "title": "Perguntas que todo mundo faz.",
@@ -808,6 +816,40 @@
         "question": "Preciso escrever muito pra valer a pena?",
         "answer": "Não. Dá pra começar com uma coisa pequena que você fez essa semana e ir somando no seu ritmo."
       }
-    }
+    },
+    "label": "Perguntas"
+  },
+  "comparison": {
+    "label": "Por que não só o ChatGPT",
+    "title": "Não é a mesma coisa que pedir pro ChatGPT.",
+    "chatgptName": "ChatGPT",
+    "borogodoName": "Borogodó",
+    "rows": [
+      {
+        "aspect": "Ponto de partida",
+        "chatgpt": "Um prompt do zero, toda vez.",
+        "borogodo": "O seu registro acumulado."
+      },
+      {
+        "aspect": "Sobre você",
+        "chatgpt": "Não conhece a sua trajetória.",
+        "borogodo": "Parte do que você viveu de verdade."
+      },
+      {
+        "aspect": "A prova",
+        "chatgpt": "Inventa pra soar bem.",
+        "borogodo": "Cita a evidência real do seu registro."
+      },
+      {
+        "aspect": "A voz",
+        "chatgpt": "Genérica, com cara de IA.",
+        "borogodo": "A sua."
+      },
+      {
+        "aspect": "Quando falta dado",
+        "chatgpt": "Chuta com confiança.",
+        "borogodo": "Te pergunta em vez de inventar."
+      }
+    ]
   }
 }

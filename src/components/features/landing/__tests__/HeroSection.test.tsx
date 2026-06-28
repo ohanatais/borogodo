@@ -17,9 +17,10 @@ describe('HeroSection', () => {
     expect(container.querySelector('a[href="/login"]')).not.toBeInTheDocument()
   })
 
-  it('renders the demo with a force tag and its cited proof', () => {
-    render(<HeroSection />)
-    expect(screen.getAllByText('forceLabel').length).toBeGreaterThanOrEqual(1)
-    expect(screen.getByText('proofText', { exact: false })).toBeInTheDocument()
+  it('renders the espelho video with a poster fallback', () => {
+    const { container } = render(<HeroSection />)
+    const video = container.querySelector('video')
+    expect(video).toBeInTheDocument()
+    expect(video?.getAttribute('poster')).toBe('/landing/espelho.jpg')
   })
 })

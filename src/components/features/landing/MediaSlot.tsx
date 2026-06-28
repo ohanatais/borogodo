@@ -46,7 +46,7 @@ export function MediaSlot({
       }}
     >
       {kind === 'image' && src && (
-        <Image src={src} alt={label} fill className="object-cover" sizes="(max-width: 768px) 100vw, 480px" />
+        <Image src={src} alt={label} fill className="object-cover" sizes="(max-width: 768px) 100vw, 60vw" />
       )}
 
       {kind === 'video' && src && (

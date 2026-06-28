@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl'
+import { SectionLabel } from './SectionLabel'
 
 const stepKeys = [0, 1, 2, 3] as const
 
@@ -11,7 +12,8 @@ export function JourneySection() {
 
   return (
     <section id="como-funciona" style={{ background: 'var(--color-warm-bg, oklch(97% 0.02 85))' }} className="px-6 py-20 md:py-28">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-5xl">
+        <SectionLabel>{t('label')}</SectionLabel>
         <h2
           className="mb-14 text-2xl md:text-3xl"
           style={{ fontFamily: 'var(--font-display)', color: 'var(--foreground)', lineHeight: 1.2, letterSpacing: '-0.015em' }}
@@ -37,7 +39,10 @@ export function JourneySection() {
                 >
                   {t(`steps.${i}.quote`)}
                 </p>
-                <p className="text-base leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                <p
+                  className="text-base leading-relaxed"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
                   {t(`steps.${i}.description`)}
                 </p>
               </div>

@@ -10,14 +10,14 @@ export function CtaSection() {
       style={{ background: 'linear-gradient(145deg, oklch(32% 0.18 300) 0%, oklch(26% 0.23 325) 100%)' }}
       className="px-6 py-20 md:py-28"
     >
-      <div className="mx-auto max-w-2xl text-center">
+      <div className="mx-auto max-w-5xl">
         <h2
           className="mb-4 text-3xl md:text-4xl"
           style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary-fg)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
         >
           {t('title')}
         </h2>
-        <p className="mb-10 text-lg" style={{ color: 'var(--color-primary-fg)', opacity: 0.8 }}>
+        <p className="mb-10 max-w-2xl text-lg" style={{ color: 'var(--color-primary-fg)', opacity: 0.8 }}>
           {t('subtitle')}
         </p>
 

@@ -3,6 +3,7 @@ import { HeroSection } from '@/components/features/landing/HeroSection'
 import { PainPointsSection } from '@/components/features/landing/PainPointsSection'
 import { JourneySection } from '@/components/features/landing/JourneySection'
 import { ProofSection } from '@/components/features/landing/ProofSection'
+import { ComparisonSection } from '@/components/features/landing/ComparisonSection'
 import { OwnershipSection } from '@/components/features/landing/OwnershipSection'
 import { ManifestoSection } from '@/components/features/landing/ManifestoSection'
 import { SocialProofSection } from '@/components/features/landing/SocialProofSection'
@@ -27,6 +28,9 @@ export default function LandingPage() {
         </AnimatedSection>
         <AnimatedSection>
           <ProofSection />
+        </AnimatedSection>
+        <AnimatedSection>
+          <ComparisonSection />
         </AnimatedSection>
         <AnimatedSection>
           <OwnershipSection />

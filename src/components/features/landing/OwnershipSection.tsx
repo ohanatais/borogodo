@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl'
 import { ShieldCheck, Eye, Download, Lock } from 'lucide-react'
+import { SectionLabel } from './SectionLabel'
 
 const signalIcons = [Lock, Eye, Download, ShieldCheck] as const
 const signalKeys = [0, 1, 2, 3] as const
@@ -17,14 +18,18 @@ export function OwnershipSection() {
       style={{ background: 'var(--color-teal-bg, oklch(96% 0.03 195))' }}
       className="px-6 py-20 md:py-28"
     >
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-5xl">
+        <SectionLabel>{t('label')}</SectionLabel>
         <h2
           className="mb-5 text-2xl md:text-3xl"
           style={{ fontFamily: 'var(--font-display)', color: 'var(--foreground)', lineHeight: 1.15, letterSpacing: '-0.015em' }}
         >
           {t('title')}
         </h2>
-        <p className="mb-10 text-base leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+        <p
+          className="mb-10 text-base leading-relaxed md:hyphens-auto md:text-justify"
+          style={{ color: 'var(--muted-foreground)' }}
+        >
           {t('body')}
         </p>
 
