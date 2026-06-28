@@ -24,48 +24,29 @@ Features mergeadas em `main` (até PR #40):
 - **016-captura-v2** — captura multi-item, ressurgimento por delta, áudio via Web Speech, pergunta cirúrgica (PR #40)
 - **017-feed-registros** — feed cru de registros (`/registros`), cards colapsáveis, busca/filtros, grade-faísca (PR #51)
 - **020-canal-suporte** — canal de contato/suporte pré-launch: `ContactCard` reutilizável (e-mail copiável via `lib/clipboard.ts`, LinkedIn secundário, SLA) no rodapé da LP (`Footer`) e em `/configuracoes`; i18n namespace `support` (PR #54)
+- **021-navegacao-espinha** — reforma de IA: menu de 6 → 4 destinos (Painel, Espelho c/ Forças+Trajetória, Registros, Usar), `Segmented` único, chat como porta no Painel (PR #55)
 
 **Bloco da Presença (fechado):** 013 → 014 → 015 mergeadas. Migrations `009` e `010` aplicadas em
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **021-navegacao-espinha** (branch: `021-navegacao-espinha`) — **reforma de IA: o menu expressa a espinha; 6 → 4 destinos. Spec ✅ clarify ✅ plan ✅ · IMPLEMENTADA + refinada numa revisão de design (PR aberto)**
+Current feature: **022-landing-rebuild** (branch: `022-landing-rebuild`) — **rebuild da landing page: narrativa dos 4 verbos + pilar Provas + propriedade do dado + SEO/GEO 100% + mídia real via slots. Spec ✅ clarify ✅ plan ✅**
 
-> **Decisão:** `docs/decisions/001-arquitetura-de-navegacao.md`. O menu cresceu feature a feature
-> e virou 6 portas paralelas que misturam camadas. Esta reforma colapsa para **4 destinos = os
-> movimentos da espinha** (Descobrir→Entender→Provar→Usar): **Painel** (Home), **Espelho**
-> (absorve a Linha do Tempo como 2ª vista — Forças + Trajetória), **Registros** (log cru),
-> **Usar** (landing que roteia: pra fora → Repertório/`/presenca`; pra dentro → `/autoavaliacao`).
-> **Reorganização, não reescrita** — telas existentes são re-parentadas/re-roteadas (a Trajetória
-> reusa o `HistoricoPageClient` inteiro). **Sem migration.** `impact_summary` sai das listas
-> oferecidas, fica no enum/motor. Princípio fixado: a Home é estruturada/proativa; o **chat é
-> ferramenta onipresente, nunca a Home** (porta de conversa aditiva no topo do Painel).
-> **4 fases independentes e testáveis** (US1 menu+landing · US2 Espelho 2 vistas · US3 porta do
-> Painel · US4 limpeza de formato). **Me preparar** (generalizar a Autoavaliação para novos
-> momentos) é feature futura separada, fora desta.
->
-> **Refinos de execução (revisão de design pós-implementação — o que ficou diferente da spec):**
-> - **Painel** colapsou pra coluna única (hero → porta de chat → conquistas → insight → recentes).
->   Saíram o `UsarInvite` (vivia no destino Usar) e a `MiniTimeline` (vive no Espelho→Trajetória);
->   query de timeline morta removida do `getPanelData`. A **porta de chat** (US3) ganhou copy que
->   ensina ("Pergunte qualquer coisa… ex.: 'o que me destaca?'") — o gap real era descoberta.
-> - **Usar**: o splash de intenção foi mantido, mas cada caminho abre um **hub ESCOPADO**
->   (`/presenca?hub=mostrar|preparar`) — antes mostrava os dois hubs ("tudo tudo"). Título e
->   "Voltar" por hub. A **Autoavaliação** virou card permanente do hub PREPARAR (não se perde).
-> - **Espelho**: Forças/Trajetória alinham no mesmo container (sem `max-w/px` duplicado); título da
->   Trajetória virou intro (h2). Temas de força viraram **tags de leitura** — saíram o "Usar" por
->   tema e o "Criar bio" (o Espelho é contemplação, ação vive no Usar).
-> - **Design system**: um **`Segmented`** único (`components/ui/Segmented.tsx`) padroniza os 3
->   toggles (Espelho, Registros, Registrar/Perguntar). `impact_summary` ("Pra falar") saiu também
->   do filtro de rascunhos.
-> - **Bio**: deixou de ancorar num tema fixo — **a pessoa escolhe o foco** antes de gerar (Geral +
->   temas). A evidência da mini-bio já era ampla; o prompt já mira formato LinkedIn ("Sobre").
-> - **Shell**: frame de altura fixa (`h-dvh`/overflow) — só o conteúdo rola, sem rubber-band.
-Spec: [specs/021-navegacao-espinha/spec.md](specs/021-navegacao-espinha/spec.md) ·
-Plan: [specs/021-navegacao-espinha/plan.md](specs/021-navegacao-espinha/plan.md) ·
-Research: [specs/021-navegacao-espinha/research.md](specs/021-navegacao-espinha/research.md) ·
-Data-model: [specs/021-navegacao-espinha/data-model.md](specs/021-navegacao-espinha/data-model.md) ·
-Contracts: [specs/021-navegacao-espinha/contracts/routes.md](specs/021-navegacao-espinha/contracts/routes.md) ·
-Quickstart: [specs/021-navegacao-espinha/quickstart.md](specs/021-navegacao-espinha/quickstart.md) ·
+> Mescla decidida em `docs/decisions/001-landing-page-rebuild.md`: a issue #36 manda na
+> narrativa, voz e estrutura (headline da dor, eyebrow estilo dicionário, 4 verbos, CTA único,
+> sem depoimento fake); a auditoria de mercado entra como camada técnica de SEO/GEO (H1 único,
+> JSON-LD Software+Org+FAQ, llms.txt, SSR, crawlers de IA, meta/OG humanas) e reforço dos
+> diferenciais (Provas e "seu, não da sua empresa"). Os mockups fake (`MirrorMockup`,
+> `CareerMapMockup`, `ContentGenSection`) saem; entram slots de mídia (`MediaSlot`) com
+> placeholder agora, mídia real depois (vídeo do onboarding no hero + screenshot do card de
+> força em Provas). **Sem migration, sem API nova, sem dado de usuário.** Risco real é
+> conteúdo/voz (gate humano da Ohana). Hub de conteúdo e consenso off-site ficam FORA (trilha
+> GTM separada).
+Spec: [specs/022-landing-rebuild/spec.md](specs/022-landing-rebuild/spec.md) ·
+Plan: [specs/022-landing-rebuild/plan.md](specs/022-landing-rebuild/plan.md) ·
+Research: [specs/022-landing-rebuild/research.md](specs/022-landing-rebuild/research.md) ·
+Data-model: [specs/022-landing-rebuild/data-model.md](specs/022-landing-rebuild/data-model.md) ·
+Contracts: [specs/022-landing-rebuild/contracts/landing.md](specs/022-landing-rebuild/contracts/landing.md) ·
+Quickstart: [specs/022-landing-rebuild/quickstart.md](specs/022-landing-rebuild/quickstart.md) ·
 Tasks: (pendente — `/speckit-tasks`)
 <!-- SPECKIT END -->

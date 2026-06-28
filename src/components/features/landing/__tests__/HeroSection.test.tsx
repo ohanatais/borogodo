@@ -2,26 +2,25 @@ import { render, screen } from '@testing-library/react'
 import { HeroSection } from '../HeroSection'
 
 describe('HeroSection', () => {
-  it('renders an h1 heading', () => {
+  it('renders a single h1 heading (the pain headline)', () => {
     render(<HeroSection />)
-    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
   })
 
-  it('T028: "Criar conta" link points to /login?mode=signup', () => {
+  it('primary CTA points to signup', () => {
     const { container } = render(<HeroSection />)
-    const link = container.querySelector('a[href="/login?mode=signup"]')
-    expect(link).toBeInTheDocument()
+    expect(container.querySelector('a[href="/login?mode=signup"]')).toBeInTheDocument()
   })
 
-  it('T028: "Já tenho conta" link points to /login', () => {
+  it('does not render a competing "Entrar" link in the hero (single CTA)', () => {
     const { container } = render(<HeroSection />)
-    const link = container.querySelector('a[href="/login"]')
-    expect(link).toBeInTheDocument()
+    expect(container.querySelector('a[href="/login"]')).not.toBeInTheDocument()
   })
 
-  it('CTA links have aria-label attributes', () => {
+  it('renders the espelho video with a poster fallback', () => {
     const { container } = render(<HeroSection />)
-    const links = container.querySelectorAll('a[aria-label]')
-    expect(links.length).toBeGreaterThanOrEqual(2)
+    const video = container.querySelector('video')
+    expect(video).toBeInTheDocument()
+    expect(video?.getAttribute('poster')).toBe('/landing/espelho.jpg')
   })
 })

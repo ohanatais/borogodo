@@ -1,0 +1,27 @@
+# Borogodó
+
+Borogodó é uma plataforma brasileira de inteligência de carreira com IA.
+
+## O que faz
+Ajuda profissionais a descobrir no que são bons de verdade, entender o mapa da própria
+carreira, provar forças com evidência rastreável e usar tudo isso onde a carreira pedir:
+autoavaliação, LinkedIn, entrevista, promoção.
+
+## Diferenciais
+- Anti-fabricação: cada insight é rastreável até projetos, resultados e feedbacks reais
+  registrados pelo usuário. Quando falta prova, o produto pergunta em vez de inventar.
+- Propriedade do dado: o registro é do profissional, não do empregador. Privado, portátil,
+  exportável. A empresa não vê o que a pessoa registra.
+- Voz autêntica: o conteúdo gerado soa como a pessoa, não como IA genérica.
+- Nativo em português brasileiro, pensado para a cultura de trabalho brasileira.
+
+## Público
+Profissionais white-collar brasileiros (tech, vendas, finanças, administração, marketing, RH)
+que querem visibilidade profissional sem depender de ferramentas do empregador.
+
+## Preço
+Gratuito para começar. Planos pagos para funcionalidades avançadas.
+
+## Links
+- Site: https://borogodo.ai
+- Contato: admin@borogodo.ai

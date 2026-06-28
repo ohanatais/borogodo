@@ -5,9 +5,25 @@ import { MotionProvider } from '@/components/providers/MotionProvider'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata')
+  // Placeholder (SVG) enquanto a arte real do card não existe; trocar por .png depois (FR-026).
+  const ogImage = '/og/espelho-prova.svg'
   return {
+    metadataBase: new URL('https://borogodo.ai'),
     title: t('title'),
     description: t('description'),
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      images: [{ url: ogImage }],
+      locale: 'pt_BR',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      images: [ogImage],
+    },
   }
 }
 
