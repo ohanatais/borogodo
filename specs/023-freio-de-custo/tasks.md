@@ -42,7 +42,7 @@ custo são escritos e confirmados **falhando** (RED) antes da implementação.
   `ai_daily_alert_state` conforme [data-model.md](./data-model.md) — colunas, CHECKs, índices
   (`(user_id, created_at)`, `(created_at)`, `(action, created_at)`), RLS habilitada **server-only**
   (sem policy para anon/authenticated). Cabeçalho explicando a renumeração para 014.
-- [ ] T004 Aplicar a migration `014` em **dev** (Supabase) e confirmar via `list_migrations`.
+- [x] T004 Aplicar a migration `014` em **dev** (Supabase) e confirmar via `list_migrations`.
   (Prod fica para a fase de validação/PR.)
 
 ### Provider devolve uso de tokens
@@ -165,7 +165,7 @@ nenhuma fura o chokepoint (validável pelo Cenário 6 do quickstart).
 - [ ] T029 `/security-review` focado: auth-first nas rotas, RLS de `ai_usage_events`, input→LLM
   inalterado, e o e-mail operacional com identificador de usuário (Constitution I) — sem achados
   CRITICAL/HIGH.
-- [ ] T030 Aplicar a migration `014` em **prod** (após aprovação do PR) e confirmar via
+- [x] T030 Aplicar a migration `014` em **prod** (após aprovação do PR) e confirmar via
   `list_migrations`. Anotar no `CLAUDE.md` a aplicação (dev+prod) na ordem.
 
 ---
