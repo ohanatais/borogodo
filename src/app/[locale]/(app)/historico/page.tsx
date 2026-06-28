@@ -1,26 +1,8 @@
 import { redirect } from 'next/navigation'
-import type { Metadata } from 'next'
-import { createServerClient } from '@/lib/db/supabase/server'
-import { getHistoricoData } from '@/lib/historico/getHistoricoData'
-import { HistoricoPageClient } from './HistoricoPageClient'
 
-export const metadata: Metadata = {
-  title: 'Linha do Tempo | Borogodó',
-}
-
+// A Linha do Tempo foi absorvida pelo Espelho como a vista "Trajetória" (021). A rota
+// permanece viva e nunca 404 (FR-006/007): redireciona para a nova casa. Os componentes
+// continuam em `historico/` e são reusados pela vista de Trajetória.
 export default async function HistoricoPage() {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const data = await getHistoricoData(supabase, user.id)
-
-  return (
-    <div className="py-6">
-      <HistoricoPageClient data={data} />
-    </div>
-  )
+  redirect('/espelho?vista=trajetoria')
 }

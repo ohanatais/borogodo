@@ -41,7 +41,6 @@ const BASE_DATA: PanelData = {
   monthsSpan: 2,
   daysSince: 1,
   recentEntries: [],
-  timelineEntries: [],
   highlights: [],
   mirror: { headline: 'Você media conflitos com leveza.', strengthThemes: ['mediação'], skillSummary: null },
   insight: null,
@@ -79,18 +78,12 @@ describe('PainelPage', () => {
     expect(screen.getByText('formingSubtitle')).toBeInTheDocument()
   })
 
-  it('017: mostra o convite do Repertório quando há histórico', async () => {
+  it('021: não duplica o convite "Usar" no painel (vive no destino de topo Usar)', async () => {
     mockGetPanelData.mockResolvedValueOnce(BASE_DATA)
     const { default: PainelPage } = await import('../page')
     render(await PainelPage())
-    expect(screen.getByText('hubs.mostrar.title')).toBeInTheDocument()
-    expect(screen.getByText('hubs.preparar.title')).toBeInTheDocument()
-  })
-
-  it('017: não mostra o convite quando ainda não há entradas', async () => {
-    mockGetPanelData.mockResolvedValueOnce({ ...BASE_DATA, entryCount: 0 })
-    const { default: PainelPage } = await import('../page')
-    render(await PainelPage())
+    // O card de convite ao Repertório saiu do painel — "Usar" virou destino de menu (021).
     expect(screen.queryByText('hubs.mostrar.title')).not.toBeInTheDocument()
+    expect(screen.queryByText('hubs.preparar.title')).not.toBeInTheDocument()
   })
 })

@@ -17,9 +17,10 @@ const STATUS_OPTIONS: { value: DraftStatusFilter; key: string }[] = [
 ]
 
 const FORMAT_OPTIONS: { value: DraftFormat | null; key: string }[] = [
+  // 'impact_summary' ("Pra falar") saiu dos formatos oferecidos na 021 — fora do filtro também.
+  // Rascunhos antigos desse tipo seguem visíveis em "Todos".
   { value: null, key: 'filter.allFormats' },
   { value: 'post', key: 'filter.post' },
-  { value: 'impact_summary', key: 'filter.impactSummary' },
   { value: 'mini_bio', key: 'filter.miniBio' },
 ]
 

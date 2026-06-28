@@ -12,7 +12,8 @@ interface ProactiveInsightCardProps {
   insight: ProactiveInsight | null
 }
 
-const NUDGE_FORMATS: DraftFormat[] = ['post', 'impact_summary']
+// impact_summary saiu das opções oferecidas (021); permanece no enum/motor (FR-015).
+export const NUDGE_FORMATS: DraftFormat[] = ['post']
 
 export function ProactiveInsightCard({ insight }: ProactiveInsightCardProps) {
   const t = useTranslations('panel')

@@ -23,7 +23,8 @@
       "proofPrefix": "você mesma contou:",
       "proofText": "alinhei os times em tempo real na crise do servidor",
       "placeholderNote": "Em breve, o vídeo real do seu primeiro borogodó aqui."
-    }
+    },
+    "tagline": ""
   },
   "painPoints": {
     "title": "Você já sabe que tem mais pra mostrar.",
@@ -50,7 +51,9 @@
     "title": "O seu borogodó já existe.",
     "subtitle": "Você só ainda não viu ele inteiro. Começa de graça e leva uns 5 minutos.",
     "primary": "Ver o meu borogodó",
-    "primaryAriaLabel": "Criar conta e ver o meu borogodó"
+    "primaryAriaLabel": "Criar conta e ver o meu borogodó",
+    "secondary": "",
+    "secondaryAriaLabel": ""
   },
   "auth": {
     "headline": {
@@ -99,7 +102,11 @@
     "greeting": "Hello, {name}",
     "placeholder": "Your dashboard is coming. Everything's good for now.",
     "logout": "Sign out",
-    "logoutAriaLabel": "End session"
+    "logoutAriaLabel": "End session",
+    "chatDoor": {
+      "placeholder": "Ask anything about your career — e.g. \"what makes me stand out?\"",
+      "ariaLabel": "Open chat and ask about your career"
+    }
   },
   "panel": {
     "status": {
@@ -174,7 +181,9 @@
     "perguntar": "Perguntar",
     "captureHint": "Conte o que você fez hoje...",
     "askHint": "Pergunte algo sobre sua carreira...",
-    "send": "Enviar"
+    "send": "Enviar",
+    "registros": "Registros",
+    "usar": "Usar"
   },
   "capture": {
     "composer": {
@@ -397,7 +406,8 @@
         "edited": "Edited",
         "copied": "Copied",
         "discarded": "Archived"
-      }
+      },
+      "backToUsar": "Back"
     },
     "loadMore": "Load more",
     "filterEmpty": "No drafts in this filter.",
@@ -561,7 +571,8 @@
     "moments": {
       "entrevista": "Interview",
       "review": "Performance review",
-      "salario": "Ask for a raise"
+      "salario": "Ask for a raise",
+      "autoavaliacao": "Write self-assessment"
     },
     "prepare": {
       "heading": "How do you want to prepare?",
@@ -578,6 +589,10 @@
     },
     "bio": {
       "cta": "Create my bio"
+    },
+    "bioFocus": {
+      "title": "What should the bio focus on?",
+      "geral": "General (whole trajectory)"
     }
   },
   "feed": {
@@ -715,6 +730,58 @@
         "question": "Preciso escrever muito pra valer a pena?",
         "answer": "Não. Dá pra começar com uma coisa pequena que você fez essa semana e ir somando no seu ritmo."
       }
+    }
+  },
+  "howItWorks": {
+    "title": "",
+    "subtitle": "",
+    "steps": [
+      {
+        "number": "01",
+        "title": "",
+        "description": ""
+      },
+      {
+        "number": "02",
+        "title": "",
+        "description": ""
+      },
+      {
+        "number": "03",
+        "title": "",
+        "description": ""
+      }
+    ]
+  },
+  "mirror": {
+    "title": "",
+    "subtitle": "",
+    "patternLabel": "",
+    "evidenceLabel": "",
+    "insightLabel": ""
+  },
+  "careerMap": {
+    "title": "",
+    "subtitle": "",
+    "clustersLabel": "",
+    "timelineLabel": ""
+  },
+  "contentGen": {
+    "title": "",
+    "subtitle": "",
+    "realLabel": "",
+    "genericLabel": ""
+  },
+  "usar": {
+    "title": "What do you want to do with your borogodó?",
+    "subtitle": "Two paths: show it outward or prepare inward.",
+    "conteudo": {
+      "label": "Content",
+      "when": "Show your value outward — post, bio."
+    },
+    "preparo": {
+      "label": "Prep",
+      "when": "Walk in ready — interview, review, raise."
     }
   }
 }

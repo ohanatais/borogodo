@@ -13,8 +13,9 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['src/test/setup.ts'],
-    // Não varrer worktrees irmãs montadas em .claude/worktrees (cada branch tem seus
-    // próprios testes; rodá-los a partir da branch principal gera falsos vermelhos).
+    // Worktrees efêmeras de agentes vivem em .claude/worktrees com cópias do código; não são
+    // alvo de teste do repo principal. Sem excluí-las, o vitest roda testes duplicados/
+    // desatualizados de outra branch (falsos vermelhos). configDefaults preserva os ignores padrão.
     exclude: [...configDefaults.exclude, '**/.claude/**'],
   },
 })

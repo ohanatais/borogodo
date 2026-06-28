@@ -22,13 +22,6 @@ interface RecentEntryRow {
   created_at: string
 }
 
-export interface TimelineEntry {
-  id: string
-  role_title: string | null
-  company: string | null
-  entry_date: string | null
-}
-
 interface MirrorRow {
   primary_strength: { headline: string } | null
   strength_themes: string[] | null
@@ -66,7 +59,6 @@ export interface PanelData {
   monthsSpan: number | null
   daysSince: number | null
   recentEntries: RecentEntryRow[]
-  timelineEntries: TimelineEntry[]
   highlights: HighlightEntry[]
   mirror: PanelMirror | null
   insight: ProactiveInsight | null
@@ -103,7 +95,6 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     newestRes,
     mirrorRes,
     insightRes,
-    timelineRes,
     highlightsRes,
     oldestByCreatedRes,
   ] = await Promise.all([
@@ -146,13 +137,6 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
       .order('generated_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
-    supabase
-      .from('entries')
-      .select('id, role_title, company, entry_date')
-      .eq('user_id', userId)
-      .not('role_title', 'is', null)
-      .order('entry_date', { ascending: false })
-      .limit(10),
     supabase
       .from('entries')
       .select('id, what_i_did, impact, metric, entry_date')
@@ -246,14 +230,6 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
   const t = await getTranslations('capture.composer.prompt')
   const prompt = getCapturePrompt(daysSince, mirror?.strengthThemes)
 
-  const seenCompanies = new Set<string>()
-  const timelineEntries = ((timelineRes.data ?? []) as TimelineEntry[]).filter((e) => {
-    if (!e.company) return true
-    if (seenCompanies.has(e.company)) return false
-    seenCompanies.add(e.company)
-    return true
-  })
-
   return {
     name: profileData?.name ?? '',
     avatarUrl: profileData?.avatar_url ?? null,
@@ -262,7 +238,6 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
     monthsSpan: calculateMonthsSpan(oldestEntryDate, newestEntryDate),
     daysSince,
     recentEntries,
-    timelineEntries,
     highlights: (highlightsRes.data ?? []) as HighlightEntry[],
     mirror,
     insight: (insightRes.data as ProactiveInsight | null) ?? null,

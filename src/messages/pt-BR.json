@@ -11,7 +11,9 @@
     "anchorHow": "Como funciona",
     "anchorProof": "Provas",
     "anchorPrivacy": "Privacidade",
-    "anchorFaq": "Perguntas"
+    "anchorFaq": "Perguntas",
+    "cta": "Criar conta",
+    "ctaAriaLabel": "Criar conta gratuita no Borogodó"
   },
   "hero": {
     "eyebrow": "borogodó: aquele quê que só você tem.",
@@ -32,7 +34,8 @@
       "proofText": "alinhei os times em tempo real na crise do servidor",
       "placeholderNote": "Em breve, o vídeo real do seu primeiro borogodó aqui."
     },
-    "videoAlt": "O espelho do Borogodó: suas forças organizadas por categoria, cada uma com a prova do lado."
+    "videoAlt": "O espelho do Borogodó: suas forças organizadas por categoria, cada uma com a prova do lado.",
+    "tagline": "todo mundo tem um. o seu merece ser visto."
   },
   "painPoints": {
     "title": "Você já sabe que tem mais pra mostrar.",
@@ -60,7 +63,9 @@
     "title": "O seu borogodó já existe.",
     "subtitle": "Você só ainda não viu ele inteiro. Começa de graça e leva uns 5 minutos.",
     "primary": "Ver o meu borogodó",
-    "primaryAriaLabel": "Criar conta e ver o meu borogodó"
+    "primaryAriaLabel": "Criar conta e ver o meu borogodó",
+    "secondary": "Já tenho conta",
+    "secondaryAriaLabel": "Entrar na minha conta"
   },
   "auth": {
     "headline": {
@@ -109,7 +114,11 @@
     "greeting": "Olá, {name}",
     "placeholder": "Seu painel está chegando. Por enquanto, tudo certo.",
     "logout": "Sair",
-    "logoutAriaLabel": "Encerrar sessão"
+    "logoutAriaLabel": "Encerrar sessão",
+    "chatDoor": {
+      "placeholder": "Pergunte qualquer coisa sobre sua carreira — ex.: \"o que me destaca?\"",
+      "ariaLabel": "Abrir conversa e perguntar sobre sua carreira"
+    }
   },
   "panel": {
     "status": {
@@ -250,6 +259,10 @@
       "yes": "Sim",
       "no": "Não",
       "confirmed": "Obrigado pelo feedback"
+    },
+    "views": {
+      "forcas": "Forças",
+      "trajetoria": "Trajetória"
     }
   },
   "historico": {
@@ -269,7 +282,9 @@
     "perguntar": "Perguntar",
     "captureHint": "Conte o que você fez hoje...",
     "askHint": "Pergunte algo sobre sua carreira...",
-    "send": "Enviar"
+    "send": "Enviar",
+    "registros": "Registros",
+    "usar": "Usar"
   },
   "capture": {
     "composer": {
@@ -501,7 +516,8 @@
         "edited": "Editado",
         "copied": "Copiado",
         "discarded": "Arquivado"
-      }
+      },
+      "backToUsar": "Voltar"
     },
     "loadMore": "Carregar mais",
     "filterEmpty": "Nenhum rascunho neste filtro.",
@@ -665,7 +681,8 @@
     "moments": {
       "entrevista": "Entrevista",
       "review": "Conversa de avaliação",
-      "salario": "Pedir aumento"
+      "salario": "Pedir aumento",
+      "autoavaliacao": "Escrever autoavaliação"
     },
     "prepare": {
       "heading": "Como você quer se preparar?",
@@ -682,6 +699,10 @@
     },
     "bio": {
       "cta": "Criar minha bio"
+    },
+    "bioFocus": {
+      "title": "Sobre o que é a bio?",
+      "geral": "Geral (trajetória inteira)"
     }
   },
   "feed": {
@@ -851,5 +872,57 @@
         "borogodo": "Te pergunta em vez de inventar."
       }
     ]
+  },
+  "howItWorks": {
+    "title": "Como funciona",
+    "subtitle": "Três passos para finalmente ver o que você já construiu.",
+    "steps": [
+      {
+        "number": "01",
+        "title": "Você conta sua história",
+        "description": "Registre experiências, projetos e conquistas no seu ritmo. O Borogodó organiza, guarda e nunca perde nada."
+      },
+      {
+        "number": "02",
+        "title": "Você recebe seu espelho",
+        "description": "A IA identifica seus padrões, revela no que você é bom e por quê, e te devolve uma síntese que faz sentido de verdade."
+      },
+      {
+        "number": "03",
+        "title": "Você usa como quiser",
+        "description": "LinkedIn, posts, currículo, portfólio, reunião de performance. Tudo sai do mesmo lugar, com a sua voz."
+      }
+    ]
+  },
+  "mirror": {
+    "title": "Seu espelho profissional",
+    "subtitle": "Cada insight parte da sua história real, construída experiência por experiência.",
+    "patternLabel": "Padrão identificado",
+    "evidenceLabel": "Baseado em",
+    "insightLabel": "Sua síntese"
+  },
+  "careerMap": {
+    "title": "Mapa da sua carreira",
+    "subtitle": "Visualize como suas habilidades se conectam e onde você está indo.",
+    "clustersLabel": "Suas competências",
+    "timelineLabel": "Sua jornada"
+  },
+  "contentGen": {
+    "title": "Conteúdo que soa como você",
+    "subtitle": "A diferença entre uma IA que te conhece e uma IA qualquer.",
+    "realLabel": "Com o Borogodó",
+    "genericLabel": "IA genérica"
+  },
+  "usar": {
+    "title": "O que você quer fazer com o seu borogodó?",
+    "subtitle": "Dois caminhos: mostrar pra fora ou se preparar pra dentro.",
+    "conteudo": {
+      "label": "Conteúdo",
+      "when": "Mostrar seu valor pra fora — post, bio."
+    },
+    "preparo": {
+      "label": "Preparo",
+      "when": "Chegar pronto num momento — entrevista, avaliação, aumento."
+    }
   }
 }

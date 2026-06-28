@@ -73,7 +73,7 @@ describe('PresencaCreate', () => {
     })
   })
 
-  it('escolher uma entrada dispara a geração com post + resumo de impacto', async () => {
+  it('escolher uma entrada dispara a geração com post (sem resumo de impacto — 021)', async () => {
     openChooser()
     await screen.findByText('create.title')
 
@@ -83,7 +83,7 @@ describe('PresencaCreate', () => {
 
     expect(captured?.seedType).toBe('entry')
     expect(captured?.seedRef).toBe('e-1')
-    expect(captured?.formats).toEqual(['post', 'impact_summary'])
+    expect(captured?.formats).toEqual(['post'])
   })
 
   it('sem temas nem entradas, guia a registrar primeiro (nunca um prompt vazio)', async () => {

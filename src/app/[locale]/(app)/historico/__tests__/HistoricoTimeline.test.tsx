@@ -23,7 +23,9 @@ describe('HistoricoTimeline', () => {
   it('renders the headline', () => {
     const data: HistoricoData = { companies: [COMPANY] }
     render(<HistoricoTimeline data={data} activeProject={null} onSelectProject={noop} onCloseProject={noop} onStartCapture={noop} />)
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/fio da/)
+    // h2: a Trajetória é uma vista do Espelho (segmented control), não uma página própria — o
+    // intro deixou de ser page-title (h1) pra não duplicar título logo abaixo do toggle (021).
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(/fio da/)
   })
 
   it('renders the subtitle', () => {
