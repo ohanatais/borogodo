@@ -24,7 +24,7 @@
       "proofText": "alinhei os times em tempo real na crise do servidor",
       "placeholderNote": "Em breve, o vídeo real do seu primeiro borogodó aqui."
     },
-    "tagline": ""
+    "tagline": "todo mundo tem um. o seu merece ser visto."
   },
   "painPoints": {
     "title": "Você já sabe que tem mais pra mostrar.",
@@ -52,8 +52,8 @@
     "subtitle": "Você só ainda não viu ele inteiro. Começa de graça e leva uns 5 minutos.",
     "primary": "Ver o meu borogodó",
     "primaryAriaLabel": "Criar conta e ver o meu borogodó",
-    "secondary": "",
-    "secondaryAriaLabel": ""
+    "secondary": "Já tenho conta",
+    "secondaryAriaLabel": "Entrar na minha conta"
   },
   "auth": {
     "headline": {
@@ -733,8 +733,8 @@
     }
   },
   "howItWorks": {
-    "title": "",
-    "subtitle": "",
+    "title": "Como funciona",
+    "subtitle": "Três passos para finalmente ver o que você já construiu.",
     "steps": [
       {
         "number": "01",
@@ -754,23 +754,23 @@
     ]
   },
   "mirror": {
-    "title": "",
-    "subtitle": "",
-    "patternLabel": "",
-    "evidenceLabel": "",
-    "insightLabel": ""
+    "title": "Seu espelho profissional",
+    "subtitle": "Cada insight parte da sua história real, construída experiência por experiência.",
+    "patternLabel": "Padrão identificado",
+    "evidenceLabel": "Baseado em",
+    "insightLabel": "Sua síntese"
   },
   "careerMap": {
-    "title": "",
-    "subtitle": "",
-    "clustersLabel": "",
-    "timelineLabel": ""
+    "title": "Mapa da sua carreira",
+    "subtitle": "Visualize como suas habilidades se conectam e onde você está indo.",
+    "clustersLabel": "Suas competências",
+    "timelineLabel": "Sua jornada"
   },
   "contentGen": {
-    "title": "",
-    "subtitle": "",
-    "realLabel": "",
-    "genericLabel": ""
+    "title": "Conteúdo que soa como você",
+    "subtitle": "A diferença entre uma IA que te conhece e uma IA qualquer.",
+    "realLabel": "Com o Borogodó",
+    "genericLabel": "IA genérica"
   },
   "usar": {
     "title": "What do you want to do with your borogodó?",
