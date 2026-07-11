@@ -1,7 +1,9 @@
 {
   "metadata": {
-    "title": "Borogodó",
-    "description": "Descubra no que você é bom, por que você é bom nisso, e tenha o registro completo da carreira que você já construiu."
+    "title": "Borogodó: descubra onde você manda bem e aprenda a mostrar",
+    "description": "O Borogodó organiza o que você já fez no trabalho, mostra seus pontos fortes com a prova junto e te ajuda a falar do seu valor sem travar. Comece de graça.",
+    "ogTitle": "Tudo sobre sua carreira num lugar só.",
+    "ogDescription": "Descubra no que você manda bem e use a seu favor. O Borogodó mostra seus pontos fortes com a prova do lado e na sua voz. De graça pra começar."
   },
   "aiLimit": {
     "rateLimited": "Você gerou bastante na última hora, que bom. Daqui a uns {minutes} min isso libera e você continua.",
@@ -9,88 +11,65 @@
     "dismiss": "Tá bom"
   },
   "nav": {
+    "signIn": "Entrar",
+    "signInAriaLabel": "Entrar na minha conta",
+    "anchorHow": "Como funciona",
+    "anchorProof": "Provas",
+    "anchorPrivacy": "Privacidade",
+    "anchorFaq": "Perguntas",
     "cta": "Criar conta",
     "ctaAriaLabel": "Criar conta gratuita no Borogodó"
   },
   "hero": {
-    "tagline": "todo mundo tem um. o seu merece ser visto.",
-    "headline": "Todo mundo tem um borogodó.",
-    "headlineEmphasis": "A gente te mostra o seu.",
-    "subheadline": "Borogodó registra sua trajetória, revela no que você é bom e por quê, e te dá a narrativa que faltava para a carreira que você já construiu.",
-    "cta": {
-      "primary": "Criar conta",
-      "secondary": "Já tenho conta",
-      "primaryAriaLabel": "Criar conta gratuita no Borogodó",
-      "secondaryAriaLabel": "Entrar na minha conta"
-    }
+    "eyebrow": "borogodó: aquele quê que só você tem.",
+    "headline": "Tudo sobre sua carreira num lugar só.",
+    "headlineEmphasis": "Descubra no que você manda bem e use a seu favor.",
+    "subheadline": "Registre todas as conquistas, projetos e feedbacks. O Borogodó, sua inteligência de carreira, encontra seus padrões de força, monta a evidência e te entrega tudo pronto pra autoavaliação, posts no LinkedIn, entrevista ou promoção.",
+    "cta": "Ver o meu borogodó",
+    "ctaAriaLabel": "Criar conta e ver o meu borogodó",
+    "microcopy": "É de graça. Em uns 5 minutos você já vê o primeiro resultado.",
+    "microTrust": "Feito no Brasil · Seus dados são seus",
+    "demo": {
+      "statusLabel": "analisando experiência",
+      "inputLabel": "o que você contou",
+      "inputText": "Organizei a força-tarefa na crise do servidor e alinhei os times em tempo real.",
+      "outputLabel": "o que o Borogodó viu",
+      "forceLabel": "Liderança sob pressão",
+      "proofPrefix": "você contou:",
+      "proofText": "alinhei os times em tempo real na crise do servidor",
+      "placeholderNote": "Em breve, o vídeo real do seu primeiro borogodó aqui."
+    },
+    "videoAlt": "O espelho do Borogodó: suas forças organizadas por categoria, cada uma com a prova do lado.",
+    "tagline": "todo mundo tem um. o seu merece ser visto."
   },
   "painPoints": {
-    "title": "Você já sabe que tem mais para mostrar.",
+    "title": "Você já sabe que tem mais pra mostrar.",
     "items": [
       {
-        "title": "Você entrega muito. O mundo vê pouco.",
-        "description": "Você tem anos de entrega acumulada, mas quem não te conhece não consegue enxergar. Não por falta de conteúdo, mas por falta de registro."
+        "title": "Você entrega muito e o mundo vê pouco.",
+        "description": "Tem anos de trabalho bom acumulado, mas quem não te acompanha de perto não faz ideia. O problema não tá no que você fez. Tá no fato de que isso nunca ficou registrado em lugar nenhum."
       },
       {
-        "title": "Na hora de falar de você, as palavras somem.",
-        "description": "Você sabe que entregou aquele projeto inteiro quase sozinho, mas na conversa de performance a memória falha e o argumento vai embora."
+        "title": "Na hora de falar de você, dá branco.",
+        "description": "Você sabe que carregou aquele projeto quase inteiro. Aí chega na conversa de avaliação e os detalhes somem. Fica sem o número, sem o exemplo, sem o argumento na mão."
       },
       {
-        "title": "Você tem o que dizer, mas não sabe por onde começar.",
-        "description": "A ideia existe, a experiência existe, mas transformar isso em conteúdo que soa como você parece uma missão impossível."
+        "title": "Você tem o que dizer, mas não sai.",
+        "description": "A experiência tá toda aí. Transformar isso num texto que parece você falando, e não um robô, trava antes mesmo de começar."
       },
       {
-        "title": "Você evoluiu demais para não conseguir explicar como.",
-        "description": "A identidade profissional que você foi construindo ao longo dos anos ainda não tem forma visível. Está na hora de mudar isso."
+        "title": "Você cresceu muito e não sabe explicar como.",
+        "description": "Hoje você é bem diferente de quando começou. Mas essa evolução tá só na sua cabeça, sem forma e sem nome."
       }
-    ]
-  },
-  "howItWorks": {
-    "title": "Como funciona",
-    "subtitle": "Três passos para finalmente ver o que você já construiu.",
-    "steps": [
-      {
-        "number": "01",
-        "title": "Você conta sua história",
-        "description": "Registre experiências, projetos e conquistas no seu ritmo. O Borogodó organiza, guarda e nunca perde nada."
-      },
-      {
-        "number": "02",
-        "title": "Você recebe seu espelho",
-        "description": "A IA identifica seus padrões, revela no que você é bom e por quê, e te devolve uma síntese que faz sentido de verdade."
-      },
-      {
-        "number": "03",
-        "title": "Você usa como quiser",
-        "description": "LinkedIn, posts, currículo, portfólio, reunião de performance. Tudo sai do mesmo lugar, com a sua voz."
-      }
-    ]
-  },
-  "mirror": {
-    "title": "Seu espelho profissional",
-    "subtitle": "Cada insight parte da sua história real, construída experiência por experiência.",
-    "patternLabel": "Padrão identificado",
-    "evidenceLabel": "Baseado em",
-    "insightLabel": "Sua síntese"
-  },
-  "careerMap": {
-    "title": "Mapa da sua carreira",
-    "subtitle": "Visualize como suas habilidades se conectam e onde você está indo.",
-    "clustersLabel": "Suas competências",
-    "timelineLabel": "Sua jornada"
-  },
-  "contentGen": {
-    "title": "Conteúdo que soa como você",
-    "subtitle": "A diferença entre uma IA que te conhece e uma IA qualquer.",
-    "realLabel": "Com o Borogodó",
-    "genericLabel": "IA genérica"
+    ],
+    "label": "O que trava hoje"
   },
   "cta": {
-    "title": "Seu borogodó está esperando ser nomeado.",
-    "subtitle": "Comece de graça e descubra o que todo mundo já sente em você.",
-    "primary": "Criar conta",
+    "title": "O seu borogodó já existe.",
+    "subtitle": "Você só ainda não viu ele inteiro. Começa de graça e leva uns 5 minutos.",
+    "primary": "Ver o meu borogodó",
+    "primaryAriaLabel": "Criar conta e ver o meu borogodó",
     "secondary": "Já tenho conta",
-    "primaryAriaLabel": "Criar conta gratuita",
     "secondaryAriaLabel": "Entrar na minha conta"
   },
   "auth": {
@@ -229,10 +208,6 @@
     }
   },
   "espelho": {
-    "views": {
-      "forcas": "Forças",
-      "trajetoria": "Trajetória"
-    },
     "back": "← Voltar ao painel",
     "mirrorOf": "Espelho de",
     "regenerate": "Gerar novo espelho",
@@ -289,6 +264,10 @@
       "yes": "Sim",
       "no": "Não",
       "confirmed": "Obrigado pelo feedback"
+    },
+    "views": {
+      "forcas": "Forças",
+      "trajetoria": "Trajetória"
     }
   },
   "historico": {
@@ -301,8 +280,6 @@
   "appNav": {
     "painel": "Painel",
     "espelho": "Espelho",
-    "registros": "Registros",
-    "usar": "Usar",
     "historico": "Linha do Tempo",
     "conteudo": "Conteúdo",
     "verConta": "Ver conta",
@@ -310,7 +287,9 @@
     "perguntar": "Perguntar",
     "captureHint": "Conte o que você fez hoje...",
     "askHint": "Pergunte algo sobre sua carreira...",
-    "send": "Enviar"
+    "send": "Enviar",
+    "registros": "Registros",
+    "usar": "Usar"
   },
   "capture": {
     "composer": {
@@ -429,7 +408,8 @@
     "linkedinLabel": "Prefere conversar?",
     "linkedinCta": "Me chama no LinkedIn",
     "sla": "Tem uma pessoa de verdade do outro lado, eu mesma. Respondo em até 2 dias úteis.",
-    "credits": "Borogodó · feito no Brasil · {ano}"
+    "credits": "Borogodó · {ano}",
+    "brandTagline": "Inteligência de carreira com IA, feita no Brasil."
   },
   "bemvindo": {
     "step1": {
@@ -718,6 +698,10 @@
       "back": "Voltar",
       "noTheme": "Gere seu Espelho primeiro pra eu conhecer sua trajetória."
     },
+    "invite": {
+      "title": "Pronto pra usar?",
+      "cta": "Abrir"
+    },
     "bio": {
       "cta": "Criar minha bio"
     },
@@ -774,6 +758,165 @@
     "viewAll": "Ver tudo →",
     "deleteError": "Não consegui excluir esse registro. Ele continua aqui.",
     "deleteErrorDismiss": "Ok"
+  },
+  "journey": {
+    "title": "Do silêncio ao \"é isso que eu faço de melhor\".",
+    "steps": [
+      {
+        "verb": "Descobrir",
+        "quote": "Eu nem sabia que mandava bem nisso.",
+        "description": "Você conta o que fez, do seu jeito. O Borogodó acha a força que tava ali e você nem tinha percebido."
+      },
+      {
+        "verb": "Entender",
+        "quote": "Agora vejo a forma da minha carreira.",
+        "description": "Suas forças aparecem organizadas por tipo, cada uma com o exemplo real que provou ela."
+      },
+      {
+        "verb": "Provar",
+        "quote": "Tenho como comprovar.",
+        "description": "Toda força vem de algo que aconteceu de verdade. Quando não tem como comprovar, o Borogodó te pergunta em vez de inventar."
+      },
+      {
+        "verb": "Usar",
+        "quote": "Sei mostrar do meu jeito.",
+        "description": "Numa entrevista, numa avaliação, num post. Você pega o que precisa e fala com as suas palavras."
+      }
+    ],
+    "label": "Como funciona"
+  },
+  "proof": {
+    "title": "Não inventa. Mostra a prova.",
+    "body": "Cada força que aparece no seu espelho nasce de algo que você mesmo registrou, e sempre vem com a prova do lado. E quando falta evidência pra sustentar uma força, o Borogodó te pergunta em vez de inventar.",
+    "mediaLabel": "Card de força com a evidência citada",
+    "mediaNote": "Em breve, o print real do seu espelho aqui.",
+    "label": "Provas"
+  },
+  "ownership": {
+    "title": "Seu. Não da sua empresa.",
+    "body": "Ferramentas de avaliação trabalham pro empregador. Existem pra alimentar a decisão de calibração e salário que a empresa controla, e quando você sai, o dado fica lá. O Borogodó trabalha pra você. Seu registro é privado e portátil, e ninguém da empresa lê. Na hora da avaliação corporativa, você copia o que quiser pro sistema deles. A fonte continua sua.",
+    "signals": [
+      "Dados criptografados",
+      "Só você vê",
+      "Exportável quando quiser",
+      "Sem acesso do empregador"
+    ],
+    "label": "Privacidade"
+  },
+  "manifesto": {
+    "title": "Mostrar o seu valor não é se gabar.",
+    "body": "Lá fora ensinam a se vender. Aqui no Brasil isso dá um desconforto danado, e tem razão de dar. Mostrar o seu borogodó é outra coisa. É deixar claro o que você já faz bem, com a prova do lado. O Borogodó faz a parte chata disso por você, sem floreio e sem aquele tom de IA que todo mundo reconhece de longe.",
+    "label": "Manifesto"
+  },
+  "socialProof": {
+    "title": "Feito à vista de todos.",
+    "body": "O Borogodó tá sendo construído no aberto por uma PM brasileira, que vai postando o processo conforme faz. Sem depoimento inventado e sem número de fachada. Se quiser ver como tá ficando, é só acompanhar.",
+    "link": "Ver os bastidores",
+    "linkAriaLabel": "Ver os bastidores no LinkedIn da fundadora",
+    "label": "Bastidores"
+  },
+  "faq": {
+    "title": "Perguntas que todo mundo faz.",
+    "items": {
+      "free": {
+        "question": "É de graça?",
+        "answer": "Pra começar, é. Você cria a conta e monta o seu primeiro borogodó sem pagar nada."
+      },
+      "how": {
+        "question": "Como funciona na prática?",
+        "answer": "Você conta o que fez no trabalho, escrevendo, falando ou subindo um PDF. O Borogodó organiza, acha seus pontos fortes e guarda tudo com a prova junto."
+      },
+      "robot": {
+        "question": "A IA vai escrever por mim e ficar com cara de robô?",
+        "answer": "Não. Ela parte do que você contou e usa as suas palavras. Quando falta informação, ela pergunta em vez de inventar."
+      },
+      "chatgpt": {
+        "question": "É diferente de pedir pro ChatGPT?",
+        "answer": "É. O ChatGPT não conhece a sua trajetória e gera texto genérico a partir de um prompt solto. O Borogodó parte do seu registro acumulado e mostra quem você é de verdade, com prova e na sua voz."
+      },
+      "privacy": {
+        "question": "Meus dados ficam seguros?",
+        "answer": "Ficam. Só você vê o seu borogodó, e nada sai pra lugar nenhum sem você mandar. Sua empresa não vê o que você registra."
+      },
+      "effort": {
+        "question": "Preciso escrever muito pra valer a pena?",
+        "answer": "Não. Dá pra começar com uma coisa pequena que você fez essa semana e ir somando no seu ritmo."
+      }
+    },
+    "label": "Perguntas"
+  },
+  "comparison": {
+    "label": "Por que não só o ChatGPT",
+    "title": "Não é a mesma coisa que pedir pro ChatGPT.",
+    "chatgptName": "ChatGPT",
+    "borogodoName": "Borogodó",
+    "rows": [
+      {
+        "aspect": "Ponto de partida",
+        "chatgpt": "Um prompt do zero, toda vez.",
+        "borogodo": "O seu registro acumulado."
+      },
+      {
+        "aspect": "Sobre você",
+        "chatgpt": "Não conhece a sua trajetória.",
+        "borogodo": "Parte do que você viveu de verdade."
+      },
+      {
+        "aspect": "A prova",
+        "chatgpt": "Inventa pra soar bem.",
+        "borogodo": "Cita a evidência real do seu registro."
+      },
+      {
+        "aspect": "A voz",
+        "chatgpt": "Genérica, com cara de IA.",
+        "borogodo": "A sua."
+      },
+      {
+        "aspect": "Quando falta dado",
+        "chatgpt": "Chuta com confiança.",
+        "borogodo": "Te pergunta em vez de inventar."
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "Como funciona",
+    "subtitle": "Três passos para finalmente ver o que você já construiu.",
+    "steps": [
+      {
+        "number": "01",
+        "title": "Você conta sua história",
+        "description": "Registre experiências, projetos e conquistas no seu ritmo. O Borogodó organiza, guarda e nunca perde nada."
+      },
+      {
+        "number": "02",
+        "title": "Você recebe seu espelho",
+        "description": "A IA identifica seus padrões, revela no que você é bom e por quê, e te devolve uma síntese que faz sentido de verdade."
+      },
+      {
+        "number": "03",
+        "title": "Você usa como quiser",
+        "description": "LinkedIn, posts, currículo, portfólio, reunião de performance. Tudo sai do mesmo lugar, com a sua voz."
+      }
+    ]
+  },
+  "mirror": {
+    "title": "Seu espelho profissional",
+    "subtitle": "Cada insight parte da sua história real, construída experiência por experiência.",
+    "patternLabel": "Padrão identificado",
+    "evidenceLabel": "Baseado em",
+    "insightLabel": "Sua síntese"
+  },
+  "careerMap": {
+    "title": "Mapa da sua carreira",
+    "subtitle": "Visualize como suas habilidades se conectam e onde você está indo.",
+    "clustersLabel": "Suas competências",
+    "timelineLabel": "Sua jornada"
+  },
+  "contentGen": {
+    "title": "Conteúdo que soa como você",
+    "subtitle": "A diferença entre uma IA que te conhece e uma IA qualquer.",
+    "realLabel": "Com o Borogodó",
+    "genericLabel": "IA genérica"
   },
   "usar": {
     "title": "O que você quer fazer com o seu borogodó?",

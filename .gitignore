@@ -60,3 +60,6 @@ next-env.d.ts
 # dados pessoais / fixtures sensíveis — NUNCA commitar (usar só anonimizado em docs/fixtures)
 /Ohana Lohmann - *.md
 /Profile*.pdf
+
+# Worktrees do Claude Code (cada uma é um checkout próprio; não rastrear)
+.claude/worktrees/

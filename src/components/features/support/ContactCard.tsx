@@ -49,12 +49,14 @@ export function ContactCard({ brand = false, className = '' }: ContactCardProps)
           </span>
         </div>
 
-        <CopyButton
-          value={SUPPORT_EMAIL}
-          copyLabel={t('copyButton')}
-          copiedLabel={t('copied')}
-          failedLabel={t('copyFailed')}
-        />
+        {!brand && (
+          <CopyButton
+            value={SUPPORT_EMAIL}
+            copyLabel={t('copyButton')}
+            copiedLabel={t('copied')}
+            failedLabel={t('copyFailed')}
+          />
+        )}
       </div>
 
       {hasLinkedin && (

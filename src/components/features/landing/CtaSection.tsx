@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
+/** CTA final da landing (feature 022). Server Component. CTA único pra signup (FR-009). */
 export function CtaSection() {
   const t = useTranslations('cta')
 
@@ -9,51 +10,25 @@ export function CtaSection() {
       style={{ background: 'linear-gradient(145deg, oklch(32% 0.18 300) 0%, oklch(26% 0.23 325) 100%)' }}
       className="px-6 py-20 md:py-28"
     >
-      <div className="max-w-2xl mx-auto text-center">
+      <div className="mx-auto max-w-5xl">
         <h2
-          className="text-3xl md:text-4xl mb-4"
-          style={{
-            fontFamily: 'var(--font-display)',
-            color: 'var(--color-primary-fg)',
-            lineHeight: 1.1,
-            letterSpacing: '-0.02em',
-          }}
+          className="mb-4 text-3xl md:text-4xl"
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary-fg)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
         >
-          <strong style={{ fontWeight: 700, display: 'block' }}>Seu borogodó</strong>
-          <em style={{ fontWeight: 400, fontStyle: 'italic' }}>está esperando ser nomeado.</em>
+          {t('title')}
         </h2>
-        <p
-          className="text-lg mb-10"
-          style={{ color: 'var(--color-primary-fg)', opacity: 0.8 }}
-        >
+        <p className="mb-10 max-w-2xl text-lg" style={{ color: 'var(--color-primary-fg)', opacity: 0.8 }}>
           {t('subtitle')}
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/login?mode=signup"
-            aria-label={t('primaryAriaLabel')}
-            className="inline-flex items-center justify-center min-h-[52px] px-8 py-3 rounded-full font-semibold transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-            style={{
-              background: 'var(--color-accent)',
-              color: 'var(--color-accent-fg)',
-            }}
-          >
-            {t('primary')}
-          </Link>
-
-          <Link
-            href="/login"
-            aria-label={t('secondaryAriaLabel')}
-            className="inline-flex items-center justify-center min-h-[52px] px-8 py-3 rounded-full font-medium transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-            style={{
-              color: 'var(--color-primary-fg)',
-              border: '1px solid rgba(255,255,255,0.3)',
-            }}
-          >
-            {t('secondary')}
-          </Link>
-        </div>
+        <Link
+          href="/login?mode=signup"
+          aria-label={t('primaryAriaLabel')}
+          className="inline-flex min-h-[52px] items-center justify-center rounded-full px-8 py-3 font-semibold transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          style={{ background: 'var(--color-accent)', color: 'var(--color-accent-fg)' }}
+        >
+          {t('primary')}
+        </Link>
       </div>
     </section>
   )
