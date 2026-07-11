@@ -4,8 +4,9 @@ const mockComplete = vi.hoisted(() => vi.fn())
 const mockFrom = vi.hoisted(() => vi.fn())
 const mockGetSupabaseAdmin = vi.hoisted(() => vi.fn())
 
-vi.mock('@/lib/ai/provider', () => ({
-  getProvider: () => ({ complete: mockComplete }),
+// 023: a geração do insight passa pelo guard (`client.complete`). Mockamos ele direto.
+vi.mock('@/lib/ai/client', () => ({
+  complete: mockComplete,
 }))
 
 vi.mock('@/lib/db/supabaseAdmin', () => ({

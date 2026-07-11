@@ -2,18 +2,27 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { AiLimitNotice } from '@/components/features/cost/AiLimitNotice'
+import { parseAiLimit, type AiLimitInfo } from '@/lib/ai/cost/clientLimit'
 
 export function GenerateMirrorButton() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [aiLimit, setAiLimit] = useState<AiLimitInfo | null>(null)
 
   const handleGenerate = async () => {
     setLoading(true)
     setError(null)
+    setAiLimit(null)
     try {
       const res = await fetch('/api/mirror/generate', { method: 'POST' })
       if (!res.ok) {
+        const limit = await parseAiLimit(res)
+        if (limit) {
+          setAiLimit(limit)
+          return
+        }
         const body = await res.json().catch(() => ({})) as { error?: string }
         setError(body.error ?? 'Algo deu errado. Tenta de novo?')
         return
@@ -37,6 +46,7 @@ export function GenerateMirrorButton() {
       >
         {loading ? 'Gerando...' : 'Gerar espelho agora'}
       </button>
+      {aiLimit && <AiLimitNotice info={aiLimit} onDismiss={() => setAiLimit(null)} />}
       {error && (
         <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
           {error}

@@ -5,6 +5,11 @@
     "ogTitle": "Você sabe trabalhar. Falar do seu trabalho é que trava.",
     "ogDescription": "O Borogodó mostra no que você é bom, com a prova do lado e na sua voz. De graça pra começar."
   },
+  "aiLimit": {
+    "rateLimited": "You generated a lot in the last hour, nice. Give it about {minutes} min and you can keep going.",
+    "overloaded": "I'm a bit overloaded right now. Things should be back to normal soon, try again later.",
+    "dismiss": "Got it"
+  },
   "hero": {
     "eyebrow": "borogodó (substantivo): aquele quê que só você tem.",
     "headline": "Você sabe trabalhar.",

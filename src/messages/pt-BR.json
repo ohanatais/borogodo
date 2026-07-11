@@ -5,6 +5,11 @@
     "ogTitle": "Tudo sobre sua carreira num lugar só.",
     "ogDescription": "Descubra no que você manda bem e use a seu favor. O Borogodó mostra seus pontos fortes com a prova do lado e na sua voz. De graça pra começar."
   },
+  "aiLimit": {
+    "rateLimited": "Você gerou bastante na última hora, que bom. Daqui a uns {minutes} min isso libera e você continua.",
+    "overloaded": "Tô um pouco sobrecarregado agora. Daqui a pouco volta ao normal, tenta de novo mais tarde.",
+    "dismiss": "Tá bom"
+  },
   "nav": {
     "signIn": "Entrar",
     "signInAriaLabel": "Entrar na minha conta",

@@ -1,4 +1,4 @@
-import { getProvider } from '@/lib/ai/provider'
+import { complete } from '@/lib/ai/client'
 import { extractJSONBlock } from '@/lib/ai/extractJSON'
 import { DOCUMENT_EXTRACTION_SYSTEM_PROMPT, buildDocumentExtractionPrompt } from '@/lib/ai/extraction/prompts/linkedin'
 import { validateEntries } from '@/lib/ai/extraction/schemas'
@@ -19,9 +19,11 @@ function extractEntriesArray(raw: string): unknown {
  * Extração pura (sem reflexo individual) — base reusada por `extractFromLinkedIn` (006).
  * Lote inteiro é invalidado se qualquer item falhar na validação Zod (MVP, sem persistência parcial).
  */
-export async function extractEntries(rawText: string, source: EntrySource, maxEntries: number): Promise<ExtractedEntry[]> {
-  const raw = await getProvider().complete({
+export async function extractEntries(rawText: string, source: EntrySource, maxEntries: number, userId: string): Promise<ExtractedEntry[]> {
+  const raw = await complete({
     role: 'extraction',
+    action: 'capture',
+    userId,
     system: DOCUMENT_EXTRACTION_SYSTEM_PROMPT,
     user: buildDocumentExtractionPrompt(rawText),
     maxTokens: MAX_TOKENS,

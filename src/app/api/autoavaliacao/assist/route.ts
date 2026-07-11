@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { assist, AssistFailedError } from '@/lib/ai/content/assist'
 import { errorMessage } from '@/lib/errors'
+import { aiLimitResponse } from '@/lib/ai/cost/limitResponse'
 import { logger } from '@/lib/log'
 
 const MAX_TEXT_CHARS = 5000
@@ -47,9 +48,12 @@ export async function POST(request: Request): Promise<NextResponse> {
   if (!parsed.success) return jsonError('invalid_request', 400)
 
   try {
-    const result = await assist(parsed.data)
+    const result = await assist({ ...parsed.data, userId: user.id })
     return NextResponse.json(result, { status: 200 })
   } catch (error: unknown) {
+    const limited = aiLimitResponse(error)
+    if (limited) return limited
+
     if (error instanceof AssistFailedError) {
       return jsonError('assist_failed', 422)
     }

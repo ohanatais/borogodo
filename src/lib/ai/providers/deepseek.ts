@@ -1,4 +1,4 @@
-import type { LLMProvider, LLMRequest } from '@/lib/ai/provider'
+import type { CompletionResult, LLMProvider, LLMRequest } from '@/lib/ai/provider'
 
 /**
  * Stub documentado — costura para um provider OpenAI-compatible mais barato (ex.: DeepSeek).
@@ -6,7 +6,7 @@ import type { LLMProvider, LLMRequest } from '@/lib/ai/provider'
  * constituição (Princípio III — ver research.md D10).
  */
 export class DeepSeekProvider implements LLMProvider {
-  async complete(request: LLMRequest): Promise<string> {
+  async complete(request: LLMRequest): Promise<CompletionResult> {
     void request
     throw new Error('DeepSeek não habilitado no MVP')
   }

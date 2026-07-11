@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { getProvider } from '@/lib/ai/provider'
+import { complete } from '@/lib/ai/client'
 import { extractJSONBlock } from '@/lib/ai/extractJSON'
 
 export interface SufficiencyEntry {
@@ -48,7 +48,8 @@ function buildUserPrompt(entries: SufficiencyEntry[]): string {
 }
 
 export async function evaluateSufficiency(
-  entries: SufficiencyEntry[]
+  entries: SufficiencyEntry[],
+  userId: string
 ): Promise<SufficiencyResult> {
   if (entries.length === 0) {
     return {
@@ -57,8 +58,10 @@ export async function evaluateSufficiency(
     }
   }
 
-  const raw = await getProvider().complete({
+  const raw = await complete({
     role: 'extraction',
+    action: 'sufficiency',
+    userId,
     system: SYSTEM_PROMPT,
     user: buildUserPrompt(entries),
     maxTokens: 512,

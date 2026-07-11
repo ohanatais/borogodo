@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Mic2 } from 'lucide-react'
+import { AiLimitNotice } from '@/components/features/cost/AiLimitNotice'
+import { parseAiLimit, type AiLimitInfo } from '@/lib/ai/cost/clientLimit'
 
 interface VoiceCalibrationProps {
   /** Chamado após salvar a voz com sucesso — a superfície regera refletindo o novo perfil. */
@@ -21,6 +23,7 @@ export function VoiceCalibration({ onSaved }: VoiceCalibrationProps) {
   const [sampleB, setSampleB] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(false)
+  const [aiLimit, setAiLimit] = useState<AiLimitInfo | null>(null)
 
   async function handleSave() {
     const samples = [sampleA, sampleB].map((s) => s.trim()).filter((s) => s.length > 0)
@@ -31,6 +34,7 @@ export function VoiceCalibration({ onSaved }: VoiceCalibrationProps) {
 
     setSaving(true)
     setError(false)
+    setAiLimit(null)
     try {
       const res = await fetch('/api/content/voice', {
         method: 'PUT',
@@ -38,6 +42,11 @@ export function VoiceCalibration({ onSaved }: VoiceCalibrationProps) {
         body: JSON.stringify({ samples }),
       })
       if (!res.ok) {
+        const limit = await parseAiLimit(res)
+        if (limit) {
+          setAiLimit(limit)
+          return
+        }
         setError(true)
         return
       }
@@ -85,6 +94,7 @@ export function VoiceCalibration({ onSaved }: VoiceCalibrationProps) {
         style={{ borderColor: 'var(--border)', background: 'var(--background)', color: 'var(--foreground)' }}
         aria-label={`${t('calibration.hint')} 2`}
       />
+      {aiLimit && <AiLimitNotice info={aiLimit} onDismiss={() => setAiLimit(null)} />}
       {error && (
         <p className="text-xs font-medium" style={{ color: 'var(--destructive)' }}>
           {t('errors.generic')}

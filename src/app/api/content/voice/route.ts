@@ -4,6 +4,7 @@ import { createServerClient } from '@/lib/db/supabase/server'
 import { buildVoiceProfile } from '@/lib/ai/content/buildVoiceProfile'
 import { getVoiceProfile, upsertVoiceProfile } from '@/lib/db/drafts'
 import { errorMessage } from '@/lib/errors'
+import { aiLimitResponse } from '@/lib/ai/cost/limitResponse'
 import { logger } from '@/lib/log'
 
 const MAX_SAMPLE_CHARS = 5000
@@ -67,11 +68,14 @@ export async function PUT(request: Request): Promise<NextResponse> {
       loadRawContents(supabase, user.id),
     ])
 
-    const profile = await buildVoiceProfile({ rawContents, existing, samples, tone, lengthPref })
+    const profile = await buildVoiceProfile({ rawContents, existing, samples, tone, lengthPref, userId: user.id })
     const saved = await upsertVoiceProfile(supabase, user.id, profile)
 
     return NextResponse.json({ voiceProfile: saved }, { status: 200 })
   } catch (error: unknown) {
+    const limited = aiLimitResponse(error)
+    if (limited) return limited
+
     logger.error('voice profile update failed', { message: errorMessage(error) })
     return jsonError('internal_error', 500)
   }

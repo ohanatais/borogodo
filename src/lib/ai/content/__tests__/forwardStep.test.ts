@@ -25,7 +25,7 @@ describe('forwardStep — plano de ação ancorado só no que a pessoa escreveu 
   it('gera o plano (GROW + 70-20-10) e devolve kind action_plan com generatedAt', async () => {
     const complete = vi.fn().mockResolvedValue(jsonBlock(VALID_PLAN))
 
-    const result = await forwardStep({ body: BODY }, complete)
+    const result = await forwardStep({ body: BODY, userId: 'u1' }, complete)
 
     expect(result.kind).toBe('action_plan')
     expect(result.actionPlan?.area).toBe('negociação com fornecedores')
@@ -41,7 +41,7 @@ describe('forwardStep — plano de ação ancorado só no que a pessoa escreveu 
     const invented = { ...VALID_PLAN, area: 'liderança de vendas globais', anchoredOn: ['Liderei vendas globais em 12 países'] }
     const complete = vi.fn().mockResolvedValue(jsonBlock(invented))
 
-    await expect(forwardStep({ body: BODY }, complete)).rejects.toBeInstanceOf(ForwardStepFailedError)
+    await expect(forwardStep({ body: BODY, userId: 'u1' }, complete)).rejects.toBeInstanceOf(ForwardStepFailedError)
     expect(complete).toHaveBeenCalledTimes(2)
   })
 
@@ -52,14 +52,14 @@ describe('forwardStep — plano de ação ancorado só no que a pessoa escreveu 
       .mockResolvedValueOnce(jsonBlock(invented))
       .mockResolvedValueOnce(jsonBlock(VALID_PLAN))
 
-    const result = await forwardStep({ body: BODY }, complete)
+    const result = await forwardStep({ body: BODY, userId: 'u1' }, complete)
     expect(result.actionPlan?.area).toBe('negociação com fornecedores')
     expect(complete).toHaveBeenCalledTimes(2)
   })
 
   it('saída malformada (sem JSON) também conta como falha e regenera', async () => {
     const complete = vi.fn().mockResolvedValue('sem json nenhum aqui')
-    await expect(forwardStep({ body: BODY }, complete)).rejects.toBeInstanceOf(ForwardStepFailedError)
+    await expect(forwardStep({ body: BODY, userId: 'u1' }, complete)).rejects.toBeInstanceOf(ForwardStepFailedError)
     expect(complete).toHaveBeenCalledTimes(2)
   })
 })

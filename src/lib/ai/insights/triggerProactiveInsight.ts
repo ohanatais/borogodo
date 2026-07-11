@@ -1,4 +1,4 @@
-import { getProvider } from '@/lib/ai/provider'
+import { complete } from '@/lib/ai/client'
 import { extractJSONBlock } from '@/lib/ai/extractJSON'
 import {
   PROACTIVE_INSIGHT_SYSTEM_PROMPT,
@@ -47,9 +47,11 @@ function isStrongSignal(entry: InsightEntryRow): boolean {
   return Boolean(entry.impact?.trim()) || Boolean(entry.metric?.trim())
 }
 
-async function generateInsight(entries: InsightEntryRow[]) {
-  const raw = await getProvider().complete({
+async function generateInsight(entries: InsightEntryRow[], userId: string) {
+  const raw = await complete({
     role: 'extraction',
+    action: 'insight',
+    userId,
     system: PROACTIVE_INSIGHT_SYSTEM_PROMPT,
     user: buildProactiveInsightPrompt(entries),
     maxTokens: MAX_TOKENS,
@@ -89,7 +91,7 @@ export async function triggerProactiveInsight(userId: string): Promise<void> {
       return
     }
 
-    const draft = await generateInsight(entries)
+    const draft = await generateInsight(entries, userId)
     const entryIds = draft.entry_indexes
       .map((index) => entries[index]?.id)
       .filter((id): id is string => Boolean(id))

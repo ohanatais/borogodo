@@ -5,6 +5,7 @@ import { getSelfAssessmentBody, saveForwardStep } from '@/lib/db/drafts'
 import { forwardStep, ForwardStepFailedError } from '@/lib/ai/content/forwardStep'
 import type { ForwardStep } from '@/types/content'
 import { errorMessage } from '@/lib/errors'
+import { aiLimitResponse } from '@/lib/ai/cost/limitResponse'
 import { logger } from '@/lib/log'
 
 const MAX_PLAN_FIELD = 1000
@@ -58,10 +59,13 @@ export async function POST(request: Request): Promise<NextResponse> {
   if (!assessmentBody) return jsonError('draft_not_found', 404)
 
   try {
-    const step = await forwardStep({ body: assessmentBody })
+    const step = await forwardStep({ body: assessmentBody, userId: user.id })
     await saveForwardStep(supabase, user.id, parsed.data.draftId, step)
     return NextResponse.json(step, { status: 200 })
   } catch (error: unknown) {
+    const limited = aiLimitResponse(error)
+    if (limited) return limited
+
     if (error instanceof ForwardStepFailedError) {
       return jsonError('generation_failed', 422)
     }

@@ -156,7 +156,7 @@ async function handleTextCapture(
 
   try {
     const context = await buildCaptureContext(supabase, userId)
-    const { entries, reflection } = await captureAndReflect(textInput.rawText, 'text', context)
+    const { entries, reflection } = await captureAndReflect(textInput.rawText, 'text', context, userId)
     const entriesWithProject = overrideProjectName
       ? entries.map((e) => ({ ...e, project_name: overrideProjectName }))
       : entries
@@ -190,7 +190,7 @@ async function handleFileCapture(
   try {
     const buffer = Buffer.from(await fileInput.file.arrayBuffer())
     const pdfText = await extractTextFromPDF(buffer)
-    const extracted = await extractFromDocument(pdfText)
+    const extracted = await extractFromDocument(pdfText, userId)
     // Registra o arquivo de origem em cada entrada para rastreabilidade no feed.
     const entries = extracted.map((entry) => ({ ...entry, file_name: fileInput.file.name }))
     const saved = await saveEntries(supabase, userId, entries)

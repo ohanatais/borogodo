@@ -79,7 +79,7 @@ describe.runIf(process.env.RUN_SMOKE)('SMOKE: geração real do espelho (Sonnet)
   it('gera um espelho válido a partir de entradas e imprime o resultado', async () => {
     loadAnthropicKey()
 
-    const raw = await getProvider().complete({
+    const { text: raw } = await getProvider().complete({
       role: 'synthesis',
       system: MIRROR_SYSTEM_PROMPT,
       user: buildMirrorUserPrompt(SAMPLE_ENTRIES, 'Ana', 'emerging'),

@@ -18,6 +18,8 @@ export interface RecalibrateVoiceInput {
   soaSamples: string[]
   /** Corpos dos rascunhos marcados "nao_soa" (estilo a evitar). */
   naoSoaSamples: string[]
+  /** Quem disparou — threaded até o guard de custo (023). */
+  userId: string
 }
 
 /**
@@ -54,6 +56,8 @@ export async function recalibrateVoice(
 
   const raw = await complete({
     role: 'synthesis',
+    action: 'voice',
+    userId: input.userId,
     system: RECALIBRATE_SYSTEM_PROMPT,
     user: buildRecalibrateUserPrompt({
       existing,

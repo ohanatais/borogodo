@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { generateAndSaveMirror } from '@/lib/ai/mirror/generateMirror'
 import { errorMessage, NoEntriesError } from '@/lib/errors'
+import { aiLimitResponse } from '@/lib/ai/cost/limitResponse'
 import { logger } from '@/lib/log'
 
 const ERROR_MESSAGES = {
@@ -35,6 +36,9 @@ export async function POST(): Promise<NextResponse> {
 
     return NextResponse.json({ mirror: snapshot.mirror }, { status: 200 })
   } catch (error: unknown) {
+    const limited = aiLimitResponse(error)
+    if (limited) return limited
+
     if (error instanceof NoEntriesError) {
       return jsonError(ERROR_MESSAGES.noEntries, 400)
     }

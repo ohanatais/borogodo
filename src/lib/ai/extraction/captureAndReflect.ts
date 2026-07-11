@@ -1,4 +1,4 @@
-import { getProvider } from '@/lib/ai/provider'
+import { complete } from '@/lib/ai/client'
 import { extractJSONBlock } from '@/lib/ai/extractJSON'
 import { CAPTURE_SYSTEM_PROMPT, buildCaptureUserPrompt } from '@/lib/ai/extraction/prompts/capture'
 import { validateCaptureResult } from '@/lib/ai/extraction/schemas'
@@ -14,10 +14,13 @@ const MAX_TOKENS = 2048
 export async function captureAndReflect(
   rawText: string,
   source: EntrySource,
-  context: CaptureContext
+  context: CaptureContext,
+  userId: string
 ): Promise<{ entries: ExtractedEntry[]; reflection: Reflection }> {
-  const raw = await getProvider().complete({
+  const raw = await complete({
     role: 'extraction',
+    action: 'capture',
+    userId,
     system: CAPTURE_SYSTEM_PROMPT,
     user: buildCaptureUserPrompt(rawText, source, context),
     maxTokens: MAX_TOKENS,

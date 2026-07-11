@@ -15,6 +15,8 @@ export interface BuildVoiceProfileInput {
   samples?: string[]
   tone?: string | null
   lengthPref?: LengthPref | null
+  /** Quem disparou — threaded até o guard de custo (023). */
+  userId: string
 }
 
 /** Normaliza: corta espaços, descarta vazias, limita a 2 (FR-001: 1–2 amostras). */
@@ -45,6 +47,8 @@ export async function buildVoiceProfile(
   if (hasMaterial(input.rawContents, samples)) {
     const raw = await complete({
       role: 'synthesis',
+      action: 'voice',
+      userId: input.userId,
       system: VOICE_SYSTEM_PROMPT,
       user: buildVoiceUserPrompt(input.rawContents, samples),
       maxTokens: MAX_TOKENS,

@@ -1,6 +1,7 @@
 'use client'
 
 import { useReducer, useEffect, useRef, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import * as Dialog from '@radix-ui/react-dialog'
 import { X, Plus } from 'lucide-react'
 import { ChatMessage, type MessageData } from './ChatMessage'
@@ -8,6 +9,7 @@ import { ChatInput } from './ChatInput'
 import { StarterPrompts } from './StarterPrompts'
 import { CorrectionConfirmCard } from './CorrectionConfirmCard'
 import { MarcoPreviewCard } from './MarcoPreviewCard'
+import { parseAiLimit } from '@/lib/ai/cost/clientLimit'
 import type { Citation, CorrectionAction, MarcoPreview } from '@/lib/ai/chat/answerCareerQuestion'
 import type { PrepMoment } from '@/lib/content/intentions'
 
@@ -47,6 +49,7 @@ type Action =
   | { type: 'ASSISTANT_DELTA'; id: string; text: string }
   | { type: 'ASSISTANT_DONE'; id: string; citations: Citation[]; suggestions: string[]; correction?: CorrectionAction; marcoPreview?: MarcoPreview }
   | { type: 'ASSISTANT_ERROR'; id: string; message: string }
+  | { type: 'ASSISTANT_LIMITED'; id: string; message: string }
   | { type: 'CARD_DISMISSED' }
   | { type: 'SET_HELPFUL'; id: string; helpful: boolean }
 
@@ -139,6 +142,17 @@ function reducer(state: State, action: Action): State {
             : m
         ),
       }
+    case 'ASSISTANT_LIMITED':
+      // Pausa honesta do freio de custo (023): bolha de assistente calma, NÃO um erro.
+      return {
+        ...state,
+        status: 'idle',
+        messages: state.messages.map((m) =>
+          m.id === action.id
+            ? { ...m, isStreaming: false, content: action.message }
+            : m
+        ),
+      }
     case 'CARD_DISMISSED':
       return { ...state, pendingCorrection: null, pendingMarco: null }
     case 'SET_HELPFUL':
@@ -169,6 +183,7 @@ const initialState: State = {
 
 export function ChatSheet() {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const tLimit = useTranslations('aiLimit')
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputAreaRef = useRef<HTMLDivElement>(null)
 
@@ -199,6 +214,17 @@ export function ChatSheet() {
         })
 
         if (!res.ok || !res.body) {
+          // Freio de custo (023): o pre-check devolve 429 JSON (não um stream). Surge como pausa
+          // honesta numa bolha calma, nunca como falha genérica.
+          const limit = await parseAiLimit(res)
+          if (limit) {
+            const message =
+              limit.kind === 'rateLimited'
+                ? tLimit('rateLimited', { minutes: limit.minutes })
+                : tLimit('overloaded')
+            dispatch({ type: 'ASSISTANT_LIMITED', id: assistantMsgId, message })
+            return
+          }
           dispatch({
             type: 'ASSISTANT_ERROR',
             id: assistantMsgId,
@@ -263,7 +289,7 @@ export function ChatSheet() {
         })
       }
     },
-    [state.messages, state.status, state.context]
+    [state.messages, state.status, state.context, tLimit]
   )
 
   useEffect(() => {
