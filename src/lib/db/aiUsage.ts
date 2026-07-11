@@ -21,8 +21,48 @@ function startOfUtcDayIso(): string {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString()
 }
 
+/** Tamanho da página ao varrer as linhas do dia. O PostgREST limita o retorno (~1000 por padrão),
+ * então paginamos explicitamente — senão a soma diária truncaria e a trava de custo pararia de
+ * disparar silenciosamente num dia de volume alto (o oposto do que o freio existe para garantir). */
+const DAY_SCAN_PAGE = 1000
+
+/**
+ * Varre TODAS as linhas do dia (UTC) para as colunas pedidas, paginando até esgotar. Retorna o
+ * conjunto completo — nunca um recorte truncado. Volume de beta é pequeno; correção > micro-perf.
+ */
+async function fetchAllDayRows<T>(columns: string): Promise<T[]> {
+  const admin = getSupabaseAdmin()
+  const since = startOfUtcDayIso()
+  const rows: T[] = []
+  for (let from = 0; ; from += DAY_SCAN_PAGE) {
+    const { data, error } = await admin
+      .from('ai_usage_events')
+      .select(columns)
+      .gte('created_at', since)
+      .order('created_at', { ascending: true })
+      .range(from, from + DAY_SCAN_PAGE - 1)
+
+    if (error) {
+      throw new Error(`fetchAllDayRows: ${error.message}`)
+    }
+    const page = (data ?? []) as T[]
+    rows.push(...page)
+    if (page.length < DAY_SCAN_PAGE) {
+      break
+    }
+  }
+  return rows
+}
+
 function utcDayString(): string {
   return startOfUtcDayIso().slice(0, 10)
+}
+
+/** Segundos até a próxima virada de dia (UTC), quando a trava diária reinicia. Mínimo de 60. */
+export function secondsUntilUtcDayReset(): number {
+  const now = new Date()
+  const nextDay = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
+  return Math.max(60, Math.ceil((nextDay - now.getTime()) / 1000))
 }
 
 /** Registra uma chamada paga de IA. Server-only (service-role). */
@@ -88,15 +128,8 @@ export async function secondsUntilGenerationFrees(userId: string): Promise<numbe
 
 /** Gasto total de IA acumulado no dia (UTC) — base do limiar de aviso e da trava diária. */
 export async function sumDailyCostUsd(): Promise<number> {
-  const { data, error } = await getSupabaseAdmin()
-    .from('ai_usage_events')
-    .select('cost_usd')
-    .gte('created_at', startOfUtcDayIso())
-
-  if (error) {
-    throw new Error(`sumDailyCostUsd: ${error.message}`)
-  }
-  return (data ?? []).reduce((sum, row) => sum + Number(row.cost_usd ?? 0), 0)
+  const rows = await fetchAllDayRows<{ cost_usd: number | string | null }>('cost_usd')
+  return rows.reduce((sum, row) => sum + Number(row.cost_usd ?? 0), 0)
 }
 
 export interface ConsumerSummary {
@@ -130,16 +163,7 @@ async function emailFor(userId: string): Promise<string | null> {
  * memória — volume de beta é pequeno. Busca e-mail só dos poucos usuários relevantes.
  */
 export async function dailyOpsSnapshot(rateLimit: number): Promise<OpsSnapshot> {
-  const { data, error } = await getSupabaseAdmin()
-    .from('ai_usage_events')
-    .select('user_id, action, cost_usd, created_at')
-    .gte('created_at', startOfUtcDayIso())
-
-  if (error) {
-    throw new Error(`dailyOpsSnapshot: ${error.message}`)
-  }
-
-  const rows = (data ?? []) as DayRow[]
+  const rows = await fetchAllDayRows<DayRow>('user_id, action, cost_usd, created_at')
   const byUser = new Map<string, { costUsd: number; actions: number; recentGenerations: number }>()
   const sinceHour = Date.now() - ONE_HOUR_MS
 
@@ -157,12 +181,14 @@ export async function dailyOpsSnapshot(rateLimit: number): Promise<OpsSnapshot> 
   const topUserIds = [...byUser.entries()].sort((a, b) => b[1].costUsd - a[1].costUsd).slice(0, 5)
   const blockedUserIds = [...byUser.entries()].filter(([, v]) => v.recentGenerations >= rateLimit)
 
-  const ranking = await Promise.all(
-    topUserIds.map(async ([userId, v]) => ({ userId, email: await emailFor(userId), costUsd: v.costUsd, actions: v.actions }))
+  // Resolve o e-mail de cada usuário relevante UMA vez (um usuário pode estar no ranking e travado).
+  const relevantIds = new Set<string>([...topUserIds, ...blockedUserIds].map(([userId]) => userId))
+  const emailById = new Map<string, string | null>(
+    await Promise.all([...relevantIds].map(async (userId) => [userId, await emailFor(userId)] as const))
   )
-  const blocked = await Promise.all(
-    blockedUserIds.map(async ([userId]) => ({ userId, email: await emailFor(userId) }))
-  )
+
+  const ranking = topUserIds.map(([userId, v]) => ({ userId, email: emailById.get(userId) ?? null, costUsd: v.costUsd, actions: v.actions }))
+  const blocked = blockedUserIds.map(([userId]) => ({ userId, email: emailById.get(userId) ?? null }))
 
   return { totalUsd, activeUsers: byUser.size, ranking, blocked }
 }

@@ -8,6 +8,7 @@ import {
   countGenerationsLastHour,
   insertUsageEvent,
   secondsUntilGenerationFrees,
+  secondsUntilUtcDayReset,
   sumDailyCostUsd,
   tryMarkDailyAlert,
 } from '@/lib/db/aiUsage'
@@ -37,14 +38,18 @@ export async function assertWithinLimits(userId: string, action: AIAction): Prom
   }
   const limits = getLimits()
 
-  const recentGenerations = await countGenerationsLastHour(userId)
+  // Contagem/hora e gasto do dia são independentes — buscar em paralelo (uma latência, não duas).
+  const [recentGenerations, dailySpend] = await Promise.all([
+    countGenerationsLastHour(userId),
+    sumDailyCostUsd(),
+  ])
+
+  // Rate limit tem prioridade sobre a trava diária (erro mais específico e acionável para o usuário).
   if (recentGenerations >= limits.ratePerHour) {
     throw new RateLimitedError(await secondsUntilGenerationFrees(userId))
   }
-
-  const dailySpend = await sumDailyCostUsd()
   if (dailySpend >= limits.dailyCapUsd) {
-    throw new DailyCapReachedError()
+    throw new DailyCapReachedError(secondsUntilUtcDayReset())
   }
 }
 

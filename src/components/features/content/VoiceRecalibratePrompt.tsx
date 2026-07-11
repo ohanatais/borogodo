@@ -3,6 +3,8 @@
 import { useState, useSyncExternalStore } from 'react'
 import { useTranslations } from 'next-intl'
 import { Mic2 } from 'lucide-react'
+import { AiLimitNotice } from '@/components/features/cost/AiLimitNotice'
+import { parseAiLimit, type AiLimitInfo } from '@/lib/ai/cost/clientLimit'
 
 interface VoiceRecalibratePromptProps {
   /**
@@ -12,7 +14,7 @@ interface VoiceRecalibratePromptProps {
   signalKey: string | null
 }
 
-type State = 'idle' | 'applying' | 'done' | 'error'
+type State = 'idle' | 'applying' | 'done' | 'error' | 'limited'
 
 const DISMISS_KEY = 'borogodo:voice-recalibrate-dismissed'
 
@@ -54,6 +56,7 @@ export function VoiceRecalibratePrompt({ signalKey }: VoiceRecalibratePromptProp
   )
   const [dismissedNow, setDismissedNow] = useState(false)
   const [state, setState] = useState<State>('idle')
+  const [aiLimit, setAiLimit] = useState<AiLimitInfo | null>(null)
 
   function handleDismiss() {
     rememberDismissed(signalKey)
@@ -69,6 +72,12 @@ export function VoiceRecalibratePrompt({ signalKey }: VoiceRecalibratePromptProp
         body: JSON.stringify({ apply: true }),
       })
       if (!res.ok) {
+        const limit = await parseAiLimit(res)
+        if (limit) {
+          setAiLimit(limit)
+          setState('limited')
+          return
+        }
         setState('error')
         return
       }
@@ -95,7 +104,11 @@ export function VoiceRecalibratePrompt({ signalKey }: VoiceRecalibratePromptProp
         </p>
       </div>
 
-      {state !== 'done' && (
+      {state === 'limited' && aiLimit && (
+        <AiLimitNotice info={aiLimit} onDismiss={() => setState('idle')} />
+      )}
+
+      {state !== 'done' && state !== 'limited' && (
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"

@@ -10,6 +10,8 @@ import { MirrorFeedback } from './MirrorFeedback'
 import { EvidenceText } from './EvidenceText'
 import { MacroCategoryTabs } from './MacroCategoryTabs'
 import { SectionLabel } from '@/components/ui/SectionLabel'
+import { AiLimitNotice } from '@/components/features/cost/AiLimitNotice'
+import { parseAiLimit, type AiLimitInfo } from '@/lib/ai/cost/clientLimit'
 
 interface MirrorContentProps {
   snapshot: MirrorSnapshot
@@ -118,6 +120,7 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [regenerateError, setRegenerateError] = useState<string | null>(null)
+  const [aiLimit, setAiLimit] = useState<AiLimitInfo | null>(null)
   const { mirror } = snapshot
 
   const personName = userName || mirror.intro.match(/^([A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ]+)/)?.[1] || ''
@@ -125,9 +128,15 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
   const handleRegenerate = async () => {
     setLoading(true)
     setRegenerateError(null)
+    setAiLimit(null)
     try {
       const res = await fetch('/api/mirror/generate', { method: 'POST' })
       if (!res.ok) {
+        const limit = await parseAiLimit(res)
+        if (limit) {
+          setAiLimit(limit)
+          return
+        }
         const body = await res.json().catch(() => ({})) as { error?: string }
         setRegenerateError(body.error ?? t('regenerateError'))
         return
@@ -255,10 +264,15 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
               <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
               {loading ? t('regenerating') : t('regenerate')}
             </button>
-            {!loading && !regenerateError && (
+            {!loading && !regenerateError && !aiLimit && (
               <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                 Usa suas entradas mais recentes
               </p>
+            )}
+            {aiLimit && (
+              <div className="w-full pt-1">
+                <AiLimitNotice info={aiLimit} onDismiss={() => setAiLimit(null)} />
+              </div>
             )}
             {regenerateError && (
               <p className="text-xs font-medium" style={{ color: 'var(--destructive)' }}>

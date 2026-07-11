@@ -7,6 +7,8 @@ import type { SentenceStemAnchors } from '@/lib/autoavaliacao/sentenceStems'
 import type { AssistSection } from '@/lib/ai/content/assist'
 import type { ForwardStep } from '@/types/content'
 import { ForwardStepOffer } from './ForwardStepOffer'
+import { AiLimitNotice } from '@/components/features/cost/AiLimitNotice'
+import { parseAiLimit, type AiLimitInfo } from '@/lib/ai/cost/clientLimit'
 
 /** Uma seção do andaime. `key` indexa o i18n (sections/stems); `api` é o parâmetro da rota de assist. */
 interface SectionDef {
@@ -58,6 +60,8 @@ export function AssessmentEditor({ stems, seedRef, initialDraftId, initialSectio
   const monthFmt = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' })
   const [sections, setSections] = useState<Sections>(initialSections ?? EMPTY_SECTIONS)
   const [card, setCard] = useState<AssistCard | null>(null)
+  /** Limite do freio de custo (023) na chamada de assist — ancorado na seção que disparou. */
+  const [aiLimit, setAiLimit] = useState<{ section: SectionKey; info: AiLimitInfo } | null>(null)
   /** Resposta da pessoa à pergunta do unblock (vira o rascunho ao "Usar"). */
   const [answer, setAnswer] = useState('')
   const [busy, setBusy] = useState(false)
@@ -90,6 +94,7 @@ export function AssessmentEditor({ stems, seedRef, initialDraftId, initialSectio
   function closeCard() {
     setCard(null)
     setAnswer('')
+    setAiLimit(null)
   }
 
   async function callAssist(def: SectionDef, kind: 'rephrase' | 'unblock') {
@@ -106,6 +111,11 @@ export function AssessmentEditor({ stems, seedRef, initialDraftId, initialSectio
         ),
       })
       if (!res.ok) {
+        const limit = await parseAiLimit(res)
+        if (limit) {
+          setAiLimit({ section: def.key, info: limit })
+          return
+        }
         setCard({ section: def.key, kind, value: t('assist.failed') })
         return
       }
@@ -287,6 +297,11 @@ export function AssessmentEditor({ stems, seedRef, initialDraftId, initialSectio
                 </button>
               </div>
             </div>
+          )}
+
+          {/* Freio de custo (023): pausa honesta no lugar do cartão, ancorada nesta seção. */}
+          {aiLimit?.section === def.key && (
+            <AiLimitNotice info={aiLimit.info} onDismiss={() => setAiLimit(null)} />
           )}
         </section>
       ))}

@@ -58,8 +58,12 @@ export class RateLimitedError extends Error {
  * motivo real). Captura/insight nunca lançam isto.
  */
 export class DailyCapReachedError extends Error {
-  constructor() {
+  /** Segundos até a virada do dia (UTC), quando a trava reinicia — a espera real, não "já já". */
+  readonly retryAfterSeconds: number
+
+  constructor(retryAfterSeconds: number) {
     super('Teto diário de gasto de IA atingido')
     this.name = 'DailyCapReachedError'
+    this.retryAfterSeconds = retryAfterSeconds
   }
 }

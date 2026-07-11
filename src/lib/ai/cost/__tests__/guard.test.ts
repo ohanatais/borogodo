@@ -19,6 +19,7 @@ vi.mock('@/lib/db/aiUsage', () => ({
   sumDailyCostUsd: mockSumDaily,
   insertUsageEvent: mockInsert,
   secondsUntilGenerationFrees: mockSecondsUntil,
+  secondsUntilUtcDayReset: () => 3600,
   tryMarkDailyAlert: mockTryMark,
 }))
 

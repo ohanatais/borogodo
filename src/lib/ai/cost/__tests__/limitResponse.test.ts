@@ -13,11 +13,12 @@ describe('aiLimitResponse (servidor → 429)', () => {
     expect(body).toMatchObject({ code: 'ai_rate_limited', retryAfterSeconds: 1800 })
   })
 
-  it('mapeia DailyCapReachedError para 429 com code ai_overloaded', async () => {
-    const res = aiLimitResponse(new DailyCapReachedError())
+  it('mapeia DailyCapReachedError para 429 com code, retryAfterSeconds e header Retry-After', async () => {
+    const res = aiLimitResponse(new DailyCapReachedError(7200))
     expect(res?.status).toBe(429)
+    expect(res?.headers.get('Retry-After')).toBe('7200')
     const body = await res?.json()
-    expect(body).toMatchObject({ code: 'ai_overloaded' })
+    expect(body).toMatchObject({ code: 'ai_overloaded', retryAfterSeconds: 7200 })
   })
 
   it('devolve null para erros que não são do freio', () => {
@@ -41,8 +42,14 @@ describe('parseAiLimit (cliente lê o 429)', () => {
     })
   })
 
-  it('reconhece ai_overloaded', async () => {
-    expect(await parseAiLimit(res429({ code: 'ai_overloaded' }))).toEqual({ kind: 'overloaded', minutes: 0 })
+  it('converte ai_overloaded (trava diária) na espera real em minutos', async () => {
+    // Com retryAfterSeconds (segundos até virar o dia), informa a espera real, não "já já".
+    expect(await parseAiLimit(res429({ code: 'ai_overloaded', retryAfterSeconds: 7200 }))).toEqual({
+      kind: 'overloaded',
+      minutes: 120,
+    })
+    // Sem retryAfterSeconds, cai no default de 1h.
+    expect(await parseAiLimit(res429({ code: 'ai_overloaded' }))).toEqual({ kind: 'overloaded', minutes: 60 })
   })
 
   it('devolve null para respostas que não são 429 do freio', async () => {

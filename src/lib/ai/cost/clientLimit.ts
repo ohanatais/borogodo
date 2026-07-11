@@ -33,7 +33,9 @@ export async function parseAiLimit(res: Response): Promise<AiLimitInfo | null> {
     return { kind: 'rateLimited', minutes: Math.max(1, Math.ceil(seconds / SECONDS_PER_MINUTE)) }
   }
   if (body?.code === 'ai_overloaded') {
-    return { kind: 'overloaded', minutes: 0 }
+    // A trava diária dura até virar o dia — informa a espera real (em minutos) em vez de "já já".
+    const seconds = body.retryAfterSeconds ?? DEFAULT_RETRY_SECONDS
+    return { kind: 'overloaded', minutes: Math.max(1, Math.ceil(seconds / SECONDS_PER_MINUTE)) }
   }
   return null
 }

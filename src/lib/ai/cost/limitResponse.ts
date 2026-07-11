@@ -14,7 +14,10 @@ export function aiLimitResponse(error: unknown): NextResponse | null {
     )
   }
   if (error instanceof DailyCapReachedError) {
-    return NextResponse.json({ error: 'daily_cap', code: 'ai_overloaded' }, { status: 429 })
+    return NextResponse.json(
+      { error: 'daily_cap', code: 'ai_overloaded', retryAfterSeconds: error.retryAfterSeconds },
+      { status: 429, headers: { 'Retry-After': String(error.retryAfterSeconds) } }
+    )
   }
   return null
 }

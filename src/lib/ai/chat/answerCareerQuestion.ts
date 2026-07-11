@@ -199,6 +199,7 @@ export async function answerCareerQuestion(
   let inBlocks = false
   let blocksBuffer = ''
 
+  let streamError: string | null = null
   try {
     for await (const event of stream) {
       if (event.type !== 'content_block_delta') continue
@@ -232,13 +233,14 @@ export async function answerCareerQuestion(
       events.onDelta(pending)
     }
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Erro desconhecido'
-    events.onError(message)
-    return
+    // Não sai daqui direto: uma falha no meio do stream ainda consumiu tokens (o Anthropic cobra),
+    // então tentamos registrar o uso abaixo antes de reportar o erro — senão o freio sub-conta.
+    streamError = err instanceof Error ? err.message : 'Erro desconhecido'
   }
 
   // Registra o uso do chat para o freio de custo (023). O chat stream-a por fora do provider, então
-  // recordamos aqui após o streaming, lendo o usage da mensagem final. Best-effort.
+  // recordamos aqui após o streaming (sucesso OU falha no meio), lendo o usage da mensagem final.
+  // Best-effort: se nem o usage final vier (erro duro), loga e segue.
   try {
     const final = await stream.finalMessage()
     await recordUsageAndMaybeAlert({
@@ -251,6 +253,11 @@ export async function answerCareerQuestion(
     })
   } catch (err: unknown) {
     logger.error('chat usage record failed', { reason: err instanceof Error ? err.message : 'unknown' })
+  }
+
+  if (streamError) {
+    events.onError(streamError)
+    return
   }
 
   const blocks = parseBlocks(blocksBuffer)

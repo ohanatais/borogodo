@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Sparkles, Check, CalendarClock, Pencil, RefreshCw, X } from 'lucide-react'
 import type { ForwardStep } from '@/types/content'
+import { AiLimitNotice } from '@/components/features/cost/AiLimitNotice'
+import { parseAiLimit, type AiLimitInfo } from '@/lib/ai/cost/clientLimit'
 
 interface ForwardStepOfferProps {
   /** O draft da autoavaliação já salva — insumo do passo-pra-frente. */
@@ -12,7 +14,7 @@ interface ForwardStepOfferProps {
   initialPlan?: ForwardStep
 }
 
-type Phase = 'offer' | 'generating' | 'done' | 'error' | 'declined'
+type Phase = 'offer' | 'generating' | 'done' | 'error' | 'limited' | 'declined'
 
 /** Âncora para o banner de "próxima revisão" rolar até o plano ao reabrir a autoavaliação. */
 const ANCHOR_ID = 'passo-pra-frente'
@@ -26,6 +28,7 @@ export function ForwardStepOffer({ draftId, initialPlan }: ForwardStepOfferProps
   const t = useTranslations('autoavaliacao.forwardStep')
   const [phase, setPhase] = useState<Phase>(initialPlan ? 'done' : 'offer')
   const [plan, setPlan] = useState<ForwardStep | null>(initialPlan ?? null)
+  const [aiLimit, setAiLimit] = useState<AiLimitInfo | null>(null)
   const [reviewDate, setReviewDate] = useState('')
   const [dateSaved, setDateSaved] = useState(false)
   // Revisão é compromisso futuro: o input só aceita de amanhã em diante. Calculado uma vez (puro no render).
@@ -49,6 +52,12 @@ export function ForwardStepOffer({ draftId, initialPlan }: ForwardStepOfferProps
         body: JSON.stringify({ draftId, kind: 'action_plan' }),
       })
       if (!res.ok) {
+        const limit = await parseAiLimit(res)
+        if (limit) {
+          setAiLimit(limit)
+          setPhase('limited')
+          return
+        }
         setPhase('error')
         return
       }
@@ -131,6 +140,14 @@ export function ForwardStepOffer({ draftId, initialPlan }: ForwardStepOfferProps
     return (
       <section className="rounded-2xl px-5 py-5" style={{ background: 'var(--color-lilas-nevoa)' }}>
         <p className="text-sm" style={{ color: 'var(--color-lilas-nevoa-text)' }}>{t('generating')}</p>
+      </section>
+    )
+  }
+
+  if (phase === 'limited' && aiLimit) {
+    return (
+      <section id={ANCHOR_ID} className="scroll-mt-20">
+        <AiLimitNotice info={aiLimit} onDismiss={() => setPhase('offer')} />
       </section>
     )
   }
