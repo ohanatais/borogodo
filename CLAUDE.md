@@ -30,23 +30,22 @@ Features mergeadas em `main` (até PR #40):
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **022-landing-rebuild** (branch: `022-landing-rebuild`) — **rebuild da landing page: narrativa dos 4 verbos + pilar Provas + propriedade do dado + SEO/GEO 100% + mídia real via slots. Spec ✅ clarify ✅ plan ✅**
+Current feature: **024-termos-privacidade** (branch: `024-termos-privacidade`) — **Termos de Uso + Política de Privacidade (páginas em URLs dedicadas `/termos-de-uso` e `/politica-de-privacidade`) + consentimento auditável (LGPD). Spec ✅ clarify ✅ plan ✅**
 
-> Mescla decidida em `docs/decisions/001-landing-page-rebuild.md`: a issue #36 manda na
-> narrativa, voz e estrutura (headline da dor, eyebrow estilo dicionário, 4 verbos, CTA único,
-> sem depoimento fake); a auditoria de mercado entra como camada técnica de SEO/GEO (H1 único,
-> JSON-LD Software+Org+FAQ, llms.txt, SSR, crawlers de IA, meta/OG humanas) e reforço dos
-> diferenciais (Provas e "seu, não da sua empresa"). Os mockups fake (`MirrorMockup`,
-> `CareerMapMockup`, `ContentGenSection`) saem; entram slots de mídia (`MediaSlot`) com
-> placeholder agora, mídia real depois (vídeo do onboarding no hero + screenshot do card de
-> força em Provas). **Sem migration, sem API nova, sem dado de usuário.** Risco real é
-> conteúdo/voz (gate humano da Ohana). Hub de conteúdo e consenso off-site ficam FORA (trilha
-> GTM separada).
-Spec: [specs/022-landing-rebuild/spec.md](specs/022-landing-rebuild/spec.md) ·
-Plan: [specs/022-landing-rebuild/plan.md](specs/022-landing-rebuild/plan.md) ·
-Research: [specs/022-landing-rebuild/research.md](specs/022-landing-rebuild/research.md) ·
-Data-model: [specs/022-landing-rebuild/data-model.md](specs/022-landing-rebuild/data-model.md) ·
-Contracts: [specs/022-landing-rebuild/contracts/landing.md](specs/022-landing-rebuild/contracts/landing.md) ·
-Quickstart: [specs/022-landing-rebuild/quickstart.md](specs/022-landing-rebuild/quickstart.md) ·
-Tasks: (pendente — `/speckit-tasks`)
+> Escopo: estrutura das páginas (conteúdo jurídico é placeholder — Ohana escreve depois), vínculos
+> (Footer + `/configuracoes`), e o mecanismo de aceite. Aceite de Termos via **sign-in-wrap** (aviso +
+> links, sem checkbox; base legal LGPD = execução de contrato), **registrado server-side** (`terms_accepted_at`
+> + `terms_version`). Marketing é consentimento **separado, desligado por padrão** (checkbox no cadastro por
+> e-mail; Google só liga em configurações; **onboarding livre de marketing**, decisão da Ohana). Registro do aceite na camada de render:
+> onboarding carimba novos usuários; gate em `(app)/layout.tsx` (3º check: `terms_version != CURRENT`) cobre
+> contas existentes e bumps de versão → `/consentimento`. Fonte única em `src/lib/legal/policy.ts`.
+> **Migration `015_profiles_consent.sql`** (3 colunas em `profiles`, aditiva). FORA: texto jurídico, cookie
+> banner, direitos-do-titular (exclusão/portabilidade), histórico multi-versão de aceites.
+Spec: [specs/024-termos-privacidade/spec.md](specs/024-termos-privacidade/spec.md) ·
+Plan: [specs/024-termos-privacidade/plan.md](specs/024-termos-privacidade/plan.md) ·
+Research: [specs/024-termos-privacidade/research.md](specs/024-termos-privacidade/research.md) ·
+Data-model: [specs/024-termos-privacidade/data-model.md](specs/024-termos-privacidade/data-model.md) ·
+Contracts: [specs/024-termos-privacidade/contracts/consent.md](specs/024-termos-privacidade/contracts/consent.md) ·
+Quickstart: [specs/024-termos-privacidade/quickstart.md](specs/024-termos-privacidade/quickstart.md) ·
+Tasks: [specs/024-termos-privacidade/tasks.md](specs/024-termos-privacidade/tasks.md) (42 tasks, 7 fases; MVP = Foundational + US1)
 <!-- SPECKIT END -->
