@@ -2,9 +2,10 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { getProfile } from '@/lib/db/profiles'
-import { IdentityCard } from '@/components/features/perfil/IdentityCard'
-import { LinksCard } from '@/components/features/perfil/LinksCard'
+import { MeusDadosCard } from '@/components/features/perfil/MeusDadosCard'
 import { ContactCard } from '@/components/features/support/ContactCard'
+import { LegalLinksCard } from '@/components/features/legal/LegalLinksCard'
+import { ConfiguracoesTabs } from '@/components/features/perfil/ConfiguracoesTabs'
 
 export default async function ConfiguracoesPage() {
   const supabase = await createServerClient()
@@ -22,16 +23,27 @@ export default async function ConfiguracoesPage() {
   return (
     <div className="max-w-[980px] mx-auto px-6 py-8 pb-32 lg:pb-8">
       <h1
-        className="text-2xl font-semibold mb-6"
+        className="text-2xl font-semibold mb-8"
         style={{ fontFamily: 'Fraunces, serif', color: 'var(--foreground)' }}
       >
         {t('title')}
       </h1>
-      <div className="lg:grid lg:grid-cols-2 lg:gap-8 space-y-6 lg:space-y-0">
-        <IdentityCard profile={profile} />
-        <LinksCard profile={profile} />
-        <ContactCard />
-      </div>
+
+      <ConfiguracoesTabs
+        groupAriaLabel={t('title')}
+        meusDadosLabel={t('sections.profile')}
+        privacidadeLabel={t('sections.privacy')}
+        suporteLabel={t('sections.support')}
+        meusDados={<MeusDadosCard profile={profile} />}
+        privacidade={
+          <LegalLinksCard
+            marketingConsent={profile?.marketing_consent ?? false}
+            termsVersion={profile?.terms_version ?? null}
+            termsAcceptedAt={profile?.terms_accepted_at ?? null}
+          />
+        }
+        suporte={<ContactCard />}
+      />
     </div>
   )
 }

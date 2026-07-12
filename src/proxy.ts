@@ -2,10 +2,11 @@ import createIntlMiddleware from 'next-intl/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 import { routing } from './i18n/routing'
 import { updateSession } from './lib/db/supabase/middleware'
+import { LEGAL_ROUTES } from './lib/legal/policy'
 
 const intlMiddleware = createIntlMiddleware(routing)
 
-const PUBLIC_ROUTES = ['/', '/login', '/auth/callback']
+const PUBLIC_ROUTES = ['/', '/login', '/auth/callback', LEGAL_ROUTES.terms, LEGAL_ROUTES.privacy]
 
 function isPublicRoute(pathname: string): boolean {
   // Com localePrefix: 'never' (next-intl) as URLs nunca têm prefixo de locale,

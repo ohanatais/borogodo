@@ -52,9 +52,11 @@ Roteiro de validação manual ponta-a-ponta. Cobre os cenários de aceitação d
 1. No cadastro por **e-mail/senha**: observe o checkbox de marketing.
    - **Esperado**: desmarcado por padrão, separado do aviso de termos.
 2. Cadastre-se por **Google** e vá ao onboarding.
-   - **Esperado**: pergunta única de marketing, desmarcada.
-3. Sem marcar nada, conclua.
-   - **Esperado (SQL)**: `marketing_consent = false`.
+   - **Esperado**: nenhuma pergunta de marketing no onboarding (decisão travada em
+     `design-brief.md` §10 — onboarding livre de consentimento de marketing; o caminho Google só
+     liga marketing depois, em `/configuracoes`).
+3. Conclua o onboarding.
+   - **Esperado (SQL)**: `marketing_consent = false` (padrão, sem UI no onboarding para alterar).
 4. Em `/configuracoes`, ligue o toggle de marketing e salve; recarregue.
    - **Esperado**: `marketing_consent = true` persistido.
 5. Desligue e salve.
