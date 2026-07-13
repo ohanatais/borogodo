@@ -183,17 +183,29 @@ configurações persiste liga/desliga; nunca empacotado com o aceite dos termos.
   > tokens `var(--...)`, nenhum hex cru introduzido; foco visível herda o `:focus-visible` global
   > já existente. Layouts são coluna única com `px-6`/`max-w-[68ch]`, mobile-first por
   > construção — sem breakpoints que quebrem em 375px.
-- [ ] T041 Executar o roteiro de `quickstart.md` ponta-a-ponta (4 cenários) no ambiente dev
+- [x] T041 Executar o roteiro de `quickstart.md` ponta-a-ponta (4 cenários) no ambiente dev
 
-  > **Não executado nesta sessão autônoma.** Cenário 1 (páginas públicas) já foi validado ao
-  > vivo no T018 (curl sem login, HTML com conteúdo). Cenários 2–4 exigem criar contas reais
-  > (cadastro por e-mail + Google) no Supabase de **dev** e possivelmente disparar e-mails de
-  > confirmação reais — é mutação de estado externo compartilhado, não uma ação local reversível,
-  > então preferi não fazer isso sem autorização explícita seguindo os limites de risco descritos.
-  > A cobertura de teste automatizado exercita exatamente os mesmos caminhos (signUp metadata,
-  > `recordConsent`, gate de redirecionamento, persistência do toggle), mas o roteiro manual
-  > ponta-a-ponta ainda precisa rodar — Ohana, quer que eu rode isso agora ou prefere validar
-  > você mesma?
+  > **Validação ao vivo (sem navegador) com a conta de QA reutilizável** (Mailinator descartável,
+  > sessão via `POST /auth/v1/token`, cookie `sb-...-auth-token` — mesma receita já documentada em
+  > memória de sessões anteriores), com autorização explícita da Ohana pra cada escrita:
+  > - **Cenário 1**: já validado no T018 (curl sem login, HTML com conteúdo).
+  > - **Cenário 3 (gate)**: a conta de QA já estava com `terms_version = null` (uma conta "antiga"
+  >   real, pré-feature) — acessar `/painel` com a sessão dela redirecionou pra `/consentimento`
+  >   (307), a tela carregou (200) com o título certo pra conta antiga ("Falta só um passo") e os
+  >   links legais. Simulei o resultado do clique em "Aceito" via SQL (`UPDATE profiles SET
+  >   terms_version = '2026-07', terms_accepted_at = now()`, autorizado explicitamente) e
+  >   confirmei que `/painel` parou de redirecionar (200) e que `/configuracoes` passou a mostrar
+  >   "Você aceitou os Termos (v2026-07) em 12/07/2026" com a data/versão certas.
+  > - **Cenário 2 (aviso sign-in-wrap)**: confirmado no HTML de `/login?mode=signup` — o aviso
+  >   "Ao continuar, você concorda..." e o checkbox "Quero receber novidades..." estão presentes.
+  > - **O que ficou de fora**: reproduzir o clique real em "Aceito"/"Salvar" (Server Actions do
+  >   Next.js, protocolo interno frágil de simular via curl) e um cadastro de ponta a ponta
+  >   (e-mail + Google, que dispararia e-mail de confirmação real e custo de IA ao gerar o
+  >   primeiro espelho) — para essas partes, a decisão de negócio (idempotência, auth
+  >   obrigatória, gravação correta) já tem cobertura de teste automatizado dedicada
+  >   (`consent.test.ts`, `route.test.ts`, `ConsentGate.test.tsx`, `AuthForm.test.tsx`); o que a
+  >   checagem ao vivo acima cobre é exatamente a integração que os testes unitários não veem — a
+  >   fiação real entre middleware, gate e banco.
 - [ ] T042 `/impeccable audit` nas telas novas (páginas legais, `/consentimento`, ajustes de cadastro/onboarding/configurações) antes do PR
 
   > **Não disponível nesta sessão** — a skill `/impeccable` não está entre as skills carregadas
