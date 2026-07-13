@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const mockGetUser = vi.hoisted(() => vi.fn())
 const mockUpdate = vi.hoisted(() => vi.fn())
 const mockEq = vi.hoisted(() => vi.fn())
+const mockMaybeSingle = vi.hoisted(() => vi.fn())
 const mockGenerateAndSaveMirror = vi.hoisted(() => vi.fn())
 const mockRecordTermsAcceptance = vi.hoisted(() => vi.fn())
 const mockSetMarketingConsent = vi.hoisted(() => vi.fn())
@@ -12,6 +13,7 @@ vi.mock('@/lib/db/supabase/server', () => ({
     auth: { getUser: mockGetUser },
     from: vi.fn(() => ({
       update: mockUpdate.mockReturnValue({ eq: mockEq }),
+      select: vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle: mockMaybeSingle })) })),
     })),
   })),
 }))
@@ -39,6 +41,7 @@ describe('POST /api/mirror/generate — 024/T022 carimbo de aceite', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockEq.mockResolvedValue({ error: null })
+    mockMaybeSingle.mockResolvedValue({ data: { onboarding_completed: false } })
     mockGenerateAndSaveMirror.mockResolvedValue({ mirror: { id: 'm1' } })
     mockRecordTermsAcceptance.mockResolvedValue({ success: true })
     mockSetMarketingConsent.mockResolvedValue({ success: true })
@@ -70,6 +73,21 @@ describe('POST /api/mirror/generate — 024/T022 carimbo de aceite', () => {
     await POST()
     await new Promise((resolve) => setTimeout(resolve, 0))
 
+    expect(mockSetMarketingConsent).not.toHaveBeenCalled()
+  })
+
+  it('024/regression: does not re-run recordConsent on a mirror regenerate after onboarding already completed', async () => {
+    // Conta já onboarded regenerando o espelho (correção, botão "gerar de novo" no painel etc.) —
+    // não é a chamada que conclui o onboarding.
+    mockMaybeSingle.mockResolvedValue({ data: { onboarding_completed: true } })
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u1', user_metadata: { marketing_consent: true } } },
+    })
+
+    await POST()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(mockRecordTermsAcceptance).not.toHaveBeenCalled()
     expect(mockSetMarketingConsent).not.toHaveBeenCalled()
   })
 })

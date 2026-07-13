@@ -30,15 +30,23 @@ export async function POST(): Promise<NextResponse> {
   }
 
   try {
+    const isFirstGeneration = !(await isOnboardingCompleted(supabase, user.id))
+
     const snapshot = await generateAndSaveMirror(supabase, user.id)
 
     markOnboardingCompleted(supabase, user.id).catch((err: unknown) => {
       logger.error('markOnboardingCompleted failed', { message: errorMessage(err) })
     })
 
-    recordConsent(user).catch((err: unknown) => {
-      logger.error('recordConsent failed', { message: errorMessage(err) })
-    })
+    // Só na chamada que conclui o onboarding — em regenerações seguintes (correção, botão
+    // "gerar de novo"), recordConsent() reescreveria marketing_consent com o valor estático do
+    // metadata do cadastro, apagando qualquer mudança que o usuário tenha feito depois em
+    // /configuracoes (viola "revogável a qualquer momento", FR do data-model.md).
+    if (isFirstGeneration) {
+      recordConsent(user).catch((err: unknown) => {
+        logger.error('recordConsent failed', { message: errorMessage(err) })
+      })
+    }
 
     return NextResponse.json({ mirror: snapshot.mirror }, { status: 200 })
   } catch (error: unknown) {
@@ -52,6 +60,19 @@ export async function POST(): Promise<NextResponse> {
     logger.error('mirror generation failed', { message: errorMessage(error) })
     return jsonError(ERROR_MESSAGES.generic, 500)
   }
+}
+
+async function isOnboardingCompleted(
+  supabase: SupabaseServerClient,
+  userId: string
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('onboarding_completed')
+    .eq('id', userId)
+    .maybeSingle()
+
+  return Boolean((data as { onboarding_completed?: boolean } | null)?.onboarding_completed)
 }
 
 async function markOnboardingCompleted(

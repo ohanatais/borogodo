@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { mockGetUser, mockGenerateAndSaveMirror, mockUpdate, mockEq, mockFrom } = vi.hoisted(() => ({
+const { mockGetUser, mockGenerateAndSaveMirror, mockUpdate, mockEq, mockFrom, mockMaybeSingle } = vi.hoisted(() => ({
   mockGetUser: vi.fn(),
   mockGenerateAndSaveMirror: vi.fn(),
   mockUpdate: vi.fn(),
   mockEq: vi.fn(),
   mockFrom: vi.fn(),
+  mockMaybeSingle: vi.fn(),
 }))
 
 vi.mock('@/lib/db/supabase/server', () => ({
@@ -45,7 +46,11 @@ describe('POST /api/mirror/generate', () => {
 
     mockEq.mockResolvedValue({ error: null })
     mockUpdate.mockReturnValue({ eq: mockEq })
-    mockFrom.mockReturnValue({ update: mockUpdate })
+    mockMaybeSingle.mockResolvedValue({ data: { onboarding_completed: false } })
+    mockFrom.mockReturnValue({
+      update: mockUpdate,
+      select: vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle: mockMaybeSingle })) })),
+    })
   })
 
   it('retorna 401 sem sessão', async () => {
