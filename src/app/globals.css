@@ -9,6 +9,8 @@
     --color-accent:       oklch(62% 0.22 28);    /* coral-faísca */
     --color-accent-fg:    oklch(98% 0.01 28);
     --color-accent-text:  oklch(56% 0.20 28);    /* coral sobre fundo claro (texto acessível, ≥4.5:1) */
+    --color-accent-wash:  oklch(62% 0.22 28 / 0.12); /* lavagem coral sutil (crachá, drag overlay do drawer) */
+    --color-lilas-linha:  oklch(88% 0.03 320);   /* sublinhado sutil ("Suas forças") — visível nos dois temas */
     --color-warm:         oklch(74% 0.12 75);    /* mel */
     --color-teal:         oklch(70% 0.10 190);   /* verde-água */
     --color-lilas-nevoa:  oklch(95% 0.01 320);   /* lilas-névoa */
@@ -74,6 +76,23 @@
     --border:             oklch(28% 0.02 260);
     --input:              oklch(28% 0.02 260);
     --ring:               oklch(65% 0.16 320);
+
+    /* 025 (US6): --color-primary/--color-accent/--color-lilas-nevoa não tinham override — sem
+       isso, a sidebar, o FAB de registro e o destaque de item ativo usavam roxo/coral CLAROS
+       (feitos para fundo creme) sobre fundo escuro, quebrando contraste AA. Espelham os pares
+       --primary/--accent acima em vez de introduzir uma segunda escala de cor. */
+    --color-primary:      var(--primary);
+    --color-primary-fg:   var(--primary-foreground);
+    --color-accent:       var(--accent);
+    --color-accent-fg:    var(--accent-foreground);
+    --color-accent-text:  oklch(78% 0.16 28);   /* coral claro — texto legível sobre --card escuro */
+    --color-accent-wash:  oklch(68% 0.18 28 / 0.18);
+    --color-lilas-nevoa:      var(--secondary);
+    --color-lilas-nevoa-text: var(--secondary-foreground);
+    /* --color-lilas-nevoa (= --secondary escuro) fica perto demais de --card/--background no
+       escuro — o sublinhado de "Suas forças" precisa de um tom mais claro pra continuar visível
+       à noite (audit 025: underline "nearly invisible in dark mode"). */
+    --color-lilas-linha:      oklch(45% 0.06 320);
   }
 }
 

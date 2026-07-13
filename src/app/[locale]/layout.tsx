@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
 import { MotionProvider } from '@/components/providers/MotionProvider'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata')
@@ -36,9 +37,11 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <MotionProvider>
-        {children}
-      </MotionProvider>
+      <ThemeProvider>
+        <MotionProvider>
+          {children}
+        </MotionProvider>
+      </ThemeProvider>
     </NextIntlClientProvider>
   )
 }

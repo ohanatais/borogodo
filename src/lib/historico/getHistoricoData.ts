@@ -94,7 +94,7 @@ function formatYearLabel(start: string | null, end: string | null): string {
   return `${startYear}–${endYear}`
 }
 
-interface RawEntry {
+export interface RawEntry {
   id: string
   role_title: string | null
   company: string | null

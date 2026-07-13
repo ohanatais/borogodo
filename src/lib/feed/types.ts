@@ -1,5 +1,11 @@
 import type { EntrySource } from '@/types/entry'
 
+export interface FeedEvidenceItem {
+  type: 'url' | 'image'
+  value: string
+  label?: string
+}
+
 export interface FeedItem {
   id: string
   title: string
@@ -12,6 +18,8 @@ export interface FeedItem {
   metric: string | null
   tags: string[]
   thumbnail: string | null
+  /** Anexos (imagem/link) persistidos via `POST /api/entries/[id]/evidence` — 025-registro-deposito. */
+  evidences: FeedEvidenceItem[]
   impact: string | null
   decision: string | null
   learning: string | null

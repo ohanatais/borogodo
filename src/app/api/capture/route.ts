@@ -8,6 +8,7 @@ import { captureAndReflect } from '@/lib/ai/extraction/captureAndReflect'
 import { extractFromDocument } from '@/lib/ai/extraction/extractFromLinkedIn'
 import { extractTextFromPDF } from '@/lib/pdf/extractText'
 import { saveEntries } from '@/lib/db/entries'
+import { saveDeposito, EmptyContentError, type ManualFields } from '@/lib/capture/saveDeposito'
 import { fireAndForget, maybeRegenerateMirror, triggerProactiveInsight, triggerEnrichmentNudge } from '@/lib/ai/extraction/jobs'
 import { errorMessage, NoExtractableContentError } from '@/lib/errors'
 import { logger } from '@/lib/log'
@@ -85,6 +86,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (body.kind === 'marco') {
       return handleMarcoCapture(supabase, user.id, body, t)
     }
+    if (body.kind === 'deposito') {
+      return handleDepositoCapture(supabase, user.id, body, t)
+    }
     return jsonError(t('invalidKind'), 400)
   }
 
@@ -134,6 +138,48 @@ async function handleMarcoCapture(
   } catch (error: unknown) {
     const message = errorMessage(error)
     logger.error('marco capture failed', { message })
+    return jsonError(t('generic'), 500)
+  }
+}
+
+function readManualFields(body: Record<string, unknown>): ManualFields | undefined {
+  const raw = body.manualFields
+  if (!raw || typeof raw !== 'object') return undefined
+
+  const fields = raw as Record<string, unknown>
+  return {
+    metric: typeof fields.metric === 'string' ? fields.metric : null,
+    impact: typeof fields.impact === 'string' ? fields.impact : null,
+    tags: Array.isArray(fields.tags) ? fields.tags.filter((tag): tag is string => typeof tag === 'string') : [],
+    company: typeof fields.company === 'string' ? fields.company : null,
+    entryDate: typeof fields.entryDate === 'string' ? fields.entryDate : null,
+  }
+}
+
+/**
+ * Salvamento direto (025-registro-deposito): nunca chama IA, nunca rejeita por tamanho/formato de
+ * texto — o único erro de conteúdo possível é `rawText` vazio (contracts/capture.md).
+ */
+async function handleDepositoCapture(
+  supabase: SupabaseServerClient,
+  userId: string,
+  body: Record<string, unknown>,
+  t: ApiErrors
+): Promise<NextResponse> {
+  const rawText = typeof body.rawText === 'string' ? body.rawText : ''
+
+  try {
+    const result = await saveDeposito(supabase, userId, {
+      rawText,
+      manualFields: readManualFields(body),
+    })
+    return NextResponse.json(result, { status: 201 })
+  } catch (error: unknown) {
+    if (error instanceof EmptyContentError) {
+      return jsonError(t('emptyContent'), 422)
+    }
+    const message = errorMessage(error)
+    logger.error('deposito capture failed', { message })
     return jsonError(t('generic'), 500)
   }
 }

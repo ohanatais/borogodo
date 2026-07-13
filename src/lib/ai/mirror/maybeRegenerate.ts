@@ -3,7 +3,9 @@ import { getSupabaseAdmin } from '@/lib/db/supabaseAdmin'
 import { errorMessage } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
-const FIRST_MIRROR_MIN_ENTRIES = 3
+// Exportado para o Painel (025-registro-deposito, modo "novo") reusar o mesmo limiar no cartão
+// de progresso — sem inventar um número novo (FR-022).
+export const FIRST_MIRROR_MIN_ENTRIES = 3
 const REGEN_EVERY = 5
 
 type Admin = ReturnType<typeof getSupabaseAdmin>

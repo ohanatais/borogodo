@@ -181,6 +181,7 @@ export async function getFeedData(
     metric: entry.metric,
     tags: entry.tags ?? [],
     thumbnail: extractThumbnail(entry.evidences ?? []),
+    evidences: entry.evidences ?? [],
     impact: entry.impact,
     decision: entry.decision,
     learning: entry.learning,

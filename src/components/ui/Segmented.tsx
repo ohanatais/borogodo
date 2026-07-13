@@ -38,7 +38,9 @@ export function Segmented({ items, ariaLabel, size = 'md' }: SegmentedProps) {
       role="group"
       aria-label={ariaLabel}
       className="inline-flex items-center p-0.5 rounded-full"
-      style={{ background: 'oklch(100% 0 0 / 0.7)' }}
+      // Token de superfície (não o literal branco fixo): sobrevive ao dark mode (US6, 025) — em
+      // vez de ficar branco puro sobre fundo escuro, acompanha --muted (já tem par claro/escuro).
+      style={{ background: 'var(--muted)' }}
     >
       {items.map((item) => {
         const className = `${SIZE[size]} rounded-full flex items-center justify-center transition-[background-color,color] hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none`

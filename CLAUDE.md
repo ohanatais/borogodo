@@ -30,23 +30,23 @@ Features mergeadas em `main` (até PR #40):
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **022-landing-rebuild** (branch: `022-landing-rebuild`) — **rebuild da landing page: narrativa dos 4 verbos + pilar Provas + propriedade do dado + SEO/GEO 100% + mídia real via slots. Spec ✅ clarify ✅ plan ✅**
+Current feature: **025-registro-deposito** (branch: `025-registro-deposito`) — **Registro como Depósito (fundação): drawer bloco-de-notas que sempre salva (sem IA no caminho crítico), anexo de imagem/link de primeira classe, confirmação editável, campos manuais opcionais; Painel novo (saudação + gatilho único + Suas forças + Registros recentes) e navegação em grupos + dark mode. Spec ✅ clarify ✅ plan ✅**
 
-> Mescla decidida em `docs/decisions/001-landing-page-rebuild.md`: a issue #36 manda na
-> narrativa, voz e estrutura (headline da dor, eyebrow estilo dicionário, 4 verbos, CTA único,
-> sem depoimento fake); a auditoria de mercado entra como camada técnica de SEO/GEO (H1 único,
-> JSON-LD Software+Org+FAQ, llms.txt, SSR, crawlers de IA, meta/OG humanas) e reforço dos
-> diferenciais (Provas e "seu, não da sua empresa"). Os mockups fake (`MirrorMockup`,
-> `CareerMapMockup`, `ContentGenSection`) saem; entram slots de mídia (`MediaSlot`) com
-> placeholder agora, mídia real depois (vídeo do onboarding no hero + screenshot do card de
-> força em Provas). **Sem migration, sem API nova, sem dado de usuário.** Risco real é
-> conteúdo/voz (gate humano da Ohana). Hub de conteúdo e consenso off-site ficam FORA (trilha
-> GTM separada).
-Spec: [specs/022-landing-rebuild/spec.md](specs/022-landing-rebuild/spec.md) ·
-Plan: [specs/022-landing-rebuild/plan.md](specs/022-landing-rebuild/plan.md) ·
-Research: [specs/022-landing-rebuild/research.md](specs/022-landing-rebuild/research.md) ·
-Data-model: [specs/022-landing-rebuild/data-model.md](specs/022-landing-rebuild/data-model.md) ·
-Contracts: [specs/022-landing-rebuild/contracts/landing.md](specs/022-landing-rebuild/contracts/landing.md) ·
-Quickstart: [specs/022-landing-rebuild/quickstart.md](specs/022-landing-rebuild/quickstart.md) ·
+> Feature A do fatiamento A→B→C descrito em `docs/decisions/003-registro-deposito-e-captura.md`.
+> Remove a dependência de IA síncrona (Haiku) do caminho de salvar (`captureAndReflect`) e o
+> reroteamento por tamanho de texto (limiar de 150 chars) — hoje ambos quebram o dogfooding.
+> Reusa `entries`/`evidences` JSONB/bucket `evidence-files` (migration 007) sem migration nova.
+> Novo `kind: 'deposito'` em `/api/capture` salva texto+campos manuais direto (sem IA); anexos
+> vão pela rota já existente `/api/entries/[id]/evidence`, chamada após a entry já ter `id`.
+> Navegação em grupos ("Meu espelho"/"Usar") e dark mode via `next-themes` (nova dependência)
+> ficam dentro desta fatia — decidido no `/speckit-clarify`, não viram sub-feature. Fora de
+> escopo: botão Organizar/estruturação por IA, destaques, reestruturação de Registros, Importar
+> histórico (features `026-organizar-destaques` e `027-importar-historico`).
+Spec: [specs/025-registro-deposito/spec.md](specs/025-registro-deposito/spec.md) ·
+Plan: [specs/025-registro-deposito/plan.md](specs/025-registro-deposito/plan.md) ·
+Research: [specs/025-registro-deposito/research.md](specs/025-registro-deposito/research.md) ·
+Data-model: [specs/025-registro-deposito/data-model.md](specs/025-registro-deposito/data-model.md) ·
+Contracts: [specs/025-registro-deposito/contracts/capture.md](specs/025-registro-deposito/contracts/capture.md) ·
+Quickstart: [specs/025-registro-deposito/quickstart.md](specs/025-registro-deposito/quickstart.md) ·
 Tasks: (pendente — `/speckit-tasks`)
 <!-- SPECKIT END -->

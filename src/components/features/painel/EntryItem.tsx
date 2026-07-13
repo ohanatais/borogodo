@@ -32,6 +32,7 @@ export function EntryItem({ id, whatIDid, title, source, createdAt }: EntryItemP
     metric: null,
     tags: [],
     thumbnail: null,
+    evidences: [],
     impact: null,
     decision: null,
     learning: null,

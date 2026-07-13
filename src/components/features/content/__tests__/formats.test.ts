@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { ENTRY_FORMATS } from '../PresencaCreate'
-import { NUDGE_FORMATS } from '../../painel/ProactiveInsightCard'
-import type { DraftFormat } from '@/types/content'
+import { NUDGE_FORMATS, type DraftFormat } from '@/types/content'
 
 describe('formatos oferecidos — impact_summary fora das listas (US4)', () => {
   it('ENTRY_FORMATS não contém impact_summary', () => {

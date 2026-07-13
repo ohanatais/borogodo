@@ -1,4 +1,6 @@
-export type EntrySource = 'linkedin_pdf' | 'audio' | 'text' | 'chips' | 'image'
+// 'deposito' (025-registro-deposito): salvamento direto do drawer, sem chamada de IA no caminho
+// crítico — ver data-model.md da feature.
+export type EntrySource = 'linkedin_pdf' | 'audio' | 'text' | 'chips' | 'image' | 'deposito'
 
 export interface ExtractedEntry {
   what_i_did: string

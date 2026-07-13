@@ -7,6 +7,7 @@ import { Trash2, Pencil, Check, X, ChevronDown, ChevronUp, Paperclip } from 'luc
 import type { FeedItem } from '@/lib/feed/types'
 import type { EntrySource } from '@/types/entry'
 import { UsarButton } from '@/components/features/content/UsarButton'
+import { AttachTile } from '@/components/features/capture/AttachTile'
 
 interface EntryCardProps {
   item: FeedItem
@@ -21,6 +22,8 @@ const SOURCE_ICON: Record<EntrySource, string> = {
   audio: '🎙️',
   linkedin_pdf: '📄',
   image: '🖼️',
+  // 025-registro-deposito: mesmo texto cru do drawer, ícone igual ao das demais entradas de texto.
+  deposito: '📝',
 }
 
 function formatDate(dateStr: string): string {
@@ -134,6 +137,19 @@ export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
             <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
               {editValue}
             </p>
+          )}
+
+          {item.evidences.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {item.evidences.map((evidence, index) => (
+                <AttachTile
+                  key={`${evidence.type}-${evidence.value}-${index}`}
+                  kind={evidence.type === 'image' ? 'image' : 'link'}
+                  previewUrl={evidence.value}
+                  label={evidence.label}
+                />
+              ))}
+            </div>
           )}
 
           {item.source === 'linkedin_pdf' && item.file_name && (

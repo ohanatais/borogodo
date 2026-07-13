@@ -2,6 +2,11 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import type { PanelData } from '@/lib/panel/getPanelData'
 
+// 025-registro-deposito (US5): o Painel trocou o cartão pesado de Espelho (`BorogodoCard`) e o
+// empty state antigo (`PanelEmptyState`) pelo layout novo — saudação, gatilho único de Registro,
+// "Suas forças", "Registros recentes" (com dados) e `NewAccountPrompt` (modo "novo"). Este arquivo
+// substitui as asserções antigas de T022 pelas equivalentes do layout novo.
+
 vi.mock('next-intl/server', () => ({
   getTranslations: vi.fn(async () => (key: string, params?: Record<string, string>) => {
     if (params) return `${key}:${JSON.stringify(params)}`
@@ -41,7 +46,6 @@ const BASE_DATA: PanelData = {
   monthsSpan: 2,
   daysSince: 1,
   recentEntries: [],
-  highlights: [],
   mirror: { headline: 'Você media conflitos com leveza.', strengthThemes: ['mediação'], skillSummary: null },
   insight: null,
   composerPlaceholder: 'O que aconteceu no trabalho ontem?',
@@ -50,32 +54,31 @@ const BASE_DATA: PanelData = {
 }
 
 describe('PainelPage', () => {
-  it('T022: renders BorogodoCard with mirror headline', async () => {
+  it('025/US5: renderiza "Suas forças" a partir dos temas do mirror (substitui BorogodoCard)', async () => {
     mockGetPanelData.mockResolvedValueOnce(BASE_DATA)
 
     const { default: PainelPage } = await import('../page')
     const jsx = await PainelPage()
     render(jsx)
 
-    expect(screen.getByText('Você media conflitos com leveza.')).toBeInTheDocument()
+    expect(screen.getByText('mediação')).toBeInTheDocument()
     expect(screen.getByText('viewMirror')).toBeInTheDocument()
   })
 
-  it('T022: shows BorogodoCard empty state when mirror is null and fewer than 3 entries', async () => {
+  it('025/US5: mostra NewAccountPrompt (modo "novo") quando não há mirror nem registros', async () => {
     mockGetPanelData.mockResolvedValueOnce({
       ...BASE_DATA,
       mirror: null,
       status: 'building',
-      entryCount: 1,
+      entryCount: 0,
     })
 
     const { default: PainelPage } = await import('../page')
     const jsx = await PainelPage()
     render(jsx)
 
-    const heading = screen.getByRole('heading', { level: 2 })
-    expect(heading.textContent).toMatch(/formingOf/)
-    expect(screen.getByText('formingSubtitle')).toBeInTheDocument()
+    expect(screen.getByText('newAccount.importButton')).toBeInTheDocument()
+    expect(screen.getByText(/newAccount.progressLabel/)).toBeInTheDocument()
   })
 
   it('021: não duplica o convite "Usar" no painel (vive no destino de topo Usar)', async () => {

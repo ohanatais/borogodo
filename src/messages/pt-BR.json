@@ -123,6 +123,30 @@
     "chatDoor": {
       "placeholder": "Pergunte qualquer coisa sobre sua carreira — ex.: \"o que me destaca?\"",
       "ariaLabel": "Abrir conversa e perguntar sobre sua carreira"
+    },
+    "greetingByTime": {
+      "morning": "Bom dia, {name}.",
+      "afternoon": "Boa tarde, {name}.",
+      "evening": "Boa noite, {name}."
+    },
+    "greetingSubtitle": "Cada registro de hoje afina o seu Espelho.",
+    "registroTrigger": {
+      "label": "Registrar o que você fez",
+      "ariaLabel": "Registrar o que você fez"
+    },
+    "suasForcas": {
+      "title": "Suas forças",
+      "viewMirror": "Ver espelho"
+    },
+    "registrosRecentes": {
+      "title": "Registros recentes",
+      "viewAll": "Ver todos"
+    },
+    "newAccount": {
+      "heading": "Painel",
+      "importButton": "Importar currículo ou LinkedIn",
+      "progressCard": "Seu Espelho se forma conforme você registra",
+      "progressLabel": "{count} de {total} registros"
     }
   },
   "panel": {
@@ -289,7 +313,19 @@
     "askHint": "Pergunte algo sobre sua carreira...",
     "send": "Enviar",
     "registros": "Registros",
-    "usar": "Usar"
+    "usar": "Usar",
+    "perfil": "Perfil",
+    "trajetoria": "Trajetória",
+    "gerarConteudo": "Gerar conteúdo",
+    "mePreparar": "Me preparar",
+    "groups": {
+      "meuEspelho": "Meu espelho",
+      "usar": "Usar"
+    },
+    "theme": {
+      "toggleToDark": "Mudar para tema escuro",
+      "toggleToLight": "Mudar para tema claro"
+    }
   },
   "capture": {
     "composer": {
@@ -365,7 +401,8 @@
       "fileTooLarge": "Arquivo muito grande (máx 10 MB)",
       "missingFile": "Nenhum arquivo enviado",
       "generic": "Não consegui processar sua captura agora, tenta de novo?",
-      "noContent": "Não encontrei uma vitória clara aqui — quer contar com suas palavras?"
+      "noContent": "Não encontrei uma vitória clara aqui — quer contar com suas palavras?",
+      "emptyContent": "Escreva algo pra registrar."
     },
     "sheet": {
       "closeAriaLabel": "Fechar"
@@ -928,6 +965,52 @@
     "preparo": {
       "label": "Preparo",
       "when": "Chegar pronto num momento — entrevista, avaliação, aumento."
+    }
+  },
+  "registro": {
+    "drawer": {
+      "title": "Registrar",
+      "closeAriaLabel": "Fechar",
+      "textareaPlaceholder": "Cole uma transcrição, um e-mail ou um documento. Ou escreva — fica salvo do jeito que está.",
+      "textareaAriaLabel": "Texto do registro",
+      "sourcePreserved": "Fonte completa preservada. Guardo o texto inteiro.",
+      "imageButton": "Imagem",
+      "linkButton": "Link",
+      "submitButton": "Registrar",
+      "submitAriaLabel": "Registrar",
+      "shortcutHint": "Esc fecha · ⌘/Ctrl+Enter registra",
+      "emptyPromptFirst": "O que tomou mais do seu tempo esta semana?",
+      "emptyPromptSecond": "O que só você conseguiu resolver?"
+    },
+    "error": {
+      "saveFailed": "Não foi possível salvar agora. Seu texto está salvo aqui.",
+      "retry": "Tentar de novo"
+    },
+    "attach": {
+      "imageAriaLabel": "Anexar imagem",
+      "linkAriaLabel": "Anexar link",
+      "removeAriaLabel": "Remover anexo",
+      "linkInputPlaceholder": "Cole o link aqui",
+      "linkInputLabel": "Link",
+      "linkConfirm": "Adicionar",
+      "imageAlt": "Pré-visualização da imagem anexada",
+      "uploadError": "Não foi possível enviar",
+      "retryAriaLabel": "Tentar enviar de novo"
+    },
+    "savedPanel": {
+      "confirmation": "Registrado. Já está nos seus Registros.",
+      "titleLabel": "Título",
+      "titleHint": "O título é seu. Ajuste como quiser.",
+      "titleAriaLabel": "Título do registro",
+      "doneButton": "Concluir"
+    },
+    "detailsFields": {
+      "toggleLabel": "+ adicionar detalhes",
+      "metricLabel": "Métrica",
+      "impactLabel": "Impacto",
+      "tagsLabel": "Tags",
+      "companyLabel": "Empresa",
+      "dateLabel": "Data"
     }
   }
 }
