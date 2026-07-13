@@ -18,4 +18,10 @@ describe('Footer', () => {
     render(<Footer />)
     expect(screen.getByRole('contentinfo')).toBeInTheDocument()
   })
+
+  it('renders links to the terms of use and privacy policy pages', () => {
+    render(<Footer />)
+    expect(screen.getByRole('link', { name: 'termsLabel' })).toHaveAttribute('href', '/termos-de-uso')
+    expect(screen.getByRole('link', { name: 'privacyLabel' })).toHaveAttribute('href', '/politica-de-privacidade')
+  })
 })

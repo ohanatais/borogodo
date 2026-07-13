@@ -18,4 +18,7 @@ export type Profile = {
   area: ProfileArea | null
   onboarding_completed: boolean
   created_at: string
+  terms_accepted_at: string | null
+  terms_version: string | null
+  marketing_consent: boolean
 }

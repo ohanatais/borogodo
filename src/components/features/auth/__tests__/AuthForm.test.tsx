@@ -122,6 +122,71 @@ describe('AuthForm — signup mode', () => {
   })
 })
 
+describe('AuthForm — legal consent (024)', () => {
+  beforeEach(() => {
+    mockSignUp.mockReset()
+    mockSignInWithPassword.mockReset()
+    mockRouterPush.mockReset()
+    mockRouterReplace.mockReset()
+  })
+
+  it('T019: signup mode shows the sign-in-wrap notice with links to the legal pages', () => {
+    render(<AuthForm initialMode="signup" />)
+    const hrefs = screen.getAllByRole('link').map((link) => link.getAttribute('href'))
+    expect(hrefs).toContain('/termos-de-uso')
+    expect(hrefs).toContain('/politica-de-privacidade')
+  })
+
+  it('024: opens the sign-in-wrap legal links in a new tab (does not lose the signup form)', () => {
+    render(<AuthForm initialMode="signup" />)
+    for (const link of screen.getAllByRole('link')) {
+      expect(link).toHaveAttribute('target', '_blank')
+    }
+  })
+
+  it('T019: signup mode does not render a terms checkbox', () => {
+    render(<AuthForm initialMode="signup" />)
+    expect(screen.queryByRole('checkbox', { name: /termo/i })).not.toBeInTheDocument()
+  })
+
+  it('T019: login mode does not show the sign-in-wrap notice', () => {
+    render(<AuthForm initialMode="login" />)
+    expect(screen.queryAllByRole('link')).toHaveLength(0)
+  })
+
+  it('T031: signup mode shows an unchecked marketing opt-in checkbox', () => {
+    render(<AuthForm initialMode="signup" />)
+    const checkbox = screen.getByRole('checkbox', { name: 'marketingOptIn.label' })
+    expect(checkbox).not.toBeChecked()
+  })
+
+  it('T021/T032: sends the marketing checkbox value as signup metadata', async () => {
+    mockSignUp.mockResolvedValue({ data: { user: { id: '1' } }, error: null })
+    render(<AuthForm initialMode="signup" />)
+    fireEvent.change(screen.getByLabelText('field.name'), { target: { value: 'Ana' } })
+    fireEvent.change(screen.getByLabelText('field.email'), {
+      target: { value: 'ana@example.com' },
+    })
+    fireEvent.change(screen.getByLabelText('field.password'), {
+      target: { value: 'senha12345' },
+    })
+    fireEvent.change(screen.getByLabelText('field.confirmPassword'), {
+      target: { value: 'senha12345' },
+    })
+    fireEvent.click(screen.getByRole('checkbox', { name: 'marketingOptIn.label' }))
+    fireEvent.click(screen.getByRole('button', { name: 'submit.signup' }))
+    await waitFor(() => {
+      expect(mockSignUp).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: expect.objectContaining({
+            data: expect.objectContaining({ marketing_consent: true }),
+          }),
+        })
+      )
+    })
+  })
+})
+
 describe('AuthForm — login mode', () => {
   beforeEach(() => {
     mockSignUp.mockReset()
