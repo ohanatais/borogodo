@@ -266,6 +266,31 @@ describe('organizeEntry', () => {
     expect(mockComplete).toHaveBeenCalledTimes(1)
   })
 
+  it('T049 — injeta o vocabulário de tags da pessoa no prompt e reaproveita uma tag existente em vez de criar variação (Story 6, FR-022/FR-023)', async () => {
+    mockGetTagVocabulary.mockResolvedValue(['liderança', 'devops'])
+    mockComplete.mockResolvedValue(
+      jsonResponse({
+        highlights: [{ title: 'Liderou squad de plataforma', metric: null, impact: null, tags: ['liderança'] }],
+        company: null,
+        entry_date: null,
+      })
+    )
+    const { client } = makeClient({ entryRow: BASE_ENTRY, insertedHighlights: [{ id: 'h6', tags: ['liderança'] }] })
+
+    const result = await organizeEntry(client as never, 'user-1', 'entry-1')
+
+    expect(mockGetTagVocabulary).toHaveBeenCalledWith(client, 'user-1')
+    // O vocabulário existente precisa chegar ao prompt do usuário — é o que permite a IA
+    // reaproveitar 'liderança' em vez de gerar uma variação nova como 'Liderança de equipe'.
+    const userPrompt = mockComplete.mock.calls[0][0].user as string
+    expect(userPrompt).toContain('liderança')
+    expect(userPrompt).toContain('devops')
+    expect(result.status).toBe('organized')
+    if (result.status === 'organized') {
+      expect(result.highlights[0]).toMatchObject({ tags: ['liderança'] })
+    }
+  })
+
   it('T042 — texto sem métrica clara cria ao menos 1 destaque sem métrica, tratado como válido (FR-018)', async () => {
     mockComplete.mockResolvedValue(
       jsonResponse({

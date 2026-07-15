@@ -97,4 +97,52 @@ describe('organizeResultSchema — validação do resultado de "Organizar" (026)
   it('rejeita quando highlights está ausente', () => {
     expect(() => validateOrganizeResult({})).toThrow()
   })
+
+  it('FR-024 — remove tag que é um adjetivo genérico isolado, mantendo as demais tags do highlight', () => {
+    const result = validateOrganizeResult({
+      highlights: [{ title: 'Refatorou serviço de pagamentos', tags: ['importante', 'pagamentos', 'difícil'] }],
+    })
+
+    expect(result.highlights[0].tags).toEqual(['pagamentos'])
+  })
+
+  it('FR-024 — bloqueia adjetivo genérico mesmo com capitalização diferente (case-insensitive)', () => {
+    const result = validateOrganizeResult({
+      highlights: [{ title: 'Conduziu projeto', tags: ['Produtivo', 'PROATIVO', 'liderança'] }],
+    })
+
+    expect(result.highlights[0].tags).toEqual(['liderança'])
+  })
+
+  it('FR-024 — highlight cujas tags são só adjetivos genéricos fica com array de tags vazio (não lança)', () => {
+    const result = validateOrganizeResult({
+      highlights: [{ title: 'Fez algo', tags: ['eficiente', 'engajado'] }],
+    })
+
+    expect(result.highlights[0].tags).toEqual([])
+  })
+
+  it('FR-023 — normaliza capitalização de uma tag nova para minúsculas (formato consistente)', () => {
+    const result = validateOrganizeResult({
+      highlights: [{ title: 'Liderou squad', tags: ['Liderança de Equipe'] }],
+    })
+
+    expect(result.highlights[0].tags).toEqual(['liderança de equipe'])
+  })
+
+  it('FR-023 — normalizar capitalização não deve criar tag duplicada quando a IA devolve variações da mesma tag', () => {
+    const result = validateOrganizeResult({
+      highlights: [{ title: 'Fez migração', tags: ['DevOps', 'devops', ' DevOps '] }],
+    })
+
+    expect(result.highlights[0].tags).toEqual(['devops'])
+  })
+
+  it('FR-023 — remove espaços nas pontas de uma tag', () => {
+    const result = validateOrganizeResult({
+      highlights: [{ title: 'Fez migração', tags: ['  devops  '] }],
+    })
+
+    expect(result.highlights[0].tags).toEqual(['devops'])
+  })
 })

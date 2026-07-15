@@ -29,9 +29,12 @@ REGRAS GERAIS:
     otimizar, engajar, deliverar).
   - tags = skills/temas concretos. Reaproveite o VOCABULÁRIO DE TAGS já usado pela pessoa
     (ver contexto) sempre que o mesmo tema aparecer com palavras diferentes — nunca crie uma
-    variação nova de uma tag que já existe no vocabulário (FR-022/FR-023). NUNCA um adjetivo
-    genérico isolado como tag (ex. "proativo", "eficiente") — tag é sempre um tema/skill concreto
-    (FR-024).
+    variação nova de uma tag que já existe no vocabulário (FR-022). Quando precisar criar uma tag
+    nova (sem correspondência no vocabulário), use a MESMA capitalização e idioma das tags já
+    existentes da pessoa (ex.: se o vocabulário é todo em português e minúsculas, a tag nova
+    também é; nunca misture convenções dentro do vocabulário de uma mesma pessoa) (FR-023). NUNCA
+    um adjetivo genérico isolado como tag (ex. "proativo", "eficiente", "importante", "difícil") —
+    tag é sempre um tema/skill concreto (FR-024).
 - Nunca sobrescreva um destaque já existente listado em "Destaques já existentes" — eles são
   preenchidos manualmente pela pessoa; você só ADICIONA novos destaques ao texto cru.
 

@@ -113,6 +113,21 @@ describe('getFeedData — filtros (US4)', () => {
       await getFeedData(supabase as never, 'user-1', { axis: 'created_at', q: "'; DROP TABLE entries; --" })
     }).not.toThrow()
   })
+
+  it('T051 (Story 6) — filtro por tag repassa .contains e retorna juntas duas fontes organizadas em momentos diferentes com a mesma tag reaproveitada', async () => {
+    const entries = [
+      makeMockEntry({ id: 'e1', tags: ['liderança'], created_at: '2026-01-01T10:00:00Z' }),
+      makeMockEntry({ id: 'e2', tags: ['liderança'], created_at: '2026-06-01T10:00:00Z' }),
+    ]
+    const supabase = makeSupabase(entries)
+
+    const result = await getFeedData(supabase as never, 'user-1', { axis: 'created_at', tags: ['liderança'] })
+
+    const builder = supabase.from().select() as Record<string, ReturnType<typeof vi.fn>>
+    expect(builder.contains).toHaveBeenCalledWith('tags', ['liderança'])
+    expect(result.items.map((item) => item.id)).toEqual(['e1', 'e2'])
+    expect(result.items.every((item) => item.tags.includes('liderança'))).toBe(true)
+  })
 })
 
 describe('getFeedData — eixo entry_date (US2)', () => {

@@ -322,16 +322,16 @@ tag nos dois; filtro por tag em Registros retorna ambos
 
 ### Tests for User Story 6 ⚠️
 
-- [ ] T049 [P] [US6] Teste de integração: prompt de organização recebe o vocabulário de tags
+- [x] T049 [P] [US6] Teste de integração: prompt de organização recebe o vocabulário de tags
       (T013) e o resultado reaproveita uma tag existente em vez de criar variação, em
       `organizeEntry.test.ts` (mesmo arquivo de T018) — DEVE falhar antes de T050
-- [ ] T050 [US6] Ajustar `buildOrganizeUserPrompt` (T010) e `organizeEntry` (T022) para injetar
+- [x] T050 [US6] Ajustar `buildOrganizeUserPrompt` (T010) e `organizeEntry` (T022) para injetar
       `getTagVocabulary` no contexto de cada chamada
-- [ ] T051 [P] [US6] Teste de integração: `getFeedData` filtra por tag usando o rollup de
+- [x] T051 [P] [US6] Teste de integração: `getFeedData` filtra por tag usando o rollup de
       `entries.tags` e retorna as duas fontes organizadas com a tag reaproveitada, em
       `src/lib/feed/__tests__/getFeedData.test.ts` (estende suíte existente) — DEVE falhar antes
       de T052 (Phase 9)
-- [ ] T052 [US6] Confirmar (via revisão do prompt T008 + teste) que nenhuma tag gerada é um
+- [x] T052 [US6] Confirmar (via revisão do prompt T008 + teste) que nenhuma tag gerada é um
       adjetivo genérico isolado — lista de bloqueio reaproveitada da extração legada
       (`capture.ts`)
 

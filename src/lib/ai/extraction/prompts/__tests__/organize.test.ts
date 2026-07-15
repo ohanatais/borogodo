@@ -1,5 +1,23 @@
 import { describe, it, expect } from 'vitest'
-import { buildOrganizeUserPrompt } from '../organize'
+import { buildOrganizeUserPrompt, CAPTURE_ORGANIZE_SYSTEM_PROMPT } from '../organize'
+
+describe('CAPTURE_ORGANIZE_SYSTEM_PROMPT — instruções de tags consistentes (Story 6)', () => {
+  it('FR-022 — instrui a reaproveitar o vocabulário de tags já usado em vez de criar variação', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('FR-022')
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('vocabulário de tags')
+  })
+
+  it('FR-023 — instrui a seguir a mesma capitalização/idioma do vocabulário ao criar tag nova', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('FR-023')
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('capitalização')
+  })
+
+  it('FR-024 — proíbe explicitamente adjetivo genérico isolado como tag, com exemplos', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('FR-024')
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('adjetivo')
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('importante')
+  })
+})
 
 describe('buildOrganizeUserPrompt — prompt de "Organizar" (026)', () => {
   it('inclui pedido de inferência de empresa/período quando a fonte ainda não tem contexto resolvido', () => {
