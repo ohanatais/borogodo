@@ -415,20 +415,57 @@ segunda sem selo; expandir revela destaques + fonte completa
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-- [ ] T063 [P] Rodar `/impeccable shape` para a reestruturação de Registros e o `ContextPillPicker`
+- [x] T063 [P] Rodar `/impeccable shape` para a reestruturação de Registros e o `ContextPillPicker`
       antes de finalizar qualquer decisão visual pendente (constituição VII) — se ainda não feito
       antes da Phase 9
-- [ ] T064 [P] Rodar `/code-review medium` ao final de cada fase de user story (já indicado nos
+      — Já feito ANTES do `/speckit-implement` (ver `specs/026-organizar-destaques/ux-shape.md`,
+      commit `9f7fb6c`): dois níveis fonte→destaque, seletor de pílulas com busca acima de 8 itens,
+      sem Framer Motion no collapse. Revisado pela Ohana antes da implementação (nota em
+      `CLAUDE.md` da raiz). Nenhuma decisão visual ficou pendente durante US1-US7.
+- [x] T064 [P] Rodar `/code-review medium` ao final de cada fase de user story (já indicado nos
       checkpoints acima); consolidar achados críticos/altos antes do PR
-- [ ] T065 [P] Confirmar cobertura de teste ≥80% nas áreas novas (`src/lib/entries/`,
+      — Passes por fase já rodados durante US1-US7 (histórico de commits). Consolidação final
+      feita nesta sessão com `/code-review high` sobre o diff completo (`4787bf9...HEAD`, todas as
+      7 stories) — achado principal: corrida real entre o guard de `organizing_started_at` do
+      clique manual (US1, `POST /organize`) e o disparo assíncrono (US3, `triggerOrganizeEntry`),
+      os dois faziam "ler, depois escrever" em passos separados. Corrigido com
+      `tryAcquireOrganizingLock` (UPDATE condicional atômico), commit `044656d`. Ver relatório da
+      sessão para a lista completa de achados MEDIUM documentados sem correção.
+- [x] T065 [P] Confirmar cobertura de teste ≥80% nas áreas novas (`src/lib/entries/`,
       `src/lib/ai/extraction/prompts/organize.ts`, rotas novas) via `npm run test -- --coverage`
-- [ ] T066 Rodar `quickstart.md` (todos os roteiros US1-US7) manualmente antes do `/impeccable
+      — `src/lib/entries/` 94%, `extraction/prompts/organize.ts` 93%, `entries/organizeEntry.ts`
+      91%. `SourceCard.tsx` estava em 66% (fluxos de editar/excluir/adicionar destaque e variant
+      "panel" sem teste) — subiu para 88% com testes novos (commit `05170dc`), sem mudança de
+      comportamento.
+- [x] T066 Rodar `quickstart.md` (todos os roteiros US1-US7) manualmente antes do `/impeccable
       audit` e do PR
-- [ ] T067 [P] `/impeccable audit` + `web-design-guidelines` — acessibilidade e identidade visual
+      — **Parcial**: a migration `016_entry_highlights.sql` não está aplicada no ambiente de dev
+      (bloqueio de segurança do MCP Supabase, ver nota de T004) — não há como rodar os roteiros
+      fim a fim contra um servidor real neste ambiente (sandbox sem browser/servidor rodando
+      também). Validação de substituição feita por leitura de código + suíte de testes de
+      integração (1128 testes, cobrindo os mesmos cenários descritos no quickstart: "só preenche
+      vazios", múltiplos destaques, precedência de pílula sobre IA, organização silenciosa,
+      título protegido de sobrescrita, tags reaproveitadas, feed com selo/miniatura/timeline).
+      **Pendência real para a Ohana**: rodar os roteiros manuais do `quickstart.md` contra o app
+      rodando de verdade, depois que a migration `016` for aplicada em dev.
+- [x] T067 [P] `/impeccable audit` + `web-design-guidelines` — acessibilidade e identidade visual
       do feed reestruturado e das pílulas (Princípios V/VII/VIII)
-- [ ] T068 Atualizar `CLAUDE.md` (marcador `<!-- SPECKIT START -->`/`<!-- SPECKIT END -->`) para
+      — Auditoria manual (sem tooling de browser ao vivo disponível neste ambiente) seguindo os
+      critérios de `.claude/skills/impeccable/reference/audit.md` sobre `SourceCard.tsx`,
+      `HighlightCard.tsx`, `ContextPillPicker.tsx`, `FeedPage.tsx`, `SavedPanel.tsx`. Achados
+      corrigidos (commit `0ecff2c`): 3 alvos de toque abaixo de 48px (Princípio VIII,
+      não-negociável) — botão "Concluir" do `SavedPanel`, input de busca do
+      `ContextPillPicker`, 3 inputs de edição inline do `HighlightCard`. Theming limpo (zero cor
+      hardcoded nos 5 arquivos, só tokens). i18n completo (aria-labels, `aria-expanded`,
+      `aria-pressed` nas pílulas). Achado sistêmico não corrigido: `outline-none` sem
+      `focus-visible` em vários inputs do app, herdado da 025 (`DrawerTextarea`,
+      `DetailsFields`) — mudar só nesta feature criaria inconsistência; fica para um
+      `/impeccable polish` futuro, decisão de design mais ampla da Ohana.
+- [x] T068 Atualizar `CLAUDE.md` (marcador `<!-- SPECKIT START -->`/`<!-- SPECKIT END -->`) para
       status "implementada" e mover a entrada para a lista de features mergeadas, quando o PR for
       aberto/mergeado (fora do escopo deste plano — nota para a etapa `/speckit-implement`)
+      — `CLAUDE.md` atualizado para "implementação completa, pronta para PR" (não movida para
+      "mergeadas" ainda — aguarda o PR/merge de verdade, feito pela Ohana).
 
 ---
 

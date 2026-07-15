@@ -36,41 +36,38 @@ Features mergeadas em `main` (até PR #40):
 Feature A (`025-registro-deposito`) mergeada (PR #59). Feature B é esta (`026`); Feature C
 (`027-importar-historico`) depende de B.
 
-<!-- SPECKIT START -->
-Current feature: **026-organizar-destaques** (branch: `026-organizar-destaques`) — **Organizar +
-destaques: botão opcional 'Organizar' (Haiku, só preenche campos vazios) infere métrica, impacto,
-tags e período; empresa/contexto via seletor de pílulas determinístico (empresas já usadas +
-'Projeto pessoal' + 'Outro', sem IA); organização assíncrona disparada pelo salvar; registro =
-FONTE com destaques dentro (contexto/período no nível da fonte, layout dois níveis, não splitar
-fonte de um evento); tags consistentes (reaproveitam o vocabulário já usado pela pessoa);
-Registros reestruturado (miniatura real, feed 1 card/fonte, timeline por mês, grade-faísca sem
-streak). Spec ✅**
+## Pronta para PR (implementação completa, aguardando merge)
 
-> Depende da Feature A (`025-registro-deposito`, PR #59, mergeada) já implementada: reusa o
-> drawer sempre-salva, `Entry.raw_content` (cru verbatim), `EntrySource: 'deposito'` e
-> `evidences`/bucket `evidence-files`. Escopo desta feature começa depois do salvar: estruturação
-> por IA opcional, destaques dentro da fonte, e a reestruturação de Registros. Cru preservado
-> sempre; geração/RAG leem a fonte, não o resumo. Provavelmente sem migration nova (a decidir no
-> `/speckit-plan`). **Empresa/período e consistência de tags** foram gaps do decision record
-> original (a extração legada nunca populava `company` de fato, e tag só tinha a regra "concreta,
-> não genérica" — sem vocabulário). Revisão de 2026-07-15: empresa/contexto viraram seleção
-> determinística por pílula (não só inferência de IA) — risco levantado pela Ohana de misturar
-> contexto/inventar correlação empresa-evento em usos futuros de alto risco (currículo, prep de
-> entrevista). Esta feature entrega o **sinal** ("contexto não identificado") e o mecanismo de
-> resolver rápido; o **gate de uso** em geração de alto risco é trabalho futuro, fora daqui (ver
-> Assumptions do spec). Tags seguem sem mecanismo de pílula — Ohana decidiu avaliar em uso real
-> antes de investir mais ali. Ver checklist para o histórico completo da revisão.
-> Contexto: `docs/decisions/003-registro-deposito-e-captura.md`.
-Spec: [specs/026-organizar-destaques/spec.md](specs/026-organizar-destaques/spec.md) ·
-Plan: [specs/026-organizar-destaques/plan.md](specs/026-organizar-destaques/plan.md) — confirma
-migration nova (`016_entry_highlights.sql`, tabela de destaques + 3 colunas aditivas em
-`entries`), reusa `fireAndForget`/`dispatchAsyncJobs` já existente para o disparo assíncrono ·
-Tasks: [specs/026-organizar-destaques/tasks.md](specs/026-organizar-destaques/tasks.md) — 68
-tasks em 10 fases (Setup, Foundational, US1→US2→US3→US4→US6 P1, US5→US7 P2, Polish).
-Shape de UX: [specs/026-organizar-destaques/ux-shape.md](specs/026-organizar-destaques/ux-shape.md)
-— produzido pelo `/impeccable shape` sem rodada interativa (sessão delegada sem canal de pergunta
-em tempo real); decisões (dois níveis fonte→destaque, seletor de pílulas com busca acima de 8
-itens, sem Framer Motion no collapse) reusam a gramática visual já existente
-(`EntryCard`/`DetailsFields`) — **pendente revisão da Ohana** antes do `/speckit-implement`,
-especialmente a copy do indicador "contexto não identificado". Falta `/speckit-implement`.
+- **026-organizar-destaques** (branch: `026-organizar-destaques`) — implementação completa das 7
+  user stories (US1-US7, T001-T062) + Polish (T063-T068): botão opcional "Organizar" (Haiku, só
+  preenche campos vazios) infere métrica/impacto/tags/período; contexto por seletor de pílulas
+  determinístico (empresas já usadas + "Projeto pessoal" + "Outro", sem IA, precedência sobre
+  inferência); organização assíncrona disparada pelo salvar (fire-and-forget); registro = FONTE
+  com múltiplos destaques dentro (`entry_highlights`); tags reaproveitam o vocabulário já usado
+  pela pessoa; título outcome-first protegido de sobrescrita; Registros reestruturado
+  (`SourceCard`, miniatura real, selo "+N destaques", timeline por mês, grade-faísca sem streak).
+  Code-review high pós-implementação encontrou e corrigiu uma corrida real entre o guard de
+  `organizing_started_at` do clique manual e o disparo assíncrono (US1 × US3) — ver
+  `src/lib/entries/organizingLock.ts`. Impeccable audit corrigiu 3 alvos de toque abaixo de 48px.
+  1128 testes passando, `tsc --noEmit` limpo.
+  **Pendências antes do merge:**
+  - Migration `016_entry_highlights.sql` ainda **não aplicada** em dev nem prod — bloqueio de
+    segurança do MCP Supabase (não confirma automaticamente que é o projeto de dev autorizado);
+    requer a Ohana rodar manualmente ou conceder a permissão.
+  - Roteiros manuais de `specs/026-organizar-destaques/quickstart.md` (US1-US7) não rodados fim a
+    fim contra o app de verdade — depende da migration acima estar aplicada.
+  - Abrir o PR (branch pronta, não commitada nenhuma alteração além do que está aqui).
+  Ver `specs/026-organizar-destaques/tasks.md` (Phase 10) para o detalhe completo do que foi
+  verificado em cada item de polish.
+
+<!-- SPECKIT START -->
+Sem feature em especificação ativa no momento — a `026-organizar-destaques` está com
+implementação completa (ver "Pronta para PR" acima), só falta migration/validação manual e o
+merge. A próxima é `027-importar-historico`, que depende de `026` estar mergeada (ver
+fatiamento acima). Referências da 026: Spec
+[specs/026-organizar-destaques/spec.md](specs/026-organizar-destaques/spec.md) · Plan
+[specs/026-organizar-destaques/plan.md](specs/026-organizar-destaques/plan.md) · Tasks
+[specs/026-organizar-destaques/tasks.md](specs/026-organizar-destaques/tasks.md) (68 tasks, 10
+fases, todas concluídas) · Shape de UX
+[specs/026-organizar-destaques/ux-shape.md](specs/026-organizar-destaques/ux-shape.md).
 <!-- SPECKIT END -->
