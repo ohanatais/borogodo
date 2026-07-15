@@ -25,28 +25,30 @@ Features mergeadas em `main` (até PR #40):
 - **017-feed-registros** — feed cru de registros (`/registros`), cards colapsáveis, busca/filtros, grade-faísca (PR #51)
 - **020-canal-suporte** — canal de contato/suporte pré-launch: `ContactCard` reutilizável (e-mail copiável via `lib/clipboard.ts`, LinkedIn secundário, SLA) no rodapé da LP (`Footer`) e em `/configuracoes`; i18n namespace `support` (PR #54)
 - **021-navegacao-espinha** — reforma de IA: menu de 6 → 4 destinos (Painel, Espelho c/ Forças+Trajetória, Registros, Usar), `Segmented` único, chat como porta no Painel (PR #55)
+- **023-freio-de-custo** — limite/hora + trava diária US$10 + alertas operacionais de IA (PR #57)
+- **024-termos-privacidade** — Termos de Uso + Política de Privacidade + consentimento auditável (LGPD), migration `015` (PR #58)
+- **025-registro-deposito** — drawer bloco-de-notas que sempre salva (sem IA no caminho crítico), anexo de imagem/link de primeira classe (clique/colar/arrastar), confirmação editável, campos manuais opcionais; Painel novo (saudação + gatilho único + Suas forças + Registros recentes) e navegação em grupos + dark mode (PR #59)
 
 **Bloco da Presença (fechado):** 013 → 014 → 015 mergeadas. Migrations `009` e `010` aplicadas em
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
-<!-- SPECKIT START -->
-Current feature: **025-registro-deposito** (branch: `025-registro-deposito`) — **Registro como Depósito (fundação): drawer bloco-de-notas que sempre salva (sem IA no caminho crítico), anexo de imagem/link de primeira classe, confirmação editável, campos manuais opcionais; Painel novo (saudação + gatilho único + Suas forças + Registros recentes) e navegação em grupos + dark mode. Spec ✅ clarify ✅ plan ✅**
+**Fatiamento Registro-como-depósito (A → B → C, `docs/decisions/003-registro-deposito-e-captura.md`):**
+Feature A (`025-registro-deposito`) mergeada (PR #59). Feature B é esta (`026`); Feature C
+(`027-importar-historico`) depende de B.
 
-> Feature A do fatiamento A→B→C descrito em `docs/decisions/003-registro-deposito-e-captura.md`.
-> Remove a dependência de IA síncrona (Haiku) do caminho de salvar (`captureAndReflect`) e o
-> reroteamento por tamanho de texto (limiar de 150 chars) — hoje ambos quebram o dogfooding.
-> Reusa `entries`/`evidences` JSONB/bucket `evidence-files` (migration 007) sem migration nova.
-> Novo `kind: 'deposito'` em `/api/capture` salva texto+campos manuais direto (sem IA); anexos
-> vão pela rota já existente `/api/entries/[id]/evidence`, chamada após a entry já ter `id`.
-> Navegação em grupos ("Meu espelho"/"Usar") e dark mode via `next-themes` (nova dependência)
-> ficam dentro desta fatia — decidido no `/speckit-clarify`, não viram sub-feature. Fora de
-> escopo: botão Organizar/estruturação por IA, destaques, reestruturação de Registros, Importar
-> histórico (features `026-organizar-destaques` e `027-importar-historico`).
-Spec: [specs/025-registro-deposito/spec.md](specs/025-registro-deposito/spec.md) ·
-Plan: [specs/025-registro-deposito/plan.md](specs/025-registro-deposito/plan.md) ·
-Research: [specs/025-registro-deposito/research.md](specs/025-registro-deposito/research.md) ·
-Data-model: [specs/025-registro-deposito/data-model.md](specs/025-registro-deposito/data-model.md) ·
-Contracts: [specs/025-registro-deposito/contracts/capture.md](specs/025-registro-deposito/contracts/capture.md) ·
-Quickstart: [specs/025-registro-deposito/quickstart.md](specs/025-registro-deposito/quickstart.md) ·
-Tasks: (pendente — `/speckit-tasks`)
+<!-- SPECKIT START -->
+Current feature: **026-organizar-destaques** (branch: `026-organizar-destaques`) — **Organizar +
+destaques: botão opcional 'Organizar' (Haiku, só preenche campos vazios) + organização
+assíncrona disparada pelo salvar; registro = FONTE com destaques dentro (layout dois níveis, não
+splitar fonte de um evento); Registros reestruturado (miniatura real, feed 1 card/fonte,
+timeline por mês, grade-faísca sem streak). Spec ✅**
+
+> Depende da Feature A (`025-registro-deposito`, PR #59, mergeada) já implementada: reusa o
+> drawer sempre-salva, `Entry.raw_content` (cru verbatim), `EntrySource: 'deposito'` e
+> `evidences`/bucket `evidence-files`. Escopo desta feature começa depois do salvar: estruturação
+> por IA opcional, destaques dentro da fonte, e a reestruturação de Registros. Cru preservado
+> sempre; geração/RAG leem a fonte, não o resumo. Provavelmente sem migration nova (a decidir no
+> `/speckit-plan`). Contexto: `docs/decisions/003-registro-deposito-e-captura.md`.
+Spec: [specs/026-organizar-destaques/spec.md](specs/026-organizar-destaques/spec.md) ·
+Plan: (pendente — `/speckit-clarify` → `/speckit-plan`)
 <!-- SPECKIT END -->
