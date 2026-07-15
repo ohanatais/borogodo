@@ -65,5 +65,7 @@ Spec: [specs/026-organizar-destaques/spec.md](specs/026-organizar-destaques/spec
 Plan: [specs/026-organizar-destaques/plan.md](specs/026-organizar-destaques/plan.md) — confirma
 migration nova (`016_entry_highlights.sql`, tabela de destaques + 3 colunas aditivas em
 `entries`), reusa `fireAndForget`/`dispatchAsyncJobs` já existente para o disparo assíncrono ·
-Tasks: (pendente — `/speckit-tasks`)
+Tasks: [specs/026-organizar-destaques/tasks.md](specs/026-organizar-destaques/tasks.md) — 68
+tasks em 10 fases (Setup, Foundational, US1→US2→US3→US4→US6 P1, US5→US7 P2, Polish); falta
+`/impeccable shape` e `/speckit-implement`
 <!-- SPECKIT END -->
