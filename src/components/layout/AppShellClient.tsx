@@ -106,7 +106,7 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
                       <button
                         type="button"
                         onClick={() => handleGroupItemAction(item)}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 min-h-12 rounded-lg text-sm transition-colors"
                         style={{ background: 'transparent', color: 'var(--muted-foreground)', fontWeight: 400 }}
                       >
                         <Icon size={20} />
@@ -129,7 +129,7 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
                     <Link
                       href={item.path}
                       aria-current={active ? 'page' : undefined}
-                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 min-h-12 rounded-lg text-sm transition-colors"
                       style={{
                         background: active ? 'var(--color-lilas-nevoa)' : 'transparent',
                         color: active ? 'var(--color-primary)' : 'var(--muted-foreground)',

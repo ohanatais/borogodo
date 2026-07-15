@@ -110,6 +110,22 @@ describe('POST /api/capture — kind: deposito', () => {
     )
   })
 
+  it('trunca silenciosamente um rawText acima de 20.000 caracteres (piso técnico, não gate de produto)', async () => {
+    const oversizedText = 'a'.repeat(20_500)
+    mockSingle.mockResolvedValue({ data: { id: 'entry-3', title: 'aaaa' }, error: null })
+
+    const { POST } = await import('@/app/api/capture/route')
+    const response = await POST(buildJsonRequest({ kind: 'deposito', rawText: oversizedText }))
+
+    expect(response.status).toBe(201)
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        what_i_did: 'a'.repeat(20_000),
+        raw_content: 'a'.repeat(20_000),
+      })
+    )
+  })
+
   it('retorna 401 sem sessão válida e não insere nada', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null })
 

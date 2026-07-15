@@ -102,6 +102,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved }: Drawer
   const [dragActive, setDragActive] = useState(false)
   const [linkInputOpen, setLinkInputOpen] = useState(false)
   const [linkInputValue, setLinkInputValue] = useState('')
+  const [linkInputError, setLinkInputError] = useState(false)
   const dialogRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const touchStartYRef = useRef<number | null>(null)
@@ -176,9 +177,16 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved }: Drawer
   }
 
   async function uploadPendingAttachments(entryId: string, attachmentIds: string[]) {
+    if (attachmentIds.length === 0) return
+
     for (const id of attachmentIds) {
       await uploadAttachment(entryId, id)
     }
+
+    // Registro já apareceu na lista (refresh logo após o insert); os anexos sobem em
+    // background, então a lista pode ter mostrado o registro sem evidências por um instante.
+    // Refresh de novo aqui garante que a lista reflita os anexos assim que terminarem.
+    router.refresh()
   }
 
   async function handleSubmit() {
@@ -257,15 +265,17 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved }: Drawer
     const url = linkInputValue.trim()
     if (!url) return
 
-    let label: string | undefined
+    let hostname: string
     try {
-      label = new URL(url).hostname.replace(/^www\./, '')
+      hostname = new URL(url).hostname.replace(/^www\./, '')
     } catch {
-      label = undefined
+      setLinkInputError(true)
+      return
     }
 
-    draft.addLinkAttachment(url, label)
+    draft.addLinkAttachment(url, hostname)
     setLinkInputValue('')
+    setLinkInputError(false)
     setLinkInputOpen(false)
   }
 
@@ -409,7 +419,10 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved }: Drawer
                 </button>
                 <button
                   type="button"
-                  onClick={() => setLinkInputOpen((v) => !v)}
+                  onClick={() => {
+                    setLinkInputError(false)
+                    setLinkInputOpen((v) => !v)
+                  }}
                   aria-label={t('attach.linkAriaLabel')}
                   className="inline-flex items-center gap-1.5 px-3 min-h-12 rounded-full text-xs font-medium"
                   style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
@@ -423,25 +436,36 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved }: Drawer
               <DetailsFields values={draft.manualFields} onChange={draft.setManualField} />
 
               {linkInputOpen && (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="url"
-                    value={linkInputValue}
-                    onChange={(e) => setLinkInputValue(e.target.value)}
-                    placeholder={t('attach.linkInputPlaceholder')}
-                    aria-label={t('attach.linkInputLabel')}
-                    autoFocus
-                    className="flex-1 rounded-xl px-3 py-2 text-sm outline-none"
-                    style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleLinkConfirm}
-                    className="px-3 py-2 rounded-xl text-xs font-semibold"
-                    style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-                  >
-                    {t('attach.linkConfirm')}
-                  </button>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="url"
+                      value={linkInputValue}
+                      onChange={(e) => {
+                        setLinkInputValue(e.target.value)
+                        setLinkInputError(false)
+                      }}
+                      placeholder={t('attach.linkInputPlaceholder')}
+                      aria-label={t('attach.linkInputLabel')}
+                      aria-invalid={linkInputError}
+                      autoFocus
+                      className="flex-1 rounded-xl px-3 py-2 text-sm outline-none"
+                      style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleLinkConfirm}
+                      className="px-3 py-2 rounded-xl text-xs font-semibold"
+                      style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+                    >
+                      {t('attach.linkConfirm')}
+                    </button>
+                  </div>
+                  {linkInputError && (
+                    <span role="alert" className="text-xs px-3" style={{ color: 'var(--color-accent)' }}>
+                      {t('attach.linkInputError')}
+                    </span>
+                  )}
                 </div>
               )}
 

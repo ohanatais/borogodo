@@ -993,6 +993,7 @@
       "linkInputPlaceholder": "Cole o link aqui",
       "linkInputLabel": "Link",
       "linkConfirm": "Adicionar",
+      "linkInputError": "Esse link não parece válido. Confira e tente de novo.",
       "imageAlt": "Pré-visualização da imagem anexada",
       "uploadError": "Não foi possível enviar",
       "retryAriaLabel": "Tentar enviar de novo"
