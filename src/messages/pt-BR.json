@@ -825,7 +825,8 @@
         "description": "Esta ação é definitiva. Rascunhos gerados a partir dele não são apagados.",
         "cancel": "Cancelar",
         "confirm": "Excluir"
-      }
+      },
+      "highlightsBadge": ""
     },
     "pagination": {
       "loadMore": "Carregar mais",
@@ -1052,6 +1053,27 @@
       "tagsLabel": "Tags",
       "companyLabel": "Empresa",
       "dateLabel": "Data"
+    },
+    "organize": {
+      "cta": "",
+      "ctaAgain": "",
+      "organizing": ""
+    },
+    "context": {
+      "unresolvedLabel": "",
+      "personalProjectLabel": "",
+      "otherLabel": "",
+      "otherPlaceholder": "",
+      "searchPlaceholder": ""
+    },
+    "highlight": {
+      "addNew": "",
+      "deleteConfirm": {
+        "title": "",
+        "description": "",
+        "cancel": "",
+        "confirm": ""
+      }
     }
   }
 }

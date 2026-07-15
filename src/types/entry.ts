@@ -27,3 +27,32 @@ export interface Entry extends ExtractedEntry {
   created_at: string
   updated_at: string
 }
+
+// Feature 026-organizar-destaques: um registro (fonte) passa a agrupar um ou mais destaques.
+// Ver specs/026-organizar-destaques/data-model.md para o raciocínio completo do schema.
+
+/** Um destaque dentro de uma fonte (`entries`) — métrica/impacto/tags/título são por destaque. */
+export interface EntryHighlight {
+  id: string
+  entry_id: string
+  user_id: string
+  title: string | null
+  metric: string | null
+  impact: string | null
+  tags: string[]
+  position: number
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Estado de organização de uma fonte, derivado de `organized_at`/`organizing_started_at`
+ * (não é uma coluna de enum — ver data-model.md).
+ */
+export type SourceOrganizationStatus = 'not_organized' | 'organizing' | 'organized'
+
+/**
+ * Estado de contexto de uma fonte, derivado de `company`/`is_personal_project`
+ * (não é uma coluna de enum — ver data-model.md).
+ */
+export type ContextStatus = 'unresolved' | 'company' | 'personal_project'

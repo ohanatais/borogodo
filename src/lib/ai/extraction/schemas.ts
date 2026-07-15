@@ -104,3 +104,51 @@ export function validateEntries(
 
   return limited.map((entry) => toExtractedEntry(entry, rawContent, source))
 }
+
+// Feature 026-organizar-destaques: resultado da chamada de "Organizar" (Haiku). Ausência de
+// métrica é válida (FR-018) — nenhum campo de highlight é obrigatório além de `tags`.
+const organizeHighlightSchema = z.object({
+  title: textField,
+  metric: textField,
+  impact: textField,
+  tags: z.array(z.string()).default([]),
+})
+
+const organizeResultSchema = z.object({
+  highlights: z.array(organizeHighlightSchema),
+  company: z.string().nullish(),
+  entry_date: dateField,
+})
+
+export interface OrganizeHighlight {
+  title: string | null
+  metric: string | null
+  impact: string | null
+  tags: string[]
+}
+
+export interface OrganizeResult {
+  highlights: OrganizeHighlight[]
+  company: string | null
+  entry_date: string | null
+}
+
+/**
+ * Valida o JSON bruto retornado pela chamada de "Organizar" (`organizeEntry`, feature 026).
+ * Lança se o shape não bate — quem chama não persiste nada parcial (mesmo padrão de
+ * `validateCaptureResult`/`validateEntries`).
+ */
+export function validateOrganizeResult(raw: unknown): OrganizeResult {
+  const parsed = organizeResultSchema.parse(raw)
+
+  return {
+    highlights: parsed.highlights.map((h) => ({
+      title: h.title ?? null,
+      metric: h.metric ?? null,
+      impact: h.impact ?? null,
+      tags: h.tags,
+    })),
+    company: parsed.company ?? null,
+    entry_date: parsed.entry_date,
+  }
+}

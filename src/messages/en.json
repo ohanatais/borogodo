@@ -825,7 +825,8 @@
         "description": "This action is permanent. Drafts generated from it are not deleted.",
         "cancel": "Cancel",
         "confirm": "Delete"
-      }
+      },
+      "highlightsBadge": ""
     },
     "pagination": {
       "loadMore": "Load more",
@@ -1052,6 +1053,27 @@
       "tagsLabel": "Tags",
       "companyLabel": "Empresa",
       "dateLabel": "Data"
+    },
+    "organize": {
+      "cta": "",
+      "ctaAgain": "",
+      "organizing": ""
+    },
+    "context": {
+      "unresolvedLabel": "",
+      "personalProjectLabel": "",
+      "otherLabel": "",
+      "otherPlaceholder": "",
+      "searchPlaceholder": ""
+    },
+    "highlight": {
+      "addNew": "",
+      "deleteConfirm": {
+        "title": "",
+        "description": "",
+        "cancel": "",
+        "confirm": ""
+      }
     }
   }
 }

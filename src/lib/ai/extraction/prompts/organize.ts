@@ -1,0 +1,116 @@
+import type { OrganizeHighlight } from '@/lib/ai/extraction/schemas'
+
+const RAW_TEXT_LIMIT = 8000
+
+/**
+ * Constante e estável — nunca recebe dado de usuário diretamente (mesmo padrão de
+ * `CAPTURE_SYSTEM_PROMPT`). O contexto variável entra só no prompt do usuário.
+ *
+ * Escopo desta chamada (feature 026): infere métrica/impacto/tags/título POR DESTAQUE
+ * (FR-014), e empresa/período no nível da FONTE apenas quando ainda não resolvidos
+ * (FR-004/FR-006) — nunca por associação estatística entre registros, só sinal textual
+ * explícito no próprio texto cru.
+ */
+export const CAPTURE_ORGANIZE_SYSTEM_PROMPT = `Você é a inteligência de organização do Borogodó. A pessoa já salvou um registro cru de um
+momento de trabalho. Sua tarefa agora é ORGANIZAR esse texto em um ou mais DESTAQUES — não
+reescrever, não resumir, não inventar.
+
+REGRAS GERAIS:
+- Um mesmo texto pode conter MAIS DE UM destaque (FR-014) — ex. uma reunião com dois resultados
+  distintos vira 2 destaques, não 1 misturado. A maioria dos textos tem só 1.
+- Cada destaque tem: title, metric, impact, tags.
+  - title: substantivo-primeiro/outcome-first, com o número quando presente (FR-019). Ex:
+    "Redução de 50% no tempo de investigação de bug crítico", não "Trabalhei para reduzir o tempo".
+    NUNCA nominalização vaga ("Melhoria de processo", "Otimização de fluxo").
+  - metric: só quando o texto TEM um número claro. Ausência de métrica é válida (FR-018) —
+    nunca invente um número que não está no texto.
+  - impact: consequência concreta do que foi feito, na mesma regra anti-padrão da extração
+    (sem travessão/seta/barra, sem jargão corporativo: alavancar, potencializar, maximizar,
+    otimizar, engajar, deliverar).
+  - tags = skills/temas concretos. Reaproveite o VOCABULÁRIO DE TAGS já usado pela pessoa
+    (ver contexto) sempre que o mesmo tema aparecer com palavras diferentes — nunca crie uma
+    variação nova de uma tag que já existe no vocabulário (FR-022/FR-023). NUNCA um adjetivo
+    genérico isolado como tag (ex. "proativo", "eficiente") — tag é sempre um tema/skill concreto
+    (FR-024).
+- Nunca sobrescreva um destaque já existente listado em "Destaques já existentes" — eles são
+  preenchidos manualmente pela pessoa; você só ADICIONA novos destaques ao texto cru.
+
+EMPRESA E PERÍODO (nível da fonte, não do destaque):
+- Só infira "company" ou "entry_date" quando o pedido explicitamente pedir (isto é, quando o
+  contexto abaixo disser que ainda estão vazios) — nunca por associação com outros registros.
+- Baseie-se SÓ em sinal textual explícito no próprio texto (nome de empresa citado, data/período
+  mencionado). Nunca invente uma correlação estatística entre este registro e outros.
+- Se o texto mencionar mais de uma empresa, escolha a empresa CENTRAL ao evento descrito
+  (FR-007) — a pessoa pode corrigir depois, a pílula de contexto continua editável.
+
+SAÍDA — apenas JSON dentro de bloco de código:
+\`\`\`json
+{
+  "highlights": [
+    { "title": "...", "metric": null, "impact": "...", "tags": ["...", "..."] }
+  ],
+  "company": "... ou null",
+  "entry_date": "YYYY-MM-DD ou null"
+}
+\`\`\``
+
+interface ExistingHighlightLike {
+  title: string | null
+  metric: string | null
+  impact: string | null
+  tags: string[]
+}
+
+export interface BuildOrganizeUserPromptOptions {
+  /** `company` já resolvido da fonte — omitido do pedido de inferência quando presente (FR-004/FR-006). */
+  company: string | null
+  /** `entry_date` já resolvido da fonte — mesma regra de omissão. */
+  entryDate: string | null
+  /** Vocabulário de tags já usado pela pessoa (Story 6) — reaproveitado em vez de criar variação. */
+  tagVocabulary: string[]
+  /** Destaques já existentes na fonte — a IA não deve tentar repeti-los. */
+  existingHighlights: (OrganizeHighlight | ExistingHighlightLike)[]
+}
+
+function formatContextSection(company: string | null, entryDate: string | null): string {
+  const needsCompany = company === null
+  const needsEntryDate = entryDate === null
+
+  if (!needsCompany && !needsEntryDate) {
+    return 'Contexto da fonte: empresa e período já resolvidos manualmente — NÃO infira nenhum dos dois, devolva "company": null e "entry_date": null.'
+  }
+
+  const asks: string[] = []
+  if (needsCompany) asks.push('infira a empresa (se houver sinal textual explícito, senão null)')
+  if (needsEntryDate) asks.push('infira o período (se houver sinal textual explícito, senão null)')
+
+  const resolved: string[] = []
+  if (!needsCompany) resolved.push(`empresa já resolvida ("${company}") — NÃO infira, devolva "company": null`)
+  if (!needsEntryDate) resolved.push(`período já resolvido ("${entryDate}") — NÃO infira, devolva "entry_date": null`)
+
+  return [`Contexto da fonte: ${asks.join(' e ')}.`, ...resolved].join(' ')
+}
+
+function formatTagVocabulary(tagVocabulary: string[]): string {
+  if (tagVocabulary.length === 0) return 'Vocabulário de tags da pessoa: nenhuma ainda (primeiro registro organizado).'
+  return `Vocabulário de tags da pessoa (reaproveite antes de criar uma tag nova): ${tagVocabulary.join(', ')}`
+}
+
+function formatExistingHighlights(existingHighlights: BuildOrganizeUserPromptOptions['existingHighlights']): string {
+  if (existingHighlights.length === 0) return 'Destaques já existentes: nenhum ainda.'
+
+  const list = existingHighlights
+    .map((h) => `- ${h.title ?? '(sem título)'}${h.metric ? ` (${h.metric})` : ''}`)
+    .join('\n')
+
+  return `Destaques já existentes (NÃO repita, apenas adicione destaques novos se o texto trouxer algo além disso):\n${list}`
+}
+
+/** Prompt do usuário — único lugar onde dados específicos da pessoa entram na chamada. */
+export function buildOrganizeUserPrompt(rawContent: string, options: BuildOrganizeUserPromptOptions): string {
+  const contextSection = formatContextSection(options.company, options.entryDate)
+  const tagSection = formatTagVocabulary(options.tagVocabulary)
+  const highlightsSection = formatExistingHighlights(options.existingHighlights)
+
+  return `Texto cru da fonte:\n---\n${rawContent.slice(0, RAW_TEXT_LIMIT)}\n---\n\n${contextSection}\n\n${tagSection}\n\n${highlightsSection}`
+}
