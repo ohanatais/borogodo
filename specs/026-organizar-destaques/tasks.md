@@ -349,20 +349,23 @@ confirmar que reorganização futura não sobrescreve
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T053 [P] [US5] Teste de integração: destaque com métrica clara → título gerado inclui o
+- [x] T053 [P] [US5] Teste de integração: destaque com métrica clara → título gerado inclui o
       número (ex. "Redução de 50% no tempo de investigação de bug crítico"), em
       `organizeEntry.test.ts` — DEVE falhar antes de ajuste no prompt (T008, já implementado —
       este teste valida o comportamento específico de título)
-- [ ] T054 [P] [US5] Teste de integração: título editado manualmente não é sobrescrito em
+- [x] T054 [P] [US5] Teste de integração: título editado manualmente não é sobrescrito em
       reorganização futura (FR-020, mesma regra "só preenche vazios" aplicada a `title`), mesmo
       arquivo
 
 ### Implementation for User Story 5
 
-- [ ] T055 [US5] Ajustar `organizeEntry` (T022) para tratar `title` de um destaque existente com a
+- [x] T055 [US5] Ajustar `organizeEntry` (T022) para tratar `title` de um destaque existente com a
       mesma regra "só preenche vazios" de métrica/impacto/tags (se ainda não coberto pela
-      implementação da Phase 3)
-- [ ] T056 [US5] Campo de título editável inline em `HighlightCard.tsx` (T044)
+      implementação da Phase 3) — já satisfeito estruturalmente (`insertNewHighlights` só faz
+      INSERT, nunca UPDATE em `entry_highlights`); reforçado com teste explícito (T054) e prompt
+      (FR-020)
+- [x] T056 [US5] Campo de título editável inline em `HighlightCard.tsx` (T044) — já implementado
+      na US4 (campo `title` no form de edição)
 
 **Checkpoint**: títulos gerados seguem o padrão outcome-first e respeitam edição manual
 

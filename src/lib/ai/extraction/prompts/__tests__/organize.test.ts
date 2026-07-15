@@ -19,6 +19,29 @@ describe('CAPTURE_ORGANIZE_SYSTEM_PROMPT — instruções de tags consistentes (
   })
 })
 
+describe('CAPTURE_ORGANIZE_SYSTEM_PROMPT — título outcome-first (Story 5)', () => {
+  it('FR-019 — instrui título substantivo-primeiro/outcome-first, com número quando presente', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('FR-019')
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('outcome-first')
+  })
+
+  it('FR-020 — instrui a nunca sobrescrever um título já editado manualmente', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('FR-020')
+  })
+
+  it('mostra o exemplo bom da spec, com o número puxado para o título (Acceptance Scenario 1)', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('Redução de 50% no tempo de investigação de bug crítico')
+  })
+
+  it('proíbe nominalização vaga usando o exemplo genérico exato da spec ("Otimização de processos")', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('Otimização de processos')
+  })
+
+  it('instrui buscar o objeto concreto mais próximo no texto cru em vez de repetir o termo vago (Acceptance Scenario 3)', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('objeto concreto')
+  })
+})
+
 describe('buildOrganizeUserPrompt — prompt de "Organizar" (026)', () => {
   it('inclui pedido de inferência de empresa/período quando a fonte ainda não tem contexto resolvido', () => {
     const prompt = buildOrganizeUserPrompt('Fiz uma migração de banco de dados hoje', {

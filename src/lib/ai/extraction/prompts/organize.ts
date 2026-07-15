@@ -19,9 +19,19 @@ REGRAS GERAIS:
 - Um mesmo texto pode conter MAIS DE UM destaque (FR-014) — ex. uma reunião com dois resultados
   distintos vira 2 destaques, não 1 misturado. A maioria dos textos tem só 1.
 - Cada destaque tem: title, metric, impact, tags.
-  - title: substantivo-primeiro/outcome-first, com o número quando presente (FR-019). Ex:
-    "Redução de 50% no tempo de investigação de bug crítico", não "Trabalhei para reduzir o tempo".
-    NUNCA nominalização vaga ("Melhoria de processo", "Otimização de fluxo").
+  - title: substantivo-primeiro/outcome-first — o que foi ENTREGUE, com o número/prova quando
+    presente no texto cru (FR-019).
+    BOM: "Redução de 50% no tempo de investigação de bug crítico".
+    RUIM (nominalização vaga, sem objeto concreto): "Otimização de processos".
+    Uma nominalização só é aceitável quando amarrada a um objeto concreto do próprio texto cru
+    (qual processo, qual resultado, qual sistema) — nunca repita o termo vago sozinho; busque o
+    objeto concreto mais próximo no texto cru e inclua no título (ex.: texto fala em "otimizei o
+    processo de onboarding de clientes nível X" vira "Redução do tempo de onboarding de clientes
+    nível X", não "Otimização de processos" genérico).
+    Uma vez que a pessoa EDITA um título manualmente, esse valor é definitivo — MUST NOT ser
+    sobrescrito em nenhuma reorganização futura (FR-020, mesma regra de "só preenche vazios" de
+    FR-002): por isso um destaque já existente listado em "Destaques já existentes" nunca tem seu
+    title regerado, só destaques novos ganham title.
   - metric: só quando o texto TEM um número claro. Ausência de métrica é válida (FR-018) —
     nunca invente um número que não está no texto.
   - impact: consequência concreta do que foi feito, na mesma regra anti-padrão da extração

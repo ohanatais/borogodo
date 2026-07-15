@@ -291,6 +291,57 @@ describe('organizeEntry', () => {
     }
   })
 
+  it('T053 — destaque com métrica clara: título gerado (com número) é persistido verbatim, sem alteração (Story 5, FR-019)', async () => {
+    const titleWithMetric = 'Redução de 50% no tempo de investigação de bug crítico'
+    mockComplete.mockResolvedValue(
+      jsonResponse({
+        highlights: [{ title: titleWithMetric, metric: '50%', impact: 'Menos tempo parado', tags: ['devops'] }],
+        company: null,
+        entry_date: null,
+      })
+    )
+    const { client } = makeClient({
+      entryRow: BASE_ENTRY,
+      insertedHighlights: [{ id: 'h7', title: titleWithMetric, metric: '50%' }],
+    })
+
+    const result = await organizeEntry(client as never, 'user-1', 'entry-1')
+
+    expect(result.status).toBe('organized')
+    if (result.status === 'organized') {
+      expect(result.highlights[0]).toMatchObject({ title: titleWithMetric })
+    }
+  })
+
+  it('T054 — título editado manualmente num destaque existente permanece intocado após reorganização (FR-020, mesma regra de FR-002)', async () => {
+    const editedTitle = 'Meu título editado à mão'
+    const existingHighlight: HighlightFixture = { title: editedTitle, metric: null, impact: null, tags: [] }
+    mockComplete.mockResolvedValue(
+      jsonResponse({
+        highlights: [{ title: 'Novo destaque encontrado no texto', metric: null, impact: null, tags: [] }],
+        company: null,
+        entry_date: null,
+      })
+    )
+    const { client, updateCalls } = makeClient({
+      entryRow: BASE_ENTRY,
+      existingHighlights: [existingHighlight],
+      insertedHighlights: [{ id: 'h8' }],
+    })
+
+    const result = await organizeEntry(client as never, 'user-1', 'entry-1')
+
+    expect(result.status).toBe('organized')
+    // organizeEntry nunca faz UPDATE em entry_highlights — o título editado manualmente só
+    // poderia ser sobrescrito por um UPDATE, que nunca acontece (mesma garantia estrutural de T019).
+    const highlightUpdateCalls = updateCalls.filter((c) => c.table === 'entry_highlights')
+    expect(highlightUpdateCalls).toEqual([])
+    // O prompt também instrui a IA a não repetir o destaque existente (o título editado aparece
+    // na seção "Destaques já existentes" enviada à IA).
+    const userPrompt = mockComplete.mock.calls[0][0].user as string
+    expect(userPrompt).toContain(editedTitle)
+  })
+
   it('T042 — texto sem métrica clara cria ao menos 1 destaque sem métrica, tratado como válido (FR-018)', async () => {
     mockComplete.mockResolvedValue(
       jsonResponse({
