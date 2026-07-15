@@ -38,17 +38,22 @@ Feature A (`025-registro-deposito`) mergeada (PR #59). Feature B é esta (`026`)
 
 <!-- SPECKIT START -->
 Current feature: **026-organizar-destaques** (branch: `026-organizar-destaques`) — **Organizar +
-destaques: botão opcional 'Organizar' (Haiku, só preenche campos vazios) + organização
-assíncrona disparada pelo salvar; registro = FONTE com destaques dentro (layout dois níveis, não
-splitar fonte de um evento); Registros reestruturado (miniatura real, feed 1 card/fonte,
-timeline por mês, grade-faísca sem streak). Spec ✅**
+destaques: botão opcional 'Organizar' (Haiku, só preenche campos vazios) infere métrica,
+impacto, tags, empresa e período; organização assíncrona disparada pelo salvar; registro =
+FONTE com destaques dentro (layout dois níveis, não splitar fonte de um evento); tags
+consistentes (reaproveitam o vocabulário já usado pela pessoa, sem sinônimo solto, pra manter o
+filtro por tag útil); Registros reestruturado (miniatura real, feed 1 card/fonte, timeline por
+mês, grade-faísca sem streak). Spec ✅**
 
 > Depende da Feature A (`025-registro-deposito`, PR #59, mergeada) já implementada: reusa o
 > drawer sempre-salva, `Entry.raw_content` (cru verbatim), `EntrySource: 'deposito'` e
 > `evidences`/bucket `evidence-files`. Escopo desta feature começa depois do salvar: estruturação
 > por IA opcional, destaques dentro da fonte, e a reestruturação de Registros. Cru preservado
 > sempre; geração/RAG leem a fonte, não o resumo. Provavelmente sem migration nova (a decidir no
-> `/speckit-plan`). Contexto: `docs/decisions/003-registro-deposito-e-captura.md`.
+> `/speckit-plan`). **Empresa/período e consistência de tags** foram gaps do decision record
+> original (a extração legada nunca populava `company` de fato, e tag só tinha a regra "concreta,
+> não genérica" — sem vocabulário) — adicionados na revisão de 2026-07-15 (ver checklist).
+> Contexto: `docs/decisions/003-registro-deposito-e-captura.md`.
 Spec: [specs/026-organizar-destaques/spec.md](specs/026-organizar-destaques/spec.md) ·
 Plan: (pendente — `/speckit-clarify` → `/speckit-plan`)
 <!-- SPECKIT END -->

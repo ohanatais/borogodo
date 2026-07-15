@@ -46,18 +46,22 @@ opcional, destaques dentro da fonte, e a reestruturação da tela Registros.
 ### User Story 1 - Organizar sob demanda, sem perder o que já preenchi (Priority: P1)
 
 Como profissional que acabou de salvar um registro cru, eu clico em "Organizar" e o sistema
-detecta os anexos e infere métrica, impacto e tags automaticamente, preenchendo campos que eu
-posso editar livremente. Se eu já tinha preenchido algum campo manualmente antes de clicar, a IA
-não sobrescreve o que eu escrevi.
+detecta os anexos e infere métrica, impacto, tags, **empresa e período (quando o texto ou o
+contexto tornam isso claro)** automaticamente, preenchendo campos que eu posso editar
+livremente. Se eu já tinha preenchido algum campo manualmente antes de clicar, a IA não
+sobrescreve o que eu escrevi.
 
 **Why this priority**: É o núcleo do reframe de "Organizar" como assistente opcional, não
 pedágio — sem isso, a estruturação continua bloqueando ou sendo invisível, e o registro nunca
-ganha profundidade de campo.
+ganha profundidade de campo. Empresa e período são particularmente valiosos porque alimentam a
+timeline por mês (Story 5) e o agrupamento por contexto que decide "1 fonte vs. N fontes"
+(FR-010) — sem essa identificação, os dois ficam incompletos mesmo com destaques bem extraídos.
 
 **Independent Test**: Salvar um registro cru com um anexo de imagem e sem campos preenchidos,
-clicar em "Organizar", e verificar que métrica/impacto/tags aparecem preenchidos e editáveis.
-Repetir preenchendo manualmente o campo "impacto" antes de clicar em "Organizar" — o valor
-manual permanece intacto após a organização rodar.
+clicar em "Organizar", e verificar que métrica/impacto/tags/empresa/período aparecem preenchidos
+e editáveis. Repetir preenchendo manualmente o campo "impacto" antes de clicar em "Organizar" —
+o valor manual permanece intacto após a organização rodar. Repetir com um texto que não menciona
+nenhuma empresa nem data — os campos de empresa/período ficam vazios (nenhum valor inventado).
 
 **Acceptance Scenarios**:
 
@@ -72,6 +76,19 @@ manual permanece intacto após a organização rodar.
 4. **Given** os campos de "+ adicionar detalhes" disponíveis antes de clicar em "Organizar",
    **When** a pessoa expande essa seção, **Then** os campos estruturados aparecem vazios e
    editáveis manualmente, sem depender de a IA já ter rodado.
+5. **Given** um texto cru que menciona explicitamente uma empresa e uma data/período (ex.: "na
+   Acme, em março", "no projeto da Empresa X ano passado"), **When** a organização roda, **Then**
+   o sistema preenche os campos de empresa e período (data aproximada) com o valor identificado,
+   sem exigir que a pessoa digite isso manualmente.
+6. **Given** um texto cru que não menciona empresa nem período de forma identificável, **When**
+   a organização roda, **Then** os campos de empresa e período permanecem vazios — o sistema
+   MUST NOT inventar ou "adivinhar" um valor sem sinal textual, mesmo que exista um registro
+   recente da mesma pessoa com empresa preenchida.
+7. **Given** um registro cujo texto cru menciona duas empresas diferentes (ex.: uma retrospectiva
+   comparando o antes e o depois de uma migração de fornecedor), **When** a organização roda,
+   **Then** o sistema preenche o campo de empresa com a que tem papel central no relato (o
+   sujeito da ação, não uma menção lateral) — e deixa claro, na UI, que esse campo é uma
+   inferência editável, não um fato fechado.
 
 ---
 
@@ -202,6 +219,48 @@ texto cru da fonte.
 
 ---
 
+### User Story 6 - Tags que eu consigo filtrar, não etiquetas soltas (Priority: P1)
+
+Como profissional que quer revisitar tudo que fiz sobre um tema (ex.: "liderança", "SQL",
+"negociação"), eu preciso que as tags geradas por "Organizar" sejam consistentes entre
+registros diferentes — a mesma habilidade ou tema deve usar sempre a mesma tag, não variações
+como "liderança", "Liderança de equipe" e "gestão de pessoas" espalhadas em registros distintos
+que na prática falam da mesma coisa. Isso é o que torna o filtro por tag em Registros (que já
+existe) útil de verdade.
+
+**Why this priority**: É pré-requisito de qualidade para toda a inferência de tags desta
+feature — sem isso, "Organizar" adiciona ruído em vez de estrutura, e o filtro por tag em
+Registros (`getFeedData`, que já suporta filtrar por `tags`) fica praticamente inutilizável à
+medida que o vocabulário se fragmenta. É P1 porque roda dentro da mesma chamada de IA das
+Stories 1 e 2 — não é um recurso à parte, é um requisito de qualidade do que elas já produzem.
+
+**Independent Test**: Organizar dois registros que descrevem, em palavras diferentes, a mesma
+habilidade concreta (ex.: um menciona "liderei o time" e outro "fui responsável pela equipe") —
+as tags resultantes usam exatamente a mesma string para essa habilidade nos dois registros.
+Depois, usar o filtro por tag em Registros e confirmar que ambos os registros aparecem sob a
+mesma tag.
+
+**Acceptance Scenarios**:
+
+1. **Given** um registro sendo organizado e um vocabulário de tags já usado anteriormente pela
+   mesma pessoa, **When** o texto cru descreve algo que corresponde a uma tag já existente no
+   vocabulário da pessoa, **Then** o sistema reaproveita a tag existente (mesma grafia) em vez
+   de criar uma variação nova.
+2. **Given** um registro cujo conteúdo não corresponde a nenhuma tag já usada pela pessoa,
+   **When** a organização roda, **Then** o sistema cria uma nova tag, seguindo um formato
+   consistente (mesma capitalização/idioma das tags já existentes da pessoa).
+3. **Given** as tags geradas para um registro, **When** a pessoa visualiza os resultados,
+   **Then** nenhuma tag é um adjetivo genérico isolado (ex.: "importante", "difícil",
+   "produtivo") — toda tag representa uma skill, tema ou domínio concreto identificável.
+4. **Given** uma tag gerada automaticamente, **When** a pessoa a edita ou remove no campo
+   editável, **Then** o sistema respeita a edição (mesma regra de FR-002/FR-016) e não a
+   recria numa reorganização futura.
+5. **Given** o filtro por tag na tela Registros, **When** a pessoa seleciona uma tag, **Then**
+   todos os registros que usam exatamente aquela tag aparecem — sem tags "quase iguais" ficando
+   de fora por variação de escrita.
+
+---
+
 ### Edge Cases
 
 - O que acontece se a chamada de IA de "Organizar" falhar (timeout, erro de API)? O registro
@@ -220,75 +279,111 @@ texto cru da fonte.
 - O que acontece se o texto cru for grande o suficiente para descrever 5+ resultados distintos?
   Não há limite artificial de destaques por fonte — cada resultado identificável vira seu
   próprio destaque.
+- O que acontece se o texto cru não trouxer nenhum sinal de empresa/data (ex.: "resolvi um bug
+  hoje", sem mais contexto)? Os campos de empresa e período ficam vazios — o sistema não
+  preenche a partir de inferência estatística (ex.: "provavelmente é a mesma empresa do último
+  registro"), só a partir de sinal textual explícito no próprio registro (ver Story 1, Acceptance
+  Scenario 6).
+- O que acontece se duas tags já existentes no vocabulário da pessoa forem quase sinônimas (ex.:
+  criadas em registros diferentes antes desta feature existir, uma "lideranca" e outra
+  "liderança-de-equipe")? Esta feature não faz limpeza retroativa do vocabulário existente — a
+  consistência (Story 6) vale para tags novas geradas a partir de agora; consolidar tags antigas
+  é decisão de produto separada, fora de escopo aqui.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
 - **FR-001**: O sistema MUST oferecer um botão "Organizar" opcional em qualquer registro salvo,
-  que dispara a inferência de métrica, impacto e tags a partir do texto cru e dos anexos.
+  que dispara a inferência de métrica, impacto, tags, empresa e período (data aproximada) a
+  partir do texto cru e dos anexos.
 - **FR-002**: A inferência via IA MUST preencher apenas campos estruturados que estejam vazios —
   campos já preenchidos manualmente (pela pessoa ou por uma organização anterior editada) MUST
   permanecer intocados.
-- **FR-003**: Ao salvar um registro sem clique em "Organizar", o sistema MUST disparar a
+- **FR-003**: A inferência de empresa e período MUST se basear exclusivamente em sinal textual
+  explícito presente no próprio registro (texto cru ou anexo) — o sistema MUST NOT inferir esses
+  campos por associação estatística com outros registros da pessoa (ex.: "a última empresa
+  registrada provavelmente é essa"). Na ausência de sinal textual, os campos permanecem vazios.
+- **FR-004**: Quando o texto cru de um registro referenciar mais de uma empresa, o sistema MUST
+  priorizar a empresa com papel central no relato (sujeito da ação) sobre menções laterais, e
+  MUST sinalizar na interface que o campo é uma inferência editável.
+- **FR-005**: Ao salvar um registro sem clique em "Organizar", o sistema MUST disparar a
   organização em segundo plano automaticamente (fire-and-forget), sem bloquear o salvar nem
   exigir confirmação da pessoa.
-- **FR-004**: O sistema MUST NOT introduzir um conceito de rascunho — todo registro salvo é real
+- **FR-006**: O sistema MUST NOT introduzir um conceito de rascunho — todo registro salvo é real
   e visível, independentemente de já ter sido organizado.
-- **FR-005**: Enquanto a organização assíncrona está em andamento, o sistema MUST exibir um
+- **FR-007**: Enquanto a organização assíncrona está em andamento, o sistema MUST exibir um
   estado transitório (ex.: "organizando…") sem rótulo persistente nem CTA adicional após a
   conclusão.
-- **FR-006**: O sistema MUST preservar o texto cru do registro verbatim, inalterado por qualquer
+- **FR-008**: O sistema MUST preservar o texto cru do registro verbatim, inalterado por qualquer
   operação de organização — a estrutura (campos, destaques) é um índice construído por cima,
   nunca substitui o cru.
-- **FR-007**: Qualquer geração de conteúdo (posts, resumos, RAG) que use um registro como fonte
+- **FR-009**: Qualquer geração de conteúdo (posts, resumos, RAG) que use um registro como fonte
   MUST ler o texto cru da fonte, não um resumo derivado dela.
-- **FR-008**: O sistema MUST representar um registro como uma FONTE única contendo um ou mais
+- **FR-010**: O sistema MUST representar um registro como uma FONTE única contendo um ou mais
   DESTAQUES — nunca splitar o texto cru de uma fonte de um único evento (mesmo contexto de
   tempo/empresa/reunião) em múltiplos registros separados.
-- **FR-009**: Cada destaque dentro de uma fonte MUST ter seus próprios campos (título, métrica,
+- **FR-011**: Cada destaque dentro de uma fonte MUST ter seus próprios campos (título, métrica,
   impacto, tags), editáveis e removíveis independentemente dos demais destaques da mesma fonte.
-- **FR-010**: A pessoa MUST poder adicionar manualmente um novo destaque a um registro existente
+- **FR-012**: A pessoa MUST poder adicionar manualmente um novo destaque a um registro existente
   (via "+ adicionar destaque"), independente de a organização por IA ter rodado.
-- **FR-011**: Quando uma fonte tem exatamente um destaque, o sistema MUST exibir o cartão desse
+- **FR-013**: Quando uma fonte tem exatamente um destaque, o sistema MUST exibir o cartão desse
   destaque aberto por padrão; quando tem múltiplos, MUST exibi-los colapsados por padrão.
-- **FR-012**: Um destaque sem métrica identificável MUST ser tratado como válido (ex.: um
+- **FR-014**: Um destaque sem métrica identificável MUST ser tratado como válido (ex.: um
   aprendizado, uma skill, um relacionamento) — ausência de métrica não é erro nem bloqueia a
   criação do destaque.
-- **FR-013**: O sistema MUST gerar títulos de destaque no formato substantivo-primeiro e
+- **FR-015**: O sistema MUST gerar títulos de destaque no formato substantivo-primeiro e
   outcome-first (deliverable + objeto específico), priorizando incluir o número/prova quando
   presente no texto cru, e evitando nominalização vaga (ex.: "Otimização de processos").
-- **FR-014**: Todo título gerado por IA MUST ser editável pela pessoa, e uma vez editado
+- **FR-016**: Todo título gerado por IA MUST ser editável pela pessoa, e uma vez editado
   manualmente, MUST permanecer com o valor editado em reorganizações futuras (mesma regra de
   FR-002 aplicada ao título).
-- **FR-015**: O sistema MUST NOT oferecer nenhuma forma de gestão de destino por-registro (ex.:
+- **FR-017**: O sistema MUST NOT oferecer nenhuma forma de gestão de destino por-registro (ex.:
   chip "no espelho / só no histórico") — todo registro salvo conta para o Espelho.
-- **FR-016**: A tela Registros MUST exibir um card por FONTE (não por destaque) no feed
+- **FR-018**: Ao gerar tags para um registro, o sistema MUST reaproveitar uma tag já existente no
+  vocabulário da pessoa quando o conteúdo corresponder conceitualmente a ela, em vez de criar uma
+  variação nova (ex.: não gerar "Liderança de equipe" se a pessoa já usa "liderança" em outros
+  registros).
+- **FR-019**: Uma tag nova (sem correspondência no vocabulário já usado pela pessoa) MUST seguir
+  um formato consistente com as tags já existentes da mesma pessoa (mesma capitalização e
+  idioma) — o sistema MUST NOT misturar convenções de formatação dentro do vocabulário de uma
+  mesma pessoa.
+- **FR-020**: Nenhuma tag gerada por IA MUST ser um adjetivo genérico isolado (ex.: "importante",
+  "difícil", "produtivo") — toda tag MUST representar uma skill, tema ou domínio concreto e
+  identificável, reusando a mesma restrição que já valia na extração legada (`tags = skills/temas
+  concretos, não adjetivos genéricos`).
+- **FR-021**: A tela Registros MUST exibir um card por FONTE (não por destaque) no feed
   principal, com um selo indicando a contagem de destaques quando houver mais de um.
-- **FR-017**: Expandir um card de fonte em Registros MUST revelar todos os destaques daquela
+- **FR-022**: Expandir um card de fonte em Registros MUST revelar todos os destaques daquela
   fonte, junto com acesso ao texto cru completo e aos anexos da fonte.
-- **FR-018**: Um card de fonte com evidência de imagem MUST exibir a miniatura real da imagem
+- **FR-023**: Um card de fonte com evidência de imagem MUST exibir a miniatura real da imagem
   anexada, não um ícone genérico por tipo.
-- **FR-019**: A tela Registros MUST agrupar os registros numa timeline por mês.
-- **FR-020**: A grade-faísca (mapa de densidade de atividade) em Registros MUST refletir a
+- **FR-024**: A tela Registros MUST agrupar os registros numa timeline por mês.
+- **FR-025**: A grade-faísca (mapa de densidade de atividade) em Registros MUST refletir a
   distribuição de registros ao longo do tempo sem usar mecânicas de streak gamificado nem emoji.
-- **FR-021**: Uma falha na chamada de IA de organização (manual ou assíncrona) MUST NOT impedir
+- **FR-026**: Uma falha na chamada de IA de organização (manual ou assíncrona) MUST NOT impedir
   o registro de permanecer salvo e visível normalmente — a pessoa pode tentar organizar
   novamente depois.
-- **FR-022**: O sistema MUST evitar disparar mais de uma chamada de organização simultânea para
+- **FR-027**: O sistema MUST evitar disparar mais de uma chamada de organização simultânea para
   o mesmo registro (proteção contra duplo clique / disparo concorrente).
-- **FR-023**: Registros criados antes desta feature (sem destaques estruturados) MUST continuar
+- **FR-028**: Registros criados antes desta feature (sem destaques estruturados) MUST continuar
   navegáveis normalmente em Registros, tratados como fonte de destaque único.
 
 ### Key Entities
 
 - **Registro (Fonte)**: a unidade que guarda o texto cru verbatim, anexos (evidences), empresa e
-  data — já existe como `Entry` desde a 025. Nesta feature, ganha um estado de organização
-  (não-organizado transitório / organizado) e passa a agrupar um ou mais Destaques.
+  data — já existe como `Entry` desde a 025 (o schema já reserva `company`/`entry_date`, mas a
+  extração legada nunca os preenchia de forma confiável — ver Assumptions). Nesta feature, ganha
+  um estado de organização (não-organizado transitório / organizado) e passa a agrupar um ou
+  mais Destaques.
 - **Destaque**: uma faceta dentro de um registro — título editável, métrica/impacto opcionais,
   tags. Repetível dentro de uma mesma fonte; nem todo destaque tem métrica. É a unidade que o
   Espelho e a geração de conteúdo consomem para achar padrão, mas sempre em referência à fonte
-  completa (FR-007).
+  completa (FR-009).
+- **Vocabulário de tags da pessoa**: o conjunto de tags já usadas por uma pessoa em seus
+  registros anteriores. É o que a inferência de tags (FR-018/FR-019) consulta antes de criar uma
+  tag nova, para manter consistência e permitir filtrar por tag em Registros (`getFeedData` já
+  suporta esse filtro hoje) sem fragmentação de sinônimos.
 
 ## Success Criteria *(mandatory)*
 
@@ -299,14 +394,21 @@ texto cru da fonte.
   recarregar a página.
 - **SC-002**: 100% dos registros salvos — organizados manualmente ou não — terminam com pelo
   menos um destaque associado, sem exigir ação adicional da pessoa além de salvar.
-- **SC-003**: Editar manualmente um campo (título, métrica, impacto ou tag) antes ou depois da
-  organização automática nunca é sobrescrito por uma organização subsequente — verificável em
-  100% dos casos testados.
+- **SC-003**: Editar manualmente um campo (título, métrica, impacto, tag, empresa ou período)
+  antes ou depois da organização automática nunca é sobrescrito por uma organização subsequente
+  — verificável em 100% dos casos testados.
 - **SC-004**: Uma fonte com múltiplos resultados distintos no texto cru gera múltiplos destaques
   dentro do mesmo registro, sem criar registros adicionais — nenhuma fragmentação em N registros
   para eventos de contexto único.
 - **SC-005**: A tela Registros carrega o feed reestruturado (1 card por fonte, timeline por mês,
   grade-faísca) sem regressão perceptível de tempo de carregamento em relação à versão da 025.
+- **SC-006**: Ao organizar registros que descrevem a mesma skill/tema em palavras diferentes, a
+  taxa de reaproveitamento de tag já existente (em vez de criar uma variação nova) é alta o
+  suficiente para que o filtro por tag em Registros continue útil — medido, pós-lançamento,
+  observando se o número de tags distintas por pessoa cresce de forma descontrolada em relação ao
+  número de registros (sinal de fragmentação de vocabulário).
+- **SC-007**: Registros cujo texto cru menciona empresa e/ou período de forma explícita têm esses
+  campos preenchidos sem intervenção manual em pelo menos 90% dos casos testados manualmente.
 
 ## Assumptions
 
@@ -319,8 +421,26 @@ texto cru da fonte.
   "provavelmente sem migration"; a confirmação final acontece na fase de plano técnico.
 - O texto cru inteiro de cada fonte já está preservado desde a 025 (`raw_content`); esta feature
   não precisa resolver retrocompatibilidade de captura, apenas organizar o que já existe.
-- A definição de "mesmo contexto" para não-splitar (FR-008) usa como sinal principal
+- A definição de "mesmo contexto" para não-splitar (FR-010) usa como sinal principal
   tempo/empresa/evento mencionados no próprio texto cru submetido em uma única sessão do drawer
   — não há input explícito da pessoa indicando limites de evento.
 - O "botão Organizar" e a organização assíncrona operam sobre o mesmo registro em qualquer
   estado (recém-criado ou antigo) — não há restrição de janela de tempo para reorganizar.
+- **Empresa/período não eram extraídos de forma confiável antes desta feature**: o campo
+  `company` já existe no schema `Entry`/`ExtractedEntry` desde a captura legada (003), mas o
+  prompt de extração (`src/lib/ai/extraction/prompts/capture.ts`) nunca o listava entre os campos
+  a preencher — só `tags`/`metric`/`impact`/`decision`/`learning`/`entry_date`. Esta feature
+  corrige essa lacuna explicitamente (FR-001/FR-003/FR-004); não é regressão, é extensão de algo
+  que sempre esteve no schema mas nunca foi de fato inferido no caminho do depósito.
+- **Consistência de tags não existia como requisito antes desta feature**: a única orientação de
+  tags na extração legada era "skills/temas concretos, não adjetivos genéricos" — sem noção de
+  vocabulário nem de reaproveitamento entre registros. FR-018/FR-019/FR-020 formalizam isso pela
+  primeira vez; a estratégia adotada (reusar o vocabulário já usado pela própria pessoa, sem um
+  taxonomia global curada) é o default mais simples que atende ao pedido de "permitir filtrar" —
+  o projeto não tem hoje uma tabela de histórico profissional estruturado (empresas/cargos) contra
+  a qual validar consistência de outro tipo; essa é uma decisão que pode ser revisitada se o
+  `/speckit-plan` identificar limitação (ex.: nenhum mecanismo além do prompt para garantir
+  reaproveitamento exato — normalização/matching de string é decisão técnica do plano).
+- Não há tabela de histórico profissional estruturado (cargos/empresas com datas) para validar ou
+  corrigir a inferência de empresa/período contra fatos já conhecidos da pessoa — a inferência é
+  puramente textual, por registro, sem cross-check contra um perfil de carreira.
