@@ -81,7 +81,7 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('context.searchPlaceholder')}
           aria-label={t('context.searchPlaceholder')}
-          className="text-sm rounded-lg px-3 py-2 min-h-[44px] border w-full max-w-xs"
+          className="text-sm rounded-lg px-3 py-2 min-h-[48px] border w-full max-w-xs"
           style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
         />
       )}

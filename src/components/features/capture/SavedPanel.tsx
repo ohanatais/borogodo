@@ -98,7 +98,7 @@ export function SavedPanel({ entryId, initialTitle, attachments = [], onRetryAtt
       <button
         type="button"
         onClick={onDone}
-        className="self-end px-4 py-2 rounded-xl text-sm font-semibold"
+        className="self-end px-4 py-2 min-h-[48px] rounded-xl text-sm font-semibold transition-opacity hover:opacity-80"
         style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
       >
         {t('savedPanel.doneButton')}

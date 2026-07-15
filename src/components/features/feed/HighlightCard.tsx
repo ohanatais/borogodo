@@ -138,7 +138,7 @@ export function HighlightCard({ entryId, highlight, defaultOpen, onUpdate, onDel
                   aria-label={t('highlight.titleLabel')}
                   value={form.title}
                   onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  className="text-sm rounded-lg px-2 py-1.5 border"
+                  className="text-sm rounded-lg px-2 py-1.5 min-h-[48px] border"
                   style={inputStyle}
                 />
               </label>
@@ -148,7 +148,7 @@ export function HighlightCard({ entryId, highlight, defaultOpen, onUpdate, onDel
                   aria-label={t('highlight.metricLabel')}
                   value={form.metric}
                   onChange={(e) => setForm((f) => ({ ...f, metric: e.target.value }))}
-                  className="text-sm rounded-lg px-2 py-1.5 border"
+                  className="text-sm rounded-lg px-2 py-1.5 min-h-[48px] border"
                   style={inputStyle}
                 />
               </label>
@@ -169,7 +169,7 @@ export function HighlightCard({ entryId, highlight, defaultOpen, onUpdate, onDel
                   aria-label={t('highlight.tagsLabel')}
                   value={form.tags}
                   onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
-                  className="text-sm rounded-lg px-2 py-1.5 border"
+                  className="text-sm rounded-lg px-2 py-1.5 min-h-[48px] border"
                   style={inputStyle}
                 />
               </label>
