@@ -410,6 +410,16 @@
   },
   "configuracoes": {
     "title": "Configurações",
+    "sections": {
+      "profile": "Meus dados",
+      "privacy": "Privacidade",
+      "support": "Suporte"
+    },
+    "meusDados": {
+      "save": "Salvar",
+      "saved": "Salvo!",
+      "error": "Erro ao salvar. Tente de novo."
+    },
     "identity": {
       "title": "Identidade",
       "name": "Nome",
@@ -447,6 +457,36 @@
     "sla": "Tem uma pessoa de verdade do outro lado, eu mesma. Respondo em até 2 dias úteis.",
     "credits": "Borogodó · {ano}",
     "brandTagline": "Inteligência de carreira com IA, feita no Brasil."
+  },
+  "legal": {
+    "termsLabel": "Termos de Uso",
+    "privacyLabel": "Política de Privacidade",
+    "signInWrap": "Ao continuar, você concorda com os <terms>Termos de Uso</terms> e a <privacy>Política de Privacidade</privacy>.",
+    "marketingOptIn": {
+      "label": "Quero receber novidades e conteúdos do Borogodó por e-mail.",
+      "helper": "Pode desligar quando quiser nas configurações."
+    },
+    "consentGate": {
+      "titleBump": "Demos uma atualizada nos nossos termos",
+      "titleStale": "Falta só um passo",
+      "body": "Para continuar usando o Borogodó, precisamos que você aceite a versão vigente dos nossos termos.",
+      "submit": "Aceito e quero continuar",
+      "error": "Não conseguimos registrar seu aceite agora. Tenta de novo?"
+    },
+    "settings": {
+      "heading": "Privacidade e consentimento",
+      "acceptedOn": "Você aceitou os Termos (v{version}) em {date}."
+    },
+    "termsPage": {
+      "title": "Termos de Uso",
+      "versionLabel": "Versão vigente · atualizado em {date}",
+      "backToHome": "Voltar ao início"
+    },
+    "privacyPage": {
+      "title": "Política de Privacidade",
+      "versionLabel": "Versão vigente · atualizado em {date}",
+      "backToHome": "Voltar ao início"
+    }
   },
   "bemvindo": {
     "step1": {

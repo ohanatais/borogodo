@@ -25,6 +25,9 @@ const MOCK_PROFILE: Profile = {
   area: null,
   onboarding_completed: false,
   created_at: '2026-06-14T00:00:00Z',
+  terms_accepted_at: null,
+  terms_version: null,
+  marketing_consent: false,
 }
 
 describe('getProfile', () => {

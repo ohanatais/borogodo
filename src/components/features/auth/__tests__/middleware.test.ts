@@ -44,4 +44,20 @@ describe('middleware — route protection', () => {
     expect(response.status).toBe(307)
     expect(response.headers.get('location')).toContain('/painel')
   })
+
+  it('024/T018: unauthenticated access to /termos-de-uso does not redirect to /login', async () => {
+    mockGetUser.mockReturnValue(null)
+    const { default: middleware } = await import('@/proxy')
+    const request = makeRequest('/termos-de-uso')
+    const response = await middleware(request)
+    expect(response.headers.get('location')).toBeNull()
+  })
+
+  it('024/T018: unauthenticated access to /politica-de-privacidade does not redirect to /login', async () => {
+    mockGetUser.mockReturnValue(null)
+    const { default: middleware } = await import('@/proxy')
+    const request = makeRequest('/politica-de-privacidade')
+    const response = await middleware(request)
+    expect(response.headers.get('location')).toBeNull()
+  })
 })

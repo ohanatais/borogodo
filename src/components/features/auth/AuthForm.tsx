@@ -2,8 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createBrowserClient } from '@/lib/db/supabase/client'
+import { LEGAL_ROUTES } from '@/lib/legal/policy'
+import { Checkbox } from '@/components/ui/Checkbox'
 
 type Mode = 'login' | 'signup'
 
@@ -110,12 +113,14 @@ function Field({
 
 export function AuthForm({ initialMode }: AuthFormProps) {
   const t = useTranslations('auth')
+  const tLegal = useTranslations('legal')
   const router = useRouter()
   const [mode, setMode] = useState<Mode>(initialMode)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [marketingConsent, setMarketingConsent] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [loading, setLoading] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
@@ -142,7 +147,7 @@ export function AuthForm({ initialMode }: AuthFormProps) {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name } },
+        options: { data: { full_name: name, marketing_consent: marketingConsent } },
       })
       setLoading(false)
       if (error) {
@@ -258,6 +263,28 @@ export function AuthForm({ initialMode }: AuthFormProps) {
           />
         )}
 
+        {mode === 'signup' && (
+          <label
+            className="flex items-start gap-3 min-h-12 py-2 px-2.5 -mx-2.5 rounded-lg cursor-pointer transition-colors hover:bg-black/[0.02]"
+          >
+            <span className="mt-0.5">
+              <Checkbox
+                checked={marketingConsent}
+                onChange={setMarketingConsent}
+                ariaLabel={tLegal('marketingOptIn.label')}
+              />
+            </span>
+            <span className="flex flex-col gap-0.5">
+              <span className="text-sm" style={{ color: 'var(--foreground)' }}>
+                {tLegal('marketingOptIn.label')}
+              </span>
+              <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                {tLegal('marketingOptIn.helper')}
+              </span>
+            </span>
+          </label>
+        )}
+
         {errors.general && (
           <p className="text-sm text-center" style={{ color: 'var(--color-accent)' }}>
             {t(errors.general as Parameters<typeof t>[0])}
@@ -291,6 +318,35 @@ export function AuthForm({ initialMode }: AuthFormProps) {
             t(mode === 'signup' ? 'submit.signup' : 'submit.login')
           )}
         </button>
+
+        {mode === 'signup' && (
+          <p className="text-xs text-center" style={{ color: 'var(--muted-foreground)' }}>
+            {tLegal.rich('signInWrap', {
+              terms: (chunks) => (
+                <Link
+                  href={LEGAL_ROUTES.terms}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  {chunks}
+                </Link>
+              ),
+              privacy: (chunks) => (
+                <Link
+                  href={LEGAL_ROUTES.privacy}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
+        )}
       </form>
     </div>
   )
