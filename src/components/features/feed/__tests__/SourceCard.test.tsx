@@ -243,6 +243,7 @@ describe('SourceCard — edição inline do texto cru', () => {
     fireEvent.click(screen.getByRole('button', { name: 'card.cancelEdit' }))
 
     expect(fetch).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'card.viewFull' }))
     expect(screen.getByText(BASE_ITEM.what_i_did)).toBeInTheDocument()
   })
 })
@@ -311,31 +312,27 @@ describe('SourceCard — variant "panel" (sem ações de Registros)', () => {
   })
 })
 
-describe('SourceCard — texto cru grande não força scroll de página inteira', () => {
+describe('SourceCard — "Ver fonte completa" nunca força scroll de página inteira', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn())
   })
 
-  it('texto curto renderiza sem clamp nem botão de expandir', () => {
+  it('texto cru vem oculto por padrão, atrás do toggle "Ver fonte completa"', () => {
     render(<SourceCard item={BASE_ITEM} variant="feed" />)
     expandCard()
 
-    expect(screen.queryByRole('button', { name: 'card.viewFull' })).not.toBeInTheDocument()
-    expect(screen.getByText(BASE_ITEM.what_i_did)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'card.viewFull' })).toBeInTheDocument()
+    expect(screen.queryByText(BASE_ITEM.what_i_did)).not.toBeInTheDocument()
   })
 
-  it('texto grande vem clampado por padrão, com botão para expandir sob demanda', () => {
+  it('clicar no toggle revela o texto cru completo, mesmo sendo grande, num container com scroll próprio', () => {
     const longText = 'Trecho da transcrição. '.repeat(40)
     render(<SourceCard item={{ ...BASE_ITEM, what_i_did: longText }} variant="feed" />)
     expandCard()
 
-    const toggle = screen.getByRole('button', { name: 'card.viewFull' })
-    expect(toggle).toBeInTheDocument()
-    expect(screen.getByText(longText.trim())).toHaveClass('line-clamp-4')
-
-    fireEvent.click(toggle)
+    fireEvent.click(screen.getByRole('button', { name: 'card.viewFull' }))
 
     expect(screen.getByRole('button', { name: 'card.hideFull' })).toBeInTheDocument()
-    expect(screen.getByText(longText.trim())).not.toHaveClass('line-clamp-4')
+    expect(screen.getByText(longText.trim())).toBeInTheDocument()
   })
 })

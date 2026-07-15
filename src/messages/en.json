@@ -827,8 +827,8 @@
         "confirm": "Delete"
       },
       "highlightsBadge": "+{count} highlights",
-      "viewFull": "View full text",
-      "hideFull": "Collapse text"
+      "viewFull": "View full source",
+      "hideFull": "Hide source"
     },
     "grid": {
       "title": "Your sparks",

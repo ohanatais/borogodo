@@ -10,27 +10,32 @@ interface ActivityGridProps {
   onCellClick: (date: string) => void
 }
 
-// Mostra a grade assim que houver qualquer registro na janela — o título e os
-// rótulos de mês dão o contexto que antes faltava (parecia ruído sem eles).
+// Mostra a grade assim que houver qualquer registro na janela.
 export const GRID_MIN_DISTINCT_DAYS = 1
-const WEEKS_DESKTOP = 26
-const WEEKS_MOBILE = 13
-const SPARK = '✦'
+const WEEKS_DESKTOP = 24
+const WEEKS_MOBILE = 14
+const CELL_DESKTOP = 13
+const CELL_MOBILE = 11
+const GAP = 3
 
-// Seg Ter Qua Qui Sex Sáb Dom → S T Q Q S S D
-const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']
+// Só seg/qua/sex rotulados (padrão de calendário de atividade) — os demais dias ficam em branco.
+const DAY_LABELS = ['seg', '', 'qua', '', 'sex', '', '']
 
-interface CellIntensity {
-  size: number
-  color: string
-  opacity: number
+/** Nível 0-4 de intensidade a partir da contagem do dia — alimenta a cor do quadrado. */
+function getLevel(count: number): number {
+  if (count === 0) return 0
+  if (count === 1) return 1
+  if (count <= 3) return 2
+  if (count <= 6) return 3
+  return 4
 }
 
-function getIntensity(count: number): CellIntensity {
-  if (count === 0) return { size: 9,  color: 'var(--muted-foreground)', opacity: 0.18 }
-  if (count === 1) return { size: 9,  color: 'var(--color-primary)',    opacity: 0.45 }
-  if (count <= 3)  return { size: 11, color: 'var(--color-primary)',    opacity: 0.75 }
-  return              { size: 13, color: 'var(--color-primary)',    opacity: 1.0  }
+/** Cor de cada nível — sempre o coral da marca (`--color-accent`), variando a mistura com
+ * `--muted` em vez de introduzir uma escala de cor nova. */
+function levelColor(level: number): string {
+  if (level === 0) return 'var(--muted)'
+  const mix = level === 1 ? 35 : level === 2 ? 55 : level === 3 ? 75 : 100
+  return mix === 100 ? 'var(--color-accent)' : `color-mix(in oklch, var(--color-accent) ${mix}%, var(--muted))`
 }
 
 function startOfWeek(date: Date): Date {
@@ -78,37 +83,79 @@ function buildGrid(cells: ActivityCell[], weeks: number): GridWeek[] {
   return grid
 }
 
-// Só mostra label quando a semana contém o dia 1 do mês — evita duplicatas.
+// Rótulo de mês só na semana que contém o dia 1 — evita duplicatas.
 function getMonthLabel(week: GridWeek): string {
   const firstDay = week.days.find((d) => new Date(d.dateISO + 'T12:00:00').getDate() === 1)
   if (!firstDay) return ''
   return new Date(firstDay.dateISO + 'T12:00:00').toLocaleDateString('pt-BR', { month: 'short' })
 }
 
-function CellButton({
-  dateISO,
-  count,
-  onClick,
+function GridBody({
+  cells,
+  weeks,
+  cellSize,
+  onCellClick,
 }: {
-  dateISO: string
-  count: number
-  onClick: (date: string) => void
+  cells: ActivityCell[]
+  weeks: number
+  cellSize: number
+  onCellClick: (date: string) => void
 }) {
-  const { size, color, opacity } = getIntensity(count)
+  const grid = useMemo(() => buildGrid(cells, weeks), [cells, weeks])
+  const rowHeight = cellSize + GAP
 
   return (
-    <button
-      type="button"
-      aria-label={`${dateISO}: ${count} registro${count !== 1 ? 's' : ''}`}
-      onClick={() => count > 0 && onClick(dateISO)}
-      disabled={count === 0}
-      className="flex items-center justify-center transition-transform disabled:cursor-default"
-      style={{ width: 16, height: 16, fontSize: size, opacity, color, lineHeight: 1 }}
-      onMouseEnter={(e) => { if (count > 0) (e.currentTarget as HTMLElement).style.transform = 'scale(1.4)' }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}
-    >
-      {SPARK}
-    </button>
+    <div className="flex items-start gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'thin' }}>
+      <div className="flex flex-col justify-between shrink-0 py-0.5" style={{ height: 7 * rowHeight }}>
+        {DAY_LABELS.map((label, i) => (
+          <span key={i} className="text-[9px] leading-none select-none" style={{ height: cellSize, color: 'var(--muted-foreground)' }}>
+            {label}
+          </span>
+        ))}
+      </div>
+
+      <div>
+        <div className="flex" style={{ gap: GAP }}>
+          {grid.map((week) => (
+            <div key={week.mondayISO} className="flex flex-col" style={{ gap: GAP }}>
+              {week.days.map((day) => (
+                <button
+                  key={day.dateISO}
+                  type="button"
+                  aria-label={`${day.dateISO}: ${day.count} registro${day.count !== 1 ? 's' : ''}`}
+                  onClick={() => day.count > 0 && onCellClick(day.dateISO)}
+                  disabled={day.count === 0}
+                  className="transition-transform disabled:cursor-default hover:scale-125"
+                  style={{
+                    width: cellSize,
+                    height: cellSize,
+                    borderRadius: 3,
+                    background: levelColor(getLevel(day.count)),
+                  }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between mt-1.5" style={{ width: weeks * rowHeight }}>
+          {grid.map((week) => (
+            <span key={week.mondayISO} className="text-[9.5px] leading-none select-none" style={{ color: 'var(--muted-foreground)' }}>
+              {getMonthLabel(week)}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="hidden sm:flex flex-col items-end gap-1 ml-auto shrink-0 self-end pb-4">
+        <div className="flex items-center gap-1">
+          <span className="text-[10px]" style={{ color: 'var(--muted-foreground)' }}>menos</span>
+          {[0, 1, 2, 3, 4].map((level) => (
+            <span key={level} style={{ width: 10, height: 10, borderRadius: 2, background: levelColor(level) }} />
+          ))}
+          <span className="text-[10px]" style={{ color: 'var(--muted-foreground)' }}>mais</span>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -125,118 +172,28 @@ function useGridStats(cells: ActivityCell[]) {
 
 export function ActivityGrid({ cells, onCellClick }: ActivityGridProps) {
   const t = useTranslations('feed')
-  const desktopGrid = useMemo(() => buildGrid(cells, WEEKS_DESKTOP).toReversed(), [cells])
-  const mobileGrid  = useMemo(() => buildGrid(cells, WEEKS_MOBILE), [cells])
   const { totalRegistros, monthCount } = useGridStats(cells)
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-0.5">
-          <h2
-            className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide"
-            style={{ color: 'var(--muted-foreground)' }}
-          >
-            <Flame size={13} aria-hidden="true" style={{ color: 'var(--color-accent)' }} />
-            {t('grid.title')}
-          </h2>
-          {totalRegistros > 0 && (
-            <p className="text-[11px] normal-case" style={{ color: 'var(--muted-foreground)' }}>
-              {t('grid.subtitle', { count: totalRegistros, months: monthCount })}
-            </p>
-          )}
-        </div>
-        <div
-          className="flex items-center gap-1 text-[10px] select-none shrink-0"
-          style={{ color: 'var(--muted-foreground)' }}
-          aria-hidden="true"
-        >
-          <span>menos</span>
-          <span style={{ fontSize: 9, opacity: 0.18 }}>{SPARK}</span>
-          <span style={{ fontSize: 9, color: 'var(--color-primary)', opacity: 0.45 }}>{SPARK}</span>
-          <span style={{ fontSize: 11, color: 'var(--color-primary)', opacity: 0.75 }}>{SPARK}</span>
-          <span style={{ fontSize: 13, color: 'var(--color-primary)', opacity: 1 }}>{SPARK}</span>
-          <span>mais</span>
-        </div>
+    <section className="rounded-xl border p-5" style={{ borderColor: 'var(--border)', background: 'var(--card)' }} role="img" aria-label="Grade de atividade">
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <Flame size={16} aria-hidden="true" style={{ color: 'var(--color-accent)' }} />
+        <span className="font-display font-semibold text-[15px]" style={{ color: 'var(--foreground)' }}>
+          {t('grid.title')}
+        </span>
+        {totalRegistros > 0 && (
+          <span className="text-[12.5px]" style={{ color: 'var(--muted-foreground)' }}>
+            · {t('grid.subtitle', { count: totalRegistros, months: monthCount })}
+          </span>
+        )}
       </div>
 
-      {/* Desktop: coluna lateral vertical, mais recente no topo, ~6 meses */}
-      <div className="hidden lg:flex flex-col gap-0.5" role="img" aria-label="Grade de atividade">
-        {/* Cabeçalho: label de mês (vazio) + dias da semana */}
-        <div className="flex items-center gap-1 mb-1">
-          <span className="w-7 shrink-0" aria-hidden="true" />
-          <div className="flex gap-0.5">
-            {DAY_LABELS.map((label, i) => (
-              <span
-                key={i}
-                className="flex items-center justify-center text-[9px] select-none"
-                style={{ width: 16, color: 'var(--muted-foreground)', opacity: 0.5 }}
-                aria-hidden="true"
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {desktopGrid.map((week) => {
-          const monthLabel = getMonthLabel(week)
-          return (
-            <div key={week.mondayISO} className="flex items-center gap-1">
-              <span
-                className="w-7 text-right text-[9px] shrink-0 select-none leading-none"
-                style={{ color: 'var(--muted-foreground)', opacity: monthLabel ? 0.7 : 0 }}
-                aria-hidden="true"
-              >
-                {monthLabel}
-              </span>
-              <div className="flex gap-0.5">
-                {week.days.map((day) => (
-                  <CellButton
-                    key={day.dateISO}
-                    dateISO={day.dateISO}
-                    count={day.count}
-                    onClick={onCellClick}
-                  />
-                ))}
-              </div>
-            </div>
-          )
-        })}
+      <div className="lg:hidden">
+        <GridBody cells={cells} weeks={WEEKS_MOBILE} cellSize={CELL_MOBILE} onCellClick={onCellClick} />
       </div>
-
-      {/* Mobile: faixa horizontal, 13 semanas, scroll sem scrollbar */}
-      <div
-        className="lg:hidden flex flex-col gap-1 overflow-x-auto"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        <div className="flex gap-0.5" role="img" aria-label="Grade de atividade">
-          {mobileGrid.map((week) => (
-            <div key={week.mondayISO} className="flex flex-col gap-0.5 shrink-0">
-              {week.days.map((day) => (
-                <CellButton
-                  key={day.dateISO}
-                  dateISO={day.dateISO}
-                  count={day.count}
-                  onClick={onCellClick}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-        {/* Rótulos de mês alinhados às colunas de semana */}
-        <div className="flex gap-0.5" aria-hidden="true">
-          {mobileGrid.map((week) => (
-            <span
-              key={week.mondayISO}
-              className="shrink-0 text-[9px] leading-none select-none"
-              style={{ width: 16, color: 'var(--muted-foreground)', opacity: getMonthLabel(week) ? 0.7 : 0 }}
-            >
-              {getMonthLabel(week)}
-            </span>
-          ))}
-        </div>
+      <div className="hidden lg:block">
+        <GridBody cells={cells} weeks={WEEKS_DESKTOP} cellSize={CELL_DESKTOP} onCellClick={onCellClick} />
       </div>
-    </div>
+    </section>
   )
 }

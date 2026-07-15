@@ -209,57 +209,44 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
         </div>
       ) : (
         <>
-          {/* Mobile: faixa horizontal de faíscas acima da lista */}
-          {showGrid && (
-            <div className="lg:hidden">
-              <ActivityGrid cells={activityCells} onCellClick={handleCellClick} />
-            </div>
-          )}
+          {/* Grade de faíscas — bloco único, full-width, acima da timeline (não mais sidebar). */}
+          {showGrid && <ActivityGrid cells={activityCells} onCellClick={handleCellClick} />}
 
-          <div className="lg:flex lg:gap-6 lg:items-start">
-            {/* Lista de registros, agrupada numa timeline por mês (FR-028) */}
-            <div className="flex-1 min-w-0 flex flex-col gap-4">
-              {monthGroups.map((group) => (
-                <section key={group.monthKey} className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3 px-1">
-                    <h2
-                      className="shrink-0 text-xs font-semibold uppercase tracking-wide"
-                      style={{ color: 'var(--muted-foreground)' }}
-                    >
-                      {group.label}
-                    </h2>
-                    <span
-                      aria-hidden="true"
-                      className="h-px flex-1"
-                      style={{ background: 'color-mix(in oklch, var(--border) 60%, transparent)' }}
+          {/* Lista de registros, agrupada numa timeline por mês (FR-028) */}
+          <div className="flex flex-col gap-4">
+            {monthGroups.map((group) => (
+              <section key={group.monthKey} className="flex flex-col gap-2">
+                <div className="flex items-center gap-3 px-1">
+                  <h2
+                    className="shrink-0 text-sm font-display font-semibold"
+                    style={{ color: 'var(--muted-foreground)' }}
+                  >
+                    {group.label}
+                  </h2>
+                  <span
+                    aria-hidden="true"
+                    className="h-px flex-1"
+                    style={{ background: 'color-mix(in oklch, var(--border) 60%, transparent)' }}
+                  />
+                  <span className="shrink-0 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                    {t('timeline.count', { count: group.items.length })}
+                  </span>
+                </div>
+                <ul className="flex flex-col gap-2">
+                  {group.items.map((item) => (
+                    <SourceCard
+                      key={item.id}
+                      item={item}
+                      variant="feed"
+                      onDelete={handleDelete}
+                      onEdit={handleEdit}
+                      contextVocabulary={contextVocabulary}
+                      onContextChange={handleContextChange}
                     />
-                    <span className="shrink-0 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                      {t('timeline.count', { count: group.items.length })}
-                    </span>
-                  </div>
-                  <ul className="flex flex-col gap-2">
-                    {group.items.map((item) => (
-                      <SourceCard
-                        key={item.id}
-                        item={item}
-                        variant="feed"
-                        onDelete={handleDelete}
-                        onEdit={handleEdit}
-                        contextVocabulary={contextVocabulary}
-                        onContextChange={handleContextChange}
-                      />
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
-
-            {/* Desktop: grade de faíscas como sidebar fixa à direita */}
-            {showGrid && (
-              <div className="hidden lg:block shrink-0 sticky top-4">
-                <ActivityGrid cells={activityCells} onCellClick={handleCellClick} />
-              </div>
-            )}
+                  ))}
+                </ul>
+              </section>
+            ))}
           </div>
 
           {nextCursor && (

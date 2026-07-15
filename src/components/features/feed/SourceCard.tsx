@@ -44,10 +44,6 @@ function formatDate(dateStr: string): string {
 
 type OrganizeButtonState = 'idle' | 'organizing' | 'done'
 
-/** Acima disso, o texto cru vem clampado por padrão (evita que uma fonte grande, ex. transcrição
- * de reunião, force scroll de página inteira — só expande sob pedido, com scroll interno). */
-const RAW_TEXT_CLAMP_THRESHOLD = 400
-
 interface OrganizeResponseBody {
   status?: string
   highlights?: FeedHighlight[]
@@ -296,31 +292,52 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
                 </button>
               </div>
             </div>
-          ) : editValue.length > RAW_TEXT_CLAMP_THRESHOLD ? (
-            <div className="flex flex-col gap-1.5">
-              <p
-                className={sourceExpanded ? 'text-sm leading-relaxed overflow-y-auto' : 'text-sm leading-relaxed line-clamp-4'}
-                style={{
-                  color: 'var(--muted-foreground)',
-                  whiteSpace: 'pre-wrap',
-                  ...(sourceExpanded ? { maxHeight: 280 } : {}),
-                }}
-              >
-                {editValue}
-              </p>
-              <button
-                type="button"
-                onClick={() => setSourceExpanded((v) => !v)}
-                className="self-start text-xs font-medium min-h-[44px] transition-opacity hover:opacity-80"
-                style={{ color: 'var(--color-primary)' }}
-              >
-                {sourceExpanded ? t('card.hideFull') : t('card.viewFull')}
-              </button>
-            </div>
           ) : (
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)', whiteSpace: 'pre-wrap' }}>
-              {editValue}
-            </p>
+            <>
+              {item.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {item.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-xs px-2 py-0.5 rounded-full"
+                      style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {(item.organized_at || variant === 'feed') && (
+                <div className="flex items-center gap-3 pt-1" style={{ borderTop: '1px solid color-mix(in oklch, var(--border) 60%, transparent)' }}>
+                  {/* Selo "Organizado pelo Borogodó" só quando a IA de fato organizou esta fonte
+                      (item.organized_at) — destaques só criados manualmente ("+ adicionar destaque")
+                      não ganham o selo, sem precisar de um campo novo no banco para distinguir. */}
+                  {item.organized_at ? (
+                    <span
+                      className="inline-flex items-center gap-1.5 flex-1 min-w-0 text-xs font-medium"
+                      style={{ color: 'var(--muted-foreground)' }}
+                    >
+                      <Sparkles size={12} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                      {tRegistro('organizedBy')}
+                    </span>
+                  ) : (
+                    <span className="flex-1" />
+                  )}
+                  {variant === 'feed' && !editing && (
+                    <button
+                      type="button"
+                      onClick={() => setEditing(true)}
+                      className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[44px] rounded-full border shrink-0 transition-opacity hover:opacity-80"
+                      style={{ color: 'var(--color-primary)', borderColor: 'var(--border)' }}
+                    >
+                      <Pencil size={12} aria-hidden="true" />
+                      {t('card.edit')}
+                    </button>
+                  )}
+                </div>
+              )}
+            </>
           )}
 
           {variant === 'feed' && (
@@ -335,18 +352,6 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
 
           {variant === 'feed' && highlights.length > 0 && (
             <div className="flex flex-col gap-2">
-              {/* Selo "Organizado pelo Borogodó" só quando a IA de fato organizou esta fonte
-                  (item.organized_at) — destaques só criados manualmente ("+ adicionar destaque")
-                  não ganham o selo, sem precisar de um campo novo no banco para distinguir. */}
-              {item.organized_at && (
-                <span
-                  className="inline-flex w-fit items-center gap-1.5 text-xs font-medium"
-                  style={{ color: 'var(--color-primary)' }}
-                >
-                  <Sparkles size={12} aria-hidden="true" />
-                  {tRegistro('organizedBy')}
-                </span>
-              )}
               {highlights.map((highlight, index) => (
                 <HighlightCard
                   key={highlight.id}
@@ -397,17 +402,30 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
             </span>
           )}
 
-          {item.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {item.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-xs px-2 py-0.5 rounded-full"
-                  style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+          {!editing && (
+            <div className="flex flex-col gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSourceExpanded((v) => !v)}
+                className="self-start text-xs font-medium min-h-[44px] transition-opacity hover:opacity-80"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                {sourceExpanded ? t('card.hideFull') : t('card.viewFull')}
+              </button>
+              {sourceExpanded && (
+                <p
+                  className="text-sm leading-relaxed overflow-y-auto rounded-lg border p-3"
+                  style={{
+                    color: 'var(--muted-foreground)',
+                    whiteSpace: 'pre-wrap',
+                    maxHeight: 280,
+                    borderColor: 'var(--border)',
+                    background: 'var(--muted)',
+                  }}
                 >
-                  {tag}
-                </span>
-              ))}
+                  {editValue}
+                </p>
+              )}
             </div>
           )}
 
@@ -442,18 +460,6 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
                 </button>
               )
             })()}
-
-            {variant === 'feed' && !editing && (
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[48px] rounded-full transition-opacity hover:opacity-80"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                <Pencil size={12} aria-hidden="true" />
-                {t('card.edit')}
-              </button>
-            )}
 
             {variant === 'feed' && onDelete && !editing && (
               <button

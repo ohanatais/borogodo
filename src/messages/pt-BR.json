@@ -827,8 +827,8 @@
         "confirm": "Excluir"
       },
       "highlightsBadge": "+{count} destaques",
-      "viewFull": "Ver texto completo",
-      "hideFull": "Recolher texto"
+      "viewFull": "Ver fonte completa",
+      "hideFull": "Ocultar fonte"
     },
     "grid": {
       "title": "Suas faíscas",
