@@ -4,7 +4,7 @@ import { triggerProactiveInsight as generateProactiveInsight } from '@/lib/ai/in
 import { getSupabaseAdmin } from '@/lib/db/supabaseAdmin'
 import { getEnrichmentNudge } from '@/lib/panel/getEnrichmentNudge'
 import { organizeEntry } from '@/lib/entries/organizeEntry'
-import { isOrganizingRecently } from '@/lib/entries/organizationStatus'
+import { tryAcquireOrganizingLock } from '@/lib/entries/organizingLock'
 
 /**
  * Costura da feature 005-panel: delega para o corpo real (geração via Haiku, persistência
@@ -50,48 +50,22 @@ export async function triggerEnrichmentNudge(userId: string): Promise<void> {
   await getEnrichmentNudge(userId, entries, existing)
 }
 
-interface OrganizingStateRow {
-  organizing_started_at: string | null
-}
-
 /**
  * Dispara a organização assíncrona (US3, feature 026) quando o registro é salvo sem clicar em
- * "Organizar" (FR-009) — reusa `organizeEntry` (US1) e o mesmo lock de `organizing_started_at`
- * (FR-031) do clique manual, para nunca disparar duas chamadas de IA simultâneas para a mesma
- * fonte. Usa o client `service_role` (como os demais jobs deste arquivo) porque roda fora do ciclo
- * de request com cookie de sessão. Nunca lança — falha de IA já é tratada dentro de `organizeEntry`
+ * "Organizar" (FR-009) — reusa `organizeEntry` (US1) e o mesmo lock atômico de
+ * `organizing_started_at` (`tryAcquireOrganizingLock`, FR-031) do clique manual, para nunca
+ * disparar duas chamadas de IA simultâneas para a mesma fonte — inclusive quando este job e um
+ * clique manual em "Organizar" competem pela mesma fonte nos primeiros instantes após salvar.
+ * Usa o client `service_role` (como os demais jobs deste arquivo) porque roda fora do ciclo de
+ * request com cookie de sessão. Nunca lança — falha de IA já é tratada dentro de `organizeEntry`
  * (FR-030), e qualquer outro erro aqui é só logado, coerente com `fireAndForget`.
  */
 export async function triggerOrganizeEntry(userId: string, entryId: string): Promise<void> {
   const admin = getSupabaseAdmin()
 
   try {
-    const { data, error } = await admin
-      .from('entries')
-      .select('organizing_started_at')
-      .eq('id', entryId)
-      .eq('user_id', userId)
-      .maybeSingle()
-
-    if (error) {
-      logger.error('organize_lock_read_failed', { entryId, message: error.message })
-      return
-    }
-    if (!data) return
-
-    const { organizing_started_at: organizingStartedAt } = data as OrganizingStateRow
-    if (isOrganizingRecently(organizingStartedAt)) return
-
-    const { error: lockError } = await admin
-      .from('entries')
-      .update({ organizing_started_at: new Date().toISOString() })
-      .eq('id', entryId)
-      .eq('user_id', userId)
-
-    if (lockError) {
-      logger.error('organize_lock_write_failed', { entryId })
-      return
-    }
+    const lock = await tryAcquireOrganizingLock(admin as never, entryId, userId)
+    if (lock !== 'acquired') return
 
     await organizeEntry(admin as never, userId, entryId)
   } catch (jobError: unknown) {

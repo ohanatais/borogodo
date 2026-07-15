@@ -20,25 +20,33 @@ vi.mock('@/lib/db/supabaseAdmin', () => ({
 
 import { triggerOrganizeEntry } from '@/lib/ai/extraction/jobs'
 
-function makeAdmin(options: { organizingStartedAt?: string | null; selectError?: unknown; lockError?: unknown }) {
-  const { organizingStartedAt = null, selectError = null, lockError = null } = options
-
-  const selectBuilder = {
-    select: vi.fn(() => selectBuilder),
-    eq: vi.fn(() => selectBuilder),
-    maybeSingle: vi.fn(async () => ({ data: { organizing_started_at: organizingStartedAt }, error: selectError })),
-  }
+/**
+ * Simula `tryAcquireOrganizingLock` (`src/lib/entries/organizingLock.ts`) — o lock passou a ser
+ * um único `UPDATE ... WHERE organizing_started_at IS NULL OR organizing_started_at < cutoff`
+ * (atômico), não mais um `SELECT` seguido de `UPDATE` separados. `lockAcquired: false` simula a
+ * linha não casando o `UPDATE` (já organizando ou não encontrada); `existingRow: null` faz a
+ * checagem de fallback (`SELECT ... maybeSingle`) tratar isso como fonte inexistente.
+ */
+function makeAdmin(options: { lockAcquired?: boolean; existingRow?: { id: string } | null } = {}) {
+  const { lockAcquired = true, existingRow = { id: 'entry-1' } } = options
 
   const updateBuilder = {
     update: vi.fn(() => updateBuilder),
     eq: vi.fn(() => updateBuilder),
-    then: (resolve: (v: { data: null; error: unknown }) => unknown) => resolve({ data: null, error: lockError }),
+    or: vi.fn(() => updateBuilder),
+    select: vi.fn(async () => ({ data: lockAcquired ? [{ id: 'entry-1' }] : [], error: null })),
+  }
+
+  const selectBuilder = {
+    select: vi.fn(() => selectBuilder),
+    eq: vi.fn(() => selectBuilder),
+    maybeSingle: vi.fn(async () => ({ data: existingRow, error: null })),
   }
 
   let callCount = 0
   const from = vi.fn(() => {
     callCount += 1
-    return callCount === 1 ? selectBuilder : updateBuilder
+    return callCount === 1 ? updateBuilder : selectBuilder
   })
 
   return { from }
@@ -49,8 +57,8 @@ describe('triggerOrganizeEntry (US3 — organização assíncrona no salvar)', (
     vi.clearAllMocks()
   })
 
-  it('T036 — chama organizeEntry quando não há organização em andamento', async () => {
-    const admin = makeAdmin({})
+  it('T036 — chama organizeEntry quando adquire o lock (nenhuma organização em andamento)', async () => {
+    const admin = makeAdmin({ lockAcquired: true })
     mockGetSupabaseAdmin.mockReturnValue(admin)
 
     await triggerOrganizeEntry('user-1', 'entry-1')
@@ -60,7 +68,7 @@ describe('triggerOrganizeEntry (US3 — organização assíncrona no salvar)', (
   })
 
   it('T036 — não chama organizeEntry quando já há uma organização recente em andamento (guarda de concorrência, FR-031)', async () => {
-    const admin = makeAdmin({ organizingStartedAt: new Date().toISOString() })
+    const admin = makeAdmin({ lockAcquired: false, existingRow: { id: 'entry-1' } })
     mockGetSupabaseAdmin.mockReturnValue(admin)
 
     await triggerOrganizeEntry('user-1', 'entry-1')
@@ -69,7 +77,7 @@ describe('triggerOrganizeEntry (US3 — organização assíncrona no salvar)', (
   })
 
   it('T035/FR-030 — falha de organizeEntry não lança e não bloqueia o disparo assíncrono', async () => {
-    const admin = makeAdmin({})
+    const admin = makeAdmin({ lockAcquired: true })
     mockGetSupabaseAdmin.mockReturnValue(admin)
     mockOrganizeEntry.mockRejectedValueOnce(new Error('falha de IA'))
 
@@ -77,15 +85,12 @@ describe('triggerOrganizeEntry (US3 — organização assíncrona no salvar)', (
   })
 
   it('não chama organizeEntry quando a fonte não é encontrada', async () => {
-    const selectBuilder = {
-      select: vi.fn(() => selectBuilder),
-      eq: vi.fn(() => selectBuilder),
-      maybeSingle: vi.fn(async () => ({ data: null, error: null })),
-    }
-    mockGetSupabaseAdmin.mockReturnValue({ from: vi.fn(() => selectBuilder) })
+    const admin = makeAdmin({ lockAcquired: false, existingRow: null })
+    mockGetSupabaseAdmin.mockReturnValue(admin)
 
     await triggerOrganizeEntry('user-1', 'entry-inexistente')
 
     expect(mockOrganizeEntry).not.toHaveBeenCalled()
   })
+
 })
