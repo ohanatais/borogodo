@@ -830,6 +830,13 @@
       "viewFull": "View full text",
       "hideFull": "Collapse text"
     },
+    "grid": {
+      "title": "Your sparks",
+      "subtitle": "{count, plural, one {# record} other {# records}} over {months, plural, one {# month} other {# months}}"
+    },
+    "timeline": {
+      "count": "{count, plural, one {# record} other {# records}}"
+    },
     "pagination": {
       "loadMore": "Load more",
       "loading": "Loading..."
@@ -1062,6 +1069,7 @@
       "ctaAgain": "Organizar de novo",
       "organizing": "Organizando…"
     },
+    "organizedBy": "Organizado pelo Borogodó",
     "context": {
       "unresolvedLabel": "sem contexto ainda",
       "personalProjectLabel": "Projeto pessoal",

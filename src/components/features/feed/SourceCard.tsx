@@ -217,7 +217,7 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
         )}
         <span className="flex-1 min-w-0">
           <span className="flex items-center gap-1.5">
-            <span className="block font-medium text-sm leading-snug">
+            <span className="block font-display font-semibold text-[15px] leading-snug">
               {item.title}
             </span>
             {/* FR-025: selo de contagem só quando há mais de 1 destaque — com exatamente 1, FR-017
@@ -225,13 +225,18 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
             {highlightsCount > 1 && (
               <span
                 className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full"
-                style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+                style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
               >
                 {t('card.highlightsBadge', { count: highlightsCount })}
               </span>
             )}
           </span>
           <span className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            {item.metric && (
+              <span className="font-medium" style={{ color: 'var(--color-accent-text)' }}>
+                {item.metric}
+              </span>
+            )}
             <span>{dateLabel}</span>
             {item.is_personal_project ? (
               <span>· {tRegistro('context.personalProjectLabel')}</span>
@@ -330,11 +335,24 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
 
           {variant === 'feed' && highlights.length > 0 && (
             <div className="flex flex-col gap-2">
-              {highlights.map((highlight) => (
+              {/* Selo "Organizado pelo Borogodó" só quando a IA de fato organizou esta fonte
+                  (item.organized_at) — destaques só criados manualmente ("+ adicionar destaque")
+                  não ganham o selo, sem precisar de um campo novo no banco para distinguir. */}
+              {item.organized_at && (
+                <span
+                  className="inline-flex w-fit items-center gap-1.5 text-xs font-medium"
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  <Sparkles size={12} aria-hidden="true" />
+                  {tRegistro('organizedBy')}
+                </span>
+              )}
+              {highlights.map((highlight, index) => (
                 <HighlightCard
                   key={highlight.id}
                   entryId={item.id}
                   highlight={highlight}
+                  index={index + 1}
                   defaultOpen={highlights.length === 1}
                   onUpdate={handleHighlightUpdate}
                   onDelete={handleHighlightDelete}

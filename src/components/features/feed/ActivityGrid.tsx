@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
+import { Flame } from 'lucide-react'
 import type { ActivityCell } from '@/lib/feed/types'
 
 interface ActivityGridProps {
@@ -110,21 +112,42 @@ function CellButton({
   )
 }
 
+/** Contagem real (não mockada) de registros/meses cobertos pela janela de células recebida —
+ * alimenta o subtítulo "N registros em M meses" da grade-faísca. */
+function useGridStats(cells: ActivityCell[]) {
+  return useMemo(() => {
+    const activeCells = cells.filter((c) => c.count > 0)
+    const totalRegistros = activeCells.reduce((sum, c) => sum + c.count, 0)
+    const monthKeys = new Set(activeCells.map((c) => c.date.slice(0, 7)))
+    return { totalRegistros, monthCount: monthKeys.size }
+  }, [cells])
+}
+
 export function ActivityGrid({ cells, onCellClick }: ActivityGridProps) {
+  const t = useTranslations('feed')
   const desktopGrid = useMemo(() => buildGrid(cells, WEEKS_DESKTOP).toReversed(), [cells])
   const mobileGrid  = useMemo(() => buildGrid(cells, WEEKS_MOBILE), [cells])
+  const { totalRegistros, monthCount } = useGridStats(cells)
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-2">
-        <h2
-          className="text-xs font-semibold uppercase tracking-wide"
-          style={{ color: 'var(--muted-foreground)' }}
-        >
-          Atividade
-        </h2>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col gap-0.5">
+          <h2
+            className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide"
+            style={{ color: 'var(--muted-foreground)' }}
+          >
+            <Flame size={13} aria-hidden="true" style={{ color: 'var(--color-accent)' }} />
+            {t('grid.title')}
+          </h2>
+          {totalRegistros > 0 && (
+            <p className="text-[11px] normal-case" style={{ color: 'var(--muted-foreground)' }}>
+              {t('grid.subtitle', { count: totalRegistros, months: monthCount })}
+            </p>
+          )}
+        </div>
         <div
-          className="flex items-center gap-1 text-[10px] select-none"
+          className="flex items-center gap-1 text-[10px] select-none shrink-0"
           style={{ color: 'var(--muted-foreground)' }}
           aria-hidden="true"
         >

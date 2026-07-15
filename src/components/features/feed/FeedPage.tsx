@@ -221,12 +221,22 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
             <div className="flex-1 min-w-0 flex flex-col gap-4">
               {monthGroups.map((group) => (
                 <section key={group.monthKey} className="flex flex-col gap-2">
-                  <h2
-                    className="text-xs font-semibold uppercase tracking-wide px-1"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    {group.label}
-                  </h2>
+                  <div className="flex items-center gap-3 px-1">
+                    <h2
+                      className="shrink-0 text-xs font-semibold uppercase tracking-wide"
+                      style={{ color: 'var(--muted-foreground)' }}
+                    >
+                      {group.label}
+                    </h2>
+                    <span
+                      aria-hidden="true"
+                      className="h-px flex-1"
+                      style={{ background: 'color-mix(in oklch, var(--border) 60%, transparent)' }}
+                    />
+                    <span className="shrink-0 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                      {t('timeline.count', { count: group.items.length })}
+                    </span>
+                  </div>
                   <ul className="flex flex-col gap-2">
                     {group.items.map((item) => (
                       <SourceCard

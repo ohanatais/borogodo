@@ -830,6 +830,13 @@
       "viewFull": "Ver texto completo",
       "hideFull": "Recolher texto"
     },
+    "grid": {
+      "title": "Suas faíscas",
+      "subtitle": "{count, plural, one {# registro} other {# registros}} em {months, plural, one {# mês} other {# meses}}"
+    },
+    "timeline": {
+      "count": "{count, plural, one {# registro} other {# registros}}"
+    },
     "pagination": {
       "loadMore": "Carregar mais",
       "loading": "Carregando..."
@@ -1062,6 +1069,7 @@
       "ctaAgain": "Organizar de novo",
       "organizing": "Organizando…"
     },
+    "organizedBy": "Organizado pelo Borogodó",
     "context": {
       "unresolvedLabel": "sem contexto ainda",
       "personalProjectLabel": "Projeto pessoal",
