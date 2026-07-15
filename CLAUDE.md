@@ -66,6 +66,11 @@ Plan: [specs/026-organizar-destaques/plan.md](specs/026-organizar-destaques/plan
 migration nova (`016_entry_highlights.sql`, tabela de destaques + 3 colunas aditivas em
 `entries`), reusa `fireAndForget`/`dispatchAsyncJobs` já existente para o disparo assíncrono ·
 Tasks: [specs/026-organizar-destaques/tasks.md](specs/026-organizar-destaques/tasks.md) — 68
-tasks em 10 fases (Setup, Foundational, US1→US2→US3→US4→US6 P1, US5→US7 P2, Polish); falta
-`/impeccable shape` e `/speckit-implement`
+tasks em 10 fases (Setup, Foundational, US1→US2→US3→US4→US6 P1, US5→US7 P2, Polish).
+Shape de UX: [specs/026-organizar-destaques/ux-shape.md](specs/026-organizar-destaques/ux-shape.md)
+— produzido pelo `/impeccable shape` sem rodada interativa (sessão delegada sem canal de pergunta
+em tempo real); decisões (dois níveis fonte→destaque, seletor de pílulas com busca acima de 8
+itens, sem Framer Motion no collapse) reusam a gramática visual já existente
+(`EntryCard`/`DetailsFields`) — **pendente revisão da Ohana** antes do `/speckit-implement`,
+especialmente a copy do indicador "contexto não identificado". Falta `/speckit-implement`.
 <!-- SPECKIT END -->
