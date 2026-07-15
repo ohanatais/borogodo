@@ -62,5 +62,8 @@ streak). Spec ✅**
 > antes de investir mais ali. Ver checklist para o histórico completo da revisão.
 > Contexto: `docs/decisions/003-registro-deposito-e-captura.md`.
 Spec: [specs/026-organizar-destaques/spec.md](specs/026-organizar-destaques/spec.md) ·
-Plan: (pendente — `/speckit-clarify` → `/speckit-plan`)
+Plan: [specs/026-organizar-destaques/plan.md](specs/026-organizar-destaques/plan.md) — confirma
+migration nova (`016_entry_highlights.sql`, tabela de destaques + 3 colunas aditivas em
+`entries`), reusa `fireAndForget`/`dispatchAsyncJobs` já existente para o disparo assíncrono ·
+Tasks: (pendente — `/speckit-tasks`)
 <!-- SPECKIT END -->
