@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { EntryCard } from '../EntryCard'
+import { SourceCard } from '../SourceCard'
 import type { FeedItem } from '@/lib/feed/types'
 
 const BASE_ITEM: FeedItem = {
@@ -23,19 +23,22 @@ const BASE_ITEM: FeedItem = {
   file_name: null,
   organized_at: null,
   organizing_started_at: null,
+  highlights: [],
+  organizationStatus: 'not_organized' as const,
+  contextStatus: 'unresolved' as const,
 }
 
 function expandCard() {
   fireEvent.click(screen.getByRole('button', { name: 'card.expand' }))
 }
 
-describe('EntryCard — botão Organizar (US1, feature 026)', () => {
+describe('SourceCard — botão Organizar (US1, feature 026)', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn())
   })
 
   it('mostra o CTA "organize.cta" quando a fonte ainda não foi organizada', () => {
-    render(<EntryCard item={BASE_ITEM} variant="feed" />)
+    render(<SourceCard item={BASE_ITEM} variant="feed" />)
     expandCard()
 
     expect(screen.getByRole('button', { name: 'organize.cta' })).toBeInTheDocument()
@@ -51,7 +54,7 @@ describe('EntryCard — botão Organizar (US1, feature 026)', () => {
       vi.fn(() => fetchPromise)
     )
 
-    render(<EntryCard item={BASE_ITEM} variant="feed" />)
+    render(<SourceCard item={BASE_ITEM} variant="feed" />)
     expandCard()
     fireEvent.click(screen.getByRole('button', { name: 'organize.cta' }))
 
@@ -70,7 +73,7 @@ describe('EntryCard — botão Organizar (US1, feature 026)', () => {
     const fetchMock = vi.fn((_url: string, _init?: RequestInit) => fetchPromise)
     vi.stubGlobal('fetch', fetchMock)
 
-    render(<EntryCard item={BASE_ITEM} variant="feed" />)
+    render(<SourceCard item={BASE_ITEM} variant="feed" />)
     expandCard()
     fireEvent.click(screen.getByRole('button', { name: 'organize.cta' }))
     fireEvent.click(screen.getByRole('button', { name: 'organize.organizing' }))
@@ -84,7 +87,7 @@ describe('EntryCard — botão Organizar (US1, feature 026)', () => {
   it('volta para o estado "Organizar" (não "de novo") quando a organização falha (FR-030, sem popup)', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: 'failed' }) }))
 
-    render(<EntryCard item={BASE_ITEM} variant="feed" />)
+    render(<SourceCard item={BASE_ITEM} variant="feed" />)
     expandCard()
     fireEvent.click(screen.getByRole('button', { name: 'organize.cta' }))
 
@@ -95,7 +98,7 @@ describe('EntryCard — botão Organizar (US1, feature 026)', () => {
   it('volta para o estado "Organizar" quando a chamada de rede falha', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network error')))
 
-    render(<EntryCard item={BASE_ITEM} variant="feed" />)
+    render(<SourceCard item={BASE_ITEM} variant="feed" />)
     expandCard()
     fireEvent.click(screen.getByRole('button', { name: 'organize.cta' }))
 
@@ -103,31 +106,31 @@ describe('EntryCard — botão Organizar (US1, feature 026)', () => {
   })
 })
 
-describe('EntryCard — contexto por pílulas (US2, feature 026)', () => {
+describe('SourceCard — contexto por pílulas (US2, feature 026)', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn())
   })
 
   it('T032 — sinaliza "contexto não identificado" de forma discreta quando nem empresa nem projeto pessoal foram resolvidos (FR-008)', () => {
-    render(<EntryCard item={BASE_ITEM} variant="feed" contextVocabulary={[]} />)
+    render(<SourceCard item={BASE_ITEM} variant="feed" contextVocabulary={[]} />)
 
     expect(screen.getByText('context.unresolvedLabel')).toBeInTheDocument()
   })
 
   it('não mostra a sinalização de contexto não identificado quando a empresa já está resolvida', () => {
-    render(<EntryCard item={{ ...BASE_ITEM, company: 'Acme Corp' }} variant="feed" contextVocabulary={['Acme Corp']} />)
+    render(<SourceCard item={{ ...BASE_ITEM, company: 'Acme Corp' }} variant="feed" contextVocabulary={['Acme Corp']} />)
 
     expect(screen.queryByText('context.unresolvedLabel')).not.toBeInTheDocument()
   })
 
   it('não mostra a sinalização quando "Projeto pessoal" foi selecionado, mesmo sem empresa', () => {
-    render(<EntryCard item={{ ...BASE_ITEM, is_personal_project: true }} variant="feed" contextVocabulary={[]} />)
+    render(<SourceCard item={{ ...BASE_ITEM, is_personal_project: true }} variant="feed" contextVocabulary={[]} />)
 
     expect(screen.queryByText('context.unresolvedLabel')).not.toBeInTheDocument()
   })
 
   it('T030 — renderiza o ContextPillPicker dentro do card expandido, com o vocabulário recebido', () => {
-    render(<EntryCard item={BASE_ITEM} variant="feed" contextVocabulary={['Acme Corp']} />)
+    render(<SourceCard item={BASE_ITEM} variant="feed" contextVocabulary={['Acme Corp']} />)
     expandCard()
 
     expect(screen.getByRole('button', { name: 'Acme Corp' })).toBeInTheDocument()
@@ -138,7 +141,7 @@ describe('EntryCard — contexto por pílulas (US2, feature 026)', () => {
     vi.mocked(fetch).mockResolvedValue({ ok: true, json: async () => ({ ok: true }) } as Response)
     const onContextChange = vi.fn()
     render(
-      <EntryCard item={BASE_ITEM} variant="feed" contextVocabulary={['Acme Corp']} onContextChange={onContextChange} />
+      <SourceCard item={BASE_ITEM} variant="feed" contextVocabulary={['Acme Corp']} onContextChange={onContextChange} />
     )
     expandCard()
 
@@ -147,5 +150,61 @@ describe('EntryCard — contexto por pílulas (US2, feature 026)', () => {
     await waitFor(() =>
       expect(onContextChange).toHaveBeenCalledWith('entry-1', { company: 'Acme Corp', isPersonalProject: false })
     )
+  })
+})
+
+describe('SourceCard — 1 card por fonte (T058, US7, FR-025/FR-027)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn())
+  })
+
+  it('FR-025 — mostra o selo de contagem quando a fonte tem mais de 1 destaque', () => {
+    render(
+      <SourceCard
+        item={{
+          ...BASE_ITEM,
+          highlights: [
+            { id: 'h1', title: 'Destaque 1', metric: null, impact: null, tags: [] },
+            { id: 'h2', title: 'Destaque 2', metric: null, impact: null, tags: [] },
+            { id: 'h3', title: 'Destaque 3', metric: null, impact: null, tags: [] },
+          ],
+        }}
+        variant="feed"
+      />
+    )
+
+    expect(screen.getByText('card.highlightsBadge')).toBeInTheDocument()
+  })
+
+  it('FR-025 — não mostra selo quando a fonte tem exatamente 1 destaque', () => {
+    render(
+      <SourceCard
+        item={{ ...BASE_ITEM, highlights: [{ id: 'h1', title: 'Único destaque', metric: null, impact: null, tags: [] }] }}
+        variant="feed"
+      />
+    )
+
+    expect(screen.queryByText('card.highlightsBadge')).not.toBeInTheDocument()
+  })
+
+  it('FR-027 — mostra a miniatura real da imagem anexada em vez do ícone genérico por tipo', () => {
+    render(<SourceCard item={{ ...BASE_ITEM, thumbnail: 'https://cdn.example.com/foto.png' }} variant="feed" />)
+
+    const thumb = screen.getByRole('presentation', { hidden: true })
+    expect(thumb).toHaveAttribute('src', 'https://cdn.example.com/foto.png')
+  })
+
+  it('FR-027 — sem evidência de imagem, mostra o ícone genérico por tipo (comportamento herdado)', () => {
+    render(<SourceCard item={{ ...BASE_ITEM, thumbnail: null }} variant="feed" />)
+
+    expect(screen.queryByRole('presentation', { hidden: true })).not.toBeInTheDocument()
+  })
+
+  it('Acceptance Scenario 6 (US7) — sinalização de contexto não identificado permanece discreta no header, não um badge de alerta', () => {
+    render(<SourceCard item={{ ...BASE_ITEM, company: null, is_personal_project: false }} variant="feed" />)
+
+    const unresolved = screen.getByText('context.unresolvedLabel')
+    expect(unresolved).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

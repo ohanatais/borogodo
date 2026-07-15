@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useTranslations } from 'next-intl'
 import { Trash2, Pencil, Check, X, ChevronDown, ChevronUp, Paperclip, Sparkles, Plus } from 'lucide-react'
-import type { FeedItem } from '@/lib/feed/types'
-import type { EntryHighlight, EntrySource } from '@/types/entry'
+import type { FeedHighlight, FeedItem } from '@/lib/feed/types'
+import type { EntrySource } from '@/types/entry'
 import { UsarButton } from '@/components/features/content/UsarButton'
 import { AttachTile } from '@/components/features/capture/AttachTile'
 import { ContextPillPicker } from './ContextPillPicker'
@@ -13,14 +13,14 @@ import { HighlightCard } from './HighlightCard'
 import { deriveContextStatus } from '@/lib/entries/contextStatus'
 import { deriveOrganizationStatus } from '@/lib/entries/organizationStatus'
 
-interface EntryCardProps {
+interface SourceCardProps {
   item: FeedItem
   variant: 'feed' | 'panel'
   onDelete?: (id: string) => void
   onEdit?: (id: string, what_i_did: string) => void
   /** Vocabulário de contextos da pessoa (Story 2) — empresas já usadas, alimenta o `ContextPillPicker`. */
   contextVocabulary?: string[]
-  /** Notifica o pai da nova seleção de contexto, após o `PATCH` confirmar sucesso. */
+  /** Notifica o pai da nova seleção de contexto, após o `PATCH` (ou o "Organizar") confirmar sucesso. */
   onContextChange?: (id: string, next: { company: string | null; isPersonalProject: boolean }) => void
 }
 
@@ -44,7 +44,20 @@ function formatDate(dateStr: string): string {
 
 type OrganizeButtonState = 'idle' | 'organizing' | 'done'
 
-export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary = [], onContextChange }: EntryCardProps) {
+interface OrganizeResponseBody {
+  status?: string
+  highlights?: FeedHighlight[]
+  company?: string | null
+  is_personal_project?: boolean
+}
+
+/**
+ * Card de uma FONTE no feed de Registros (US7, feature 026) — 1 card por fonte, nunca por
+ * destaque (FR-025). Consolida o que antes vivia espalhado como `EntryCard`: os destaques agora
+ * chegam prontos em `item.highlights` (join feito em `getFeedData`, ver `contracts/feed.md`) —
+ * não há mais fetch lazy por card ao expandir.
+ */
+export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary = [], onContextChange }: SourceCardProps) {
   const t = useTranslations('feed')
   const tRegistro = useTranslations('registro')
   const [expanded, setExpanded] = useState(false)
@@ -53,8 +66,10 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
   const contextStatus = deriveContextStatus(item.company, item.is_personal_project)
   // US3 (feature 026): fonte da verdade do servidor para "organizando…" — cobre tanto o disparo
   // assíncrono (salvar sem clicar em Organizar) quanto uma organização manual iniciada em outra
-  // aba/sessão. Nunca fica presa: uma organização travada além do timeout volta a "not_organized"
-  // (FR-030), então o rótulo nunca vira permanente.
+  // aba/sessão. Derivado ao vivo (não de `item.organizationStatus`, que `getFeedData` também
+  // calcula): uma organização travada além do timeout (FR-030) precisa se autocorrigir no
+  // cliente sem esperar um novo carregamento do feed — um valor congelado no momento do SSR não
+  // se autocorrigiria.
   const serverOrganizationStatus = deriveOrganizationStatus(item.organized_at, item.organizing_started_at)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -63,43 +78,17 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
   // US1 (feature 026): "Organizar" é opcional e local ao card — sem popup em falha (FR-030), sem
   // rótulo persistente além de "Organizar de novo" no sucesso (ux-shape.md §6).
   const [organizeState, setOrganizeState] = useState<OrganizeButtonState>('idle')
-  // US4 (feature 026): destaques da fonte, buscados sob demanda ao expandir (não vêm de
-  // `FeedItem` ainda — o join com `entry_highlights` em `getFeedData` é escopo de US7/T059, fora
-  // desta fase). Isolado por fonte: cada card busca e gerencia sua própria lista.
-  const [highlights, setHighlights] = useState<EntryHighlight[] | null>(null)
-  // `useRef` (não `useState`) de propósito: só serve de guarda para não refazer a busca a cada
-  // expand/collapse — se fosse estado, setá-la dentro do efeito dispararia uma nova execução
-  // (dependência mudou) cujo cleanup cancelaria o fetch em andamento antes dele resolver.
-  const highlightsLoadedRef = useRef(false)
+  // US7 (feature 026): destaques da fonte já vêm prontos em `item.highlights` (sem fetch lazy) —
+  // este estado local existe só para refletir CRUD otimista (adicionar/editar/remover destaque,
+  // e os destaques novos que "Organizar" insere) sem esperar um novo carregamento do feed.
+  const [highlights, setHighlights] = useState<FeedHighlight[]>(item.highlights)
 
-  useEffect(() => {
-    if (variant !== 'feed' || !expanded || highlightsLoadedRef.current) return
-    highlightsLoadedRef.current = true
-    let cancelled = false
-
-    async function loadHighlights() {
-      try {
-        const res = await fetch(`/api/entries/${item.id}/highlights`)
-        if (!res?.ok) return
-        const body = (await res.json()) as { highlights?: EntryHighlight[] } | null
-        if (!cancelled && body?.highlights) setHighlights(body.highlights)
-      } catch {
-        // silencioso — mesmo padrão de falha não bloqueante do restante do card.
-      }
-    }
-
-    void loadHighlights()
-    return () => {
-      cancelled = true
-    }
-  }, [variant, expanded, item.id])
-
-  function handleHighlightUpdate(updated: EntryHighlight) {
-    setHighlights((current) => (current ?? []).map((h) => (h.id === updated.id ? updated : h)))
+  function handleHighlightUpdate(updated: FeedHighlight) {
+    setHighlights((current) => current.map((h) => (h.id === updated.id ? updated : h)))
   }
 
   function handleHighlightDelete(highlightId: string) {
-    setHighlights((current) => (current ?? []).filter((h) => h.id !== highlightId))
+    setHighlights((current) => current.filter((h) => h.id !== highlightId))
   }
 
   /**
@@ -109,9 +98,9 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
   async function handleAddHighlight() {
     try {
       const res = await fetch(`/api/entries/${item.id}/highlights`, { method: 'POST' })
-      const body = (await res.json().catch(() => null)) as { highlight?: EntryHighlight } | null
+      const body = (await res.json().catch(() => null)) as { highlight?: FeedHighlight } | null
       if (res.ok && body?.highlight) {
-        setHighlights((current) => [...(current ?? []), body.highlight as EntryHighlight])
+        setHighlights((current) => [...current, body.highlight as FeedHighlight])
       }
     } catch {
       // silencioso — mesmo padrão de falha não bloqueante do restante do card (ux-shape.md §7).
@@ -154,7 +143,9 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
    * Dispara "Organizar" (POST /api/entries/[id]/organize, US1). Guarda de duplo clique local:
    * o botão fica `disabled` assim que `organizeState` vira 'organizing' (ux-shape.md §7).
    * Falha de IA (status: 'failed') ou de rede volta ao estado inicial silenciosamente — sem popup
-   * (FR-030) — permitindo nova tentativa clicando "Organizar" de novo.
+   * (FR-030) — permitindo nova tentativa clicando "Organizar" de novo. Os destaques inseridos e
+   * o contexto resolvido pela IA (quando ainda vazio, FR-002/FR-006) são mesclados localmente —
+   * sem isso, eles só apareceriam depois de um novo carregamento da página.
    */
   async function handleOrganize() {
     // Idempotência (FR-031): se a organização assíncrona já está em andamento, o clique manual
@@ -164,12 +155,37 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
     setOrganizeState('organizing')
     try {
       const res = await fetch(`/api/entries/${item.id}/organize`, { method: 'POST' })
-      const body = (await res.json().catch(() => null)) as { status?: string } | null
-      setOrganizeState(res.ok && body?.status === 'organized' ? 'done' : 'idle')
+      const body = (await res.json().catch(() => null)) as OrganizeResponseBody | null
+      if (res.ok && body?.status === 'organized') {
+        setOrganizeState('done')
+        if (body.highlights?.length) {
+          // FR-032: uma fonte nunca organizada mostra um destaque SINTÉTICO (id === item.id, ver
+          // `getFeedData.syntheticHighlight`) representando os campos legados — ele não tem linha
+          // própria em `entry_highlights`. Ao organizar com sucesso, os destaques reais retornados
+          // substituem esse placeholder (senão ele ficaria "fantasma" na lista, duplicando o
+          // título antigo ao lado dos destaques novos). Uma fonte já organizada não tem esse
+          // placeholder (todo highlight ali já é real), então o filtro não remove nada — os novos
+          // destaques só se somam aos existentes (FR-014, "organizar" nunca sobrescreve).
+          setHighlights((current) => [
+            ...current.filter((h) => h.id !== item.id),
+            ...(body.highlights as FeedHighlight[]),
+          ])
+        }
+        if (variant === 'feed' && (body.company !== undefined || body.is_personal_project !== undefined)) {
+          onContextChange?.(item.id, {
+            company: body.company ?? null,
+            isPersonalProject: body.is_personal_project ?? false,
+          })
+        }
+      } else {
+        setOrganizeState('idle')
+      }
     } catch {
       setOrganizeState('idle')
     }
   }
+
+  const highlightsCount = highlights.length
 
   return (
     <li id={`registro-${item.id}`} className="scroll-mt-24 rounded-xl border" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
@@ -181,10 +197,34 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
         className="flex w-full items-start gap-3 px-4 py-3 text-left min-h-[48px] transition-opacity hover:opacity-80"
         style={{ color: 'var(--foreground)' }}
       >
-        <span aria-hidden="true" className="mt-0.5 shrink-0">{SOURCE_ICON[item.source]}</span>
+        {/* FR-027: miniatura real da imagem anexada quando existir, nunca um ícone genérico por tipo. */}
+        {item.thumbnail ? (
+          // eslint-disable-next-line @next/next/no-img-element -- miniatura remota (bucket Supabase), não otimizável por next/image sem domínio fixo por ambiente
+          <img
+            src={item.thumbnail}
+            alt=""
+            aria-hidden="true"
+            className="mt-0.5 shrink-0 rounded-md object-cover"
+            style={{ width: 32, height: 32 }}
+          />
+        ) : (
+          <span aria-hidden="true" className="mt-0.5 shrink-0">{SOURCE_ICON[item.source]}</span>
+        )}
         <span className="flex-1 min-w-0">
-          <span className="block font-medium text-sm leading-snug">
-            {item.title}
+          <span className="flex items-center gap-1.5">
+            <span className="block font-medium text-sm leading-snug">
+              {item.title}
+            </span>
+            {/* FR-025: selo de contagem só quando há mais de 1 destaque — com exatamente 1, FR-017
+                já resolve isso (destaque único vem sempre aberto, sem necessidade de sinalizar). */}
+            {highlightsCount > 1 && (
+              <span
+                className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+              >
+                {t('card.highlightsBadge', { count: highlightsCount })}
+              </span>
+            )}
           </span>
           <span className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
             <span>{dateLabel}</span>
@@ -262,7 +302,7 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
             />
           )}
 
-          {variant === 'feed' && highlights && highlights.length > 0 && (
+          {variant === 'feed' && highlights.length > 0 && (
             <div className="flex flex-col gap-2">
               {highlights.map((highlight) => (
                 <HighlightCard

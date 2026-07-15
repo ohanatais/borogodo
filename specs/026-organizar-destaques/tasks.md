@@ -381,28 +381,33 @@ segunda sem selo; expandir revela destaques + fonte completa
 
 ### Tests for User Story 7 ⚠️
 
-- [ ] T057 [P] [US7] Teste de integração: `getFeedData` retorna `FeedItem.highlights`,
+- [x] T057 [P] [US7] Teste de integração: `getFeedData` retorna `FeedItem.highlights`,
       `organizationStatus`, `contextStatus`, `isPersonalProject` por fonte legada (sem
       `entry_highlights`, FR-032 → destaque sintético único) e por fonte organizada (N
       destaques), em `src/lib/feed/__tests__/getFeedData.test.ts` — DEVE falhar antes de T059
-- [ ] T058 [P] [US7] Teste de componente: `SourceCard` mostra selo apenas quando
+- [x] T058 [P] [US7] Teste de componente: `SourceCard` mostra selo apenas quando
       `highlights.length > 1`; miniatura real quando há evidência de imagem; sinalização discreta
       quando `contextStatus === 'unresolved'`, em
       `src/components/features/feed/__tests__/SourceCard.test.tsx` — DEVE falhar antes de T060
 
 ### Implementation for User Story 7
 
-- [ ] T059 [US7] Estender `getFeedData`/`FeedItem`/`RawEntry` em `src/lib/feed/getFeedData.ts` e
+- [x] T059 [US7] Estender `getFeedData`/`FeedItem`/`RawEntry` em `src/lib/feed/getFeedData.ts` e
       `src/lib/feed/types.ts` — join com `entry_highlights` por página, fallback sintético para
       fontes legadas, derivação de `organizationStatus`/`contextStatus` (conforme `data-model.md`)
-- [ ] T060 [US7] Criar `SourceCard.tsx` completo em `src/components/features/feed/SourceCard.tsx`
+- [x] T060 [US7] Criar `SourceCard.tsx` completo em `src/components/features/feed/SourceCard.tsx`
       — card único por fonte, miniatura real, selo de contagem, sinalização de contexto,
-      renderiza `HighlightCard` (T044) para cada destaque ao expandir
-- [ ] T061 [US7] Atualizar `FeedPage.tsx` (`src/components/features/feed/FeedPage.tsx`) para
-      renderizar `SourceCard` no lugar do card atual por entrada
-- [ ] T062 [US7] Confirmar/ajustar timeline por mês e grade-faísca (`src/app/api/feed/activity`)
-      — sem streak gamificado nem emoji (FR-029), sem mudança de contrato além de remoção de
-      qualquer resquício de streak se existir
+      renderiza `HighlightCard` (T044) para cada destaque ao expandir. Implementado como
+      renomeação/consolidação de `EntryCard.tsx` (decisão registrada no relatório da fase — o
+      componente já tinha toda a estrutura de dois níveis fonte→destaque; a US7 removeu o fetch
+      lazy de destaques por card e passou a consumir `item.highlights` vindo pronto no payload do
+      feed) em vez de um componente novo do zero — `EntryItem.tsx` (Painel) também migrado.
+- [x] T061 [US7] Atualizar `FeedPage.tsx` (`src/components/features/feed/FeedPage.tsx`) para
+      renderizar `SourceCard` no lugar do card atual por entrada — inclui timeline por mês
+      (FR-028, `src/lib/feed/groupByMonth.ts`, antes inexistente: o feed só ordenava por data, sem
+      nenhum agrupamento visual).
+- [x] T062 [US7] Confirmado `ActivityGrid.tsx` já satisfaz FR-029 (símbolo ✦, sem streak, sem
+      emoji) — nenhuma mudança estrutural necessária, sem resquício de streak a remover.
 
 **Checkpoint**: todas as user stories funcionam juntas — Registros reestruturado, fim a fim
 

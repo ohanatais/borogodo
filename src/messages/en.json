@@ -826,7 +826,7 @@
         "cancel": "Cancel",
         "confirm": "Delete"
       },
-      "highlightsBadge": ""
+      "highlightsBadge": "+{count} highlights"
     },
     "pagination": {
       "loadMore": "Load more",

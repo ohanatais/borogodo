@@ -4,7 +4,8 @@ import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { useSearchParams, useRouter } from 'next/navigation'
 import type { FeedPage as FeedPageType, FeedItem, FeedQuery, FeedAxis, ActivityCell } from '@/lib/feed/types'
-import { EntryCard } from './EntryCard'
+import { groupFeedItemsByMonth } from '@/lib/feed/groupByMonth'
+import { SourceCard } from './SourceCard'
 import { EmptyFeed } from './EmptyFeed'
 import { FeedFilters } from './FeedFilters'
 import { ActivityGrid, GRID_MIN_DISTINCT_DAYS } from './ActivityGrid'
@@ -84,6 +85,11 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
   }, [activityCells])
 
   const showGrid = distinctDays90 >= GRID_MIN_DISTINCT_DAYS
+
+  // FR-028: timeline por mês — agrupa pela MESMA data usada para ordenar a página (`currentAxis`),
+  // nunca uma escolha fixa (ver `groupByMonth.ts`) — senão a seção do mês poderia divergir da
+  // ordem real da lista.
+  const monthGroups = useMemo(() => groupFeedItemsByMonth(items, currentAxis), [items, currentAxis])
 
   const handleLoadMore = useCallback(async () => {
     if (!nextCursor || isLoading) return
@@ -211,20 +217,32 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
           )}
 
           <div className="lg:flex lg:gap-6 lg:items-start">
-            {/* Lista de registros */}
-            <ul className="flex-1 min-w-0 flex flex-col gap-2">
-              {items.map((item) => (
-                <EntryCard
-                  key={item.id}
-                  item={item}
-                  variant="feed"
-                  onDelete={handleDelete}
-                  onEdit={handleEdit}
-                  contextVocabulary={contextVocabulary}
-                  onContextChange={handleContextChange}
-                />
+            {/* Lista de registros, agrupada numa timeline por mês (FR-028) */}
+            <div className="flex-1 min-w-0 flex flex-col gap-4">
+              {monthGroups.map((group) => (
+                <section key={group.monthKey} className="flex flex-col gap-2">
+                  <h2
+                    className="text-xs font-semibold uppercase tracking-wide px-1"
+                    style={{ color: 'var(--muted-foreground)' }}
+                  >
+                    {group.label}
+                  </h2>
+                  <ul className="flex flex-col gap-2">
+                    {group.items.map((item) => (
+                      <SourceCard
+                        key={item.id}
+                        item={item}
+                        variant="feed"
+                        onDelete={handleDelete}
+                        onEdit={handleEdit}
+                        contextVocabulary={contextVocabulary}
+                        onContextChange={handleContextChange}
+                      />
+                    ))}
+                  </ul>
+                </section>
               ))}
-            </ul>
+            </div>
 
             {/* Desktop: grade de faíscas como sidebar fixa à direita */}
             {showGrid && (

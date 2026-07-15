@@ -4,15 +4,15 @@ import { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useTranslations } from 'next-intl'
 import { Check, X, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react'
-import type { EntryHighlight } from '@/types/entry'
+import type { FeedHighlight } from '@/lib/feed/types'
 
 interface HighlightCardProps {
   entryId: string
-  highlight: EntryHighlight
+  highlight: FeedHighlight
   /** Aberto por padrão quando é o único destaque da fonte (FR-017) — decidido pelo pai (contagem). */
   defaultOpen: boolean
   /** Notifica o pai do destaque atualizado (isolado — nunca os demais, FR-015). */
-  onUpdate: (updated: EntryHighlight) => void
+  onUpdate: (updated: FeedHighlight) => void
   /** Notifica o pai da remoção deste destaque (isolado — nunca a fonte nem os demais, FR-015). */
   onDelete: (highlightId: string) => void
 }
@@ -24,7 +24,7 @@ interface HighlightFormValues {
   tags: string
 }
 
-function toFormValues(highlight: EntryHighlight): HighlightFormValues {
+function toFormValues(highlight: FeedHighlight): HighlightFormValues {
   return {
     title: highlight.title ?? '',
     metric: highlight.metric ?? '',
@@ -84,7 +84,7 @@ export function HighlightCard({ entryId, highlight, defaultOpen, onUpdate, onDel
           tags: parseTags(form.tags),
         }),
       })
-      const body = (await res.json().catch(() => null)) as { highlight?: EntryHighlight } | null
+      const body = (await res.json().catch(() => null)) as { highlight?: FeedHighlight } | null
       if (res.ok && body?.highlight) {
         onUpdate(body.highlight)
         setEditing(false)
