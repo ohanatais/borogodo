@@ -22,12 +22,12 @@ são P1, US5/US7 são P2), na ordem de prioridade.
 **Purpose**: chaves i18n e scaffolding compartilhado antes de qualquer código de feature — sem
 dependência de pacote nova (ver plan.md, Technical Context)
 
-- [ ] T001 [P] Criar/estender namespace i18n `registro` (ou `organize`, decidir no `/impeccable
+- [x] T001 [P] Criar/estender namespace i18n `registro` (ou `organize`, decidir no `/impeccable
       shape`) em `src/messages/pt-BR.json` e `src/messages/en.json` (stub) com chaves vazias
       para: botão "Organizar", estado "organizando…", selo "+N destaques", "+ adicionar
       destaque", pílulas de contexto ("Projeto pessoal", "Outro"), sinalização "contexto não
       identificado"
-- [ ] T002 [P] Confirmar em ambiente de dev que `ANTHROPIC_API_KEY`/config de `claude-haiku-4-5`
+- [x] T002 [P] Confirmar em ambiente de dev que `ANTHROPIC_API_KEY`/config de `claude-haiku-4-5`
       já usados pela extração legada (`src/lib/ai/client.ts`) cobrem o novo prompt sem
       configuração adicional
 
@@ -42,23 +42,29 @@ ausente
 
 **⚠️ CRITICAL**: nenhuma user story pode ser implementada antes desta fase
 
-- [ ] T003 Criar migration `supabase/migrations/016_entry_highlights.sql` — tabela
+- [x] T003 Criar migration `supabase/migrations/016_entry_highlights.sql` — tabela
       `entry_highlights` (FK `entries`, RLS própria por comando) + colunas aditivas em `entries`
       (`organized_at`, `organizing_started_at`, `is_personal_project`) + índices
       `(entry_id, position)` e `(user_id)`, conforme `data-model.md`
 - [ ] T004 [P] Aplicar migration `016` no ambiente de dev local (`supabase db reset` ou
-      `migration up`) e confirmar RLS via teste manual (usuário A não lê destaque de usuário B)
-- [ ] T005 [P] Estender `src/types/entry.ts` com `EntryHighlight`, `SourceOrganizationStatus`
+      `migration up`) e confirmar RLS via teste manual (usuário A não lê destaque de usuário B) —
+      **BLOQUEADO**: a MCP Supabase `apply_migration` foi negada pelo classificador automático de
+      segurança do ambiente ("Protected-Scope IaC Apply" — não há como o agente confirmar de forma
+      verificável que `tsxvlxszlynwmmlskugg`/"borogodo-dev" é o projeto de dev autorizado, mesmo
+      batendo com a URL do `.env.local`). Requer a Ohana rodar manualmente (ela pode confirmar o
+      projeto) ou conceder a permissão explicitamente. Arquivo da migration pronto e revisado em
+      `supabase/migrations/016_entry_highlights.sql`.
+- [x] T005 [P] Estender `src/types/entry.ts` com `EntryHighlight`, `SourceOrganizationStatus`
       ('not_organized' | 'organizing' | 'organized'), `ContextStatus` ('unresolved' | 'company' |
       'personal_project') — ver `data-model.md`
-- [ ] T006 [P] Teste unitário para `organizeResultSchema` (Zod) em
+- [x] T006 [P] Teste unitário para `organizeResultSchema` (Zod) em
       `src/lib/ai/extraction/__tests__/schemas.test.ts` — valida shape `{ highlights: [{title,
       metric, impact, tags}], company?, entry_date? }`, rejeita highlight sem `title`/`tags`
       ausentes tratados como opcionais, tolera `tags` vazio — DEVE falhar antes de T007
-- [ ] T007 Implementar `organizeResultSchema` em `src/lib/ai/extraction/schemas.ts` +
+- [x] T007 Implementar `organizeResultSchema` em `src/lib/ai/extraction/schemas.ts` +
       `validateOrganizeResult(raw): { highlights: OrganizeHighlight[]; company: string | null;
       entry_date: string | null }`
-- [ ] T008 [P] Criar `CAPTURE_ORGANIZE_SYSTEM_PROMPT` em
+- [x] T008 [P] Criar `CAPTURE_ORGANIZE_SYSTEM_PROMPT` em
       `src/lib/ai/extraction/prompts/organize.ts` — instruções: múltiplos destaques por fonte
       (FR-014), título substantivo-primeiro/outcome-first com número quando presente (FR-019),
       anti-nominalização vaga (FR-019/US5), tags reaproveitando vocabulário existente
@@ -66,27 +72,27 @@ ausente
       textual explícito e nunca por associação estatística (FR-006), pré-seleção de empresa
       central quando o texto menciona mais de uma (FR-007) — reusa o anti-padrão de formatação já
       documentado em `capture.ts` (sem travessão/seta/barra, sem jargão corporativo)
-- [ ] T009 [P] Teste unitário para `buildOrganizeUserPrompt` em
+- [x] T009 [P] Teste unitário para `buildOrganizeUserPrompt` em
       `src/lib/ai/extraction/prompts/__tests__/organize.test.ts` — confirma que company/entry_date
       são OMITIDOS do prompt quando a fonte já tem contexto/período resolvido (reforça FR-004/
       FR-006 na origem) — DEVE falhar antes de T010
-- [ ] T010 Implementar `buildOrganizeUserPrompt(rawContent, { company, entryDate, tagVocabulary,
+- [x] T010 Implementar `buildOrganizeUserPrompt(rawContent, { company, entryDate, tagVocabulary,
       existingHighlights })` em `src/lib/ai/extraction/prompts/organize.ts`
-- [ ] T011 [P] Criar `src/lib/entries/` (novo diretório, ver plan.md "Structure Decision")
-- [ ] T012 [P] Teste unitário para vocabulário de tags em
+- [x] T011 [P] Criar `src/lib/entries/` (novo diretório, ver plan.md "Structure Decision")
+- [x] T012 [P] Teste unitário para vocabulário de tags em
       `src/lib/entries/__tests__/highlightVocabulary.test.ts` — `DISTINCT unnest(tags)` por
       `user_id`, ordenado — DEVE falhar antes de T013
-- [ ] T013 Implementar `getTagVocabulary(supabase, userId): Promise<string[]>` em
+- [x] T013 Implementar `getTagVocabulary(supabase, userId): Promise<string[]>` em
       `src/lib/entries/highlightVocabulary.ts`
-- [ ] T014 [P] Teste unitário para vocabulário de contextos em
+- [x] T014 [P] Teste unitário para vocabulário de contextos em
       `src/lib/entries/__tests__/contextVocabulary.test.ts` — `DISTINCT company` por `user_id`,
       `company IS NOT NULL`, ordenado — DEVE falhar antes de T015
-- [ ] T015 Implementar `getContextVocabulary(supabase, userId): Promise<string[]>` em
+- [x] T015 Implementar `getContextVocabulary(supabase, userId): Promise<string[]>` em
       `src/lib/entries/contextVocabulary.ts`
-- [ ] T016 [P] Teste unitário para o rollup de tags em
+- [x] T016 [P] Teste unitário para o rollup de tags em
       `src/lib/entries/__tests__/rollupEntryTags.test.ts` — união das tags de todos os
       `entry_highlights` de uma fonte, ordenada e sem duplicatas — DEVE falhar antes de T017
-- [ ] T017 Implementar `rollupEntryTags(supabase, entryId): Promise<string[]>` (recalcula e
+- [x] T017 Implementar `rollupEntryTags(supabase, entryId): Promise<string[]>` (recalcula e
       persiste `entries.tags`) em `src/lib/entries/rollupEntryTags.ts`
 
 **Checkpoint**: schema, tipos, prompt e utilitários de vocabulário prontos — user stories podem
