@@ -1055,9 +1055,9 @@
       "dateLabel": "Data"
     },
     "organize": {
-      "cta": "",
-      "ctaAgain": "",
-      "organizing": ""
+      "cta": "Organizar",
+      "ctaAgain": "Organizar de novo",
+      "organizing": "Organizando…"
     },
     "context": {
       "unresolvedLabel": "",

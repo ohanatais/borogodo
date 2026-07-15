@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useTranslations } from 'next-intl'
-import { Trash2, Pencil, Check, X, ChevronDown, ChevronUp, Paperclip } from 'lucide-react'
+import { Trash2, Pencil, Check, X, ChevronDown, ChevronUp, Paperclip, Sparkles } from 'lucide-react'
 import type { FeedItem } from '@/lib/feed/types'
 import type { EntrySource } from '@/types/entry'
 import { UsarButton } from '@/components/features/content/UsarButton'
@@ -34,13 +34,19 @@ function formatDate(dateStr: string): string {
   })
 }
 
+type OrganizeButtonState = 'idle' | 'organizing' | 'done'
+
 export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
   const t = useTranslations('feed')
+  const tRegistro = useTranslations('registro')
   const [expanded, setExpanded] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState(item.what_i_did)
   const [saving, setSaving] = useState(false)
+  // US1 (feature 026): "Organizar" é opcional e local ao card — sem popup em falha (FR-030), sem
+  // rótulo persistente além de "Organizar de novo" no sucesso (ux-shape.md §6).
+  const [organizeState, setOrganizeState] = useState<OrganizeButtonState>('idle')
 
   const displayDate = item.entry_date ?? item.created_at
   const dateLabel = formatDate(displayDate)
@@ -72,6 +78,23 @@ export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
   function handleCancelEdit() {
     setEditValue(item.what_i_did)
     setEditing(false)
+  }
+
+  /**
+   * Dispara "Organizar" (POST /api/entries/[id]/organize, US1). Guarda de duplo clique local:
+   * o botão fica `disabled` assim que `organizeState` vira 'organizing' (ux-shape.md §7).
+   * Falha de IA (status: 'failed') ou de rede volta ao estado inicial silenciosamente — sem popup
+   * (FR-030) — permitindo nova tentativa clicando "Organizar" de novo.
+   */
+  async function handleOrganize() {
+    setOrganizeState('organizing')
+    try {
+      const res = await fetch(`/api/entries/${item.id}/organize`, { method: 'POST' })
+      const body = (await res.json().catch(() => null)) as { status?: string } | null
+      setOrganizeState(res.ok && body?.status === 'organized' ? 'done' : 'idle')
+    } catch {
+      setOrganizeState('idle')
+    }
   }
 
   return (
@@ -184,6 +207,23 @@ export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
               seedSummary={editValue}
               formats={['post', 'impact_summary']}
             />
+
+            {variant === 'feed' && !editing && (
+              <button
+                type="button"
+                onClick={() => void handleOrganize()}
+                disabled={organizeState === 'organizing'}
+                className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[48px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                <Sparkles size={12} aria-hidden="true" />
+                {organizeState === 'organizing'
+                  ? tRegistro('organize.organizing')
+                  : organizeState === 'done'
+                    ? tRegistro('organize.ctaAgain')
+                    : tRegistro('organize.cta')}
+              </button>
+            )}
 
             {variant === 'feed' && !editing && (
               <button

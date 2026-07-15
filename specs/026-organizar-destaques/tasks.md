@@ -111,36 +111,43 @@ manualmente antes — valor manual intacto após organizar
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T018 [P] [US1] Teste de integração para `organizeEntry()` — fonte sem nenhum campo
+- [x] T018 [P] [US1] Teste de integração para `organizeEntry()` — fonte sem nenhum campo
       preenchido → cria `entry_highlights` com métrica/impacto/tags/título inferidos, em
       `src/lib/entries/__tests__/organizeEntry.test.ts` — DEVE falhar antes de T021
-- [ ] T019 [P] [US1] Teste de integração: fonte com "impacto" já preenchido manualmente em um
+- [x] T019 [P] [US1] Teste de integração: fonte com "impacto" já preenchido manualmente em um
       destaque existente → organização não sobrescreve esse campo (FR-002), mesmo arquivo de T018
-- [ ] T020 [P] [US1] Teste de integração: fonte sem nenhum anexo → ainda infere a partir só do
+- [x] T020 [P] [US1] Teste de integração: fonte sem nenhum anexo → ainda infere a partir só do
       texto cru (FR-001 acceptance #3), mesmo arquivo de T018
-- [ ] T021 [P] [US1] Teste de integração para `POST /api/entries/[id]/organize` em
+- [x] T021 [P] [US1] Teste de integração para `POST /api/entries/[id]/organize` em
       `tests/integration/api/entries-organize.test.ts` — 401 sem auth, 404 fonte de outro
       usuário, 200 com highlights no sucesso, 200 `{status:'failed'}` em erro de IA (nunca 5xx só
       por falha de IA, FR-030) — DEVE falhar antes de T023
 
 ### Implementation for User Story 1
 
-- [ ] T022 [US1] Implementar `organizeEntry(supabase, userId, entryId)` em
+- [x] T022 [US1] Implementar `organizeEntry(supabase, userId, entryId)` em
       `src/lib/entries/organizeEntry.ts` — carrega fonte, monta prompt (T010), chama Haiku,
       valida (T007), insere `entry_highlights` (nunca sobrescreve destaques existentes), aplica
       "só preenche vazios" em `company`/`entry_date`, recalcula rollup (T017), seta
       `organized_at`/limpa `organizing_started_at`; em falha, limpa `organizing_started_at` sem
       lançar (depende de T003, T007, T010, T013, T015, T017)
-- [ ] T023 [US1] Implementar `POST /api/entries/[id]/organize` em
+- [x] T023 [US1] Implementar `POST /api/entries/[id]/organize` em
       `src/app/api/entries/[id]/organize/route.ts` — guarda de concorrência via
       `organizing_started_at` (timeout curto), chama `organizeEntry` (T022), resposta conforme
       `contracts/organize.md`
-- [ ] T024 [US1] Botão "Organizar" no cartão de fonte (`src/components/features/feed/SourceCard.tsx`,
+- [x] T024 [US1] Botão "Organizar" no cartão de fonte (`src/components/features/feed/SourceCard.tsx`,
       criado em US7 — se ainda não existir nesta fase, criar versão mínima aqui) chamando
       `POST /organize`, com estado de carregamento local
-- [ ] T025 [US1] Campos "+ adicionar detalhes" (herdados da 025) continuam vazios/editáveis
+      — **Nota**: `SourceCard.tsx` é escopo da Phase 9 (US7, fora do agente desta fase); a versão
+      mínima do botão foi adicionada diretamente em `EntryCard.tsx` (o card real hoje em uso no
+      feed), com os três estados (Organizar / Organizando… / Organizar de novo), guarda de duplo
+      clique local e sem popup em falha (FR-030) — ver `EntryCard.test.tsx`.
+- [x] T025 [US1] Campos "+ adicionar detalhes" (herdados da 025) continuam vazios/editáveis
       independente de o Organizar já ter rodado (FR-001 acceptance #4) — confirmar via teste de
       integração que não há regressão nesse comportamento
+      — Coberto por `src/components/features/capture/__tests__/DetailsFields.test.tsx` (novo):
+      confirma que a seção abre vazia, edita sem chamada de rede, e não tem nenhum acoplamento
+      com `organizeEntry`/`POST /organize`.
 
 **Checkpoint**: User Story 1 funcional e testável de forma independente
 
