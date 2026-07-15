@@ -103,10 +103,15 @@ interface ResolvedContextFields {
  * Única fonte de verdade da regra "só preenche vazios" (FR-002/FR-006) para `company`/`entry_date`
  * — usada tanto para decidir o que persistir quanto para montar a resposta, para as duas nunca
  * divergirem entre si.
+ *
+ * `is_personal_project = true` conta como contexto já resolvido manualmente (Story 2, FR-004) —
+ * mesmo com `company` vazio, a IA nunca deve preencher uma empresa por cima da escolha de
+ * "Projeto pessoal" (o prompt já pede `company: null` nesse caso, mas esta função é a garantia
+ * de aplicação: nunca confiar cegamente no que a IA devolveu).
  */
 function resolveContextFields(entryRow: EntryRow, result: OrganizeResult): ResolvedContextFields {
   return {
-    company: entryRow.company ?? result.company,
+    company: entryRow.is_personal_project ? null : entryRow.company ?? result.company,
     entryDate: entryRow.entry_date ?? result.entry_date,
   }
 }
@@ -176,6 +181,7 @@ export async function organizeEntry(
 
     const prompt = buildOrganizeUserPrompt(entryRow.raw_content, {
       company: entryRow.company,
+      isPersonalProject: entryRow.is_personal_project,
       entryDate: entryRow.entry_date,
       tagVocabulary,
       existingHighlights,

@@ -16,6 +16,7 @@ function buildItem(overrides: Partial<FeedItem> = {}): FeedItem {
     created_at: new Date().toISOString(),
     entry_date: null,
     company: null,
+    is_personal_project: false,
     role_title: null,
     metric: null,
     tags: [],

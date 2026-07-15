@@ -11,6 +11,7 @@ const BASE_ITEM: FeedItem = {
   created_at: '2026-07-10T12:00:00.000Z',
   entry_date: null,
   company: null,
+  is_personal_project: false,
   role_title: null,
   metric: null,
   tags: [],
@@ -96,5 +97,52 @@ describe('EntryCard — botão Organizar (US1, feature 026)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'organize.cta' }))
 
     await waitFor(() => expect(screen.getByRole('button', { name: 'organize.cta' })).toBeInTheDocument())
+  })
+})
+
+describe('EntryCard — contexto por pílulas (US2, feature 026)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn())
+  })
+
+  it('T032 — sinaliza "contexto não identificado" de forma discreta quando nem empresa nem projeto pessoal foram resolvidos (FR-008)', () => {
+    render(<EntryCard item={BASE_ITEM} variant="feed" contextVocabulary={[]} />)
+
+    expect(screen.getByText('context.unresolvedLabel')).toBeInTheDocument()
+  })
+
+  it('não mostra a sinalização de contexto não identificado quando a empresa já está resolvida', () => {
+    render(<EntryCard item={{ ...BASE_ITEM, company: 'Acme Corp' }} variant="feed" contextVocabulary={['Acme Corp']} />)
+
+    expect(screen.queryByText('context.unresolvedLabel')).not.toBeInTheDocument()
+  })
+
+  it('não mostra a sinalização quando "Projeto pessoal" foi selecionado, mesmo sem empresa', () => {
+    render(<EntryCard item={{ ...BASE_ITEM, is_personal_project: true }} variant="feed" contextVocabulary={[]} />)
+
+    expect(screen.queryByText('context.unresolvedLabel')).not.toBeInTheDocument()
+  })
+
+  it('T030 — renderiza o ContextPillPicker dentro do card expandido, com o vocabulário recebido', () => {
+    render(<EntryCard item={BASE_ITEM} variant="feed" contextVocabulary={['Acme Corp']} />)
+    expandCard()
+
+    expect(screen.getByRole('button', { name: 'Acme Corp' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'context.personalProjectLabel' })).toBeInTheDocument()
+  })
+
+  it('propaga a seleção de pílula via onContextChange', async () => {
+    vi.mocked(fetch).mockResolvedValue({ ok: true, json: async () => ({ ok: true }) } as Response)
+    const onContextChange = vi.fn()
+    render(
+      <EntryCard item={BASE_ITEM} variant="feed" contextVocabulary={['Acme Corp']} onContextChange={onContextChange} />
+    )
+    expandCard()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Acme Corp' }))
+
+    await waitFor(() =>
+      expect(onContextChange).toHaveBeenCalledWith('entry-1', { company: 'Acme Corp', isPersonalProject: false })
+    )
   })
 })

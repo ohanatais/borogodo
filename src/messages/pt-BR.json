@@ -1060,19 +1060,19 @@
       "organizing": "Organizando…"
     },
     "context": {
-      "unresolvedLabel": "",
-      "personalProjectLabel": "",
-      "otherLabel": "",
-      "otherPlaceholder": "",
-      "searchPlaceholder": ""
+      "unresolvedLabel": "sem contexto ainda",
+      "personalProjectLabel": "Projeto pessoal",
+      "otherLabel": "Outro",
+      "otherPlaceholder": "Nome do projeto ou empresa",
+      "searchPlaceholder": "Buscar..."
     },
     "highlight": {
-      "addNew": "",
+      "addNew": "+ adicionar destaque",
       "deleteConfirm": {
-        "title": "",
-        "description": "",
-        "cancel": "",
-        "confirm": ""
+        "title": "Excluir este destaque?",
+        "description": "Essa ação não pode ser desfeita. O restante do registro continua intacto.",
+        "cancel": "Cancelar",
+        "confirm": "Excluir"
       }
     }
   }

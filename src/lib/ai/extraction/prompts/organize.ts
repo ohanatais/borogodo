@@ -64,6 +64,12 @@ interface ExistingHighlightLike {
 export interface BuildOrganizeUserPromptOptions {
   /** `company` já resolvido da fonte — omitido do pedido de inferência quando presente (FR-004/FR-006). */
   company: string | null
+  /**
+   * `true` quando a pessoa selecionou a pílula "Projeto pessoal" (Story 2) — contexto já
+   * resolvido manualmente mesmo sem `company`; a IA MUST NOT tentar inferir uma empresa nesse
+   * caso (FR-004 aplicado ao contexto, não só a `company` estar preenchida).
+   */
+  isPersonalProject: boolean
   /** `entry_date` já resolvido da fonte — mesma regra de omissão. */
   entryDate: string | null
   /** Vocabulário de tags já usado pela pessoa (Story 6) — reaproveitado em vez de criar variação. */
@@ -72,12 +78,17 @@ export interface BuildOrganizeUserPromptOptions {
   existingHighlights: (OrganizeHighlight | ExistingHighlightLike)[]
 }
 
-function formatContextSection(company: string | null, entryDate: string | null): string {
-  const needsCompany = company === null
+function formatContextSection(company: string | null, isPersonalProject: boolean, entryDate: string | null): string {
+  // Story 2 (FR-004): "Projeto pessoal" selecionado manualmente é contexto resolvido, mesmo com
+  // `company` vazio — a IA não deve tentar inferir uma empresa por cima dessa escolha.
+  const needsCompany = company === null && !isPersonalProject
   const needsEntryDate = entryDate === null
 
   if (!needsCompany && !needsEntryDate) {
-    return 'Contexto da fonte: empresa e período já resolvidos manualmente — NÃO infira nenhum dos dois, devolva "company": null e "entry_date": null.'
+    const companyNote = isPersonalProject
+      ? 'contexto já resolvido manualmente como "Projeto pessoal"'
+      : `empresa já resolvida ("${company}")`
+    return `Contexto da fonte: ${companyNote} e período já resolvidos manualmente — NÃO infira nenhum dos dois, devolva "company": null e "entry_date": null.`
   }
 
   const asks: string[] = []
@@ -85,7 +96,12 @@ function formatContextSection(company: string | null, entryDate: string | null):
   if (needsEntryDate) asks.push('infira o período (se houver sinal textual explícito, senão null)')
 
   const resolved: string[] = []
-  if (!needsCompany) resolved.push(`empresa já resolvida ("${company}") — NÃO infira, devolva "company": null`)
+  if (!needsCompany) {
+    const companyNote = isPersonalProject
+      ? 'contexto já resolvido manualmente como "Projeto pessoal"'
+      : `empresa já resolvida ("${company}")`
+    resolved.push(`${companyNote} — NÃO infira, devolva "company": null`)
+  }
   if (!needsEntryDate) resolved.push(`período já resolvido ("${entryDate}") — NÃO infira, devolva "entry_date": null`)
 
   return [`Contexto da fonte: ${asks.join(' e ')}.`, ...resolved].join(' ')
@@ -108,7 +124,7 @@ function formatExistingHighlights(existingHighlights: BuildOrganizeUserPromptOpt
 
 /** Prompt do usuário — único lugar onde dados específicos da pessoa entram na chamada. */
 export function buildOrganizeUserPrompt(rawContent: string, options: BuildOrganizeUserPromptOptions): string {
-  const contextSection = formatContextSection(options.company, options.entryDate)
+  const contextSection = formatContextSection(options.company, options.isPersonalProject, options.entryDate)
   const tagSection = formatTagVocabulary(options.tagVocabulary)
   const highlightsSection = formatExistingHighlights(options.existingHighlights)
 

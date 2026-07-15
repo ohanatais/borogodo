@@ -14,6 +14,9 @@ export interface FeedItem {
   created_at: string
   entry_date: string | null
   company: string | null
+  // Story 2 (026-organizar-destaques): `true` quando a pílula "Projeto pessoal" foi selecionada —
+  // contexto resolvido mesmo sem `company` (ver `deriveContextStatus`).
+  is_personal_project: boolean
   role_title: string | null
   metric: string | null
   tags: string[]

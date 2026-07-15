@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { getFeedData } from '@/lib/feed/getFeedData'
+import { getContextVocabulary } from '@/lib/entries/contextVocabulary'
 import { FeedPage } from '@/components/features/feed/FeedPage'
 import type { FeedAxis, FeedQuery } from '@/lib/feed/types'
 import type { EntrySource } from '@/types/entry'
@@ -55,7 +56,10 @@ export default async function RegistrosPage({ searchParams }: RegistrosPageProps
   }
 
   const filterKey = [axis, q, from, to, company, rawTags, String(metricOnly), rawSource].join('|')
-  const initialPage = await getFeedData(supabase, user.id, query)
+  const [initialPage, contextVocabulary] = await Promise.all([
+    getFeedData(supabase, user.id, query),
+    getContextVocabulary(supabase, user.id),
+  ])
 
   return (
     <div className="max-w-[980px] mx-auto px-6 py-8">
@@ -68,7 +72,12 @@ export default async function RegistrosPage({ searchParams }: RegistrosPageProps
         </h1>
       </header>
 
-      <FeedPage filterKey={filterKey} initialPage={initialPage} initialQuery={query} />
+      <FeedPage
+        filterKey={filterKey}
+        initialPage={initialPage}
+        initialQuery={query}
+        contextVocabulary={contextVocabulary}
+      />
     </div>
   )
 }

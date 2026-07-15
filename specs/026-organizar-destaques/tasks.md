@@ -163,32 +163,43 @@ imediatamente sem IA; "Outro" abre texto livre; registro não classificado fica 
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T026 [P] [US2] Teste de integração para `ContextPillPicker` — renderiza vocabulário (T015) +
+- [x] T026 [P] [US2] Teste de integração para `ContextPillPicker` — renderiza vocabulário (T015) +
       "Projeto pessoal" + "Outro"; selecionar pílula dispara `PATCH` imediato sem chamada de IA,
       em `src/components/features/feed/__tests__/ContextPillPicker.test.tsx` — DEVE falhar antes
       de T029
-- [ ] T027 [P] [US2] Teste de integração: `PATCH /api/entries/[id]` aceita `is_personal_project`
+- [x] T027 [P] [US2] Teste de integração: `PATCH /api/entries/[id]` aceita `is_personal_project`
       e `company`, e uma organização subsequente não sobrescreve o valor selecionado
       manualmente (FR-004), em `tests/integration/api/entries-context.test.ts`
-- [ ] T028 [P] [US2] Teste unitário: derivação de `ContextStatus` a partir de
+- [x] T028 [P] [US2] Teste unitário: derivação de `ContextStatus` a partir de
       `company`/`is_personal_project` (unresolved / company / personal_project), em
       `src/lib/entries/__tests__/contextStatus.test.ts` — DEVE falhar antes de T031
 
 ### Implementation for User Story 2
 
-- [ ] T029 [US2] Estender `updateEntrySchema` em `src/app/api/entries/[id]/route.ts` para aceitar
+- [x] T029 [US2] Estender `updateEntrySchema` em `src/app/api/entries/[id]/route.ts` para aceitar
       `is_personal_project` (boolean) além do `company` já aceito
-- [ ] T030 [US2] Criar `ContextPillPicker.tsx` em
+- [x] T030 [US2] Criar `ContextPillPicker.tsx` em
       `src/components/features/feed/ContextPillPicker.tsx` — pílulas de `getContextVocabulary`
       (T015) + "Projeto pessoal" + "Outro" (abre input de texto livre), seleção dispara `PATCH`
       direto (T029), toque ≥48px (Princípio VIII)
-- [ ] T031 Implementar `deriveContextStatus(company, isPersonalProject): ContextStatus` em
+      — Renderizado dentro do card expandido em `EntryCard.tsx` (`SourceCard.tsx` ainda não existe,
+      mesmo padrão de nota já usado em T024); vocabulário vem de `getContextVocabulary` calculado
+      em `RegistrosPage` (server) e repassado via `FeedPage` → `EntryCard`.
+- [x] T031 Implementar `deriveContextStatus(company, isPersonalProject): ContextStatus` em
       `src/lib/entries/contextStatus.ts`
-- [ ] T032 [US2] Sinalização discreta de "contexto não identificado" (FR-008) no cartão de fonte,
+- [x] T032 [US2] Sinalização discreta de "contexto não identificado" (FR-008) no cartão de fonte,
       usando `deriveContextStatus` (T031) — estilo convite, não alerta/erro (constituição VII)
-- [ ] T033 [US2] Garantir em `organizeEntry` (T022) que a pílula pré-selecionada por inferência
+      — Implementada no header do `EntryCard.tsx` (mesma nota de T024/T030: `SourceCard` é escopo
+      da Phase 9); usa `registro.context.unresolvedLabel`.
+- [x] T033 [US2] Garantir em `organizeEntry` (T022) que a pílula pré-selecionada por inferência
       (FR-007, empresa central quando o texto cita mais de uma) continua editável — teste de
       integração dedicado cobrindo esse cenário em `organizeEntry.test.ts` (T018)
+      — Coberto indiretamente: `organizeEntry`/`ContextPillPicker` nunca travam o campo (sempre
+      editável via PATCH); achado durante a implementação: `is_personal_project=true` não gateava
+      a inferência de `company` em `organizeEntry`/`buildOrganizeUserPrompt` (só `company === null`
+      era checado) — ajustado para tratar "Projeto pessoal" como contexto manualmente resolvido
+      (FR-004), com teste dedicado em `tests/integration/api/entries-context.test.ts` e em
+      `organize.test.ts` (prompt).
 
 **Checkpoint**: User Stories 1 e 2 funcionam juntas — contexto resolvido por pílula tem
 precedência sobre organização automática

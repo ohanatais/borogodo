@@ -28,6 +28,7 @@ export function EntryItem({ id, whatIDid, title, source, createdAt }: EntryItemP
     created_at: createdAt,
     entry_date: null,
     company: null,
+    is_personal_project: false,
     role_title: null,
     metric: null,
     tags: [],

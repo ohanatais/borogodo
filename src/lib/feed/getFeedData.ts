@@ -19,6 +19,7 @@ interface RawEntry {
   created_at: string
   entry_date: string | null
   company: string | null
+  is_personal_project: boolean
   role_title: string | null
   metric: string | null
   tags: string[]
@@ -86,7 +87,7 @@ export async function getFeedData(
   let req = supabase
     .from('entries')
     .select(
-      'id, what_i_did, title, source, created_at, entry_date, company, role_title, metric, tags, evidences, impact, decision, learning, file_name'
+      'id, what_i_did, title, source, created_at, entry_date, company, is_personal_project, role_title, metric, tags, evidences, impact, decision, learning, file_name'
     )
     .eq('user_id', userId)
 
@@ -177,6 +178,7 @@ export async function getFeedData(
     created_at: entry.created_at,
     entry_date: entry.entry_date,
     company: entry.company,
+    is_personal_project: entry.is_personal_project ?? false,
     role_title: entry.role_title,
     metric: entry.metric,
     tags: entry.tags ?? [],

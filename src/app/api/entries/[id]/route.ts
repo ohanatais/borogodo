@@ -8,6 +8,9 @@ const updateEntrySchema = z.object({
   title: z.string().min(1).max(200).optional(),
   what_i_did: z.string().min(1).max(2000).optional(),
   company: z.string().max(200).nullable().optional(),
+  // Story 2 (026-organizar-destaques): seleção da pílula "Projeto pessoal" — resolve o
+  // contexto sem empresa (FR-003 acceptance #3), custo zero (sem chamada de IA, FR-003/SC-007).
+  is_personal_project: z.boolean().optional(),
   role_title: z.string().max(200).nullable().optional(),
   entry_date: z.string().nullable().optional(),
   impact: z.string().max(1000).nullable().optional(),

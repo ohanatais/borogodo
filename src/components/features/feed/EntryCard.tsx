@@ -8,12 +8,18 @@ import type { FeedItem } from '@/lib/feed/types'
 import type { EntrySource } from '@/types/entry'
 import { UsarButton } from '@/components/features/content/UsarButton'
 import { AttachTile } from '@/components/features/capture/AttachTile'
+import { ContextPillPicker } from './ContextPillPicker'
+import { deriveContextStatus } from '@/lib/entries/contextStatus'
 
 interface EntryCardProps {
   item: FeedItem
   variant: 'feed' | 'panel'
   onDelete?: (id: string) => void
   onEdit?: (id: string, what_i_did: string) => void
+  /** Vocabulário de contextos da pessoa (Story 2) — empresas já usadas, alimenta o `ContextPillPicker`. */
+  contextVocabulary?: string[]
+  /** Notifica o pai da nova seleção de contexto, após o `PATCH` confirmar sucesso. */
+  onContextChange?: (id: string, next: { company: string | null; isPersonalProject: boolean }) => void
 }
 
 const SOURCE_ICON: Record<EntrySource, string> = {
@@ -36,10 +42,13 @@ function formatDate(dateStr: string): string {
 
 type OrganizeButtonState = 'idle' | 'organizing' | 'done'
 
-export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
+export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary = [], onContextChange }: EntryCardProps) {
   const t = useTranslations('feed')
   const tRegistro = useTranslations('registro')
   const [expanded, setExpanded] = useState(false)
+  // Story 2 (FR-008): sinalização discreta de "contexto não identificado" no header do card —
+  // nunca um badge de erro/alerta, um convite a completar (ux-shape.md §6).
+  const contextStatus = deriveContextStatus(item.company, item.is_personal_project)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState(item.what_i_did)
@@ -114,7 +123,17 @@ export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
           </span>
           <span className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
             <span>{dateLabel}</span>
-            {item.company && <span>· {item.company}</span>}
+            {item.is_personal_project ? (
+              <span>· {tRegistro('context.personalProjectLabel')}</span>
+            ) : (
+              item.company && <span>· {item.company}</span>
+            )}
+            {contextStatus === 'unresolved' && (
+              <span className="inline-flex items-center gap-1 italic" style={{ color: 'var(--muted-foreground)' }}>
+                <span aria-hidden="true">·</span>
+                <span>{tRegistro('context.unresolvedLabel')}</span>
+              </span>
+            )}
           </span>
         </span>
         <span className="shrink-0 mt-0.5" style={{ color: 'var(--muted-foreground)' }} aria-hidden="true">
@@ -160,6 +179,16 @@ export function EntryCard({ item, variant, onDelete, onEdit }: EntryCardProps) {
             <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
               {editValue}
             </p>
+          )}
+
+          {variant === 'feed' && (
+            <ContextPillPicker
+              entryId={item.id}
+              company={item.company}
+              isPersonalProject={item.is_personal_project}
+              vocabulary={contextVocabulary}
+              onChange={(next) => onContextChange?.(item.id, next)}
+            />
           )}
 
           {item.evidences.length > 0 && (

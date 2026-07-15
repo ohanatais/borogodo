@@ -13,6 +13,8 @@ interface FeedPageProps {
   filterKey: string
   initialPage: FeedPageType
   initialQuery: FeedQuery
+  /** Vocabulário de contextos da pessoa (Story 2, `getContextVocabulary`) — alimenta o `ContextPillPicker` de cada card. */
+  contextVocabulary?: string[]
 }
 
 function hasActiveFilters(searchParams: URLSearchParams): boolean {
@@ -27,7 +29,7 @@ function hasActiveFilters(searchParams: URLSearchParams): boolean {
   )
 }
 
-export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps) {
+export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabulary = [] }: FeedPageProps) {
   const t = useTranslations('feed')
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -137,6 +139,19 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
     )
   }, [])
 
+  // Story 2 (FR-004): atualização local, otimista, após o `PATCH` do `ContextPillPicker` já ter
+  // confirmado sucesso — não dispara nenhuma chamada de IA (FR-003, custo zero).
+  const handleContextChange = useCallback(
+    (id: string, next: { company: string | null; isPersonalProject: boolean }) => {
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, company: next.company, is_personal_project: next.isPersonalProject } : item
+        )
+      )
+    },
+    []
+  )
+
   const filtersActive = hasActiveFilters(searchParams)
 
   function handleCellClick(date: string) {
@@ -205,6 +220,8 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
                   variant="feed"
                   onDelete={handleDelete}
                   onEdit={handleEdit}
+                  contextVocabulary={contextVocabulary}
+                  onContextChange={handleContextChange}
                 />
               ))}
             </ul>
