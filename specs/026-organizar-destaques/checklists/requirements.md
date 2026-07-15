@@ -36,13 +36,25 @@
 - Escopo herdado explicitamente da Feature A (025) documentado na seção "Estado herdado da
   Feature A (025)" do spec.md, para evitar reabrir decisões já fechadas (drawer, anexos,
   navegação, dark mode).
-- **Revisão de 2026-07-15** (pós-merge da 025, gap encontrado pela Ohana): a frase original do
-  decision record ("infere métrica/impacto/tags") não mencionava empresa/período nem
+- **Revisão de 2026-07-15, parte 1** (pós-merge da 025, gap encontrado pela Ohana): a frase
+  original do decision record ("infere métrica/impacto/tags") não mencionava empresa/período nem
   consistência de tags. Ambos os gaps eram reais no código legado — `company` existe no schema
   `Entry` desde 003 mas nunca era listado no prompt de extração, e a única regra de tag era
-  "concreta, não genérica", sem noção de vocabulário. Adicionados: FR-001/FR-003/FR-004 (empresa/
-  período, só por sinal textual explícito, nunca por inferência estatística entre registros) e
-  User Story 6 + FR-018/FR-019/FR-020 (tags reaproveitam o vocabulário já usado pela pessoa,
-  formato consistente, sem adjetivo genérico) — isso é o que torna o filtro por tag já existente
-  em `getFeedData` (`.contains('tags', tags)`) útil na prática. Todos os itens do checklist
-  seguem passando após a revisão.
+  "concreta, não genérica", sem noção de vocabulário. Adicionados nesta rodada: inferência de
+  empresa/período (só por sinal textual explícito, nunca por associação estatística entre
+  registros) e User Story de consistência de tags (reaproveitam o vocabulário já usado pela
+  pessoa, formato consistente, sem adjetivo genérico) — isso é o que torna o filtro por tag já
+  existente em `getFeedData` (`.contains('tags', tags)`) útil na prática.
+- **Revisão de 2026-07-15, parte 2** (risco levantado pela Ohana: uso futuro de alto risco —
+  currículo, prep de entrevista — não pode misturar contexto nem inventar correlação
+  empresa/evento): trocada a abordagem de empresa de "só inferência de IA" para um **seletor de
+  contexto por pílulas determinístico** (empresas já usadas pela pessoa + "Projeto pessoal" +
+  "Outro"), sem tornar o campo obrigatório no salvar (preservaria o "sempre salva" da 025). Nova
+  User Story 2 + FR-003 a FR-008 + Key Entity "Vocabulário de contextos da pessoa". Explicitado
+  nas Assumptions que o **gate de uso** em geração de alto risco (checar o sinal "contexto não
+  identificado" antes de gerar currículo/entrevista) é **trabalho futuro, fora desta feature** —
+  esta feature entrega o sinal e o mecanismo de resolução rápida, não o consumo do sinal. Tags
+  foram deliberadamente mantidas sem mecanismo equivalente de pílula, por decisão da Ohana de
+  avaliar o comportamento atual em uso real antes de investir mais ali.
+  Todos os itens do checklist seguem passando após as duas revisões (32 FRs, 8 SCs, 7 user
+  stories, sem `[NEEDS CLARIFICATION]` pendente).

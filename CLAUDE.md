@@ -38,12 +38,13 @@ Feature A (`025-registro-deposito`) mergeada (PR #59). Feature B é esta (`026`)
 
 <!-- SPECKIT START -->
 Current feature: **026-organizar-destaques** (branch: `026-organizar-destaques`) — **Organizar +
-destaques: botão opcional 'Organizar' (Haiku, só preenche campos vazios) infere métrica,
-impacto, tags, empresa e período; organização assíncrona disparada pelo salvar; registro =
-FONTE com destaques dentro (layout dois níveis, não splitar fonte de um evento); tags
-consistentes (reaproveitam o vocabulário já usado pela pessoa, sem sinônimo solto, pra manter o
-filtro por tag útil); Registros reestruturado (miniatura real, feed 1 card/fonte, timeline por
-mês, grade-faísca sem streak). Spec ✅**
+destaques: botão opcional 'Organizar' (Haiku, só preenche campos vazios) infere métrica, impacto,
+tags e período; empresa/contexto via seletor de pílulas determinístico (empresas já usadas +
+'Projeto pessoal' + 'Outro', sem IA); organização assíncrona disparada pelo salvar; registro =
+FONTE com destaques dentro (contexto/período no nível da fonte, layout dois níveis, não splitar
+fonte de um evento); tags consistentes (reaproveitam o vocabulário já usado pela pessoa);
+Registros reestruturado (miniatura real, feed 1 card/fonte, timeline por mês, grade-faísca sem
+streak). Spec ✅**
 
 > Depende da Feature A (`025-registro-deposito`, PR #59, mergeada) já implementada: reusa o
 > drawer sempre-salva, `Entry.raw_content` (cru verbatim), `EntrySource: 'deposito'` e
@@ -52,7 +53,13 @@ mês, grade-faísca sem streak). Spec ✅**
 > sempre; geração/RAG leem a fonte, não o resumo. Provavelmente sem migration nova (a decidir no
 > `/speckit-plan`). **Empresa/período e consistência de tags** foram gaps do decision record
 > original (a extração legada nunca populava `company` de fato, e tag só tinha a regra "concreta,
-> não genérica" — sem vocabulário) — adicionados na revisão de 2026-07-15 (ver checklist).
+> não genérica" — sem vocabulário). Revisão de 2026-07-15: empresa/contexto viraram seleção
+> determinística por pílula (não só inferência de IA) — risco levantado pela Ohana de misturar
+> contexto/inventar correlação empresa-evento em usos futuros de alto risco (currículo, prep de
+> entrevista). Esta feature entrega o **sinal** ("contexto não identificado") e o mecanismo de
+> resolver rápido; o **gate de uso** em geração de alto risco é trabalho futuro, fora daqui (ver
+> Assumptions do spec). Tags seguem sem mecanismo de pílula — Ohana decidiu avaliar em uso real
+> antes de investir mais ali. Ver checklist para o histórico completo da revisão.
 > Contexto: `docs/decisions/003-registro-deposito-e-captura.md`.
 Spec: [specs/026-organizar-destaques/spec.md](specs/026-organizar-destaques/spec.md) ·
 Plan: (pendente — `/speckit-clarify` → `/speckit-plan`)
