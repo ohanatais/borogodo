@@ -44,6 +44,10 @@ function formatDate(dateStr: string): string {
 
 type OrganizeButtonState = 'idle' | 'organizing' | 'done'
 
+/** Acima disso, o texto cru vem clampado por padrão (evita que uma fonte grande, ex. transcrição
+ * de reunião, force scroll de página inteira — só expande sob pedido, com scroll interno). */
+const RAW_TEXT_CLAMP_THRESHOLD = 400
+
 interface OrganizeResponseBody {
   status?: string
   highlights?: FeedHighlight[]
@@ -75,6 +79,7 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState(item.what_i_did)
   const [saving, setSaving] = useState(false)
+  const [sourceExpanded, setSourceExpanded] = useState(false)
   // US1 (feature 026): "Organizar" é opcional e local ao card — sem popup em falha (FR-030), sem
   // rótulo persistente além de "Organizar de novo" no sucesso (ux-shape.md §6).
   const [organizeState, setOrganizeState] = useState<OrganizeButtonState>('idle')
@@ -286,8 +291,29 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
                 </button>
               </div>
             </div>
+          ) : editValue.length > RAW_TEXT_CLAMP_THRESHOLD ? (
+            <div className="flex flex-col gap-1.5">
+              <p
+                className={sourceExpanded ? 'text-sm leading-relaxed overflow-y-auto' : 'text-sm leading-relaxed line-clamp-4'}
+                style={{
+                  color: 'var(--muted-foreground)',
+                  whiteSpace: 'pre-wrap',
+                  ...(sourceExpanded ? { maxHeight: 280 } : {}),
+                }}
+              >
+                {editValue}
+              </p>
+              <button
+                type="button"
+                onClick={() => setSourceExpanded((v) => !v)}
+                className="self-start text-xs font-medium min-h-[44px] transition-opacity hover:opacity-80"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                {sourceExpanded ? t('card.hideFull') : t('card.viewFull')}
+              </button>
+            </div>
           ) : (
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)', whiteSpace: 'pre-wrap' }}>
               {editValue}
             </p>
           )}

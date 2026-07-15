@@ -826,7 +826,9 @@
         "cancel": "Cancelar",
         "confirm": "Excluir"
       },
-      "highlightsBadge": "+{count} destaques"
+      "highlightsBadge": "+{count} destaques",
+      "viewFull": "Ver texto completo",
+      "hideFull": "Recolher texto"
     },
     "pagination": {
       "loadMore": "Carregar mais",

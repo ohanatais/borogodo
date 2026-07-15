@@ -310,3 +310,32 @@ describe('SourceCard — variant "panel" (sem ações de Registros)', () => {
     expect(screen.queryByRole('button', { name: 'highlight.addNew' })).not.toBeInTheDocument()
   })
 })
+
+describe('SourceCard — texto cru grande não força scroll de página inteira', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn())
+  })
+
+  it('texto curto renderiza sem clamp nem botão de expandir', () => {
+    render(<SourceCard item={BASE_ITEM} variant="feed" />)
+    expandCard()
+
+    expect(screen.queryByRole('button', { name: 'card.viewFull' })).not.toBeInTheDocument()
+    expect(screen.getByText(BASE_ITEM.what_i_did)).toBeInTheDocument()
+  })
+
+  it('texto grande vem clampado por padrão, com botão para expandir sob demanda', () => {
+    const longText = 'Trecho da transcrição. '.repeat(40)
+    render(<SourceCard item={{ ...BASE_ITEM, what_i_did: longText }} variant="feed" />)
+    expandCard()
+
+    const toggle = screen.getByRole('button', { name: 'card.viewFull' })
+    expect(toggle).toBeInTheDocument()
+    expect(screen.getByText(longText.trim())).toHaveClass('line-clamp-4')
+
+    fireEvent.click(toggle)
+
+    expect(screen.getByRole('button', { name: 'card.hideFull' })).toBeInTheDocument()
+    expect(screen.getByText(longText.trim())).not.toHaveClass('line-clamp-4')
+  })
+})
