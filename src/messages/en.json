@@ -1041,6 +1041,7 @@
     },
     "savedPanel": {
       "confirmation": "Registrado. Já está nos seus Registros.",
+      "organizingHint": "Organizando o resto em segundo plano…",
       "titleLabel": "Título",
       "titleHint": "O título é seu. Ajuste como quiser.",
       "titleAriaLabel": "Título do registro",

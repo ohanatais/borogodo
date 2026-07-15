@@ -216,30 +216,45 @@ sem ação adicional
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T034 [P] [US3] Teste de integração: `POST /api/capture` (`kind: 'deposito'`) dispara
+- [x] T034 [P] [US3] Teste de integração: `POST /api/capture` (`kind: 'deposito'`) dispara
       `triggerOrganizeEntry` via `dispatchAsyncJobs` sem bloquear a resposta (mock/spy em
       `organizeEntry`, resposta HTTP não espera a promise resolver), em
       `tests/integration/api/capture-deposito-organize.test.ts` — DEVE falhar antes de T036
-- [ ] T035 [P] [US3] Teste de integração: falha na chamada de IA durante a organização assíncrona
+- [x] T035 [P] [US3] Teste de integração: falha na chamada de IA durante a organização assíncrona
       não afeta a entry salva (permanece visível, sem estado de erro bloqueante), mesmo arquivo
       de T034
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] Implementar `triggerOrganizeEntry(userId, entryId)` em
+- [x] T036 [US3] Implementar `triggerOrganizeEntry(userId, entryId)` em
       `src/lib/ai/extraction/jobs.ts` — chama `organizeEntry` (T022) com o mesmo guard de
       concorrência de `organizing_started_at`
-- [ ] T037 [US3] Estender `dispatchAsyncJobs()` em `src/app/api/capture/route.ts` para incluir
+      — Guarda de concorrência (FR-031) e derivação de recência extraídos para
+      `src/lib/entries/organizationStatus.ts` (`isOrganizingRecently`/`deriveOrganizationStatus`),
+      cobertos por `src/lib/entries/__tests__/organizationStatus.test.ts` e
+      `tests/unit/triggerOrganizeEntry.test.ts`. Usa `getSupabaseAdmin()` (mesmo padrão dos demais
+      jobs deste arquivo), nunca lança — qualquer erro (incluindo falha de IA que já é tratada
+      dentro de `organizeEntry`) é só logado.
+- [x] T037 [US3] Estender `dispatchAsyncJobs()` em `src/app/api/capture/route.ts` para incluir
       `fireAndForget('triggerOrganizeEntry', triggerOrganizeEntry(userId, entryId))`
-- [ ] T038 [US3] Chamar `dispatchAsyncJobs(userId, entryId)` a partir de `handleDepositoCapture`
+      — `dispatchAsyncJobs` ganhou um `entryId?` opcional (só o caminho `deposito` tem uma fonte
+      única recém-salva para organizar; marco/texto/arquivo continuam sem esse job).
+- [x] T038 [US3] Chamar `dispatchAsyncJobs(userId, entryId)` a partir de `handleDepositoCapture`
       (hoje não a chama — ver `research.md` §5) sem alterar seu comportamento de resposta (201
       imediato, sem esperar os jobs)
-- [ ] T039 [US3] Estado transitório "organizando…" no `SourceCard`, derivado de
-      `organizing_started_at` (recente) — sem rótulo persistente nem CTA adicional após conclusão
-      (FR-011)
-- [ ] T040 [US3] Bloco "Organizando o resto em segundo plano" no `SavedPanel.tsx`
+- [x] T039 [US3] Estado transitório "organizando…" no `EntryCard.tsx` (`SourceCard` ainda não
+      existe — mesma nota de T024/T030/T032), derivado de `organized_at`/`organizing_started_at`
+      via `deriveOrganizationStatus` — sem rótulo persistente nem CTA adicional após conclusão
+      (FR-011). `FeedItem`/`getFeedData` estendidos com os dois timestamps brutos (escopo mínimo;
+      a derivação completa de `organizationStatus`/join com `entry_highlights` para o feed
+      continua em US7/T059). O botão "Organizar" também reflete e respeita esse estado do
+      servidor (idempotência FR-031: clique manual não duplica chamada enquanto a versão
+      assíncrona já roda). Teste:
+      `src/components/features/feed/__tests__/EntryCardOrganizingState.test.tsx`.
+- [x] T040 [US3] Bloco "Organizando o resto em segundo plano" no `SavedPanel.tsx`
       (`src/components/features/capture/SavedPanel.tsx`) — explicitamente fora de escopo da 025,
-      entregue aqui
+      entregue aqui. Chave i18n `registro.savedPanel.organizingHint` (pt-BR/en). Teste:
+      `src/components/features/capture/__tests__/SavedPanelOrganizing.test.tsx`.
 
 **Checkpoint**: User Stories 1-3 funcionam juntas — todo registro ganha organização, manual ou
 automaticamente

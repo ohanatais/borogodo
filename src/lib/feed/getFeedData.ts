@@ -28,6 +28,8 @@ interface RawEntry {
   decision: string | null
   learning: string | null
   file_name: string | null
+  organized_at: string | null
+  organizing_started_at: string | null
 }
 
 function applyFallbackTitle(entry: RawEntry): string {
@@ -87,7 +89,7 @@ export async function getFeedData(
   let req = supabase
     .from('entries')
     .select(
-      'id, what_i_did, title, source, created_at, entry_date, company, is_personal_project, role_title, metric, tags, evidences, impact, decision, learning, file_name'
+      'id, what_i_did, title, source, created_at, entry_date, company, is_personal_project, role_title, metric, tags, evidences, impact, decision, learning, file_name, organized_at, organizing_started_at'
     )
     .eq('user_id', userId)
 
@@ -188,6 +190,8 @@ export async function getFeedData(
     decision: entry.decision,
     learning: entry.learning,
     file_name: entry.file_name,
+    organized_at: entry.organized_at ?? null,
+    organizing_started_at: entry.organizing_started_at ?? null,
   }))
 
   return { items, nextCursor, total: null }

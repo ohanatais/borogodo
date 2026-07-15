@@ -27,6 +27,10 @@ export interface FeedItem {
   decision: string | null
   learning: string | null
   file_name: string | null
+  // US3 (026-organizar-destaques): timestamps brutos usados por `deriveOrganizationStatus` para
+  // o estado transitório "organizando…" no card — nunca lidos diretamente como enum aqui.
+  organized_at: string | null
+  organizing_started_at: string | null
 }
 
 export type FeedAxis = 'created_at' | 'entry_date'

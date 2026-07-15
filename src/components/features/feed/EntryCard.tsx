@@ -10,6 +10,7 @@ import { UsarButton } from '@/components/features/content/UsarButton'
 import { AttachTile } from '@/components/features/capture/AttachTile'
 import { ContextPillPicker } from './ContextPillPicker'
 import { deriveContextStatus } from '@/lib/entries/contextStatus'
+import { deriveOrganizationStatus } from '@/lib/entries/organizationStatus'
 
 interface EntryCardProps {
   item: FeedItem
@@ -49,6 +50,11 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
   // Story 2 (FR-008): sinalização discreta de "contexto não identificado" no header do card —
   // nunca um badge de erro/alerta, um convite a completar (ux-shape.md §6).
   const contextStatus = deriveContextStatus(item.company, item.is_personal_project)
+  // US3 (feature 026): fonte da verdade do servidor para "organizando…" — cobre tanto o disparo
+  // assíncrono (salvar sem clicar em Organizar) quanto uma organização manual iniciada em outra
+  // aba/sessão. Nunca fica presa: uma organização travada além do timeout volta a "not_organized"
+  // (FR-030), então o rótulo nunca vira permanente.
+  const serverOrganizationStatus = deriveOrganizationStatus(item.organized_at, item.organizing_started_at)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState(item.what_i_did)
@@ -96,6 +102,10 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
    * (FR-030) — permitindo nova tentativa clicando "Organizar" de novo.
    */
   async function handleOrganize() {
+    // Idempotência (FR-031): se a organização assíncrona já está em andamento, o clique manual
+    // não dispara uma segunda chamada de rede — o botão já nasce desabilitado nesse caso, este
+    // guard cobre o caso defensivo de um clique disparado por outro meio (ex. Enter no foco).
+    if (serverOrganizationStatus === 'organizing') return
     setOrganizeState('organizing')
     try {
       const res = await fetch(`/api/entries/${item.id}/organize`, { method: 'POST' })
@@ -132,6 +142,12 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
               <span className="inline-flex items-center gap-1 italic" style={{ color: 'var(--muted-foreground)' }}>
                 <span aria-hidden="true">·</span>
                 <span>{tRegistro('context.unresolvedLabel')}</span>
+              </span>
+            )}
+            {serverOrganizationStatus === 'organizing' && (
+              <span className="inline-flex items-center gap-1" style={{ color: 'var(--muted-foreground)' }}>
+                <span aria-hidden="true">·</span>
+                <span>{tRegistro('organize.organizing')}</span>
               </span>
             )}
           </span>
@@ -237,22 +253,29 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
               formats={['post', 'impact_summary']}
             />
 
-            {variant === 'feed' && !editing && (
-              <button
-                type="button"
-                onClick={() => void handleOrganize()}
-                disabled={organizeState === 'organizing'}
-                className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[48px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                <Sparkles size={12} aria-hidden="true" />
-                {organizeState === 'organizing'
-                  ? tRegistro('organize.organizing')
-                  : organizeState === 'done'
-                    ? tRegistro('organize.ctaAgain')
-                    : tRegistro('organize.cta')}
-              </button>
-            )}
+            {variant === 'feed' && !editing && (() => {
+              // US3: o botão reflete tanto o clique manual local (`organizeState`) quanto a
+              // organização assíncrona em andamento no servidor (`serverOrganizationStatus`) —
+              // qualquer um dos dois basta para mostrar "organizando…" e desabilitar (FR-031).
+              const isOrganizingNow = organizeState === 'organizing' || serverOrganizationStatus === 'organizing'
+              const isOrganizedAlready = organizeState === 'done' || serverOrganizationStatus === 'organized'
+              return (
+                <button
+                  type="button"
+                  onClick={() => void handleOrganize()}
+                  disabled={isOrganizingNow}
+                  className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[48px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  <Sparkles size={12} aria-hidden="true" />
+                  {isOrganizingNow
+                    ? tRegistro('organize.organizing')
+                    : isOrganizedAlready
+                      ? tRegistro('organize.ctaAgain')
+                      : tRegistro('organize.cta')}
+                </button>
+              )
+            })()}
 
             {variant === 'feed' && !editing && (
               <button

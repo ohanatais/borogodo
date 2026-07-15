@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { CheckCircle2, Pencil } from 'lucide-react'
+import { CheckCircle2, Pencil, Sparkles } from 'lucide-react'
 import { AttachTile } from './AttachTile'
 import type { DrawerAttachment } from '@/hooks/useDrawerDraft'
 
@@ -48,6 +48,13 @@ export function SavedPanel({ entryId, initialTitle, attachments = [], onRetryAtt
         <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
           {t('savedPanel.confirmation')}
         </p>
+      </div>
+
+      {/* US3 (feature 026, T040): registro já está salvo e visível — a organização (métrica/
+          impacto/tags/título) roda em segundo plano sem bloquear nem exigir nenhuma ação aqui. */}
+      <div className="flex items-center gap-1.5 text-xs px-0.5" style={{ color: 'var(--muted-foreground)' }}>
+        <Sparkles size={13} aria-hidden="true" />
+        <span>{t('savedPanel.organizingHint')}</span>
       </div>
 
       <div className="flex flex-col gap-1.5">

@@ -29,6 +29,8 @@ function buildItem(overrides: Partial<FeedItem> = {}): FeedItem {
     decision: null,
     learning: null,
     file_name: null,
+    organized_at: null,
+    organizing_started_at: null,
     ...overrides,
   }
 }
