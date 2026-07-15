@@ -208,3 +208,105 @@ describe('SourceCard — 1 card por fonte (T058, US7, FR-025/FR-027)', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })
+
+describe('SourceCard — edição inline do texto cru', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn())
+  })
+
+  it('entra em modo de edição, salva via PATCH e propaga onEdit', async () => {
+    vi.mocked(fetch).mockResolvedValue({ ok: true, json: async () => ({}) } as Response)
+    const onEdit = vi.fn()
+    render(<SourceCard item={BASE_ITEM} variant="feed" onEdit={onEdit} />)
+    expandCard()
+
+    fireEvent.click(screen.getByRole('button', { name: 'card.edit' }))
+    const textarea = screen.getByRole('textbox')
+    fireEvent.change(textarea, { target: { value: 'Texto editado' } })
+    fireEvent.click(screen.getByRole('button', { name: 'card.save' }))
+
+    await waitFor(() =>
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/entries/entry-1',
+        expect.objectContaining({ method: 'PATCH' })
+      )
+    )
+    await waitFor(() => expect(onEdit).toHaveBeenCalledWith('entry-1', 'Texto editado'))
+  })
+
+  it('cancela a edição sem chamar a rede e restaura o texto original', () => {
+    render(<SourceCard item={BASE_ITEM} variant="feed" />)
+    expandCard()
+
+    fireEvent.click(screen.getByRole('button', { name: 'card.edit' }))
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Rascunho descartado' } })
+    fireEvent.click(screen.getByRole('button', { name: 'card.cancelEdit' }))
+
+    expect(fetch).not.toHaveBeenCalled()
+    expect(screen.getByText(BASE_ITEM.what_i_did)).toBeInTheDocument()
+  })
+})
+
+describe('SourceCard — exclusão com confirmação', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn())
+  })
+
+  it('abre o diálogo de confirmação e só chama onDelete após confirmar', () => {
+    const onDelete = vi.fn()
+    render(<SourceCard item={BASE_ITEM} variant="feed" onDelete={onDelete} />)
+    expandCard()
+
+    fireEvent.click(screen.getByRole('button', { name: 'card.delete' }))
+    expect(onDelete).not.toHaveBeenCalled()
+    expect(screen.getByText('card.deleteConfirm.title')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'card.deleteConfirm.confirm' }))
+    expect(onDelete).toHaveBeenCalledWith('entry-1')
+  })
+
+  it('não mostra o botão de excluir quando onDelete não é fornecido', () => {
+    render(<SourceCard item={BASE_ITEM} variant="feed" />)
+    expandCard()
+
+    expect(screen.queryByRole('button', { name: 'card.delete' })).not.toBeInTheDocument()
+  })
+})
+
+describe('SourceCard — adicionar destaque em branco (FR-016)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn())
+  })
+
+  it('cria um destaque em branco via POST e o soma à lista existente', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ highlight: { id: 'h-new', title: null, metric: null, impact: null, tags: [] } }),
+    } as Response)
+
+    render(<SourceCard item={{ ...BASE_ITEM, highlights: [] }} variant="feed" />)
+    expandCard()
+
+    fireEvent.click(screen.getByRole('button', { name: 'highlight.addNew' }))
+
+    await waitFor(() =>
+      expect(fetch).toHaveBeenCalledWith('/api/entries/entry-1/highlights', { method: 'POST' })
+    )
+  })
+})
+
+describe('SourceCard — variant "panel" (sem ações de Registros)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn())
+  })
+
+  it('não renderiza ContextPillPicker, botão Organizar, editar, excluir ou adicionar destaque', () => {
+    render(<SourceCard item={BASE_ITEM} variant="panel" onDelete={vi.fn()} />)
+    expandCard()
+
+    expect(screen.queryByRole('button', { name: 'organize.cta' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'card.edit' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'card.delete' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'highlight.addNew' })).not.toBeInTheDocument()
+  })
+})
