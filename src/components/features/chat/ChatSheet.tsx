@@ -308,13 +308,6 @@ export function ChatSheet() {
     }
   }, [])
 
-  // Reflect open/close state to the capture toggle (Registrar | Perguntar).
-  useEffect(() => {
-    window.dispatchEvent(
-      new CustomEvent('borogodo:chat-state', { detail: { open: state.open } })
-    )
-  }, [state.open])
-
   // Auto-send prefill message when sheet opens with a pre-set context action
   useEffect(() => {
     if (state.open && state.pendingAutoSend) {

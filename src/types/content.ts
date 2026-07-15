@@ -2,6 +2,8 @@
 // Reusados por 014 (hub) e 015 (refino de voz). Identificadores em inglês (constituição II).
 
 export type DraftFormat = 'post' | 'impact_summary' | 'mini_bio' | 'self_assessment'
+// impact_summary saiu das opções oferecidas (021); permanece no enum/motor (FR-015).
+export const NUDGE_FORMATS: DraftFormat[] = ['post']
 export type AngleKind = 'study' | 'opinion'
 export type SeedType = 'entry' | 'theme' | 'project' | 'period'
 // 'draft' (019): a autoavaliação é ESCRITA pela pessoa, então nasce rascunho autorado — nunca

@@ -10,6 +10,16 @@
     "overloaded": "I'm a bit overloaded right now. Things should be back to normal soon, try again later.",
     "dismiss": "Got it"
   },
+  "nav": {
+    "signIn": "Entrar",
+    "signInAriaLabel": "Entrar na minha conta",
+    "anchorHow": "Como funciona",
+    "anchorProof": "Provas",
+    "anchorPrivacy": "Privacidade",
+    "anchorFaq": "Perguntas",
+    "cta": "Criar conta",
+    "ctaAriaLabel": "Criar conta gratuita no Borogodó"
+  },
   "hero": {
     "eyebrow": "borogodó (substantivo): aquele quê que só você tem.",
     "headline": "Você sabe trabalhar.",
@@ -29,6 +39,7 @@
       "proofText": "alinhei os times em tempo real na crise do servidor",
       "placeholderNote": "Em breve, o vídeo real do seu primeiro borogodó aqui."
     },
+    "videoAlt": "O espelho do Borogodó: suas forças organizadas por categoria, cada uma com a prova do lado.",
     "tagline": "todo mundo tem um. o seu merece ser visto."
   },
   "painPoints": {
@@ -50,7 +61,8 @@
         "title": "Você cresceu muito e não sabe explicar como.",
         "description": "Hoje você é uma profissional bem diferente da que começou. Mas essa evolução tá só na sua cabeça, sem forma e sem nome."
       }
-    ]
+    ],
+    "label": "O que trava hoje"
   },
   "cta": {
     "title": "O seu borogodó já existe.",
@@ -111,6 +123,30 @@
     "chatDoor": {
       "placeholder": "Ask anything about your career — e.g. \"what makes me stand out?\"",
       "ariaLabel": "Open chat and ask about your career"
+    },
+    "greetingByTime": {
+      "morning": "Bom dia, {name}.",
+      "afternoon": "Boa tarde, {name}.",
+      "evening": "Boa noite, {name}."
+    },
+    "greetingSubtitle": "Cada registro de hoje afina o seu Espelho.",
+    "registroTrigger": {
+      "label": "Registrar o que você fez",
+      "ariaLabel": "Registrar o que você fez"
+    },
+    "suasForcas": {
+      "title": "Suas forças",
+      "viewMirror": "Ver espelho"
+    },
+    "registrosRecentes": {
+      "title": "Registros recentes",
+      "viewAll": "Ver todos"
+    },
+    "newAccount": {
+      "heading": "Painel",
+      "importButton": "Importar currículo ou LinkedIn",
+      "progressCard": "Seu Espelho se forma conforme você registra",
+      "progressLabel": "{count} de {total} registros"
     }
   },
   "panel": {
@@ -153,6 +189,32 @@
       "title": "Everything starts with a story.",
       "subtitle": "Tell me something you did at work — it can be small. Borogodó will start building your mirror from there."
     },
+    "borogodoCard": {
+      "subtitle": "O borogodó de",
+      "subtitleSelf": "O seu borogodó",
+      "formingSelf": "Seu espelho tá se formando.",
+      "ariaLabel": "Perfil de {name}",
+      "viewMirror": "Ver espelho completo →",
+      "viewMirrorGrowth": "{count, plural, one {Ver o skill que pode crescer →} other {Ver os # skills que podem crescer →}}",
+      "forming": "Seu espelho está se formando",
+      "formingSubtitle": "Continue capturando histórias para o Borogodó revelar seu padrão.",
+      "formingOf": "O espelho de",
+      "formingSuffix": " tá se formando.",
+      "skills": {
+        "comprovadas": "{count, plural, one {# comprovada} other {# comprovadas}}",
+        "consistentes": "{count, plural, one {# consistente} other {# consistentes}}",
+        "emergentes": "{count, plural, one {# emergente} other {# emergentes}}"
+      }
+    },
+    "highlights": {
+      "title": "Trajetória em destaque",
+      "expand": "Ver mais",
+      "collapse": "Recolher"
+    },
+    "timeline": {
+      "title": "Linha do tempo",
+      "viewAll": "Ver linha do tempo completa"
+    },
     "return": {
       "hasNew": "This week you wrapped up: {evidence}",
       "strengthAha": "This reinforces your strength in {theme}.",
@@ -167,6 +229,69 @@
       "answerPlaceholder": "Your answer…",
       "respond": "Respond",
       "dismiss": "Later"
+    }
+  },
+  "espelho": {
+    "back": "← Voltar ao painel",
+    "mirrorOf": "Espelho de",
+    "regenerate": "Gerar novo espelho",
+    "regenerating": "Gerando...",
+    "regenerateError": "Algo deu errado. Tenta de novo?",
+    "sections": {
+      "primaryStrength": "No que você manda bem",
+      "invisibleSkill": "Seu borogodó",
+      "contextPattern": "O fio da sua carreira"
+    },
+    "themes": "Temas de força",
+    "evidence": {
+      "show": "{count, plural, one {Ver # entrada} other {Ver # entradas}}",
+      "collapse": "Recolher",
+      "loading": "Carregando...",
+      "noEntries": "Nenhuma entrada vinculada",
+      "entriesRegion": "Entradas de evidência"
+    },
+    "categories": {
+      "title": "Seus skills por categoria",
+      "emptyState": "Continue capturando para ver seus skills organizados por categoria.",
+      "tier": {
+        "Emergente": "Emergente",
+        "Consistente": "Consistente",
+        "Comprovada": "Comprovada"
+      },
+      "legend": {
+        "emergente": "tá aparecendo",
+        "consistente": "virou padrão",
+        "comprovada": "tem prova externa"
+      },
+      "criteriaButton": {
+        "Emergente": "Como avançar?",
+        "Consistente": "Como avançar?",
+        "Comprovada": "Ver critério"
+      },
+      "tierCriteria": {
+        "Emergente": "O Borogodó identificou esse padrão nas suas histórias, mas sem recorrência estabelecida ainda. Para avançar para Consistente: registre mais 2 ou 3 situações com resultado claro.",
+        "Consistente": "Padrão recorrente com resultados. Para chegar a Comprovada: adicione uma evidência externa (número com impacto, nome de empresa ou reconhecimento formal documentado).",
+        "Comprovada": "Nível máximo. Evidência externa validada por fora de você: resultado com número, empresa ou reconhecimento formal. Nada mais a provar aqui."
+      },
+      "skillProgress": {
+        "Emergente": "Mais situações como essa elevam para Consistente.",
+        "Consistente": "Um resultado externo (número, reconhecimento, empresa) eleva para Comprovada."
+      },
+      "skillProgressCta": "Registrar mais"
+    },
+    "empty": {
+      "title": "Seu espelho está se formando.",
+      "description": "Continue capturando histórias e o Borogodó vai revelar seus padrões aqui."
+    },
+    "feedback": {
+      "question": "Resonou com você?",
+      "yes": "Sim",
+      "no": "Não",
+      "confirmed": "Obrigado pelo feedback"
+    },
+    "views": {
+      "forcas": "Forças",
+      "trajetoria": "Trajetória"
     }
   },
   "historico": {
@@ -188,7 +313,19 @@
     "askHint": "Pergunte algo sobre sua carreira...",
     "send": "Enviar",
     "registros": "Registros",
-    "usar": "Usar"
+    "usar": "Usar",
+    "perfil": "Perfil",
+    "trajetoria": "Trajetória",
+    "gerarConteudo": "Gerar conteúdo",
+    "mePreparar": "Me preparar",
+    "groups": {
+      "meuEspelho": "Meu espelho",
+      "usar": "Usar"
+    },
+    "theme": {
+      "toggleToDark": "Switch to dark theme",
+      "toggleToLight": "Switch to light theme"
+    }
   },
   "capture": {
     "composer": {
@@ -221,6 +358,8 @@
       "viewFeed": "View entries →"
     },
     "recording": {
+      "start": "Gravar",
+      "startAriaLabel": "Iniciar gravação de voz",
       "listening": "Listening…",
       "stop": "Stop",
       "stopAriaLabel": "Stop recording",
@@ -233,11 +372,16 @@
       "liveRegionLabel": "Live transcript",
       "use": "Use",
       "useAriaLabel": "Use transcript",
-      "controlsGroupLabel": "Recording controls"
+      "controlsGroupLabel": "Recording controls",
+      "noSpeech": "Nenhuma fala capturada. Tente gravar novamente.",
+      "errorAudioCapture": "Microfone não encontrado. Verifique se está conectado e se o navegador tem permissão.",
+      "errorNetwork": "O Chrome precisa acessar os servidores do Google para transcrever. Tente no Safari, ou cole o texto manualmente.",
+      "errorGeneric": "Não foi possível gravar. Tente novamente."
     },
     "reading": "Reading what you told me...",
     "reflection": {
       "opening": "Got it:",
+      "pillsLabel": "Temas identificados",
       "respond": "Respond",
       "saveAsIs": "Save as is",
       "answerPlaceholder": "Your answer..."
@@ -257,7 +401,8 @@
       "fileTooLarge": "File too large (max 10 MB)",
       "missingFile": "No file sent",
       "generic": "I couldn't process your capture right now, try again?",
-      "noContent": "I couldn't find a clear win here — want to tell me in your own words?"
+      "noContent": "I couldn't find a clear win here — want to tell me in your own words?",
+      "emptyContent": "Escreva algo pra registrar."
     },
     "sheet": {
       "closeAriaLabel": "Close"
@@ -310,7 +455,8 @@
     "linkedinLabel": "Rather chat?",
     "linkedinCta": "Find me on LinkedIn",
     "sla": "There's a real person on the other side, me. I reply within 2 business days.",
-    "credits": "Borogodó · made in Brazil · {ano}"
+    "credits": "Borogodó · made in Brazil · {ano}",
+    "brandTagline": "Inteligência de carreira com IA, feita no Brasil."
   },
   "legal": {
     "termsLabel": "Termos de Uso",
@@ -447,6 +593,7 @@
         "description": "Generate your first draft from a theme in your Mirror or one of your entries, in your voice."
       },
       "status": {
+        "draft": "Rascunho",
         "generated": "Generated",
         "edited": "Edited",
         "copied": "Copied",
@@ -689,14 +836,6 @@
     "deleteError": "Couldn't delete this record. It's still here.",
     "deleteErrorDismiss": "Ok"
   },
-  "nav": {
-    "signIn": "Entrar",
-    "signInAriaLabel": "Entrar na minha conta",
-    "anchorHow": "Como funciona",
-    "anchorProof": "Provas",
-    "anchorPrivacy": "Privacidade",
-    "anchorFaq": "Perguntas"
-  },
   "journey": {
     "title": "Do silêncio ao \"é isso que eu faço de melhor\".",
     "steps": [
@@ -720,13 +859,15 @@
         "quote": "Sei mostrar do meu jeito.",
         "description": "Numa entrevista, numa avaliação, num post. Você pega o que precisa e fala com as suas palavras."
       }
-    ]
+    ],
+    "label": "Como funciona"
   },
   "proof": {
     "title": "Não inventa. Mostra a prova.",
     "body": "IA generativa é boa em inventar coisa bonita sobre você. O Borogodó faz o contrário. Cada força que ele aponta nasce de algo que você registrou, e vem com a prova do lado. Se ele diz que você lidera bem na incerteza, é porque tem no seu registro três projetos de crise entregues no prazo e quatro feedbacks falando de calma sob pressão. Quando falta prova pra sustentar uma força, ele te pergunta em vez de chutar.",
     "mediaLabel": "Card de força com a evidência citada",
-    "mediaNote": "Em breve, o print real do seu espelho aqui."
+    "mediaNote": "Em breve, o print real do seu espelho aqui.",
+    "label": "Provas"
   },
   "ownership": {
     "title": "Seu. Não da sua empresa.",
@@ -736,17 +877,20 @@
       "Só você vê",
       "Exportável quando quiser",
       "Sem acesso do empregador"
-    ]
+    ],
+    "label": "Privacidade"
   },
   "manifesto": {
     "title": "Mostrar o seu valor não é se gabar.",
-    "body": "Lá fora ensinam a se vender. Aqui no Brasil isso dá um desconforto danado, e tem razão de dar. Mostrar o seu borogodó é outra coisa. É deixar claro o que você já faz bem, com a prova do lado. O Borogodó faz a parte chata disso por você, sem floreio e sem aquele tom de IA que todo mundo reconhece de longe."
+    "body": "Lá fora ensinam a se vender. Aqui no Brasil isso dá um desconforto danado, e tem razão de dar. Mostrar o seu borogodó é outra coisa. É deixar claro o que você já faz bem, com a prova do lado. O Borogodó faz a parte chata disso por você, sem floreio e sem aquele tom de IA que todo mundo reconhece de longe.",
+    "label": "Manifesto"
   },
   "socialProof": {
     "title": "Feito à vista de todos.",
     "body": "O Borogodó tá sendo construído no aberto por uma PM brasileira, que vai postando o processo conforme faz. Sem depoimento inventado e sem número de fachada. Se quiser ver como tá ficando, é só acompanhar.",
     "link": "Ver os bastidores",
-    "linkAriaLabel": "Ver os bastidores no LinkedIn da fundadora"
+    "linkAriaLabel": "Ver os bastidores no LinkedIn da fundadora",
+    "label": "Bastidores"
   },
   "faq": {
     "title": "Perguntas que todo mundo faz.",
@@ -775,7 +919,41 @@
         "question": "Preciso escrever muito pra valer a pena?",
         "answer": "Não. Dá pra começar com uma coisa pequena que você fez essa semana e ir somando no seu ritmo."
       }
-    }
+    },
+    "label": "Perguntas"
+  },
+  "comparison": {
+    "label": "Por que não só o ChatGPT",
+    "title": "Não é a mesma coisa que pedir pro ChatGPT.",
+    "chatgptName": "ChatGPT",
+    "borogodoName": "Borogodó",
+    "rows": [
+      {
+        "aspect": "Ponto de partida",
+        "chatgpt": "Um prompt do zero, toda vez.",
+        "borogodo": "O seu registro acumulado."
+      },
+      {
+        "aspect": "Sobre você",
+        "chatgpt": "Não conhece a sua trajetória.",
+        "borogodo": "Parte do que você viveu de verdade."
+      },
+      {
+        "aspect": "A prova",
+        "chatgpt": "Inventa pra soar bem.",
+        "borogodo": "Cita a evidência real do seu registro."
+      },
+      {
+        "aspect": "A voz",
+        "chatgpt": "Genérica, com cara de IA.",
+        "borogodo": "A sua."
+      },
+      {
+        "aspect": "Quando falta dado",
+        "chatgpt": "Chuta com confiança.",
+        "borogodo": "Te pergunta em vez de inventar."
+      }
+    ]
   },
   "howItWorks": {
     "title": "Como funciona",
@@ -827,6 +1005,53 @@
     "preparo": {
       "label": "Prep",
       "when": "Walk in ready — interview, review, raise."
+    }
+  },
+  "registro": {
+    "drawer": {
+      "title": "Registrar",
+      "closeAriaLabel": "Fechar",
+      "textareaPlaceholder": "Cole uma transcrição, um e-mail ou um documento. Ou escreva — fica salvo do jeito que está.",
+      "textareaAriaLabel": "Texto do registro",
+      "sourcePreserved": "Fonte completa preservada. Guardo o texto inteiro.",
+      "imageButton": "Imagem",
+      "linkButton": "Link",
+      "submitButton": "Registrar",
+      "submitAriaLabel": "Registrar",
+      "shortcutHint": "Esc fecha · ⌘/Ctrl+Enter registra",
+      "emptyPromptFirst": "O que tomou mais do seu tempo esta semana?",
+      "emptyPromptSecond": "O que só você conseguiu resolver?"
+    },
+    "error": {
+      "saveFailed": "Não foi possível salvar agora. Seu texto está salvo aqui.",
+      "retry": "Tentar de novo"
+    },
+    "attach": {
+      "imageAriaLabel": "Anexar imagem",
+      "linkAriaLabel": "Anexar link",
+      "removeAriaLabel": "Remover anexo",
+      "linkInputPlaceholder": "Cole o link aqui",
+      "linkInputLabel": "Link",
+      "linkConfirm": "Adicionar",
+      "linkInputError": "Esse link não parece válido. Confira e tente de novo.",
+      "imageAlt": "Pré-visualização da imagem anexada",
+      "uploadError": "Não foi possível enviar",
+      "retryAriaLabel": "Tentar enviar de novo"
+    },
+    "savedPanel": {
+      "confirmation": "Registrado. Já está nos seus Registros.",
+      "titleLabel": "Título",
+      "titleHint": "O título é seu. Ajuste como quiser.",
+      "titleAriaLabel": "Título do registro",
+      "doneButton": "Concluir"
+    },
+    "detailsFields": {
+      "toggleLabel": "+ adicionar detalhes",
+      "metricLabel": "Métrica",
+      "impactLabel": "Impacto",
+      "tagsLabel": "Tags",
+      "companyLabel": "Empresa",
+      "dateLabel": "Data"
     }
   }
 }

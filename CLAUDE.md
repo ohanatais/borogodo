@@ -30,22 +30,23 @@ Features mergeadas em `main` (até PR #40):
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
 <!-- SPECKIT START -->
-Current feature: **024-termos-privacidade** (branch: `024-termos-privacidade`) — **Termos de Uso + Política de Privacidade (páginas em URLs dedicadas `/termos-de-uso` e `/politica-de-privacidade`) + consentimento auditável (LGPD). Spec ✅ clarify ✅ plan ✅**
+Current feature: **025-registro-deposito** (branch: `025-registro-deposito`) — **Registro como Depósito (fundação): drawer bloco-de-notas que sempre salva (sem IA no caminho crítico), anexo de imagem/link de primeira classe, confirmação editável, campos manuais opcionais; Painel novo (saudação + gatilho único + Suas forças + Registros recentes) e navegação em grupos + dark mode. Spec ✅ clarify ✅ plan ✅**
 
-> Escopo: estrutura das páginas (conteúdo jurídico é placeholder — Ohana escreve depois), vínculos
-> (Footer + `/configuracoes`), e o mecanismo de aceite. Aceite de Termos via **sign-in-wrap** (aviso +
-> links, sem checkbox; base legal LGPD = execução de contrato), **registrado server-side** (`terms_accepted_at`
-> + `terms_version`). Marketing é consentimento **separado, desligado por padrão** (checkbox no cadastro por
-> e-mail; Google só liga em configurações; **onboarding livre de marketing**, decisão da Ohana). Registro do aceite na camada de render:
-> onboarding carimba novos usuários; gate em `(app)/layout.tsx` (3º check: `terms_version != CURRENT`) cobre
-> contas existentes e bumps de versão → `/consentimento`. Fonte única em `src/lib/legal/policy.ts`.
-> **Migration `015_profiles_consent.sql`** (3 colunas em `profiles`, aditiva). FORA: texto jurídico, cookie
-> banner, direitos-do-titular (exclusão/portabilidade), histórico multi-versão de aceites.
-Spec: [specs/024-termos-privacidade/spec.md](specs/024-termos-privacidade/spec.md) ·
-Plan: [specs/024-termos-privacidade/plan.md](specs/024-termos-privacidade/plan.md) ·
-Research: [specs/024-termos-privacidade/research.md](specs/024-termos-privacidade/research.md) ·
-Data-model: [specs/024-termos-privacidade/data-model.md](specs/024-termos-privacidade/data-model.md) ·
-Contracts: [specs/024-termos-privacidade/contracts/consent.md](specs/024-termos-privacidade/contracts/consent.md) ·
-Quickstart: [specs/024-termos-privacidade/quickstart.md](specs/024-termos-privacidade/quickstart.md) ·
-Tasks: [specs/024-termos-privacidade/tasks.md](specs/024-termos-privacidade/tasks.md) (42 tasks, 7 fases; MVP = Foundational + US1)
+> Feature A do fatiamento A→B→C descrito em `docs/decisions/003-registro-deposito-e-captura.md`.
+> Remove a dependência de IA síncrona (Haiku) do caminho de salvar (`captureAndReflect`) e o
+> reroteamento por tamanho de texto (limiar de 150 chars) — hoje ambos quebram o dogfooding.
+> Reusa `entries`/`evidences` JSONB/bucket `evidence-files` (migration 007) sem migration nova.
+> Novo `kind: 'deposito'` em `/api/capture` salva texto+campos manuais direto (sem IA); anexos
+> vão pela rota já existente `/api/entries/[id]/evidence`, chamada após a entry já ter `id`.
+> Navegação em grupos ("Meu espelho"/"Usar") e dark mode via `next-themes` (nova dependência)
+> ficam dentro desta fatia — decidido no `/speckit-clarify`, não viram sub-feature. Fora de
+> escopo: botão Organizar/estruturação por IA, destaques, reestruturação de Registros, Importar
+> histórico (features `026-organizar-destaques` e `027-importar-historico`).
+Spec: [specs/025-registro-deposito/spec.md](specs/025-registro-deposito/spec.md) ·
+Plan: [specs/025-registro-deposito/plan.md](specs/025-registro-deposito/plan.md) ·
+Research: [specs/025-registro-deposito/research.md](specs/025-registro-deposito/research.md) ·
+Data-model: [specs/025-registro-deposito/data-model.md](specs/025-registro-deposito/data-model.md) ·
+Contracts: [specs/025-registro-deposito/contracts/capture.md](specs/025-registro-deposito/contracts/capture.md) ·
+Quickstart: [specs/025-registro-deposito/quickstart.md](specs/025-registro-deposito/quickstart.md) ·
+Tasks: (pendente — `/speckit-tasks`)
 <!-- SPECKIT END -->

@@ -3,6 +3,9 @@ import { createServerClient } from '@/lib/db/supabase/server'
 import { z } from 'zod'
 
 const updateEntrySchema = z.object({
+  // Edição do título pré-preenchido no SavedPanel (025-registro-deposito, FR-010) — reusa este
+  // endpoint genérico em vez de criar uma rota nova.
+  title: z.string().min(1).max(200).optional(),
   what_i_did: z.string().min(1).max(2000).optional(),
   company: z.string().max(200).nullable().optional(),
   role_title: z.string().max(200).nullable().optional(),

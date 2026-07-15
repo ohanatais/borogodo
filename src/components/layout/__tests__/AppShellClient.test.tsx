@@ -1,15 +1,14 @@
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
 vi.mock('next/navigation', () => ({
   usePathname: vi.fn(() => '/painel'),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+  useRouter: () => ({ refresh: vi.fn() }),
 }))
 
-// Componentes pesados de captura/chat/conteúdo — fora do escopo deste teste de navegação.
-vi.mock('@/components/features/capture/CaptureInput', () => ({ CaptureInput: () => null }))
-vi.mock('@/components/features/capture/FileButton', () => ({ FileButton: () => null }))
-vi.mock('@/components/features/capture/AudioButton', () => ({ AudioButton: () => null }))
-vi.mock('@/components/features/capture/CaptureConversation', () => ({ CaptureConversation: () => null }))
+// Componentes pesados de chat/conteúdo/drawer — fora do escopo deste teste de navegação.
+vi.mock('@/components/features/capture/Drawer', () => ({ Drawer: () => null }))
 vi.mock('@/components/features/chat/ChatSheet', () => ({
   ChatSheet: () => null,
   openChatSheet: vi.fn(),

@@ -1,3 +1,5 @@
+import { PageContainer } from '@/components/layout/PageContainer'
+
 function SkeletonBlock({ className = '' }: { className?: string }) {
   return (
     <div
@@ -10,7 +12,7 @@ function SkeletonBlock({ className = '' }: { className?: string }) {
 
 export default function PainelLoading() {
   return (
-    <div className="px-5 lg:px-9 py-4 max-w-[980px] mx-auto w-full">
+    <PageContainer>
       <div className="space-y-6">
         <div className="space-y-3 max-w-xl">
           <SkeletonBlock className="h-4 w-28" />
@@ -19,6 +21,6 @@ export default function PainelLoading() {
         </div>
         <SkeletonBlock className="h-5 w-80" />
       </div>
-    </div>
+    </PageContainer>
   )
 }

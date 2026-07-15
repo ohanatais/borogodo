@@ -10,6 +10,7 @@ vi.mock('next/navigation', () => ({
   redirect: mockRedirect,
   useRouter: vi.fn(() => ({ refresh: vi.fn(), push: vi.fn() })),
   usePathname: vi.fn(() => '/painel'),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
 }))
 
 vi.mock('@/lib/db/supabase/server', () => ({
