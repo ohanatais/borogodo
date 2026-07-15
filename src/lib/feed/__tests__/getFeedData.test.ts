@@ -23,20 +23,31 @@ function makeMockEntry(overrides: Record<string, unknown> = {}) {
   }
 }
 
-function makeSupabase(rows: unknown[], { error = null }: { error?: unknown } = {}) {
+function makeBuilder(rows: unknown[], error: unknown) {
   const builder: Record<string, unknown> = {}
 
-  const chainMethods = ['eq', 'neq', 'not', 'is', 'order', 'limit', 'ilike', 'contains', 'gte', 'lte', 'or', 'lt', 'gt'] as const
+  const chainMethods = ['eq', 'neq', 'not', 'is', 'order', 'limit', 'ilike', 'contains', 'gte', 'lte', 'or', 'lt', 'gt', 'in'] as const
   for (const m of chainMethods) {
     builder[m] = vi.fn(() => builder)
   }
 
-  builder.then = (resolve: (v: unknown) => unknown) =>
-    resolve({ data: rows, error })
+  builder.then = (resolve: (v: unknown) => unknown) => resolve({ data: rows, error })
+
+  return builder
+}
+
+// US7 (026): `getFeedData` agora faz uma segunda query contra `entry_highlights` para montar
+// `FeedItem.highlights` — `highlightRows` simula essa tabela, separada de `rows` (entries).
+function makeSupabase(
+  rows: unknown[],
+  { error = null, highlightRows = [] }: { error?: unknown; highlightRows?: unknown[] } = {}
+) {
+  const entriesBuilder = makeBuilder(rows, error)
+  const highlightsBuilder = makeBuilder(highlightRows, null)
 
   return {
-    from: vi.fn(() => ({
-      select: vi.fn(() => builder),
+    from: vi.fn((table?: string) => ({
+      select: vi.fn(() => (table === 'entry_highlights' ? highlightsBuilder : entriesBuilder)),
     })),
   }
 }
@@ -244,5 +255,79 @@ describe('getFeedData', () => {
     const result = await getFeedData(supabase as never, 'user-1', DEFAULT_QUERY)
 
     expect(result.items[0].thumbnail).toBeNull()
+  })
+})
+
+describe('getFeedData — destaques por fonte (T057, US7)', () => {
+  it('FR-032 — fonte legada sem entry_highlights recebe um destaque sintético único, nunca um array vazio', async () => {
+    const entry = makeMockEntry({
+      id: 'legada-1',
+      title: 'Resolveu incidente de produção',
+      metric: '30% menos downtime',
+      impact: 'Cliente não notou a instabilidade',
+      tags: ['incident-response'],
+    })
+    const supabase = makeSupabase([entry], { highlightRows: [] })
+
+    const result = await getFeedData(supabase as never, 'user-1', DEFAULT_QUERY)
+
+    expect(result.items[0].highlights).toHaveLength(1)
+    expect(result.items[0].highlights[0]).toEqual({
+      id: 'legada-1',
+      title: 'Resolveu incidente de produção',
+      metric: '30% menos downtime',
+      impact: 'Cliente não notou a instabilidade',
+      tags: ['incident-response'],
+    })
+  })
+
+  it('fonte organizada com múltiplos destaques retorna todos, ordenados', async () => {
+    const entry = makeMockEntry({ id: 'org-1' })
+    const highlightRows = [
+      { id: 'h1', entry_id: 'org-1', title: 'Destaque 1', metric: null, impact: null, tags: ['a'] },
+      { id: 'h2', entry_id: 'org-1', title: 'Destaque 2', metric: '10%', impact: 'ok', tags: ['b'] },
+    ]
+    const supabase = makeSupabase([entry], { highlightRows })
+
+    const result = await getFeedData(supabase as never, 'user-1', DEFAULT_QUERY)
+
+    expect(result.items[0].highlights).toHaveLength(2)
+    expect(result.items[0].highlights.map((h) => h.id)).toEqual(['h1', 'h2'])
+  })
+
+  it('destaques de uma fonte não vazam para outra fonte na mesma página', async () => {
+    const entries = [makeMockEntry({ id: 'e1' }), makeMockEntry({ id: 'e2' })]
+    const highlightRows = [{ id: 'h1', entry_id: 'e1', title: 'Só do e1', metric: null, impact: null, tags: [] }]
+    const supabase = makeSupabase(entries, { highlightRows })
+
+    const result = await getFeedData(supabase as never, 'user-1', DEFAULT_QUERY)
+
+    const e1 = result.items.find((i) => i.id === 'e1')
+    const e2 = result.items.find((i) => i.id === 'e2')
+    expect(e1?.highlights.map((h) => h.id)).toEqual(['h1'])
+    expect(e2?.highlights).toHaveLength(1)
+    expect(e2?.highlights[0].id).toBe('e2') // sintético, fallback da própria entry
+  })
+
+  it('deriva organizationStatus e contextStatus por fonte', async () => {
+    const organizing = makeMockEntry({ id: 'e1', organizing_started_at: new Date().toISOString() })
+    const resolved = makeMockEntry({ id: 'e2', company: 'Acme' })
+    const supabase = makeSupabase([organizing, resolved])
+
+    const result = await getFeedData(supabase as never, 'user-1', DEFAULT_QUERY)
+
+    const e1 = result.items.find((i) => i.id === 'e1')
+    const e2 = result.items.find((i) => i.id === 'e2')
+    expect(e1?.organizationStatus).toBe('organizing')
+    expect(e1?.contextStatus).toBe('unresolved')
+    expect(e2?.contextStatus).toBe('company')
+  })
+
+  it('não dispara a query de entry_highlights quando a página não tem nenhuma fonte', async () => {
+    const supabase = makeSupabase([])
+
+    await getFeedData(supabase as never, 'user-1', DEFAULT_QUERY)
+
+    expect(supabase.from).not.toHaveBeenCalledWith('entry_highlights')
   })
 })
