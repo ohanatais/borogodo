@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useTranslations } from 'next-intl'
-import { Trash2, Pencil, Check, X, ChevronDown, ChevronUp, Paperclip, Sparkles } from 'lucide-react'
+import { Trash2, Pencil, Check, X, ChevronDown, ChevronUp, Paperclip, Sparkles, Plus } from 'lucide-react'
 import type { FeedItem } from '@/lib/feed/types'
-import type { EntrySource } from '@/types/entry'
+import type { EntryHighlight, EntrySource } from '@/types/entry'
 import { UsarButton } from '@/components/features/content/UsarButton'
 import { AttachTile } from '@/components/features/capture/AttachTile'
 import { ContextPillPicker } from './ContextPillPicker'
+import { HighlightCard } from './HighlightCard'
 import { deriveContextStatus } from '@/lib/entries/contextStatus'
 import { deriveOrganizationStatus } from '@/lib/entries/organizationStatus'
 
@@ -62,6 +63,60 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
   // US1 (feature 026): "Organizar" é opcional e local ao card — sem popup em falha (FR-030), sem
   // rótulo persistente além de "Organizar de novo" no sucesso (ux-shape.md §6).
   const [organizeState, setOrganizeState] = useState<OrganizeButtonState>('idle')
+  // US4 (feature 026): destaques da fonte, buscados sob demanda ao expandir (não vêm de
+  // `FeedItem` ainda — o join com `entry_highlights` em `getFeedData` é escopo de US7/T059, fora
+  // desta fase). Isolado por fonte: cada card busca e gerencia sua própria lista.
+  const [highlights, setHighlights] = useState<EntryHighlight[] | null>(null)
+  // `useRef` (não `useState`) de propósito: só serve de guarda para não refazer a busca a cada
+  // expand/collapse — se fosse estado, setá-la dentro do efeito dispararia uma nova execução
+  // (dependência mudou) cujo cleanup cancelaria o fetch em andamento antes dele resolver.
+  const highlightsLoadedRef = useRef(false)
+
+  useEffect(() => {
+    if (variant !== 'feed' || !expanded || highlightsLoadedRef.current) return
+    highlightsLoadedRef.current = true
+    let cancelled = false
+
+    async function loadHighlights() {
+      try {
+        const res = await fetch(`/api/entries/${item.id}/highlights`)
+        if (!res?.ok) return
+        const body = (await res.json()) as { highlights?: EntryHighlight[] } | null
+        if (!cancelled && body?.highlights) setHighlights(body.highlights)
+      } catch {
+        // silencioso — mesmo padrão de falha não bloqueante do restante do card.
+      }
+    }
+
+    void loadHighlights()
+    return () => {
+      cancelled = true
+    }
+  }, [variant, expanded, item.id])
+
+  function handleHighlightUpdate(updated: EntryHighlight) {
+    setHighlights((current) => (current ?? []).map((h) => (h.id === updated.id ? updated : h)))
+  }
+
+  function handleHighlightDelete(highlightId: string) {
+    setHighlights((current) => (current ?? []).filter((h) => h.id !== highlightId))
+  }
+
+  /**
+   * "+ adicionar destaque" (FR-016) — cria um destaque em branco independente de a organização
+   * por IA já ter rodado; entra na lista já aberto (a pessoa acabou de pedir para criar).
+   */
+  async function handleAddHighlight() {
+    try {
+      const res = await fetch(`/api/entries/${item.id}/highlights`, { method: 'POST' })
+      const body = (await res.json().catch(() => null)) as { highlight?: EntryHighlight } | null
+      if (res.ok && body?.highlight) {
+        setHighlights((current) => [...(current ?? []), body.highlight as EntryHighlight])
+      }
+    } catch {
+      // silencioso — mesmo padrão de falha não bloqueante do restante do card (ux-shape.md §7).
+    }
+  }
 
   const displayDate = item.entry_date ?? item.created_at
   const dateLabel = formatDate(displayDate)
@@ -205,6 +260,33 @@ export function EntryCard({ item, variant, onDelete, onEdit, contextVocabulary =
               vocabulary={contextVocabulary}
               onChange={(next) => onContextChange?.(item.id, next)}
             />
+          )}
+
+          {variant === 'feed' && highlights && highlights.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {highlights.map((highlight) => (
+                <HighlightCard
+                  key={highlight.id}
+                  entryId={item.id}
+                  highlight={highlight}
+                  defaultOpen={highlights.length === 1}
+                  onUpdate={handleHighlightUpdate}
+                  onDelete={handleHighlightDelete}
+                />
+              ))}
+            </div>
+          )}
+
+          {variant === 'feed' && (
+            <button
+              type="button"
+              onClick={() => void handleAddHighlight()}
+              className="inline-flex items-center justify-center gap-1 self-start text-xs font-medium px-3 py-1.5 min-h-[48px] rounded-full border border-dashed transition-opacity hover:opacity-80"
+              style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}
+            >
+              <Plus size={12} aria-hidden="true" />
+              {tRegistro('highlight.addNew')}
+            </button>
           )}
 
           {item.evidences.length > 0 && (

@@ -67,7 +67,7 @@ describe('EntryCard — botão Organizar (US1, feature 026)', () => {
     const fetchPromise = new Promise((resolve) => {
       resolveFetch = resolve
     })
-    const fetchMock = vi.fn(() => fetchPromise)
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => fetchPromise)
     vi.stubGlobal('fetch', fetchMock)
 
     render(<EntryCard item={BASE_ITEM} variant="feed" />)
@@ -75,7 +75,8 @@ describe('EntryCard — botão Organizar (US1, feature 026)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'organize.cta' }))
     fireEvent.click(screen.getByRole('button', { name: 'organize.organizing' }))
 
-    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const organizeCalls = fetchMock.mock.calls.filter(([url]) => url === '/api/entries/entry-1/organize')
+    expect(organizeCalls).toHaveLength(1)
     resolveFetch({ ok: true, json: async () => ({ status: 'organized', highlights: [] }) })
     await waitFor(() => expect(screen.getByRole('button', { name: 'organize.ctaAgain' })).toBeInTheDocument())
   })

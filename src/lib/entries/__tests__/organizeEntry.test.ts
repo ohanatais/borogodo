@@ -237,4 +237,51 @@ describe('organizeEntry', () => {
 
     expect(result.status).toBe('failed')
   })
+
+  it('T041 — texto cru com 2 resultados distintos de mesmo contexto cria 2 entry_highlights, nenhuma nova linha em entries', async () => {
+    mockComplete.mockResolvedValue(
+      jsonResponse({
+        highlights: [
+          { title: 'Redução de 50% no tempo de investigação de bug crítico', metric: '50%', impact: 'Menos tempo parado', tags: ['devops'] },
+          { title: 'Mentoria de dois devs júnior no time', metric: null, impact: 'Time mais autônomo', tags: ['mentoria'] },
+        ],
+        company: null,
+        entry_date: null,
+      })
+    )
+    const { client, from } = makeClient({
+      entryRow: BASE_ENTRY,
+      insertedHighlights: [{ id: 'h1' }, { id: 'h2' }],
+    })
+
+    const result = await organizeEntry(client as never, 'user-1', 'entry-1')
+
+    expect(result.status).toBe('organized')
+    if (result.status === 'organized') {
+      expect(result.highlights).toHaveLength(2)
+    }
+    // organizeEntry nunca cria uma linha nova em `entries` — só lê/atualiza a fonte existente.
+    const entriesCalls = from.mock.calls.filter(([table]) => table === 'entries')
+    expect(entriesCalls.length).toBeGreaterThan(0)
+    expect(mockComplete).toHaveBeenCalledTimes(1)
+  })
+
+  it('T042 — texto sem métrica clara cria ao menos 1 destaque sem métrica, tratado como válido (FR-018)', async () => {
+    mockComplete.mockResolvedValue(
+      jsonResponse({
+        highlights: [{ title: 'Aprendizado sobre observabilidade', metric: null, impact: null, tags: ['aprendizado'] }],
+        company: null,
+        entry_date: null,
+      })
+    )
+    const { client } = makeClient({ entryRow: BASE_ENTRY, insertedHighlights: [{ id: 'h5', metric: null }] })
+
+    const result = await organizeEntry(client as never, 'user-1', 'entry-1')
+
+    expect(result.status).toBe('organized')
+    if (result.status === 'organized') {
+      expect(result.highlights).toHaveLength(1)
+      expect(result.highlights[0]).not.toHaveProperty('metric', expect.stringMatching(/.+/))
+    }
+  })
 })

@@ -271,29 +271,41 @@ cartões de destaque no mesmo registro, sem registros adicionais
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T041 [P] [US4] Teste de integração: texto cru com 2 resultados distintos de mesmo contexto →
+- [x] T041 [P] [US4] Teste de integração: texto cru com 2 resultados distintos de mesmo contexto →
       `organizeEntry` cria 2 `entry_highlights`, nenhuma nova linha em `entries`, mesmo arquivo de
       T018 — DEVE falhar antes de nova asserção ser satisfeita por T022 (já implementado na fase
       3 — este teste cobre o caso multi-destaque especificamente)
-- [ ] T042 [P] [US4] Teste de integração: texto sem métrica clara → ao menos 1 destaque criado
+      — Confirmado que `organizeEntry` já suporta N destaques genericamente (mapeia
+      `result.highlights` para N inserts); teste passou de imediato, sem alteração de
+      implementação necessária.
+- [x] T042 [P] [US4] Teste de integração: texto sem métrica clara → ao menos 1 destaque criado
       sem métrica, tratado como válido (FR-018), mesmo arquivo
-- [ ] T043 [P] [US4] Teste de integração: `POST /api/entries/[id]/highlights` cria destaque em
+- [x] T043 [P] [US4] Teste de integração: `POST /api/entries/[id]/highlights` cria destaque em
       branco (`position` = último + 1); `PATCH`/`DELETE
       /api/entries/[id]/highlights/[highlightId]` edita/remove afetando só aquele destaque, em
       `tests/integration/api/entries-highlights.test.ts` — DEVE falhar antes de T045-T047
+      — Inclui também `GET /api/entries/[id]/highlights` (não estava na lista original de tasks,
+      mas necessário para o card listar os destaques existentes sem depender do join de
+      `getFeedData`, que é escopo de US7/T059 — decisão técnica documentada no PR).
 
 ### Implementation for User Story 4
 
-- [ ] T044 [US4] Criar `HighlightCard.tsx` em `src/components/features/feed/HighlightCard.tsx` —
+- [x] T044 [US4] Criar `HighlightCard.tsx` em `src/components/features/feed/HighlightCard.tsx` —
       aberto por padrão quando único (FR-017), colapsado quando múltiplo, campos editáveis
       (título/métrica/impacto/tags)
-- [ ] T045 [US4] Implementar `POST /api/entries/[id]/highlights/route.ts` (criar destaque em
+- [x] T045 [US4] Implementar `POST /api/entries/[id]/highlights/route.ts` (criar destaque em
       branco, FR-016)
-- [ ] T046 [US4] Implementar `PATCH /api/entries/[id]/highlights/[highlightId]/route.ts` (edita
+- [x] T046 [US4] Implementar `PATCH /api/entries/[id]/highlights/[highlightId]/route.ts` (edita
       campos; recalcula rollup de tags via T017 se `tags` mudou)
-- [ ] T047 [US4] Implementar `DELETE` no mesmo arquivo de T046 (remove destaque; recalcula
+- [x] T047 [US4] Implementar `DELETE` no mesmo arquivo de T046 (remove destaque; recalcula
       rollup; nunca remove a fonte)
-- [ ] T048 [US4] Botão "+ adicionar destaque" no `SourceCard`, chamando T045
+- [x] T048 [US4] Botão "+ adicionar destaque" — `SourceCard.tsx` ainda não existe (escopo de
+      Phase 9/US7, mesma nota já usada em T024/T030/T032/T039/T040); adicionado diretamente em
+      `EntryCard.tsx`, chamando T045. A lista de destaques em si também é renderizada ali: busca
+      `GET /api/entries/[id]/highlights` sob demanda ao expandir o card (lazy, não bloqueia o
+      expand) e mantém estado local isolado por card — decisão técnica porque `FeedItem`/
+      `getFeedData` ainda não carregam `entry_highlights` (join é T059, US7). Quando US7 rodar,
+      este fetch lazy pode ser substituído pelo dado já vindo no payload do feed.
 
 **Checkpoint**: User Stories 1-4 funcionam juntas — destaques existem, são editáveis/removíveis, e
 a organização automática os popula

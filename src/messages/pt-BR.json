@@ -1074,7 +1074,18 @@
         "description": "Essa ação não pode ser desfeita. O restante do registro continua intacto.",
         "cancel": "Cancelar",
         "confirm": "Excluir"
-      }
+      },
+      "titleLabel": "Título",
+      "metricLabel": "Métrica",
+      "impactLabel": "Impacto",
+      "tagsLabel": "Tags",
+      "untitled": "Destaque sem título",
+      "edit": "Editar",
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "delete": "Excluir",
+      "collapse": "Recolher destaque",
+      "expand": "Expandir destaque"
     }
   }
 }

@@ -78,7 +78,10 @@ describe('EntryCard — estado transitório "organizando…" da organização as
     expandCard()
     fireEvent.click(screen.getByRole('button', { name: 'organize.organizing' }))
 
-    await waitFor(() => expect(fetchMock).not.toHaveBeenCalled())
+    await waitFor(() => {
+      const organizeCalls = fetchMock.mock.calls.filter(([url]) => url === '/api/entries/entry-1/organize')
+      expect(organizeCalls).toHaveLength(0)
+    })
   })
 
   it('botão mostra "Organizar de novo" quando organized_at já está setado, sem precisar clicar', () => {
