@@ -808,7 +808,6 @@
       "period": "Period",
       "company": "Company",
       "tags": "Tags",
-      "metricOnly": "With metric",
       "source": "Source",
       "clear": "Clear filters",
       "dateFrom": "From",

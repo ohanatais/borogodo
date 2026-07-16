@@ -22,7 +22,6 @@ interface FeedPageProps {
 function hasActiveFilters(searchParams: URLSearchParams): boolean {
   return !!(
     searchParams.get('q') ||
-    searchParams.get('metricOnly') === 'true' ||
     searchParams.get('from') ||
     searchParams.get('to') ||
     searchParams.get('company') ||
