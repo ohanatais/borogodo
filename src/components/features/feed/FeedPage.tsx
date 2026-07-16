@@ -8,7 +8,6 @@ import { groupFeedItemsByMonth } from '@/lib/feed/groupByMonth'
 import { SourceCard } from './SourceCard'
 import { EmptyFeed } from './EmptyFeed'
 import { FeedFilters } from './FeedFilters'
-import { ActivityGrid, GRID_MIN_DISTINCT_DAYS } from './ActivityGrid'
 import { ENTRY_UPDATED_EVENT, type EntryUpdatedDetail } from '@/components/features/painel/registroTriggerEvents'
 
 interface FeedPageProps {
@@ -77,14 +76,15 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
     return () => clearTimeout(timer)
   }, [])
 
-  const distinctDays90 = useMemo(() => {
-    const cutoff = new Date()
-    cutoff.setDate(cutoff.getDate() - 90)
-    const cutoffStr = cutoff.toISOString().split('T')[0]
-    return activityCells.filter((c) => c.date >= cutoffStr && c.count > 0).length
+  // Contagem real (não mockada) pro texto discreto "N registros em M meses" — sem grade visual
+  // de atividade (removida: para o ritmo de uso deste produto, a grade ficava majoritariamente
+  // vazia e lia como cobrança, o mesmo risco que FR-029 já evitava tirando o streak gamificado).
+  const activityStats = useMemo(() => {
+    const activeCells = activityCells.filter((c) => c.count > 0)
+    const totalRegistros = activeCells.reduce((sum, c) => sum + c.count, 0)
+    const monthKeys = new Set(activeCells.map((c) => c.date.slice(0, 7)))
+    return { totalRegistros, monthCount: monthKeys.size }
   }, [activityCells])
-
-  const showGrid = distinctDays90 >= GRID_MIN_DISTINCT_DAYS
 
   // FR-028: timeline por mês — agrupa pela MESMA data usada para ordenar a página (`currentAxis`),
   // nunca uma escolha fixa (ver `groupByMonth.ts`) — senão a seção do mês poderia divergir da
@@ -179,14 +179,6 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
 
   const filtersActive = hasActiveFilters(searchParams)
 
-  function handleCellClick(date: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('from', date)
-    params.set('to', date)
-    params.delete('cursor')
-    router.replace(`?${params.toString()}`, { scroll: false })
-  }
-
   if (items.length === 0 && !filtersActive) {
     return <EmptyFeed />
   }
@@ -210,7 +202,14 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
         </div>
       )}
 
-      <FeedFilters currentAxis={currentAxis} />
+      <div className="flex flex-col gap-2">
+        <FeedFilters currentAxis={currentAxis} />
+        {activityStats.totalRegistros > 0 && (
+          <p className="text-xs px-1" style={{ color: 'var(--muted-foreground)' }}>
+            {t('grid.subtitle', { count: activityStats.totalRegistros, months: activityStats.monthCount })}
+          </p>
+        )}
+      </div>
 
       {items.length === 0 && filtersActive ? (
         <div className="flex flex-col items-center py-16 gap-3 text-center">
@@ -228,9 +227,6 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
         </div>
       ) : (
         <>
-          {/* Grade de faíscas — bloco único, full-width, acima da timeline (não mais sidebar). */}
-          {showGrid && <ActivityGrid cells={activityCells} onCellClick={handleCellClick} />}
-
           {/* Lista de registros, agrupada numa timeline por mês (FR-028) */}
           <div className="flex flex-col gap-4">
             {monthGroups.map((group) => (

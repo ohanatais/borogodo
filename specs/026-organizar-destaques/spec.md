@@ -463,8 +463,14 @@ texto cru da fonte.
 - **FR-027**: Um card de fonte com evidência de imagem MUST exibir a miniatura real da imagem
   anexada, não um ícone genérico por tipo.
 - **FR-028**: A tela Registros MUST agrupar os registros numa timeline por mês.
-- **FR-029**: A grade-faísca (mapa de densidade de atividade) em Registros MUST refletir a
-  distribuição de registros ao longo do tempo sem usar mecânicas de streak gamificado nem emoji.
+- **FR-029**: ~~A grade-faísca (mapa de densidade de atividade) em Registros MUST refletir a
+  distribuição de registros ao longo do tempo sem usar mecânicas de streak gamificado nem
+  emoji.~~ **Revisão pós-implementação (2026-07-15)**: a grade foi implementada e depois
+  **removida** por decisão da Ohana durante revisão visual. Motivo: para o ritmo de uso real
+  deste produto (poucas vezes por semana, não diário), a grade ficava majoritariamente vazia/cinza
+  na maior parte do tempo — o mesmo risco de "cobrança visual" que este FR já tentava evitar ao
+  proibir streak gamificado, só que reintroduzido pela cor em vez do número. Fica só o texto
+  discreto "N registros em M meses" (sem grid), perto dos filtros da tela.
 - **FR-030**: Uma falha na chamada de IA de organização (manual ou assíncrona) MUST NOT impedir
   o registro de permanecer salvo e visível normalmente — a pessoa pode tentar organizar
   novamente depois.

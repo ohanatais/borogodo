@@ -406,8 +406,9 @@ segunda sem selo; expandir revela destaques + fonte completa
       renderizar `SourceCard` no lugar do card atual por entrada — inclui timeline por mês
       (FR-028, `src/lib/feed/groupByMonth.ts`, antes inexistente: o feed só ordenava por data, sem
       nenhum agrupamento visual).
-- [x] T062 [US7] Confirmado `ActivityGrid.tsx` já satisfaz FR-029 (símbolo ✦, sem streak, sem
-      emoji) — nenhuma mudança estrutural necessária, sem resquício de streak a remover.
+- [x] T062 [US7] ~~Confirmado `ActivityGrid.tsx` já satisfaz FR-029~~ — **revisão pós-impl.
+      (2026-07-15)**: `ActivityGrid.tsx` foi removido por decisão da Ohana (ver FR-029 no spec.md);
+      substituído por uma linha de texto discreta "N registros em M meses" direto em `FeedPage.tsx`.
 
 **Checkpoint**: todas as user stories funcionam juntas — Registros reestruturado, fim a fim
 

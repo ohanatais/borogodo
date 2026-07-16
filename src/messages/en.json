@@ -831,7 +831,6 @@
       "hideFull": "Hide source"
     },
     "grid": {
-      "title": "Your sparks",
       "subtitle": "{count, plural, one {# record} other {# records}} over {months, plural, one {# month} other {# months}}"
     },
     "timeline": {

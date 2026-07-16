@@ -831,7 +831,6 @@
       "hideFull": "Ocultar fonte"
     },
     "grid": {
-      "title": "Suas faíscas",
       "subtitle": "{count, plural, one {# registro} other {# registros}} em {months, plural, one {# mês} other {# meses}}"
     },
     "timeline": {
