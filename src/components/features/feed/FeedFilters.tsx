@@ -4,7 +4,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef } from 'react'
 import { Search, X, CalendarRange } from 'lucide-react'
-import { Segmented } from '@/components/ui/Segmented'
 import type { FeedAxis } from '@/lib/feed/types'
 
 interface FeedFiltersProps {
@@ -31,9 +30,10 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
     router.replace(`?${params.toString()}`, { scroll: false })
   }
 
-  function handleAxisChange(newAxis: FeedAxis) {
+  function handleAxisToggle() {
     const params = new URLSearchParams(searchParams.toString())
-    params.set('axis', newAxis)
+    const nextAxis: FeedAxis = currentAxis === 'entry_date' ? 'created_at' : 'entry_date'
+    params.set('axis', nextAxis)
     params.delete('cursor')
     router.replace(`?${params.toString()}`, { scroll: false })
   }
@@ -62,7 +62,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
     [searchParams]
   )
 
-  const axes: FeedAxis[] = ['created_at', 'entry_date']
+  const isChronological = currentAxis === 'entry_date'
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -116,15 +116,33 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
         />
       </div>
 
-      <Segmented
-        ariaLabel="Eixo de ordenação"
-        items={axes.map((axis) => ({
-          key: axis,
-          label: t(`axis.${axis}`),
-          active: currentAxis === axis,
-          onClick: () => handleAxisChange(axis),
-        }))}
-      />
+      {/* Ordem cronológica (quando aconteceu) vs. ordem de registro (quando anotei, padrão) —
+          registros sem data de acontecimento simplesmente vão para o fim da lista quando
+          cronológica está ativa (getFeedData já resolve isso, `nullsFirst: false`). */}
+      <label className="inline-flex items-center gap-2 text-xs shrink-0" style={{ color: 'var(--muted-foreground)' }}>
+        {t('axis.chronologicalLabel')}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={isChronological}
+          onClick={handleAxisToggle}
+          className="relative inline-flex items-center rounded-full transition-colors shrink-0"
+          style={{ width: 34, height: 20, background: isChronological ? 'var(--color-primary)' : 'var(--muted)' }}
+        >
+          <span
+            aria-hidden="true"
+            className="absolute rounded-full transition-transform"
+            style={{
+              width: 16,
+              height: 16,
+              top: 2,
+              left: 2,
+              transform: isChronological ? 'translateX(14px)' : 'translateX(0)',
+              background: 'var(--card)',
+            }}
+          />
+        </button>
+      </label>
 
       {hasActiveFilters && (
         <button

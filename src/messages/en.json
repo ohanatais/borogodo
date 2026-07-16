@@ -800,8 +800,7 @@
       "cta": "Make my first capture"
     },
     "axis": {
-      "created_at": "When I noted it",
-      "entry_date": "When it happened"
+      "chronologicalLabel": "Chronological order"
     },
     "filters": {
       "search": "Search records…",

@@ -800,8 +800,7 @@
       "cta": "Fazer minha primeira captura"
     },
     "axis": {
-      "created_at": "Quando anotei",
-      "entry_date": "Quando aconteceu"
+      "chronologicalLabel": "Ordem cronológica"
     },
     "filters": {
       "search": "Buscar registros…",
