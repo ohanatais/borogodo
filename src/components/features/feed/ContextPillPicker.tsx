@@ -96,7 +96,7 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
               aria-pressed={active}
               disabled={pending}
               onClick={() => void select({ company: name, isPersonalProject: false })}
-              className="inline-flex items-center text-xs font-medium px-3 py-1.5 min-h-[48px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+              className="inline-flex items-center text-xs font-medium px-3 py-1 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
               style={
                 active
                   ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }
@@ -139,7 +139,7 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
                 setOtherValue('')
               }
             }}
-            className="text-xs rounded-full px-3 py-1.5 min-h-[48px] border"
+            className="text-xs rounded-full px-3 py-1 border"
             style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
           />
         ) : (

@@ -13,6 +13,7 @@ import { AudioButton } from './AudioButton'
 import { useDrawerDraft } from '@/hooks/useDrawerDraft'
 import type { DrawerManualFields } from '@/hooks/useDrawerDraft'
 import type { ManualFields } from '@/lib/capture/saveDeposito'
+import { dispatchEntryUpdated, type EditEntryDetail } from '@/components/features/painel/registroTriggerEvents'
 
 export interface DrawerSaveResult {
   id: string
@@ -25,6 +26,9 @@ interface DrawerProps {
   /** Preenchido quando a pessoa começa a digitar/colar direto no gatilho do Painel (FR-012a). */
   initialText?: string
   onSaved?: (result: DrawerSaveResult) => void
+  /** Registros → Editar (026): quando presente, o Drawer abre em modo edição de uma fonte já
+   * salva — pré-preenche texto cru + campos manuais, e salvar vira `PATCH` em vez de criar. */
+  editEntry?: EditEntryDetail
 }
 
 type SaveStatus = 'idle' | 'saving' | 'error'
@@ -93,7 +97,7 @@ async function uploadAttachmentToEntry(
  * a entry já existe; confirmação editável (US3) substitui o corpo do drawer após salvar. Campos
  * manuais (US4) chegam em fase seguinte desta feature.
  */
-export function Drawer({ open, onOpenChange, initialText = '', onSaved }: DrawerProps) {
+export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntry }: DrawerProps) {
   const t = useTranslations('registro')
   const router = useRouter()
   const draft = useDrawerDraft(initialText)
@@ -115,6 +119,19 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved }: Drawer
     if (initialText) draft.setRawText(initialText)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialText])
+
+  // Registros → Editar (026): pré-preenche texto cru + campos manuais quando o drawer abre em
+  // modo edição — dispara só quando o id muda (nova abertura), não a cada re-render.
+  useEffect(() => {
+    if (!editEntry) return
+    draft.setRawText(editEntry.rawText)
+    const fields = editEntry.manualFields
+    if (fields?.metric) draft.setManualField('metric', fields.metric)
+    if (fields?.impact) draft.setManualField('impact', fields.impact)
+    if (fields?.company) draft.setManualField('company', fields.company)
+    if (fields?.entryDate) draft.setManualField('entryDate', fields.entryDate)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editEntry?.id])
 
   // Foco: guarda o elemento que abriu o drawer e devolve o foco a ele ao fechar (WCAG 2.4.3);
   // enquanto aberto, foca o próprio diálogo e prende o Tab dentro dele (sem isso, Tab escapa
@@ -189,10 +206,60 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved }: Drawer
     router.refresh()
   }
 
+  /**
+   * Registros → Editar (026): PATCH na fonte existente em vez de criar uma nova (FR alinhado a
+   * "editar o registro em si", não o destaque). Sem `SavedPanel` — fecha direto ao salvar, já
+   * que não é uma primeira captura.
+   */
+  async function handleEditSubmit(entry: EditEntryDetail): Promise<void> {
+    try {
+      const fields = draft.manualFields
+      const body: Record<string, string> = { what_i_did: draft.rawText }
+      if (fields.metric.trim()) body.metric = fields.metric.trim()
+      if (fields.impact.trim()) body.impact = fields.impact.trim()
+      if (fields.company.trim()) body.company = fields.company.trim()
+      if (fields.entryDate.trim()) body.entry_date = fields.entryDate.trim()
+
+      const response = await fetch(`/api/entries/${entry.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+      if (!response.ok) {
+        setStatus('error')
+        return
+      }
+
+      const pendingAttachmentIds = draft.attachments.map((a) => a.id)
+      setStatus('idle')
+      onSaved?.({ id: entry.id, title: draft.rawText.slice(0, 60) })
+      dispatchEntryUpdated({
+        id: entry.id,
+        what_i_did: draft.rawText,
+        metric: fields.metric.trim(),
+        impact: fields.impact.trim(),
+        company: fields.company.trim(),
+        entryDate: fields.entryDate.trim(),
+      })
+      router.refresh()
+      void uploadPendingAttachments(entry.id, pendingAttachmentIds)
+      draft.reset()
+      onOpenChange(false)
+    } catch {
+      setStatus('error')
+    }
+  }
+
   async function handleSubmit() {
     if (!draft.hasContent || status === 'saving') return
 
     setStatus('saving')
+
+    if (editEntry) {
+      await handleEditSubmit(editEntry)
+      return
+    }
 
     try {
       const manualFields = buildManualFieldsPayload(draft.manualFields)

@@ -209,42 +209,41 @@ describe('SourceCard — 1 card por fonte (T058, US7, FR-025/FR-027)', () => {
   })
 })
 
-describe('SourceCard — edição inline do texto cru', () => {
+describe('SourceCard — "Editar" abre o Drawer preenchido com o registro (026)', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn())
   })
 
-  it('entra em modo de edição, salva via PATCH e propaga onEdit', async () => {
-    vi.mocked(fetch).mockResolvedValue({ ok: true, json: async () => ({}) } as Response)
-    const onEdit = vi.fn()
-    render(<SourceCard item={BASE_ITEM} variant="feed" onEdit={onEdit} />)
-    expandCard()
+  it('clicar em Editar dispara o evento de abrir o Drawer em modo edição, com a fonte pré-preenchida', () => {
+    const listener = vi.fn()
+    window.addEventListener('borogodo:open-drawer', listener)
 
-    fireEvent.click(screen.getByRole('button', { name: 'card.edit' }))
-    const textarea = screen.getByRole('textbox')
-    fireEvent.change(textarea, { target: { value: 'Texto editado' } })
-    fireEvent.click(screen.getByRole('button', { name: 'card.save' }))
-
-    await waitFor(() =>
-      expect(fetch).toHaveBeenCalledWith(
-        '/api/entries/entry-1',
-        expect.objectContaining({ method: 'PATCH' })
-      )
+    render(
+      <SourceCard
+        item={{ ...BASE_ITEM, metric: '50%', impact: 'reduziu retrabalho', company: 'Acme', entry_date: '2026-03-01' }}
+        variant="feed"
+      />
     )
-    await waitFor(() => expect(onEdit).toHaveBeenCalledWith('entry-1', 'Texto editado'))
+    expandCard()
+    fireEvent.click(screen.getByRole('button', { name: 'card.edit' }))
+
+    expect(listener).toHaveBeenCalledTimes(1)
+    const detail = (listener.mock.calls[0][0] as CustomEvent).detail
+    expect(detail.editEntry).toEqual({
+      id: 'entry-1',
+      rawText: BASE_ITEM.what_i_did,
+      manualFields: { metric: '50%', impact: 'reduziu retrabalho', company: 'Acme', entryDate: '2026-03-01' },
+    })
+
+    window.removeEventListener('borogodo:open-drawer', listener)
   })
 
-  it('cancela a edição sem chamar a rede e restaura o texto original', () => {
+  it('não abre o Drawer nem edita nada por engano — não existe mais edição inline no card', () => {
     render(<SourceCard item={BASE_ITEM} variant="feed" />)
     expandCard()
 
-    fireEvent.click(screen.getByRole('button', { name: 'card.edit' }))
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Rascunho descartado' } })
-    fireEvent.click(screen.getByRole('button', { name: 'card.cancelEdit' }))
-
-    expect(fetch).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('button', { name: 'card.viewFull' }))
-    expect(screen.getByText(BASE_ITEM.what_i_did)).toBeInTheDocument()
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'card.save' })).not.toBeInTheDocument()
   })
 })
 

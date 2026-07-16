@@ -789,6 +789,10 @@
   },
   "feed": {
     "title": "Seus registros",
+    "composer": {
+      "importHistory": "Importar histórico",
+      "comingSoon": "Em breve"
+    },
     "empty": {
       "heading": "Nenhum registro ainda",
       "description": "Cada história que você conta vira um registro aqui. Comece pela mais recente.",
@@ -807,10 +811,8 @@
       "metricOnly": "Com métrica",
       "source": "Origem",
       "clear": "Limpar filtros",
-      "today": "Hoje",
-      "week": "7 dias",
-      "month": "30 dias",
-      "quarter": "90 dias"
+      "dateFrom": "De",
+      "dateTo": "Até"
     },
     "card": {
       "expand": "Ver detalhes",
@@ -1078,7 +1080,7 @@
       "searchPlaceholder": "Buscar..."
     },
     "highlight": {
-      "addNew": "+ adicionar destaque",
+      "addNew": "Adicionar destaque",
       "deleteConfirm": {
         "title": "Excluir este destaque?",
         "description": "Essa ação não pode ser desfeita. O restante do registro continua intacto.",

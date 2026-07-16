@@ -3,35 +3,24 @@
 import { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useTranslations } from 'next-intl'
-import { Trash2, Pencil, Check, X, ChevronDown, ChevronUp, Paperclip, Sparkles, Plus } from 'lucide-react'
+import { Trash2, Pencil, ChevronDown, ChevronUp, Paperclip, Sparkles, Plus } from 'lucide-react'
 import type { FeedHighlight, FeedItem } from '@/lib/feed/types'
-import type { EntrySource } from '@/types/entry'
 import { UsarButton } from '@/components/features/content/UsarButton'
 import { AttachTile } from '@/components/features/capture/AttachTile'
 import { ContextPillPicker } from './ContextPillPicker'
 import { HighlightCard } from './HighlightCard'
 import { deriveContextStatus } from '@/lib/entries/contextStatus'
 import { deriveOrganizationStatus } from '@/lib/entries/organizationStatus'
+import { dispatchOpenDrawer } from '@/components/features/painel/registroTriggerEvents'
 
 interface SourceCardProps {
   item: FeedItem
   variant: 'feed' | 'panel'
   onDelete?: (id: string) => void
-  onEdit?: (id: string, what_i_did: string) => void
   /** Vocabulário de contextos da pessoa (Story 2) — empresas já usadas, alimenta o `ContextPillPicker`. */
   contextVocabulary?: string[]
   /** Notifica o pai da nova seleção de contexto, após o `PATCH` (ou o "Organizar") confirmar sucesso. */
   onContextChange?: (id: string, next: { company: string | null; isPersonalProject: boolean }) => void
-}
-
-const SOURCE_ICON: Record<EntrySource, string> = {
-  text: '📝',
-  chips: '📝',
-  audio: '🎙️',
-  linkedin_pdf: '📄',
-  image: '🖼️',
-  // 025-registro-deposito: mesmo texto cru do drawer, ícone igual ao das demais entradas de texto.
-  deposito: '📝',
 }
 
 function formatDate(dateStr: string): string {
@@ -57,7 +46,7 @@ interface OrganizeResponseBody {
  * chegam prontos em `item.highlights` (join feito em `getFeedData`, ver `contracts/feed.md`) —
  * não há mais fetch lazy por card ao expandir.
  */
-export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary = [], onContextChange }: SourceCardProps) {
+export function SourceCard({ item, variant, onDelete, contextVocabulary = [], onContextChange }: SourceCardProps) {
   const t = useTranslations('feed')
   const tRegistro = useTranslations('registro')
   const [expanded, setExpanded] = useState(false)
@@ -72,9 +61,6 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
   // se autocorrigiria.
   const serverOrganizationStatus = deriveOrganizationStatus(item.organized_at, item.organizing_started_at)
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [editing, setEditing] = useState(false)
-  const [editValue, setEditValue] = useState(item.what_i_did)
-  const [saving, setSaving] = useState(false)
   const [sourceExpanded, setSourceExpanded] = useState(false)
   // US1 (feature 026): "Organizar" é opcional e local ao card — sem popup em falha (FR-030), sem
   // rótulo persistente além de "Organizar de novo" no sucesso (ux-shape.md §6).
@@ -116,28 +102,23 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
     onDelete?.(item.id)
   }
 
-  async function handleSaveEdit() {
-    const trimmed = editValue.trim()
-    if (!trimmed || trimmed === item.what_i_did) { setEditing(false); return }
-    setSaving(true)
-    try {
-      const res = await fetch(`/api/entries/${item.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ what_i_did: trimmed }),
-      })
-      if (res.ok) {
-        onEdit?.(item.id, trimmed)
-        setEditing(false)
-      }
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  function handleCancelEdit() {
-    setEditValue(item.what_i_did)
-    setEditing(false)
+  /**
+   * "Editar" (026) — abre o Drawer de Registro pré-preenchido com esta fonte, em vez de editar
+   * um destaque ou o texto cru inline no card. Editar é sobre o REGISTRO, não sobre um destaque.
+   */
+  function handleEditClick() {
+    dispatchOpenDrawer({
+      editEntry: {
+        id: item.id,
+        rawText: item.what_i_did,
+        manualFields: {
+          metric: item.metric ?? '',
+          impact: item.impact ?? '',
+          company: item.company ?? '',
+          entryDate: item.entry_date ?? '',
+        },
+      },
+    })
   }
 
   /**
@@ -198,8 +179,8 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
         className="flex w-full items-start gap-3 px-4 py-3 text-left min-h-[48px] transition-opacity hover:opacity-80"
         style={{ color: 'var(--foreground)' }}
       >
-        {/* FR-027: miniatura real da imagem anexada quando existir, nunca um ícone genérico por tipo. */}
-        {item.thumbnail ? (
+        {/* FR-027: miniatura real da imagem anexada quando existir — sem ícone genérico quando não há. */}
+        {item.thumbnail && (
           // eslint-disable-next-line @next/next/no-img-element -- miniatura remota (bucket Supabase), não otimizável por next/image sem domínio fixo por ambiente
           <img
             src={item.thumbnail}
@@ -208,8 +189,6 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
             className="mt-0.5 shrink-0 rounded-md object-cover"
             style={{ width: 32, height: 32 }}
           />
-        ) : (
-          <span aria-hidden="true" className="mt-0.5 shrink-0">{SOURCE_ICON[item.source]}</span>
         )}
         <span className="flex-1 min-w-0">
           <span className="flex items-center gap-1.5">
@@ -260,84 +239,51 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
 
       {expanded && (
         <div className="px-4 pb-4 flex flex-col gap-3">
-          {editing ? (
-            <div className="flex flex-col gap-2">
-              <textarea
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                rows={Math.max(3, editValue.split('\n').length + 1)}
-                autoFocus
-                className="text-sm leading-relaxed rounded-lg p-2 border resize-y w-full"
-                style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-              />
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => void handleSaveEdit()}
-                  disabled={saving}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 min-h-[44px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
-                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-                >
-                  <Check size={12} aria-hidden="true" />
-                  {saving ? '…' : t('card.save')}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCancelEdit}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 min-h-[44px] rounded-full transition-opacity hover:opacity-80"
+          {item.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {item.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs px-2 py-0.5 rounded-full"
                   style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
                 >
-                  <X size={12} aria-hidden="true" />
-                  {t('card.cancelEdit')}
-                </button>
-              </div>
+                  {tag}
+                </span>
+              ))}
             </div>
-          ) : (
-            <>
-              {item.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {item.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-xs px-2 py-0.5 rounded-full"
-                      style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
+          )}
 
-              {(item.organized_at || variant === 'feed') && (
-                <div className="flex items-center gap-3 pt-1" style={{ borderTop: '1px solid color-mix(in oklch, var(--border) 60%, transparent)' }}>
-                  {/* Selo "Organizado pelo Borogodó" só quando a IA de fato organizou esta fonte
-                      (item.organized_at) — destaques só criados manualmente ("+ adicionar destaque")
-                      não ganham o selo, sem precisar de um campo novo no banco para distinguir. */}
-                  {item.organized_at ? (
-                    <span
-                      className="inline-flex items-center gap-1.5 flex-1 min-w-0 text-xs font-medium"
-                      style={{ color: 'var(--muted-foreground)' }}
-                    >
-                      <Sparkles size={12} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
-                      {tRegistro('organizedBy')}
-                    </span>
-                  ) : (
-                    <span className="flex-1" />
-                  )}
-                  {variant === 'feed' && !editing && (
-                    <button
-                      type="button"
-                      onClick={() => setEditing(true)}
-                      className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[44px] rounded-full border shrink-0 transition-opacity hover:opacity-80"
-                      style={{ color: 'var(--color-primary)', borderColor: 'var(--border)' }}
-                    >
-                      <Pencil size={12} aria-hidden="true" />
-                      {t('card.edit')}
-                    </button>
-                  )}
-                </div>
+          {(item.organized_at || variant === 'feed') && (
+            <div className="flex items-center gap-3 pt-1" style={{ borderTop: '1px solid color-mix(in oklch, var(--border) 60%, transparent)' }}>
+              {/* Selo "Organizado pelo Borogodó" só quando a IA de fato organizou esta fonte
+                  (item.organized_at) — destaques só criados manualmente ("+ adicionar destaque")
+                  não ganham o selo, sem precisar de um campo novo no banco para distinguir. */}
+              {item.organized_at ? (
+                <span
+                  className="inline-flex items-center gap-1.5 flex-1 min-w-0 text-xs font-medium"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  <Sparkles size={12} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                  {tRegistro('organizedBy')}
+                </span>
+              ) : (
+                <span className="flex-1" />
               )}
-            </>
+              {/* Editar (026): abre o Drawer de Registro pré-preenchido com esta fonte — edição é
+                  sobre o registro em si, não sobre um destaque (destaques têm seu próprio Editar
+                  dentro do HighlightCard). */}
+              {variant === 'feed' && (
+                <button
+                  type="button"
+                  onClick={handleEditClick}
+                  className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[44px] rounded-full border shrink-0 transition-opacity hover:opacity-80"
+                  style={{ color: 'var(--color-primary)', borderColor: 'var(--border)' }}
+                >
+                  <Pencil size={12} aria-hidden="true" />
+                  {t('card.edit')}
+                </button>
+              )}
+            </div>
           )}
 
           {variant === 'feed' && (
@@ -402,42 +348,40 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
             </span>
           )}
 
-          {!editing && (
-            <div className="flex flex-col gap-1.5">
-              <button
-                type="button"
-                onClick={() => setSourceExpanded((v) => !v)}
-                className="self-start text-xs font-medium min-h-[44px] transition-opacity hover:opacity-80"
-                style={{ color: 'var(--color-primary)' }}
+          <div className="flex flex-col gap-1.5">
+            <button
+              type="button"
+              onClick={() => setSourceExpanded((v) => !v)}
+              className="self-start text-xs font-medium min-h-[44px] transition-opacity hover:opacity-80"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              {sourceExpanded ? t('card.hideFull') : t('card.viewFull')}
+            </button>
+            {sourceExpanded && (
+              <p
+                className="text-sm leading-relaxed overflow-y-auto rounded-lg border p-3"
+                style={{
+                  color: 'var(--muted-foreground)',
+                  whiteSpace: 'pre-wrap',
+                  maxHeight: 280,
+                  borderColor: 'var(--border)',
+                  background: 'var(--muted)',
+                }}
               >
-                {sourceExpanded ? t('card.hideFull') : t('card.viewFull')}
-              </button>
-              {sourceExpanded && (
-                <p
-                  className="text-sm leading-relaxed overflow-y-auto rounded-lg border p-3"
-                  style={{
-                    color: 'var(--muted-foreground)',
-                    whiteSpace: 'pre-wrap',
-                    maxHeight: 280,
-                    borderColor: 'var(--border)',
-                    background: 'var(--muted)',
-                  }}
-                >
-                  {editValue}
-                </p>
-              )}
-            </div>
-          )}
+                {item.what_i_did}
+              </p>
+            )}
+          </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             <UsarButton
               seedType="entry"
               seedRef={item.id}
-              seedSummary={editValue}
+              seedSummary={item.what_i_did}
               formats={['post', 'impact_summary']}
             />
 
-            {variant === 'feed' && !editing && (() => {
+            {variant === 'feed' && (() => {
               // US3: o botão reflete tanto o clique manual local (`organizeState`) quanto a
               // organização assíncrona em andamento no servidor (`serverOrganizationStatus`) —
               // qualquer um dos dois basta para mostrar "organizando…" e desabilitar (FR-031).
@@ -461,7 +405,7 @@ export function SourceCard({ item, variant, onDelete, onEdit, contextVocabulary 
               )
             })()}
 
-            {variant === 'feed' && onDelete && !editing && (
+            {variant === 'feed' && onDelete && (
               <button
                 type="button"
                 aria-label={t('card.delete')}

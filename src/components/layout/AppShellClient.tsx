@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import { Drawer } from '@/components/features/capture/Drawer'
 import { ChatSheet, openChatSheet } from '@/components/features/chat/ChatSheet'
 import { GenerateSheet } from '@/components/features/content/GenerateSheet'
-import { OPEN_DRAWER_EVENT, type OpenDrawerDetail } from '@/components/features/painel/registroTriggerEvents'
+import { OPEN_DRAWER_EVENT, type OpenDrawerDetail, type EditEntryDetail } from '@/components/features/painel/registroTriggerEvents'
 import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LogoutButton } from '@/components/features/auth/LogoutButton'
@@ -31,11 +31,15 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
   // Conteúdo digitado/colado direto no gatilho do Painel antes do drawer abrir (FR-012a) — repassado
   // como `initialText` pro Drawer, que sincroniza no rascunho da sessão sem perder nada.
   const [drawerInitialText, setDrawerInitialText] = useState('')
+  // Registros → Editar (026-organizar-destaques): quando presente, o Drawer abre pré-preenchido
+  // com uma fonte já salva, e o salvar vira PATCH em vez de criar um registro novo.
+  const [drawerEditEntry, setDrawerEditEntry] = useState<EditEntryDetail | undefined>(undefined)
 
   useEffect(() => {
     function handler(e: Event) {
       const detail = (e as CustomEvent<OpenDrawerDetail>).detail
       setDrawerInitialText(detail?.initialText ?? '')
+      setDrawerEditEntry(detail?.editEntry)
       setDrawerOpen(true)
     }
     window.addEventListener(OPEN_DRAWER_EVENT, handler)
@@ -44,8 +48,16 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
     }
   }, [])
 
+  function handleDrawerOpenChange(open: boolean) {
+    setDrawerOpen(open)
+    if (!open) setDrawerEditEntry(undefined)
+  }
+
   function handleGroupItemAction(item: Extract<NavGroupItem, { kind: 'action' }>) {
-    if (item.action === 'open-drawer') setDrawerOpen(true)
+    if (item.action === 'open-drawer') {
+      setDrawerEditEntry(undefined)
+      setDrawerOpen(true)
+    }
     if (item.action === 'open-chat') openChatSheet()
   }
 
@@ -214,7 +226,7 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
               (FR-018), não na barra. */}
           <button
             type="button"
-            onClick={() => setDrawerOpen(true)}
+            onClick={() => { setDrawerEditEntry(undefined); setDrawerOpen(true) }}
             aria-label={tRegistro('drawer.title')}
             className="absolute left-1/2 -translate-x-1/2 -top-[14px] w-12 h-12 rounded-full flex items-center justify-center"
             style={{
@@ -246,7 +258,12 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
       {/* Sempre montado (como ChatSheet/GenerateSheet) — o rascunho da sessão (useDrawerDraft)
           sobrevive a fechar sem salvar (US7, FR-015): só é descartado ao salvar com sucesso ou
           ao navegar/recarregar a página. */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} initialText={drawerInitialText} />
+      <Drawer
+        open={drawerOpen}
+        onOpenChange={handleDrawerOpenChange}
+        initialText={drawerInitialText}
+        editEntry={drawerEditEntry}
+      />
     </div>
   )
 }

@@ -789,6 +789,10 @@
   },
   "feed": {
     "title": "Your records",
+    "composer": {
+      "importHistory": "Import history",
+      "comingSoon": "Coming soon"
+    },
     "empty": {
       "heading": "No records yet",
       "description": "Every story you share becomes a record here. Start with the most recent one.",
@@ -807,10 +811,8 @@
       "metricOnly": "With metric",
       "source": "Source",
       "clear": "Clear filters",
-      "today": "Today",
-      "week": "7 days",
-      "month": "30 days",
-      "quarter": "90 days"
+      "dateFrom": "From",
+      "dateTo": "To"
     },
     "card": {
       "expand": "View details",
@@ -1078,7 +1080,7 @@
       "searchPlaceholder": "Buscar..."
     },
     "highlight": {
-      "addNew": "+ adicionar destaque",
+      "addNew": "Add highlight",
       "deleteConfirm": {
         "title": "Excluir este destaque?",
         "description": "Essa ação não pode ser desfeita. O restante do registro continua intacto.",

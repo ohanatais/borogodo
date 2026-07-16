@@ -9,6 +9,7 @@ import { SourceCard } from './SourceCard'
 import { EmptyFeed } from './EmptyFeed'
 import { FeedFilters } from './FeedFilters'
 import { ActivityGrid, GRID_MIN_DISTINCT_DAYS } from './ActivityGrid'
+import { ENTRY_UPDATED_EVENT, type EntryUpdatedDetail } from '@/components/features/painel/registroTriggerEvents'
 
 interface FeedPageProps {
   filterKey: string
@@ -139,10 +140,29 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
     }
   }, [])
 
-  const handleEdit = useCallback((id: string, what_i_did: string) => {
-    setItems((prev) =>
-      prev.map((item) => item.id === id ? { ...item, what_i_did, title: what_i_did.slice(0, 60).trim() } : item)
-    )
+  // Editar (026): o Drawer que salva a edição vive no shell (AppShellClient), fora desta árvore —
+  // `router.refresh()` sozinho não resincroniza o estado local otimista de `items`, então ouvimos
+  // o mesmo evento que o Drawer dispara ao confirmar o PATCH.
+  useEffect(() => {
+    function handler(e: Event) {
+      const detail = (e as CustomEvent<EntryUpdatedDetail>).detail
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === detail.id
+            ? {
+                ...item,
+                what_i_did: detail.what_i_did,
+                title: detail.what_i_did.slice(0, 60).trim(),
+                ...(detail.metric !== undefined && detail.metric && { metric: detail.metric }),
+                ...(detail.company !== undefined && { company: detail.company || item.company }),
+                ...(detail.entryDate !== undefined && detail.entryDate && { entry_date: detail.entryDate }),
+              }
+            : item
+        )
+      )
+    }
+    window.addEventListener(ENTRY_UPDATED_EVENT, handler)
+    return () => window.removeEventListener(ENTRY_UPDATED_EVENT, handler)
   }, [])
 
   // Story 2 (FR-004): atualização local, otimista, após o `PATCH` do `ContextPillPicker` já ter
@@ -239,7 +259,6 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
                       item={item}
                       variant="feed"
                       onDelete={handleDelete}
-                      onEdit={handleEdit}
                       contextVocabulary={contextVocabulary}
                       onContextChange={handleContextChange}
                     />

@@ -13,7 +13,7 @@ const ENTRIES = [
 ]
 
 describe('RecentEntries', () => {
-  it('renders at most 5 entries with an icon per source', () => {
+  it('renders at most 5 entries, sem ícone de emoji por fonte', () => {
     render(<RecentEntries entries={ENTRIES} />)
 
     expect(screen.getByText('Mediou um conflito entre áreas')).toBeInTheDocument()
@@ -23,9 +23,9 @@ describe('RecentEntries', () => {
     expect(screen.getByText('Fez revisão de contrato com time jurídico')).toBeInTheDocument()
     expect(screen.queryByText('Esta sexta entrada não deve aparecer')).not.toBeInTheDocument()
 
-    expect(screen.getAllByText('📝').length).toBeGreaterThan(0)
-    expect(screen.getByText('🎙️')).toBeInTheDocument()
-    expect(screen.getByText('📄')).toBeInTheDocument()
+    expect(screen.queryByText('📝')).not.toBeInTheDocument()
+    expect(screen.queryByText('🎙️')).not.toBeInTheDocument()
+    expect(screen.queryByText('📄')).not.toBeInTheDocument()
   })
 
   it('does not render when there are no entries', () => {
