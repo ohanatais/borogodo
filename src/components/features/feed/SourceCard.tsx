@@ -276,7 +276,7 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
                 <button
                   type="button"
                   onClick={handleEditClick}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[44px] rounded-full border shrink-0 transition-opacity hover:opacity-80"
+                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full border shrink-0 transition-opacity hover:opacity-80"
                   style={{ color: 'var(--color-primary)', borderColor: 'var(--border)' }}
                 >
                   <Pencil size={12} aria-hidden="true" />
@@ -316,7 +316,7 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
             <button
               type="button"
               onClick={() => void handleAddHighlight()}
-              className="inline-flex items-center justify-center gap-1 self-start text-xs font-medium px-3 py-1.5 min-h-[48px] rounded-full border border-dashed transition-opacity hover:opacity-80"
+              className="inline-flex items-center justify-center gap-1 self-start text-xs font-medium px-4 py-2.5 rounded-full border border-dashed transition-opacity hover:opacity-80"
               style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}
             >
               <Plus size={12} aria-hidden="true" />
@@ -392,7 +392,7 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
                   type="button"
                   onClick={() => void handleOrganize()}
                   disabled={isOrganizingNow}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[48px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
                   <Sparkles size={12} aria-hidden="true" />
@@ -410,7 +410,7 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
                 type="button"
                 aria-label={t('card.delete')}
                 onClick={() => setDeleteOpen(true)}
-                className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[48px] rounded-full transition-opacity hover:opacity-80"
+                className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
                 style={{ color: 'var(--destructive)' }}
               >
                 <Trash2 size={12} aria-hidden="true" />

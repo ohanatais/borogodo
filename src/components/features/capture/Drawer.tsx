@@ -478,7 +478,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   aria-label={t('attach.imageAriaLabel')}
-                  className="inline-flex items-center gap-1.5 px-3 min-h-12 rounded-full text-xs font-medium"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-medium"
                   style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
                 >
                   <ImageIcon size={13} aria-hidden="true" />
@@ -491,7 +491,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
                     setLinkInputOpen((v) => !v)
                   }}
                   aria-label={t('attach.linkAriaLabel')}
-                  className="inline-flex items-center gap-1.5 px-3 min-h-12 rounded-full text-xs font-medium"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-medium"
                   style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
                 >
                   <Link2 size={13} aria-hidden="true" />

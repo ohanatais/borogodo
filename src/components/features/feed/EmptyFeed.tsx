@@ -21,7 +21,7 @@ export function EmptyFeed() {
       <button
         type="button"
         onClick={() => router.push('/painel')}
-        className="mt-6 inline-flex items-center justify-center text-sm font-medium px-5 py-3 min-h-[48px] rounded-full transition-opacity hover:opacity-80"
+        className="mt-6 inline-flex items-center justify-center text-sm font-medium px-5 py-2.5 rounded-full transition-opacity hover:opacity-80"
         style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
       >
         {t('empty.cta')}

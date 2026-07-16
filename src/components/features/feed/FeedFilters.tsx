@@ -80,7 +80,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
           onChange={handleSearchChange}
           placeholder={t('filters.search')}
           aria-label={t('filters.search')}
-          className="w-full pl-8 pr-3 py-1.5 text-sm rounded-full outline-none focus-visible:ring-2"
+          className="w-full pl-8 pr-3 py-2.5 text-sm rounded-full outline-none focus-visible:ring-2"
           style={{
             background: 'var(--muted)',
             color: 'var(--foreground)',
@@ -91,7 +91,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
 
       {/* Período — um único controle (não duas caixas separadas De/Até) */}
       <div
-        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border"
+        className="inline-flex items-center gap-1.5 text-xs px-4 py-2.5 rounded-full border"
         style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)', background: 'var(--card)' }}
       >
         <CalendarRange size={13} aria-hidden="true" className="shrink-0" />
@@ -148,7 +148,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
         <button
           type="button"
           onClick={handleClearAll}
-          className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full transition-opacity hover:opacity-70 ml-auto"
+          className="flex items-center gap-1 text-xs px-4 py-2.5 rounded-full transition-opacity hover:opacity-70 ml-auto"
           style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
         >
           <X size={12} aria-hidden="true" />

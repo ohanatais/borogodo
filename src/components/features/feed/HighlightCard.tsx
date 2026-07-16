@@ -203,7 +203,7 @@ export function HighlightCard({ entryId, highlight, defaultOpen, index, onUpdate
                   type="button"
                   onClick={() => void handleSave()}
                   disabled={saving}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 min-h-[44px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
                   style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
                 >
                   <Check size={12} aria-hidden="true" />
@@ -212,7 +212,7 @@ export function HighlightCard({ entryId, highlight, defaultOpen, index, onUpdate
                 <button
                   type="button"
                   onClick={cancelEditing}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 min-h-[44px] rounded-full transition-opacity hover:opacity-80"
+                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
                   style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
                 >
                   <X size={12} aria-hidden="true" />
@@ -244,7 +244,7 @@ export function HighlightCard({ entryId, highlight, defaultOpen, index, onUpdate
                 <button
                   type="button"
                   onClick={startEditing}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[48px] rounded-full transition-opacity hover:opacity-80"
+                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
                   <Pencil size={12} aria-hidden="true" />
@@ -254,7 +254,7 @@ export function HighlightCard({ entryId, highlight, defaultOpen, index, onUpdate
                   type="button"
                   onClick={() => setDeleteOpen(true)}
                   disabled={deleting}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 min-h-[48px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
                   style={{ color: 'var(--destructive)' }}
                 >
                   <Trash2 size={12} aria-hidden="true" />

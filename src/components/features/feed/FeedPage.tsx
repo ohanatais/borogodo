@@ -219,7 +219,7 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
           <button
             type="button"
             onClick={() => router.replace('?', { scroll: false })}
-            className="text-sm font-medium px-4 py-2 min-h-[44px] rounded-full transition-opacity hover:opacity-80"
+            className="text-sm font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
             style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
           >
             {t('filters.clear')}
@@ -269,7 +269,7 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
                 type="button"
                 onClick={handleLoadMore}
                 disabled={isLoading}
-                className="text-sm font-medium px-5 py-2.5 min-h-[48px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+                className="text-sm font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
                 style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
               >
                 {isLoading ? t('pagination.loading') : t('pagination.loadMore')}
