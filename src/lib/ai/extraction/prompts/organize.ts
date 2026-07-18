@@ -18,6 +18,18 @@ reescrever, não resumir, não inventar.
 REGRAS GERAIS:
 - Um mesmo texto pode conter MAIS DE UM destaque (FR-014) — ex. uma reunião com dois resultados
   distintos vira 2 destaques, não 1 misturado. A maioria dos textos tem só 1.
+- A fonte pode ser uma CONVERSA (entrevista, reunião, ligação) onde a pessoa RELATA conquistas de
+  trabalhos passados — o destaque não precisa ser algo que aconteceu só NESTE momento capturado.
+  Quando, dentro da conversa, a pessoa cita uma conquista concreta e específica de um projeto
+  anterior com número/prova, isso é um destaque próprio — não pode desaparecer dentro de um
+  resumo genérico do tipo "apresentou experiência"/"foi avaliada para a vaga".
+  ERRADO (perde o resultado real dentro de um resumo genérico da conversa): texto é a transcrição
+  de uma entrevista de emprego onde a pessoa menciona "implementamos essa plataforma em mais de 5
+  empresas diferentes e alcançamos mais de 20.000 vidas", e o único destaque vira "Apresentação de experiência para avaliação de fit" — o resultado citado (20.000 vidas, 5 empresas) some.
+  CERTO: além do destaque sobre a conversa em si (quando fizer sentido ter um), cria um destaque
+  separado pra essa conquista relatada: title "Expansão de plataforma de saúde para 5 empresas,
+  alcançando 20 mil vidas", metric "20.000+ vidas em 5 empresas", tags do tema (ex. healthtech,
+  b2b saas).
 - Cada destaque tem: title, metric, impact, tags.
   - title: substantivo-primeiro/outcome-first — o que foi ENTREGUE, com o número/prova quando
     presente no texto cru (FR-019).

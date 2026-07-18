@@ -7,6 +7,17 @@ import { useTranslations } from 'next-intl'
 // indefinidamente (ux-shape.md §6/§7, edge case da spec: vocabulário de empresas sem limite).
 const SEARCH_THRESHOLD = 8
 
+// Pílula não-selecionada: fundo --muted (quase idêntico ao lilás-névoa do container que a
+// envolve, no Drawer/card) fazia a pílula "sumir" — sem contorno visível, virava texto solto
+// (achado em teste manual). --color-lilas-linha existe no design system especificamente pra isso
+// ("sublinhado sutil... visível nos dois temas") — usado aqui como borda sobre fundo sólido
+// (--card) em vez de --muted, sem competir com a pílula ativa (roxo-jambo sólido).
+const INACTIVE_PILL_STYLE = {
+  background: 'var(--card)',
+  color: 'var(--foreground)',
+  border: '1px solid var(--color-lilas-linha)',
+} as const
+
 interface ContextPillPickerProps {
   /** Presente (Registros, pós-salvar): seleção dispara `PATCH` direto no servidor. Ausente
    * (Drawer, antes de salvar): seleção fica só local — nenhuma chamada de rede, `onChange`
@@ -115,7 +126,7 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
               style={
                 active
                   ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }
-                  : { background: 'var(--muted)', color: 'var(--foreground)' }
+                  : INACTIVE_PILL_STYLE
               }
             >
               {name}
@@ -132,7 +143,7 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
           style={
             isPersonalProject
               ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }
-              : { background: 'var(--muted)', color: 'var(--foreground)' }
+              : INACTIVE_PILL_STYLE
           }
         >
           {t('context.personalProjectLabel')}

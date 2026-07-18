@@ -36,6 +36,18 @@ describe('CAPTURE_ORGANIZE_SYSTEM_PROMPT — impact nunca infere consequência n
   })
 })
 
+describe('CAPTURE_ORGANIZE_SYSTEM_PROMPT — conquista relatada dentro de uma conversa vira destaque próprio (bug real: entrevista de emprego virou 1 resumo genérico, perdendo o resultado citado)', () => {
+  it('instrui que a fonte pode ser uma conversa (entrevista/reunião) e conquistas relatadas do passado também são destaque', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('conversa (entrevista, reunião')
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('relata conquistas de')
+  })
+
+  it('mostra o exemplo real de resultado perdido dentro de um resumo genérico de entrevista', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('20.000 vidas')
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('apresentação de experiência para avaliação de fit')
+  })
+})
+
 describe('CAPTURE_ORGANIZE_SYSTEM_PROMPT — título outcome-first (Story 5)', () => {
   it('FR-019 — instrui título substantivo-primeiro/outcome-first, com número quando presente', () => {
     expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('FR-019')
