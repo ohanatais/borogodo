@@ -221,8 +221,8 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
               {item.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs px-2 py-0.5 rounded-full"
-                  style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+                  className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
                 >
                   {tag}
                 </span>
@@ -254,8 +254,8 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
                 <button
                   type="button"
                   onClick={handleEditClick}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full border shrink-0 transition-opacity hover:opacity-80"
-                  style={{ color: 'var(--color-primary)', borderColor: 'var(--border)' }}
+                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full shrink-0 transition-opacity hover:opacity-80"
+                  style={{ color: 'var(--color-primary)' }}
                 >
                   <Pencil size={12} aria-hidden="true" />
                   {t('card.edit')}

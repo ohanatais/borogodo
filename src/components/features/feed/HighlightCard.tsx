@@ -86,8 +86,8 @@ export function HighlightCard({ highlight, defaultOpen, index }: HighlightCardPr
               {highlight.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs px-2 py-0.5 rounded-full"
-                  style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+                  className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
                 >
                   {tag}
                 </span>

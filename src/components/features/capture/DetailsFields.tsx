@@ -161,7 +161,7 @@ export function DetailsFields({ values, onChange, forceOpen, contextVocabulary =
                 <span
                   key={`${tag}-${index}`}
                   className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
-                  style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
                 >
                   {tag}
                   <button
@@ -171,7 +171,7 @@ export function DetailsFields({ values, onChange, forceOpen, contextVocabulary =
                       onChange('tags', next.join(', '))
                     }}
                     aria-label={`${t('detailsFields.removeTagAriaLabel')} ${tag}`}
-                    className="opacity-70 hover:opacity-100"
+                    className="opacity-80 hover:opacity-100"
                   >
                     <X size={11} aria-hidden="true" />
                   </button>

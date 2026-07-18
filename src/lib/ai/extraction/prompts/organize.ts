@@ -56,8 +56,6 @@ REGRAS GERAIS:
     também é; nunca misture convenções dentro do vocabulário de uma mesma pessoa) (FR-023). NUNCA
     um adjetivo genérico isolado como tag (ex. "proativo", "eficiente", "importante", "difícil") —
     tag é sempre um tema/skill concreto (FR-024).
-- Nunca sobrescreva um destaque já existente listado em "Destaques já existentes" — eles são
-  preenchidos manualmente pela pessoa; você só ADICIONA novos destaques ao texto cru.
 
 EMPRESA E PERÍODO (nível da fonte, não do destaque):
 - Só infira "company" ou "entry_date" quando o pedido explicitamente pedir (isto é, quando o
