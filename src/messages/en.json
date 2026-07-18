@@ -1056,12 +1056,18 @@
       "doneButton": "Concluir"
     },
     "detailsFields": {
-      "toggleLabel": "+ adicionar detalhes",
-      "metricLabel": "Métrica",
-      "impactLabel": "Impacto",
+      "toggleLabel": "Add details",
+      "collapseLabel": "Collapse",
+      "sectionLabel": "Details",
+      "metricLabel": "Metric",
+      "metricPlaceholder": "e.g. accepted in 2 cycles",
+      "impactLabel": "Impact",
+      "impactPlaceholder": "What changed because of this?",
       "tagsLabel": "Tags",
-      "companyLabel": "Empresa",
-      "dateLabel": "Data"
+      "tagsPlaceholder": "add tag",
+      "companyLabel": "Company",
+      "companyPlaceholder": "Where this happened",
+      "dateLabel": "Date"
     },
     "organize": {
       "cta": "Organizar",

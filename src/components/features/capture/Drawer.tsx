@@ -457,7 +457,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
           />
         ) : (
           <>
-            <div className="flex-1 flex flex-col min-h-0 px-4 py-3 gap-3">
+            <div className="flex-1 flex flex-col min-h-0 overflow-y-auto px-4 py-3 gap-3">
               <DrawerTextarea
                 value={draft.rawText}
                 onChange={draft.setRawText}

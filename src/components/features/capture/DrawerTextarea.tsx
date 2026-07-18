@@ -38,7 +38,7 @@ export function DrawerTextarea({ value, onChange, disabled, autoFocus, onImagePa
   }
 
   return (
-    <div className="flex flex-col gap-2 flex-1 min-h-0">
+    <div className="flex flex-col gap-2 shrink-0">
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -47,7 +47,8 @@ export function DrawerTextarea({ value, onChange, disabled, autoFocus, onImagePa
         aria-label={t('drawer.textareaAriaLabel')}
         disabled={disabled}
         autoFocus={autoFocus}
-        className="flex-1 w-full resize-none rounded-xl px-4 py-3 text-sm outline-none focus-visible:shadow-none min-h-[200px] leading-relaxed"
+        rows={7}
+        className="w-full resize-none rounded-xl px-4 py-3 text-sm outline-none focus-visible:shadow-none min-h-[200px] leading-relaxed"
         style={{
           background: 'var(--muted)',
           border: '1px solid var(--border)',

@@ -1056,11 +1056,17 @@
       "doneButton": "Concluir"
     },
     "detailsFields": {
-      "toggleLabel": "+ adicionar detalhes",
+      "toggleLabel": "Adicionar detalhes",
+      "collapseLabel": "Recolher",
+      "sectionLabel": "Detalhes",
       "metricLabel": "Métrica",
+      "metricPlaceholder": "ex.: aceite em 2 ciclos",
       "impactLabel": "Impacto",
+      "impactPlaceholder": "O que mudou por causa disso?",
       "tagsLabel": "Tags",
+      "tagsPlaceholder": "adicionar tag",
       "companyLabel": "Empresa",
+      "companyPlaceholder": "Onde isso aconteceu",
       "dateLabel": "Data"
     },
     "organize": {

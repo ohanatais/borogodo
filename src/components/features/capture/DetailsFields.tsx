@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, TrendingUp, Target, Tag, Building2, CalendarDays } from 'lucide-react'
 import type { DrawerManualFields } from '@/hooks/useDrawerDraft'
 
 interface DetailsFieldsProps {
@@ -10,19 +10,36 @@ interface DetailsFieldsProps {
   onChange: (field: keyof DrawerManualFields, value: string) => void
 }
 
-interface FieldDef {
-  field: keyof DrawerManualFields
-  labelKey: string
-  type: 'text' | 'date'
+/**
+ * Linha de campo editável — ícone + label acima, campo num container tingido (mesma gramática
+ * visual do resto do produto: `--color-lilas-nevoa`), em vez da grade 2 colunas anterior que
+ * espremia mal quando havia anexo + detalhes juntos.
+ */
+function FieldRow({
+  icon: Icon,
+  label,
+  htmlFor,
+  children,
+}: {
+  icon: typeof TrendingUp
+  label: string
+  htmlFor: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={htmlFor} className="inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>
+        <Icon size={13} aria-hidden="true" />
+        {label}
+      </label>
+      <div className="rounded-lg px-3 py-2" style={{ background: 'var(--color-lilas-nevoa)' }}>
+        {children}
+      </div>
+    </div>
+  )
 }
 
-const FIELDS: FieldDef[] = [
-  { field: 'metric', labelKey: 'detailsFields.metricLabel', type: 'text' },
-  { field: 'impact', labelKey: 'detailsFields.impactLabel', type: 'text' },
-  { field: 'tags', labelKey: 'detailsFields.tagsLabel', type: 'text' },
-  { field: 'company', labelKey: 'detailsFields.companyLabel', type: 'text' },
-  { field: 'entryDate', labelKey: 'detailsFields.dateLabel', type: 'date' },
-]
+const fieldInputStyle: React.CSSProperties = { color: 'var(--foreground)' }
 
 /**
  * Seção opcional "+ adicionar detalhes" (US4) — colapsada por padrão, campos de texto livre sem
@@ -33,43 +50,102 @@ export function DetailsFields({ values, onChange }: DetailsFieldsProps) {
   const t = useTranslations('registro')
   const [open, setOpen] = useState(false)
 
-  return (
-    <div className="flex flex-col gap-2">
+  if (!open) {
+    return (
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="inline-flex items-center gap-1 self-start text-xs font-medium"
-        style={{ color: 'var(--muted-foreground)' }}
+        onClick={() => setOpen(true)}
+        aria-expanded={false}
+        className="inline-flex items-center gap-1.5 self-start text-xs font-medium px-3 py-2 rounded-lg border border-dashed"
+        style={{ color: 'var(--muted-foreground)', borderColor: 'var(--border)' }}
       >
-        {open ? <ChevronUp size={13} aria-hidden="true" /> : <ChevronDown size={13} aria-hidden="true" />}
+        <Plus size={13} aria-hidden="true" />
         {t('detailsFields.toggleLabel')}
       </button>
+    )
+  }
 
-      {open && (
-        <div className="grid grid-cols-2 gap-2">
-          {FIELDS.map(({ field, labelKey, type }) => (
-            <div key={field} className="flex flex-col gap-1">
-              <label
-                htmlFor={`details-field-${field}`}
-                className="text-xs font-medium"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                {t(labelKey)}
-              </label>
-              <input
-                id={`details-field-${field}`}
-                type={type}
-                value={values[field]}
-                onChange={(e) => onChange(field, e.target.value)}
-                aria-label={t(labelKey)}
-                className="rounded-lg px-2.5 py-1.5 text-sm outline-none"
-                style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--muted-foreground)' }}>
+          {t('detailsFields.sectionLabel')}
+        </span>
+        <span className="flex-1" />
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-expanded={true}
+          className="text-xs font-medium"
+          style={{ color: 'var(--muted-foreground)' }}
+        >
+          {t('detailsFields.collapseLabel')}
+        </button>
+      </div>
+
+      <FieldRow icon={TrendingUp} label={t('detailsFields.metricLabel')} htmlFor="details-field-metric">
+        <input
+          id="details-field-metric"
+          type="text"
+          value={values.metric}
+          onChange={(e) => onChange('metric', e.target.value)}
+          placeholder={t('detailsFields.metricPlaceholder')}
+          aria-label={t('detailsFields.metricLabel')}
+          className="w-full bg-transparent outline-none text-sm font-medium"
+          style={fieldInputStyle}
+        />
+      </FieldRow>
+
+      <FieldRow icon={Target} label={t('detailsFields.impactLabel')} htmlFor="details-field-impact">
+        <textarea
+          id="details-field-impact"
+          rows={2}
+          value={values.impact}
+          onChange={(e) => onChange('impact', e.target.value)}
+          placeholder={t('detailsFields.impactPlaceholder')}
+          aria-label={t('detailsFields.impactLabel')}
+          className="w-full resize-none bg-transparent outline-none text-sm leading-snug"
+          style={fieldInputStyle}
+        />
+      </FieldRow>
+
+      <FieldRow icon={Tag} label={t('detailsFields.tagsLabel')} htmlFor="details-field-tags">
+        <input
+          id="details-field-tags"
+          type="text"
+          value={values.tags}
+          onChange={(e) => onChange('tags', e.target.value)}
+          placeholder={t('detailsFields.tagsPlaceholder')}
+          aria-label={t('detailsFields.tagsLabel')}
+          className="w-full bg-transparent outline-none text-sm"
+          style={fieldInputStyle}
+        />
+      </FieldRow>
+
+      <FieldRow icon={Building2} label={t('detailsFields.companyLabel')} htmlFor="details-field-company">
+        <input
+          id="details-field-company"
+          type="text"
+          value={values.company}
+          onChange={(e) => onChange('company', e.target.value)}
+          placeholder={t('detailsFields.companyPlaceholder')}
+          aria-label={t('detailsFields.companyLabel')}
+          className="w-full bg-transparent outline-none text-sm font-medium"
+          style={fieldInputStyle}
+        />
+      </FieldRow>
+
+      <FieldRow icon={CalendarDays} label={t('detailsFields.dateLabel')} htmlFor="details-field-date">
+        <input
+          id="details-field-date"
+          type="date"
+          value={values.entryDate}
+          onChange={(e) => onChange('entryDate', e.target.value)}
+          aria-label={t('detailsFields.dateLabel')}
+          className="w-full bg-transparent outline-none text-sm font-medium"
+          style={fieldInputStyle}
+        />
+      </FieldRow>
     </div>
   )
 }
