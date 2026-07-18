@@ -531,6 +531,15 @@ texto cru da fonte.
 
 ## Assumptions
 
+- **Revisão pós-implementação (2026-07-18)**: um botão "Organizar" foi adicionado dentro do
+  próprio Drawer (antes de salvar), por pedido direto da Ohana ao comparar com o protótipo do
+  Design. Isto NÃO reabre o "sempre salva sem pedágio de IA" da 025 (Story 2, item 2 acima) — o
+  botão é opcional, nunca bloqueia o salvar, e falha silenciosamente (mesma garantia de FR-030).
+  Tecnicamente é um endpoint novo (`POST /api/capture/organize-preview` → `previewOrganize`) que
+  reusa o mesmo prompt/schema de `organizeEntry` mas SEM entry existente — não persiste nada,
+  só pré-preenche os campos manuais do rascunho local. A organização "de verdade" (destaques
+  persistidos em `entry_highlights`) continua acontecendo só depois de salvar, como já descrito
+  no resto desta spec (US1 clique manual / US3 disparo assíncrono).
 - A extração via IA desta feature reusa `claude-haiku-4-5` (já mandatado pela constituição para
   extração/estruturação) — mesma família de modelo que a extração legada usava antes da 025
   desligar o pedágio síncrono.

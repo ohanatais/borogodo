@@ -1029,7 +1029,9 @@
       "submitAriaLabel": "Registrar",
       "shortcutHint": "Esc fecha · ⌘/Ctrl+Enter registra",
       "emptyPromptFirst": "O que tomou mais do seu tempo esta semana?",
-      "emptyPromptSecond": "O que só você conseguiu resolver?"
+      "emptyPromptSecond": "O que só você conseguiu resolver?",
+      "organizeHint": "Separa seu texto em métrica, impacto e tags.",
+      "organizeOptional": "Opcional, e você edita tudo."
     },
     "error": {
       "saveFailed": "Não foi possível salvar agora. Seu texto está salvo aqui.",

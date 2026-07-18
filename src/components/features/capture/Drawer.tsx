@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent, TouchEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { PenLine, X, AlertCircle, Image as ImageIcon, Link2 } from 'lucide-react'
+import { PenLine, X, AlertCircle, Image as ImageIcon, Link2, Sparkles, Loader2 } from 'lucide-react'
 import { DrawerTextarea } from './DrawerTextarea'
 import { AttachTile } from './AttachTile'
 import { SavedPanel } from './SavedPanel'
@@ -107,6 +107,9 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
   const [linkInputOpen, setLinkInputOpen] = useState(false)
   const [linkInputValue, setLinkInputValue] = useState('')
   const [linkInputError, setLinkInputError] = useState(false)
+  // "Organizar" no Drawer, antes de salvar — mesma extração de `organizeEntry`, sem persistir
+  // nada ainda (POST /api/capture/organize-preview). "done" força "+ adicionar detalhes" aberto.
+  const [organizeState, setOrganizeState] = useState<'idle' | 'organizing' | 'done'>('idle')
   const dialogRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const touchStartYRef = useRef<number | null>(null)
@@ -323,6 +326,47 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
     draft.setRawText(next)
   }
 
+  /**
+   * "Organizar" no Drawer, antes de salvar — mesma extração de `organizeEntry`, mas via
+   * `/organize-preview`: não persiste nada, só devolve o resultado pra pré-preencher os campos
+   * manuais do rascunho. Só preenche campo vazio (mesma regra "só preenche vazios" de FR-002) —
+   * nunca sobrescreve o que a pessoa já digitou. Falha vira silêncio, sem popup (FR-030).
+   */
+  async function handleOrganizePreview() {
+    if (!draft.hasContent || organizeState === 'organizing') return
+    setOrganizeState('organizing')
+    try {
+      const res = await fetch('/api/capture/organize-preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rawText: draft.rawText,
+          company: draft.manualFields.company.trim() || null,
+          entryDate: draft.manualFields.entryDate.trim() || null,
+        }),
+      })
+      const body = (await res.json().catch(() => null)) as
+        | { status?: string; highlights?: { metric: string | null; impact: string | null; tags: string[] }[]; company?: string | null; entry_date?: string | null }
+        | null
+
+      if (!res.ok || body?.status !== 'organized') {
+        setOrganizeState('idle')
+        return
+      }
+
+      const firstHighlight = body.highlights?.[0]
+      if (firstHighlight?.metric && !draft.manualFields.metric.trim()) draft.setManualField('metric', firstHighlight.metric)
+      if (firstHighlight?.impact && !draft.manualFields.impact.trim()) draft.setManualField('impact', firstHighlight.impact)
+      if (firstHighlight?.tags?.length && !draft.manualFields.tags.trim()) draft.setManualField('tags', firstHighlight.tags.join(', '))
+      if (body.company && !draft.manualFields.company.trim()) draft.setManualField('company', body.company)
+      if (body.entry_date && !draft.manualFields.entryDate.trim()) draft.setManualField('entryDate', body.entry_date)
+
+      setOrganizeState('done')
+    } catch {
+      setOrganizeState('idle')
+    }
+  }
+
   function addImageFiles(files: File[]) {
     files.filter((file) => file.type.startsWith('image/')).forEach((file) => draft.addImageAttachment(file))
   }
@@ -515,7 +559,34 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
                 <AudioButton onTranscript={handleAudioTranscript} />
               </div>
 
-              <DetailsFields values={draft.manualFields} onChange={draft.setManualField} />
+              <div className="flex items-center gap-3 rounded-xl p-3.5" style={{ background: 'var(--color-lilas-nevoa)' }}>
+                <button
+                  type="button"
+                  onClick={() => void handleOrganizePreview()}
+                  disabled={!draft.hasContent || organizeState === 'organizing'}
+                  className="inline-flex items-center gap-2 shrink-0 px-4 py-2.5 rounded-full text-xs font-semibold transition-opacity disabled:opacity-45"
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+                >
+                  {organizeState === 'organizing' ? (
+                    <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Sparkles size={14} aria-hidden="true" />
+                  )}
+                  {organizeState === 'organizing' ? t('organize.organizing') : t('organize.cta')}
+                </button>
+                <p className="text-xs leading-snug" style={{ color: 'var(--muted-foreground)' }}>
+                  {t('drawer.organizeHint')}{' '}
+                  <strong className="font-semibold" style={{ color: 'var(--foreground)' }}>
+                    {t('drawer.organizeOptional')}
+                  </strong>
+                </p>
+              </div>
+
+              <DetailsFields
+                values={draft.manualFields}
+                onChange={draft.setManualField}
+                forceOpen={organizeState === 'done'}
+              />
 
               {linkInputOpen && (
                 <div className="flex flex-col gap-1">
@@ -531,7 +602,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
                       aria-label={t('attach.linkInputLabel')}
                       aria-invalid={linkInputError}
                       autoFocus
-                      className="flex-1 rounded-xl px-3 py-2 text-sm outline-none"
+                      className="flex-1 rounded-xl px-3 py-2 text-sm outline-none focus-visible:shadow-none"
                       style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
                     />
                     <button

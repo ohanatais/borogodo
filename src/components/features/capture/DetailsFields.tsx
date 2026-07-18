@@ -8,6 +8,9 @@ import type { DrawerManualFields } from '@/hooks/useDrawerDraft'
 interface DetailsFieldsProps {
   values: DrawerManualFields
   onChange: (field: keyof DrawerManualFields, value: string) => void
+  /** "Organizar" (026) força a seção aberta pra mostrar o que preencheu — sem isso, ela ficaria
+   * escondida atrás do toggle mesmo depois de a IA já ter preenchido os campos. */
+  forceOpen?: boolean
 }
 
 /**
@@ -46,9 +49,16 @@ const fieldInputStyle: React.CSSProperties = { color: 'var(--foreground)' }
  * nenhuma chamada de IA (FR do US4). Abrir a seção é puramente local: nunca dispara rede. Os
  * valores são persistidos verbatim (contracts/capture.md `manualFields`).
  */
-export function DetailsFields({ values, onChange }: DetailsFieldsProps) {
+export function DetailsFields({ values, onChange, forceOpen }: DetailsFieldsProps) {
   const t = useTranslations('registro')
   const [open, setOpen] = useState(false)
+  // "Organizar" forçando a seção aberta — mesmo padrão de "ajustar estado durante o render" já
+  // usado em `FeedPage.tsx` (resync de props em vez de useEffect + setState).
+  const [prevForceOpen, setPrevForceOpen] = useState(forceOpen)
+  if (forceOpen && forceOpen !== prevForceOpen) {
+    setPrevForceOpen(forceOpen)
+    setOpen(true)
+  }
 
   if (!open) {
     return (
@@ -91,7 +101,7 @@ export function DetailsFields({ values, onChange }: DetailsFieldsProps) {
           onChange={(e) => onChange('metric', e.target.value)}
           placeholder={t('detailsFields.metricPlaceholder')}
           aria-label={t('detailsFields.metricLabel')}
-          className="w-full bg-transparent outline-none text-sm font-medium"
+          className="w-full bg-transparent outline-none focus-visible:shadow-none text-sm font-medium"
           style={fieldInputStyle}
         />
       </FieldRow>
@@ -104,7 +114,7 @@ export function DetailsFields({ values, onChange }: DetailsFieldsProps) {
           onChange={(e) => onChange('impact', e.target.value)}
           placeholder={t('detailsFields.impactPlaceholder')}
           aria-label={t('detailsFields.impactLabel')}
-          className="w-full resize-none bg-transparent outline-none text-sm leading-snug"
+          className="w-full resize-none bg-transparent outline-none focus-visible:shadow-none text-sm leading-snug"
           style={fieldInputStyle}
         />
       </FieldRow>
@@ -117,7 +127,7 @@ export function DetailsFields({ values, onChange }: DetailsFieldsProps) {
           onChange={(e) => onChange('tags', e.target.value)}
           placeholder={t('detailsFields.tagsPlaceholder')}
           aria-label={t('detailsFields.tagsLabel')}
-          className="w-full bg-transparent outline-none text-sm"
+          className="w-full bg-transparent outline-none focus-visible:shadow-none text-sm"
           style={fieldInputStyle}
         />
       </FieldRow>
@@ -130,7 +140,7 @@ export function DetailsFields({ values, onChange }: DetailsFieldsProps) {
           onChange={(e) => onChange('company', e.target.value)}
           placeholder={t('detailsFields.companyPlaceholder')}
           aria-label={t('detailsFields.companyLabel')}
-          className="w-full bg-transparent outline-none text-sm font-medium"
+          className="w-full bg-transparent outline-none focus-visible:shadow-none text-sm font-medium"
           style={fieldInputStyle}
         />
       </FieldRow>
@@ -142,7 +152,7 @@ export function DetailsFields({ values, onChange }: DetailsFieldsProps) {
           value={values.entryDate}
           onChange={(e) => onChange('entryDate', e.target.value)}
           aria-label={t('detailsFields.dateLabel')}
-          className="w-full bg-transparent outline-none text-sm font-medium"
+          className="w-full bg-transparent outline-none focus-visible:shadow-none text-sm font-medium"
           style={fieldInputStyle}
         />
       </FieldRow>
