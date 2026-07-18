@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { useSearchParams, useRouter } from 'next/navigation'
-import type { FeedPage as FeedPageType, FeedItem, FeedQuery, FeedAxis, ActivityCell } from '@/lib/feed/types'
+import type { FeedPage as FeedPageType, FeedItem, FeedQuery, FeedAxis } from '@/lib/feed/types'
 import { groupFeedItemsByMonth } from '@/lib/feed/groupByMonth'
 import { SourceCard } from './SourceCard'
 import { EmptyFeed } from './EmptyFeed'
@@ -36,7 +36,6 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
   const [items, setItems] = useState<FeedItem[]>(initialPage.items)
   const [nextCursor, setNextCursor] = useState<string | null>(initialPage.nextCursor)
   const [isLoading, setIsLoading] = useState(false)
-  const [activityCells, setActivityCells] = useState<ActivityCell[]>([])
   const [deleteError, setDeleteError] = useState(false)
 
   // Resync feed state when filters change — the server returned a fresh page.
@@ -49,15 +48,6 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
     setItems(initialPage.items)
     setNextCursor(initialPage.nextCursor)
   }
-
-  useEffect(() => {
-    const controller = new AbortController()
-    fetch('/api/feed/activity', { signal: controller.signal })
-      .then((r) => r.ok ? r.json() : [])
-      .then((cells: ActivityCell[]) => setActivityCells(cells))
-      .catch(() => {})
-    return () => controller.abort()
-  }, [])
 
   // Deep-link "Ver registro" (autoavaliação, 019): o feed vem por SSR, então o alvo #registro-<id> já
   // existe no mount. O Next App Router não rola para hash em container de scroll próprio, então o
@@ -73,16 +63,6 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
     const timer = setTimeout(() => { el.style.boxShadow = '' }, 2000)
     return () => clearTimeout(timer)
   }, [])
-
-  // Contagem real (não mockada) pro texto discreto "N registros em M meses" — sem grade visual
-  // de atividade (removida: para o ritmo de uso deste produto, a grade ficava majoritariamente
-  // vazia e lia como cobrança, o mesmo risco que FR-029 já evitava tirando o streak gamificado).
-  const activityStats = useMemo(() => {
-    const activeCells = activityCells.filter((c) => c.count > 0)
-    const totalRegistros = activeCells.reduce((sum, c) => sum + c.count, 0)
-    const monthKeys = new Set(activeCells.map((c) => c.date.slice(0, 7)))
-    return { totalRegistros, monthCount: monthKeys.size }
-  }, [activityCells])
 
   // FR-028: timeline por mês — agrupa pela MESMA data usada para ordenar a página (`currentAxis`),
   // nunca uma escolha fixa (ver `groupByMonth.ts`) — senão a seção do mês poderia divergir da
@@ -200,14 +180,7 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        <FeedFilters currentAxis={currentAxis} />
-        {activityStats.totalRegistros > 0 && (
-          <p className="text-xs px-1" style={{ color: 'var(--muted-foreground)' }}>
-            {t('grid.subtitle', { count: activityStats.totalRegistros, months: activityStats.monthCount })}
-          </p>
-        )}
-      </div>
+      <FeedFilters currentAxis={currentAxis} />
 
       {items.length === 0 && filtersActive ? (
         <div className="flex flex-col items-center py-16 gap-3 text-center">

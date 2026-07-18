@@ -70,11 +70,6 @@ export interface FeedQuery {
   cursor?: string
 }
 
-export interface ActivityCell {
-  date: string
-  count: number
-}
-
 export interface FeedPage {
   items: FeedItem[]
   nextCursor: string | null

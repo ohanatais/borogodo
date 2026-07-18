@@ -790,6 +790,7 @@
   "feed": {
     "title": "Seus registros",
     "composer": {
+      "registerButton": "Registrar",
       "importHistory": "Importar histórico",
       "comingSoon": "Em breve"
     },

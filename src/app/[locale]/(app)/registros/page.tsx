@@ -1,11 +1,9 @@
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
-import { FileUp } from 'lucide-react'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { getFeedData } from '@/lib/feed/getFeedData'
 import { FeedPage } from '@/components/features/feed/FeedPage'
-import { RegistroTrigger } from '@/components/features/painel/RegistroTrigger'
 import type { FeedAxis, FeedQuery } from '@/lib/feed/types'
 import type { EntrySource } from '@/types/entry'
 
@@ -69,22 +67,6 @@ export default async function RegistrosPage({ searchParams }: RegistrosPageProps
           {t('title')}
         </h1>
       </header>
-
-      <div className="flex items-center gap-3 mb-6 flex-wrap">
-        <div className="flex-1 min-w-[240px]">
-          <RegistroTrigger />
-        </div>
-        <button
-          type="button"
-          disabled
-          title={t('composer.comingSoon')}
-          className="inline-flex items-center gap-2 shrink-0 rounded-2xl h-[54px] px-4 text-sm font-semibold cursor-not-allowed opacity-60"
-          style={{ color: 'var(--color-primary)', background: 'var(--color-lilas-nevoa)', border: '1px solid var(--color-lilas-linha)' }}
-        >
-          <FileUp size={16} aria-hidden="true" />
-          {t('composer.importHistory')}
-        </button>
-      </div>
 
       <FeedPage filterKey={filterKey} initialPage={initialPage} initialQuery={query} />
     </div>
