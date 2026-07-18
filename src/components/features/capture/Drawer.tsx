@@ -113,6 +113,11 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
   // "Organizar" no Drawer, antes de salvar — mesma extração de `organizeEntry`, sem persistir
   // nada ainda (POST /api/capture/organize-preview). "done" força "+ adicionar detalhes" aberto.
   const [organizeState, setOrganizeState] = useState<'idle' | 'organizing' | 'done'>('idle')
+  // Editar uma fonte com 2+ destaques reais (revisão pós-implementação, 026): "Organizar" e
+  // Métrica/Impacto representam UM destaque só — sem efeito real numa fonte com vários, já que
+  // nenhuma tela mostra esses campos legados quando há 2+. Corrigir passa a ser editar o texto
+  // cru e usar "Organizar de novo" no card, que substitui todos os destaques de uma vez.
+  const isMultiHighlightEdit = Boolean(editEntry?.isMultiHighlight)
   const dialogRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const touchStartYRef = useRef<number | null>(null)
@@ -585,32 +590,35 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
                 <AudioButton onTranscript={handleAudioTranscript} />
               </div>
 
-              <div className="flex items-center gap-3 rounded-xl p-3.5" style={{ background: 'var(--color-lilas-nevoa)' }}>
-                <button
-                  type="button"
-                  onClick={() => void handleOrganizePreview()}
-                  disabled={!draft.hasContent || organizeState === 'organizing'}
-                  className="inline-flex items-center gap-2 shrink-0 px-4 py-2.5 rounded-full text-xs font-semibold transition-opacity disabled:opacity-45"
-                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-                >
-                  {organizeState === 'organizing' ? (
-                    <Loader2 size={14} className="animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Sparkles size={14} aria-hidden="true" />
-                  )}
-                  {organizeState === 'organizing' ? t('organize.organizing') : t('organize.cta')}
-                </button>
-                <p className="text-xs leading-snug" style={{ color: 'var(--muted-foreground)' }}>
-                  {t('drawer.organizeHint')}{' '}
-                  <strong className="font-semibold" style={{ color: 'var(--foreground)' }}>
-                    {t('drawer.organizeOptional')}
-                  </strong>
-                </p>
-              </div>
+              {!isMultiHighlightEdit && (
+                <div className="flex items-center gap-3 rounded-xl p-3.5" style={{ background: 'var(--color-lilas-nevoa)' }}>
+                  <button
+                    type="button"
+                    onClick={() => void handleOrganizePreview()}
+                    disabled={!draft.hasContent || organizeState === 'organizing'}
+                    className="inline-flex items-center gap-2 shrink-0 px-4 py-2.5 rounded-full text-xs font-semibold transition-opacity disabled:opacity-45"
+                    style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+                  >
+                    {organizeState === 'organizing' ? (
+                      <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Sparkles size={14} aria-hidden="true" />
+                    )}
+                    {organizeState === 'organizing' ? t('organize.organizing') : t('organize.cta')}
+                  </button>
+                  <p className="text-xs leading-snug" style={{ color: 'var(--muted-foreground)' }}>
+                    {t('drawer.organizeHint')}{' '}
+                    <strong className="font-semibold" style={{ color: 'var(--foreground)' }}>
+                      {t('drawer.organizeOptional')}
+                    </strong>
+                  </p>
+                </div>
+              )}
 
               <DetailsFields
                 values={draft.manualFields}
                 onChange={draft.setManualField}
+                hideMetricImpact={isMultiHighlightEdit}
                 forceOpen={organizeState === 'done' || Boolean(editEntry)}
                 contextVocabulary={contextVocabulary}
               />

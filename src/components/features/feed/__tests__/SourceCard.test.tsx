@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { SourceCard } from '../SourceCard'
-import type { FeedItem } from '@/lib/feed/types'
+import type { FeedHighlight, FeedItem } from '@/lib/feed/types'
 
 const BASE_ITEM: FeedItem = {
   id: 'entry-1',
@@ -222,7 +222,26 @@ describe('SourceCard — "Editar" abre o Drawer preenchido com o registro (026)'
         isPersonalProject: false,
         entryDate: '2026-03-01',
       },
+      isMultiHighlight: false,
     })
+
+    window.removeEventListener('borogodo:open-drawer', listener)
+  })
+
+  it('marca isMultiHighlight quando a fonte tem 2+ destaques — Drawer esconde Métrica/Impacto/Organizar nesse caso (revisão pós-implementação, 026)', () => {
+    const listener = vi.fn()
+    window.addEventListener('borogodo:open-drawer', listener)
+
+    const highlights: FeedHighlight[] = [
+      { id: 'h1', title: 'Destaque 1', metric: null, impact: null, tags: [] },
+      { id: 'h2', title: 'Destaque 2', metric: null, impact: null, tags: [] },
+    ]
+    render(<SourceCard item={{ ...BASE_ITEM, highlights }} variant="feed" />)
+    expandCard()
+    fireEvent.click(screen.getByRole('button', { name: 'card.edit' }))
+
+    const detail = (listener.mock.calls[0][0] as CustomEvent).detail
+    expect(detail.editEntry.isMultiHighlight).toBe(true)
 
     window.removeEventListener('borogodo:open-drawer', listener)
   })

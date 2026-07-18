@@ -103,6 +103,7 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
           isPersonalProject: item.is_personal_project,
           entryDate: item.entry_date ?? '',
         },
+        isMultiHighlight: highlights.length > 1,
       },
     })
   }

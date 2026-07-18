@@ -1061,6 +1061,7 @@
       "toggleLabel": "Add details",
       "collapseLabel": "Collapse",
       "sectionLabel": "Details",
+      "multiHighlightHint": "Esse registro tem vários destaques — pra corrigir métrica/impacto, edite o texto abaixo e use \"Organizar de novo\" no card em Registros.",
       "metricLabel": "Metric",
       "metricPlaceholder": "e.g. accepted in 2 cycles",
       "impactLabel": "Impact",

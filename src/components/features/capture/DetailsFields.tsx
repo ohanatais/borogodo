@@ -16,6 +16,11 @@ interface DetailsFieldsProps {
    * `ContextPillPicker` de empresa/projeto pessoal, aqui em modo local (sem `entryId`): a
    * seleção só atualiza o rascunho, nenhum `PATCH` acontece antes de salvar/editar de verdade. */
   contextVocabulary?: string[]
+  /** `true` ao editar uma fonte com 2+ destaques reais (revisão pós-implementação, 026) — Métrica
+   * e Impacto representam UM destaque só, sem sentido pra uma fonte com vários (e sem efeito
+   * visível: nenhuma tela mostra esses campos legados quando há 2+ destaques). Escondidos, com uma
+   * explicação no lugar em vez de somem sem dizer por quê. */
+  hideMetricImpact?: boolean
 }
 
 /**
@@ -61,7 +66,7 @@ function parseTags(raw: string): string[] {
  * nenhuma chamada de IA (FR do US4). Abrir a seção é puramente local: nunca dispara rede. Os
  * valores são persistidos verbatim (contracts/capture.md `manualFields`).
  */
-export function DetailsFields({ values, onChange, forceOpen, contextVocabulary = [] }: DetailsFieldsProps) {
+export function DetailsFields({ values, onChange, forceOpen, contextVocabulary = [], hideMetricImpact }: DetailsFieldsProps) {
   const t = useTranslations('registro')
   const [open, setOpen] = useState(false)
   // Tags já commitadas aparecem como pílula (com X pra remover); este é só o texto da PRÓXIMA
@@ -127,31 +132,39 @@ export function DetailsFields({ values, onChange, forceOpen, contextVocabulary =
         </button>
       </div>
 
-      <FieldRow icon={TrendingUp} label={t('detailsFields.metricLabel')} htmlFor="details-field-metric">
-        <input
-          id="details-field-metric"
-          type="text"
-          value={values.metric}
-          onChange={(e) => onChange('metric', e.target.value)}
-          placeholder={t('detailsFields.metricPlaceholder')}
-          aria-label={t('detailsFields.metricLabel')}
-          className="w-full bg-transparent outline-none focus-visible:shadow-none text-sm font-medium"
-          style={fieldInputStyle}
-        />
-      </FieldRow>
+      {hideMetricImpact ? (
+        <p className="text-xs leading-snug px-1" style={{ color: 'var(--muted-foreground)' }}>
+          {t('detailsFields.multiHighlightHint')}
+        </p>
+      ) : (
+        <>
+          <FieldRow icon={TrendingUp} label={t('detailsFields.metricLabel')} htmlFor="details-field-metric">
+            <input
+              id="details-field-metric"
+              type="text"
+              value={values.metric}
+              onChange={(e) => onChange('metric', e.target.value)}
+              placeholder={t('detailsFields.metricPlaceholder')}
+              aria-label={t('detailsFields.metricLabel')}
+              className="w-full bg-transparent outline-none focus-visible:shadow-none text-sm font-medium"
+              style={fieldInputStyle}
+            />
+          </FieldRow>
 
-      <FieldRow icon={Target} label={t('detailsFields.impactLabel')} htmlFor="details-field-impact">
-        <textarea
-          id="details-field-impact"
-          rows={2}
-          value={values.impact}
-          onChange={(e) => onChange('impact', e.target.value)}
-          placeholder={t('detailsFields.impactPlaceholder')}
-          aria-label={t('detailsFields.impactLabel')}
-          className="w-full resize-none bg-transparent outline-none focus-visible:shadow-none text-sm leading-snug"
-          style={fieldInputStyle}
-        />
-      </FieldRow>
+          <FieldRow icon={Target} label={t('detailsFields.impactLabel')} htmlFor="details-field-impact">
+            <textarea
+              id="details-field-impact"
+              rows={2}
+              value={values.impact}
+              onChange={(e) => onChange('impact', e.target.value)}
+              placeholder={t('detailsFields.impactPlaceholder')}
+              aria-label={t('detailsFields.impactLabel')}
+              className="w-full resize-none bg-transparent outline-none focus-visible:shadow-none text-sm leading-snug"
+              style={fieldInputStyle}
+            />
+          </FieldRow>
+        </>
+      )}
 
       <FieldRow icon={Tag} label={t('detailsFields.tagsLabel')} htmlFor="details-field-tags">
         <div className="flex flex-col gap-2">

@@ -12,6 +12,11 @@ export interface EditEntryDetail {
   id: string
   rawText: string
   manualFields?: Partial<DrawerManualFields>
+  /** `true` quando a fonte tem 2+ destaques reais (revisão pós-implementação, 026) — nesse caso
+   * o Drawer esconde Métrica/Impacto e o "Organizar" (preview de 1 único conjunto de campos, sem
+   * efeito real numa fonte com vários destaques); corrigir passa a ser editar o texto cru e usar
+   * "Organizar de novo" no card, que substitui todos os destaques de uma vez. */
+  isMultiHighlight?: boolean
 }
 
 export interface OpenDrawerDetail {
