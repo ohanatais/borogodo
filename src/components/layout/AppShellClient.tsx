@@ -16,10 +16,12 @@ import { NAV_DESTINOS, NAV_GROUPS, isActive, isGroupItemActive, type NavGroupIte
 
 interface AppShellClientProps {
   userName: string
+  /** Vocabulário de contextos da pessoa (Story 2) — alimenta o `ContextPillPicker` do Drawer. */
+  contextVocabulary?: string[]
   children: React.ReactNode
 }
 
-export function AppShellClient({ userName, children }: AppShellClientProps) {
+export function AppShellClient({ userName, contextVocabulary, children }: AppShellClientProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const tRegistro = useTranslations('registro')
@@ -263,6 +265,7 @@ export function AppShellClient({ userName, children }: AppShellClientProps) {
         onOpenChange={handleDrawerOpenChange}
         initialText={drawerInitialText}
         editEntry={drawerEditEntry}
+        contextVocabulary={contextVocabulary}
       />
     </div>
   )

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { SourceCard } from '../SourceCard'
 import type { FeedHighlight, FeedItem } from '@/lib/feed/types'
@@ -51,16 +51,6 @@ function expandCard() {
   fireEvent.click(screen.getByRole('button', { name: 'card.expand' }))
 }
 
-function mockFetchJson(handler: (url: string, init?: RequestInit) => { ok: boolean; body: unknown }) {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (url: string, init?: RequestInit) => {
-      const { ok, body } = handler(url, init)
-      return { ok, json: async () => body }
-    })
-  )
-}
-
 describe('SourceCard — múltiplos destaques dentro de uma fonte (US4/US7, feature 026)', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn())
@@ -89,47 +79,14 @@ describe('SourceCard — múltiplos destaques dentro de uma fonte (US4/US7, feat
     expect(screen.queryByText('Time mais autônomo')).not.toBeInTheDocument()
   })
 
-  it('FR-016 — "+ adicionar destaque" cria um destaque em branco via POST, aberto por padrão', async () => {
-    mockFetchJson((url, init) => {
-      if (url === '/api/entries/entry-1/highlights' && init?.method === 'POST') {
-        const blank: FeedHighlight = { id: 'highlight-new', title: null, metric: null, impact: null, tags: [] }
-        return { ok: true, body: { highlight: blank } }
-      }
-      throw new Error(`unexpected fetch ${url} ${init?.method}`)
-    })
-
-    render(<SourceCard item={baseItem({ highlights: [HIGHLIGHT_A] })} variant="feed" />)
-    expandCard()
-    fireEvent.click(screen.getByRole('button', { name: 'highlight.addNew' }))
-
-    await waitFor(() =>
-      expect(fetch).toHaveBeenCalledWith(
-        '/api/entries/entry-1/highlights',
-        expect.objectContaining({ method: 'POST' })
-      )
-    )
-    await waitFor(() => expect(screen.getByText('highlight.untitled')).toBeInTheDocument())
-  })
-
-  it('FR-015 — remover um destaque afeta só ele, os demais continuam na lista', async () => {
-    mockFetchJson((url, init) => {
-      if (url === '/api/entries/entry-1/highlights/highlight-a' && init?.method === 'DELETE') {
-        return { ok: true, body: { ok: true } }
-      }
-      throw new Error(`unexpected fetch ${url} ${init?.method}`)
-    })
-
+  it('destaques não têm editar/excluir isolado (revisão pós-implementação) — só o registro inteiro, via "Editar"/"Excluir" do card', () => {
     render(<SourceCard item={baseItem({ highlights: [HIGHLIGHT_A, HIGHLIGHT_B] })} variant="feed" />)
     expandCard()
-
-    // Múltiplos destaques nascem colapsados (FR-017) — expande o primeiro para achar o botão de excluir.
     fireEvent.click(screen.getAllByRole('button', { name: 'highlight.expand' })[0])
-    const deleteButtons = screen.getAllByRole('button', { name: 'highlight.delete' })
-    fireEvent.click(deleteButtons[0])
-    fireEvent.click(screen.getByRole('button', { name: 'highlight.deleteConfirm.confirm' }))
 
-    await waitFor(() => expect(screen.queryByText(HIGHLIGHT_A.title as string)).not.toBeInTheDocument())
-    expect(screen.getByText(HIGHLIGHT_B.title as string)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'highlight.edit' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'highlight.delete' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'highlight.addNew' })).not.toBeInTheDocument()
   })
 
   it('T057/FR-032 — fonte legada com destaque sintético único (sem entry_highlights) funciona igual a uma fonte com 1 destaque real', () => {

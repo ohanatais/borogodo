@@ -14,8 +14,6 @@ interface FeedPageProps {
   filterKey: string
   initialPage: FeedPageType
   initialQuery: FeedQuery
-  /** Vocabulário de contextos da pessoa (Story 2, `getContextVocabulary`) — alimenta o `ContextPillPicker` de cada card. */
-  contextVocabulary?: string[]
 }
 
 function hasActiveFilters(searchParams: URLSearchParams): boolean {
@@ -29,7 +27,7 @@ function hasActiveFilters(searchParams: URLSearchParams): boolean {
   )
 }
 
-export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabulary = [] }: FeedPageProps) {
+export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps) {
   const t = useTranslations('feed')
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -254,7 +252,6 @@ export function FeedPage({ filterKey, initialPage, initialQuery, contextVocabula
                       item={item}
                       variant="feed"
                       onDelete={handleDelete}
-                      contextVocabulary={contextVocabulary}
                       onContextChange={handleContextChange}
                     />
                   ))}

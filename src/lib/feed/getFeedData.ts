@@ -230,10 +230,18 @@ export async function getFeedData(
   const highlightsByEntry = groupHighlightsByEntry(highlightRows)
 
   const items: FeedItem[] = pageRows.map((entry) => {
-    const title = applyFallbackTitle(entry)
+    const fallbackTitle = applyFallbackTitle(entry)
+    const highlights = highlightsByEntry.get(entry.id) ?? [syntheticHighlight(entry, fallbackTitle)]
+    // Com exatamente 1 destaque, o cabeçalho do card mostra o título/métrica DELE (outcome-first,
+    // gerado pelo "Organizar" — FR-019) em vez do `entries.title`/`entries.metric` legados: esses
+    // campos legados nunca são atualizados pela organização (só `entry_highlights` recebe o
+    // título outcome-first), então o cabeçalho ficava preso na heurística "início do texto cru"
+    // mesmo depois de organizado. Com 2+ destaques, nenhum título/métrica isolado representa a
+    // fonte inteira — mantém o fallback.
+    const singleHighlight = highlights.length === 1 ? highlights[0] : null
     return {
       id: entry.id,
-      title,
+      title: (singleHighlight?.title || fallbackTitle),
       what_i_did: entry.what_i_did,
       source: entry.source,
       created_at: entry.created_at,
@@ -241,17 +249,17 @@ export async function getFeedData(
       company: entry.company,
       is_personal_project: entry.is_personal_project ?? false,
       role_title: entry.role_title,
-      metric: entry.metric,
+      metric: singleHighlight ? singleHighlight.metric : null,
       tags: entry.tags ?? [],
       thumbnail: extractThumbnail(entry.evidences ?? []),
       evidences: entry.evidences ?? [],
-      impact: entry.impact,
+      impact: singleHighlight ? singleHighlight.impact : entry.impact,
       decision: entry.decision,
       learning: entry.learning,
       file_name: entry.file_name,
       organized_at: entry.organized_at ?? null,
       organizing_started_at: entry.organizing_started_at ?? null,
-      highlights: highlightsByEntry.get(entry.id) ?? [syntheticHighlight(entry, title)],
+      highlights,
       organizationStatus: deriveOrganizationStatus(entry.organized_at ?? null, entry.organizing_started_at ?? null),
       contextStatus: deriveContextStatus(entry.company ?? null, entry.is_personal_project ?? false),
     }

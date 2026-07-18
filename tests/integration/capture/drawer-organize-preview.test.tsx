@@ -52,7 +52,9 @@ describe('Drawer — "Organizar" antes de salvar (revisão de UX pós-implementa
     // Tags preenchidas viram pílulas (com X pra remover), não texto no campo de digitar a próxima.
     expect(screen.getByText('discovery')).toBeInTheDocument()
     expect(screen.getByText('produto')).toBeInTheDocument()
-    expect(screen.getByLabelText('detailsFields.companyLabel')).toHaveValue('Acme')
+    // Empresa virou `ContextPillPicker` (revisão pós-implementação) — o valor inferido aparece
+    // como pílula acesa, mesmo fora do vocabulário histórico.
+    expect(screen.getByRole('button', { name: 'Acme' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByLabelText('detailsFields.dateLabel')).toHaveValue('2026-03-01')
   })
 

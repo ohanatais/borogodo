@@ -21,13 +21,6 @@ interface EntryRow {
   is_personal_project: boolean
 }
 
-interface HighlightFieldsRow {
-  title: string | null
-  metric: string | null
-  impact: string | null
-  tags: string[] | null
-}
-
 export type OrganizeEntryOutcome =
   | {
       status: 'organized'
@@ -51,28 +44,23 @@ async function loadEntry(supabase: SupabaseServerClient, userId: string, entryId
   return data as EntryRow
 }
 
-async function loadExistingHighlights(supabase: SupabaseServerClient, entryId: string): Promise<HighlightFieldsRow[]> {
-  const { data, error } = await supabase
-    .from('entry_highlights')
-    .select('title, metric, impact, tags')
-    .eq('entry_id', entryId)
-    .order('position', { ascending: true })
-
-  if (error || !data) return []
-  return data as HighlightFieldsRow[]
-}
-
 /**
- * Insere um destaque novo por resultado da IA — nunca sobrescreve um destaque já existente
- * (FR-002/FR-014): esta função só faz INSERT, jamais UPDATE em `entry_highlights`.
+ * Substitui TODOS os destaques da fonte pelo resultado da IA (revisão pós-implementação: destaque
+ * deixou de ter edição isolada — a IA sempre reprocessa o texto cru inteiro do zero, então manter
+ * os destaques antigos ao lado dos novos só duplicaria conteúdo. Corrigir um destaque errado
+ * passa a ser: editar o texto cru e reorganizar, que agora recria a lista inteira em vez de só
+ * somar). DELETE seguido de INSERT dentro da mesma chamada — não há transação explícita porque o
+ * Supabase client não expõe uma aqui, mas uma falha no INSERT após o DELETE deixaria a fonte sem
+ * destaques por um instante até a próxima organização bem-sucedida (nunca perde a fonte em si).
  */
-async function insertNewHighlights(
+async function replaceHighlights(
   supabase: SupabaseServerClient,
   entryId: string,
   userId: string,
-  startPosition: number,
   highlights: OrganizeHighlight[]
 ): Promise<EntryHighlight[]> {
+  await supabase.from('entry_highlights').delete().eq('entry_id', entryId).eq('user_id', userId)
+
   if (highlights.length === 0) return []
 
   const rows = highlights.map((highlight, index) => ({
@@ -82,7 +70,7 @@ async function insertNewHighlights(
     metric: highlight.metric,
     impact: highlight.impact,
     tags: highlight.tags,
-    position: startPosition + index,
+    position: index,
   }))
 
   const { data, error } = await supabase.from('entry_highlights').insert(rows).select()
@@ -167,24 +155,16 @@ export async function organizeEntry(
   if (!entryRow) return { status: 'not_found' }
 
   try {
-    const [existingHighlightRows, tagVocabulary] = await Promise.all([
-      loadExistingHighlights(supabase, entryId),
-      getTagVocabulary(supabase, userId),
-    ])
-
-    const existingHighlights: OrganizeHighlight[] = existingHighlightRows.map((row) => ({
-      title: row.title,
-      metric: row.metric,
-      impact: row.impact,
-      tags: row.tags ?? [],
-    }))
+    const tagVocabulary = await getTagVocabulary(supabase, userId)
 
     const prompt = buildOrganizeUserPrompt(entryRow.raw_content, {
       company: entryRow.company,
       isPersonalProject: entryRow.is_personal_project,
       entryDate: entryRow.entry_date,
       tagVocabulary,
-      existingHighlights,
+      // Reorganizar recria a lista inteira do zero (replaceHighlights) — nunca há destaque
+      // "já existente" pra IA evitar duplicar.
+      existingHighlights: [],
     })
 
     const raw = await complete({
@@ -198,13 +178,7 @@ export async function organizeEntry(
 
     const result = validateOrganizeResult(extractJSONBlock(raw))
 
-    const insertedHighlights = await insertNewHighlights(
-      supabase,
-      entryId,
-      userId,
-      existingHighlights.length,
-      result.highlights
-    )
+    const highlights = await replaceHighlights(supabase, entryId, userId, result.highlights)
 
     const resolvedContext = resolveContextFields(entryRow, result)
     await applyResolvedContextFields(supabase, entryId, userId, entryRow, resolvedContext)
@@ -213,7 +187,7 @@ export async function organizeEntry(
 
     return {
       status: 'organized',
-      highlights: insertedHighlights,
+      highlights,
       company: resolvedContext.company,
       is_personal_project: entryRow.is_personal_project,
       entry_date: resolvedContext.entryDate,

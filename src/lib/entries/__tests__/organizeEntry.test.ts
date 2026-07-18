@@ -20,43 +20,33 @@ interface EntryRowFixture {
   is_personal_project: boolean
 }
 
-interface HighlightFixture {
-  title: string | null
-  metric: string | null
-  impact: string | null
-  tags: string[]
-}
-
 function jsonResponse(body: Record<string, unknown>): string {
   return '```json\n' + JSON.stringify(body) + '\n```'
 }
 
 /**
- * Constrói um cliente Supabase fake cobrindo a sequência exata de chamadas de `organizeEntry`:
+ * Constrói um cliente Supabase fake cobrindo a sequência exata de chamadas de `organizeEntry`
+ * (revisão pós-implementação: reorganizar agora SUBSTITUI os destaques em vez de só adicionar —
+ * destaque deixou de ter edição isolada, então essa é a única forma de corrigir um destaque
+ * errado):
  * 1ª from('entries') → select+maybeSingle (carrega a fonte)
- * 1ª from('entry_highlights') → select+eq+order (destaques já existentes, thenable)
- * 2ª from('entry_highlights') → insert+select (persiste os novos destaques)
+ * 1ª from('entry_highlights') → delete+eq+eq (apaga os destaques antigos da fonte)
+ * 2ª from('entry_highlights') → insert+select (persiste os destaques novos)
  * demais from('entries') → update+eq (contexto e organized_at/organizing_started_at), thenable
  */
 function makeClient(options: {
   entryRow: EntryRowFixture | null
   entryFetchError?: unknown
-  existingHighlights?: HighlightFixture[]
   insertedHighlights?: unknown[]
   insertError?: unknown
 }) {
-  const {
-    entryRow,
-    entryFetchError = null,
-    existingHighlights = [],
-    insertedHighlights = [],
-    insertError = null,
-  } = options
+  const { entryRow, entryFetchError = null, insertedHighlights = [], insertError = null } = options
 
   let entriesCallCount = 0
   let highlightsCallCount = 0
 
   const updateCalls: { table: string; payload: unknown }[] = []
+  const deleteCalls: { table: string }[] = []
 
   function makeSelectEntryBuilder() {
     const builder = {
@@ -79,13 +69,14 @@ function makeClient(options: {
     return builder
   }
 
-  function makeSelectHighlightsBuilder() {
+  function makeDeleteHighlightsBuilder() {
     const builder = {
-      select: vi.fn(() => builder),
+      delete: vi.fn(() => {
+        deleteCalls.push({ table: 'entry_highlights' })
+        return builder
+      }),
       eq: vi.fn(() => builder),
-      order: vi.fn(() => builder),
-      then: (resolve: (value: { data: HighlightFixture[]; error: null }) => unknown) =>
-        resolve({ data: existingHighlights, error: null }),
+      then: (resolve: (value: { data: null; error: null }) => unknown) => resolve({ data: null, error: null }),
     }
     return builder
   }
@@ -108,12 +99,12 @@ function makeClient(options: {
     }
     if (table === 'entry_highlights') {
       highlightsCallCount += 1
-      return highlightsCallCount === 1 ? makeSelectHighlightsBuilder() : makeInsertHighlightsBuilder()
+      return highlightsCallCount === 1 ? makeDeleteHighlightsBuilder() : makeInsertHighlightsBuilder()
     }
     throw new Error(`Unexpected table: ${table}`)
   })
 
-  return { client: { from } as unknown, from, updateCalls }
+  return { client: { from } as unknown, from, updateCalls, deleteCalls }
 }
 
 const BASE_ENTRY: EntryRowFixture = {
@@ -153,23 +144,19 @@ describe('organizeEntry', () => {
     expect(from).toHaveBeenCalledWith('entry_highlights')
   })
 
-  it('T019 — não sobrescreve um destaque já existente com impacto preenchido manualmente (só adiciona)', async () => {
-    const existingHighlight: HighlightFixture = { title: null, metric: null, impact: 'Impacto escrito à mão', tags: [] }
+  it('reorganizar SUBSTITUI os destaques existentes — apaga a lista antiga antes de inserir a nova (revisão pós-implementação: destaque não é mais editável isolado, corrigir um errado é editar o texto cru e reorganizar)', async () => {
     mockComplete.mockResolvedValue(
       jsonResponse({ highlights: [{ title: 'Novo destaque', metric: null, impact: null, tags: [] }], company: null, entry_date: null })
     )
-    const { client, updateCalls } = makeClient({
+    const { client, deleteCalls } = makeClient({
       entryRow: BASE_ENTRY,
-      existingHighlights: [existingHighlight],
       insertedHighlights: [{ id: 'h2' }],
     })
 
     const result = await organizeEntry(client as never, 'user-1', 'entry-1')
 
     expect(result.status).toBe('organized')
-    // organizeEntry nunca chama update/patch em entry_highlights — só insert.
-    const highlightUpdateCalls = updateCalls.filter((c) => c.table === 'entry_highlights')
-    expect(highlightUpdateCalls).toEqual([])
+    expect(deleteCalls).toEqual([{ table: 'entry_highlights' }])
   })
 
   it('T020 — infere a partir só do texto cru, sem exigir nenhum anexo', async () => {
@@ -311,35 +298,6 @@ describe('organizeEntry', () => {
     if (result.status === 'organized') {
       expect(result.highlights[0]).toMatchObject({ title: titleWithMetric })
     }
-  })
-
-  it('T054 — título editado manualmente num destaque existente permanece intocado após reorganização (FR-020, mesma regra de FR-002)', async () => {
-    const editedTitle = 'Meu título editado à mão'
-    const existingHighlight: HighlightFixture = { title: editedTitle, metric: null, impact: null, tags: [] }
-    mockComplete.mockResolvedValue(
-      jsonResponse({
-        highlights: [{ title: 'Novo destaque encontrado no texto', metric: null, impact: null, tags: [] }],
-        company: null,
-        entry_date: null,
-      })
-    )
-    const { client, updateCalls } = makeClient({
-      entryRow: BASE_ENTRY,
-      existingHighlights: [existingHighlight],
-      insertedHighlights: [{ id: 'h8' }],
-    })
-
-    const result = await organizeEntry(client as never, 'user-1', 'entry-1')
-
-    expect(result.status).toBe('organized')
-    // organizeEntry nunca faz UPDATE em entry_highlights — o título editado manualmente só
-    // poderia ser sobrescrito por um UPDATE, que nunca acontece (mesma garantia estrutural de T019).
-    const highlightUpdateCalls = updateCalls.filter((c) => c.table === 'entry_highlights')
-    expect(highlightUpdateCalls).toEqual([])
-    // O prompt também instrui a IA a não repetir o destaque existente (o título editado aparece
-    // na seção "Destaques já existentes" enviada à IA).
-    const userPrompt = mockComplete.mock.calls[0][0].user as string
-    expect(userPrompt).toContain(editedTitle)
   })
 
   it('T042 — texto sem métrica clara cria ao menos 1 destaque sem métrica, tratado como válido (FR-018)', async () => {

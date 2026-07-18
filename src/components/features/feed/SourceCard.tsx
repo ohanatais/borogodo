@@ -3,11 +3,10 @@
 import { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useTranslations } from 'next-intl'
-import { Trash2, Pencil, ChevronDown, ChevronUp, Paperclip, Sparkles, Plus } from 'lucide-react'
+import { Trash2, Pencil, ChevronDown, ChevronUp, Paperclip, Sparkles } from 'lucide-react'
 import type { FeedHighlight, FeedItem } from '@/lib/feed/types'
 import { UsarButton } from '@/components/features/content/UsarButton'
 import { AttachTile } from '@/components/features/capture/AttachTile'
-import { ContextPillPicker } from './ContextPillPicker'
 import { HighlightCard } from './HighlightCard'
 import { deriveContextStatus } from '@/lib/entries/contextStatus'
 import { deriveOrganizationStatus } from '@/lib/entries/organizationStatus'
@@ -17,9 +16,8 @@ interface SourceCardProps {
   item: FeedItem
   variant: 'feed' | 'panel'
   onDelete?: (id: string) => void
-  /** Vocabulário de contextos da pessoa (Story 2) — empresas já usadas, alimenta o `ContextPillPicker`. */
-  contextVocabulary?: string[]
-  /** Notifica o pai da nova seleção de contexto, após o `PATCH` (ou o "Organizar") confirmar sucesso. */
+  /** Notifica o pai da nova seleção de contexto, após o "Organizar" confirmar sucesso (a IA pode
+   * resolver empresa/projeto pessoal quando ainda vazios, FR-002/FR-006). */
   onContextChange?: (id: string, next: { company: string | null; isPersonalProject: boolean }) => void
 }
 
@@ -46,7 +44,7 @@ interface OrganizeResponseBody {
  * chegam prontos em `item.highlights` (join feito em `getFeedData`, ver `contracts/feed.md`) —
  * não há mais fetch lazy por card ao expandir.
  */
-export function SourceCard({ item, variant, onDelete, contextVocabulary = [], onContextChange }: SourceCardProps) {
+export function SourceCard({ item, variant, onDelete, onContextChange }: SourceCardProps) {
   const t = useTranslations('feed')
   const tRegistro = useTranslations('registro')
   const [expanded, setExpanded] = useState(false)
@@ -70,29 +68,12 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
   // e os destaques novos que "Organizar" insere) sem esperar um novo carregamento do feed.
   const [highlights, setHighlights] = useState<FeedHighlight[]>(item.highlights)
 
-  function handleHighlightUpdate(updated: FeedHighlight) {
-    setHighlights((current) => current.map((h) => (h.id === updated.id ? updated : h)))
-  }
-
-  function handleHighlightDelete(highlightId: string) {
-    setHighlights((current) => current.filter((h) => h.id !== highlightId))
-  }
-
-  /**
-   * "+ adicionar destaque" (FR-016) — cria um destaque em branco independente de a organização
-   * por IA já ter rodado; entra na lista já aberto (a pessoa acabou de pedir para criar).
-   */
-  async function handleAddHighlight() {
-    try {
-      const res = await fetch(`/api/entries/${item.id}/highlights`, { method: 'POST' })
-      const body = (await res.json().catch(() => null)) as { highlight?: FeedHighlight } | null
-      if (res.ok && body?.highlight) {
-        setHighlights((current) => [...current, body.highlight as FeedHighlight])
-      }
-    } catch {
-      // silencioso — mesmo padrão de falha não bloqueante do restante do card (ux-shape.md §7).
-    }
-  }
+  // Espelha a regra de `getFeedData.ts`: com 1 destaque só, título/métrica do cabeçalho vêm DELE
+  // (outcome-first, gerado pelo "Organizar") — recalculado aqui pro cabeçalho refletir, sem
+  // esperar um novo carregamento da página, a substituição otimista que "Organizar de novo" faz.
+  const singleHighlight = highlights.length === 1 ? highlights[0] : null
+  const displayTitle = singleHighlight?.title || item.title
+  const displayMetric = singleHighlight ? singleHighlight.metric : null
 
   const displayDate = item.entry_date ?? item.created_at
   const dateLabel = formatDate(displayDate)
@@ -104,7 +85,10 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
 
   /**
    * "Editar" (026) — abre o Drawer de Registro pré-preenchido com esta fonte, em vez de editar
-   * um destaque ou o texto cru inline no card. Editar é sobre o REGISTRO, não sobre um destaque.
+   * um destaque ou o texto cru inline no card. Editar é sobre o REGISTRO inteiro (revisão
+   * pós-implementação: destaque deixou de ter edição isolada — "editar tudo" inclui, quando há
+   * só 1 destaque, os campos DELE, já que ele é o conteúdo real exibido no card, não os campos
+   * legados de `entries` que a organização nunca atualiza).
    */
   function handleEditClick() {
     dispatchOpenDrawer({
@@ -112,9 +96,11 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
         id: item.id,
         rawText: item.what_i_did,
         manualFields: {
-          metric: item.metric ?? '',
-          impact: item.impact ?? '',
+          metric: (singleHighlight ? singleHighlight.metric : item.metric) ?? '',
+          impact: (singleHighlight ? singleHighlight.impact : item.impact) ?? '',
+          tags: (singleHighlight ? singleHighlight.tags : item.tags).join(', '),
           company: item.company ?? '',
+          isPersonalProject: item.is_personal_project,
           entryDate: item.entry_date ?? '',
         },
       },
@@ -125,9 +111,10 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
    * Dispara "Organizar" (POST /api/entries/[id]/organize, US1). Guarda de duplo clique local:
    * o botão fica `disabled` assim que `organizeState` vira 'organizing' (ux-shape.md §7).
    * Falha de IA (status: 'failed') ou de rede volta ao estado inicial silenciosamente — sem popup
-   * (FR-030) — permitindo nova tentativa clicando "Organizar" de novo. Os destaques inseridos e
-   * o contexto resolvido pela IA (quando ainda vazio, FR-002/FR-006) são mesclados localmente —
-   * sem isso, eles só apareceriam depois de um novo carregamento da página.
+   * (FR-030) — permitindo nova tentativa clicando "Organizar" de novo. "Organizar de novo"
+   * SUBSTITUI os destaques existentes pelos novos (revisão pós-implementação: destaque deixou de
+   * ser editável isolado — corrigir um errado é editar o texto cru e reorganizar) — sem isso, o
+   * card só refletiria a nova lista depois de um novo carregamento da página.
    */
   async function handleOrganize() {
     // Idempotência (FR-031): se a organização assíncrona já está em andamento, o clique manual
@@ -140,18 +127,8 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
       const body = (await res.json().catch(() => null)) as OrganizeResponseBody | null
       if (res.ok && body?.status === 'organized') {
         setOrganizeState('done')
-        if (body.highlights?.length) {
-          // FR-032: uma fonte nunca organizada mostra um destaque SINTÉTICO (id === item.id, ver
-          // `getFeedData.syntheticHighlight`) representando os campos legados — ele não tem linha
-          // própria em `entry_highlights`. Ao organizar com sucesso, os destaques reais retornados
-          // substituem esse placeholder (senão ele ficaria "fantasma" na lista, duplicando o
-          // título antigo ao lado dos destaques novos). Uma fonte já organizada não tem esse
-          // placeholder (todo highlight ali já é real), então o filtro não remove nada — os novos
-          // destaques só se somam aos existentes (FR-014, "organizar" nunca sobrescreve).
-          setHighlights((current) => [
-            ...current.filter((h) => h.id !== item.id),
-            ...(body.highlights as FeedHighlight[]),
-          ])
+        if (body.highlights) {
+          setHighlights(body.highlights as FeedHighlight[])
         }
         if (variant === 'feed' && (body.company !== undefined || body.is_personal_project !== undefined)) {
           onContextChange?.(item.id, {
@@ -193,7 +170,7 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
         <span className="flex-1 min-w-0">
           <span className="flex items-center gap-1.5">
             <span className="block font-display font-semibold text-[15px] leading-snug">
-              {item.title}
+              {displayTitle}
             </span>
             {/* FR-025: selo de contagem só quando há mais de 1 destaque — com exatamente 1, FR-017
                 já resolve isso (destaque único vem sempre aberto, sem necessidade de sinalizar). */}
@@ -207,9 +184,9 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
             )}
           </span>
           <span className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-            {item.metric && (
+            {displayMetric && (
               <span className="font-medium" style={{ color: 'var(--color-accent-text)' }}>
-                {item.metric}
+                {displayMetric}
               </span>
             )}
             <span>{dateLabel}</span>
@@ -270,8 +247,9 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
                 <span className="flex-1" />
               )}
               {/* Editar (026): abre o Drawer de Registro pré-preenchido com esta fonte — edição é
-                  sobre o registro em si, não sobre um destaque (destaques têm seu próprio Editar
-                  dentro do HighlightCard). */}
+                  sobre o registro inteiro (revisão pós-implementação: destaque deixou de ter
+                  edição/exclusão isolada — empresa/projeto pessoal e o conteúdo do destaque único
+                  também se editam por aqui, não têm mais um seletor/editor próprio no card). */}
               {variant === 'feed' && (
                 <button
                   type="button"
@@ -286,42 +264,22 @@ export function SourceCard({ item, variant, onDelete, contextVocabulary = [], on
             </div>
           )}
 
-          {variant === 'feed' && (
-            <ContextPillPicker
-              entryId={item.id}
-              company={item.company}
-              isPersonalProject={item.is_personal_project}
-              vocabulary={contextVocabulary}
-              onChange={(next) => onContextChange?.(item.id, next)}
-            />
+          {/* Com 1 destaque só, o bloco de destaque seria redundante com o cabeçalho (título e
+              métrica já vêm dele) — mostra só o impacto, sem chrome/box, como um preview de
+              conteúdo. Com 2+, nenhum título/métrica isolado representa a fonte inteira, então o
+              `HighlightCard` de cada um continua necessário. */}
+          {singleHighlight?.impact && (
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+              {singleHighlight.impact}
+            </p>
           )}
 
-          {variant === 'feed' && highlights.length > 0 && (
+          {highlights.length > 1 && (
             <div className="flex flex-col gap-2">
               {highlights.map((highlight, index) => (
-                <HighlightCard
-                  key={highlight.id}
-                  entryId={item.id}
-                  highlight={highlight}
-                  index={index + 1}
-                  defaultOpen={highlights.length === 1}
-                  onUpdate={handleHighlightUpdate}
-                  onDelete={handleHighlightDelete}
-                />
+                <HighlightCard key={highlight.id} highlight={highlight} index={index + 1} defaultOpen={false} />
               ))}
             </div>
-          )}
-
-          {variant === 'feed' && (
-            <button
-              type="button"
-              onClick={() => void handleAddHighlight()}
-              className="inline-flex items-center justify-center gap-1 self-start text-xs font-medium px-4 py-2.5 rounded-full border border-dashed transition-opacity hover:opacity-80"
-              style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}
-            >
-              <Plus size={12} aria-hidden="true" />
-              {tRegistro('highlight.addNew')}
-            </button>
           )}
 
           {item.evidences.length > 0 && (

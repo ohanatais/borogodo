@@ -89,6 +89,12 @@ describe('ContextPillPicker (US2, feature 026)', () => {
     expect(screen.getByRole('button', { name: 'Beta Ltda' })).toHaveAttribute('aria-pressed', 'false')
   })
 
+  it('sempre mostra a empresa atual como pílula acesa mesmo fora do vocabulário histórico (ex.: acabou de ser inferida pelo "Organizar")', () => {
+    renderPicker({ company: 'Empresa Recém-Inferida', vocabulary: ['Acme Corp'] })
+
+    expect(screen.getByRole('button', { name: 'Empresa Recém-Inferida' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
   it('mostra campo de busca só quando o vocabulário tem mais de 8 empresas', () => {
     const bigVocabulary = Array.from({ length: 9 }, (_, i) => `Empresa ${i}`)
     renderPicker({ vocabulary: bigVocabulary })

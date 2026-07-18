@@ -43,7 +43,9 @@ describe('DetailsFields — sem regressão pós-026 (organizar não interfere)',
     expect(screen.getByLabelText('detailsFields.metricLabel')).toHaveValue('')
     expect(screen.getByLabelText('detailsFields.impactLabel')).toHaveValue('')
     expect(screen.getByLabelText('detailsFields.tagsLabel')).toHaveValue('')
-    expect(screen.getByLabelText('detailsFields.companyLabel')).toHaveValue('')
+    // Empresa/projeto pessoal (revisão pós-implementação: virou `ContextPillPicker`, não mais um
+    // campo de texto) — vazio por padrão é nenhuma pílula acesa.
+    expect(screen.getByRole('button', { name: 'context.personalProjectLabel' })).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('editar um campo manualmente não dispara nenhuma chamada de rede (sem pedágio de IA)', () => {
@@ -66,6 +68,19 @@ describe('DetailsFields — sem regressão pós-026 (organizar não interfere)',
 
     expect(screen.getByLabelText('detailsFields.metricLabel')).toBeInTheDocument()
     expect(fetch).not.toHaveBeenCalled()
+  })
+})
+
+describe('DetailsFields — empresa/projeto pessoal via ContextPillPicker local (revisão pós-implementação, 026)', () => {
+  it('selecionar "Projeto pessoal" chama onChange pra isPersonalProject e limpa company', () => {
+    const onChange = vi.fn()
+    render(<DetailsFields values={{ ...EMPTY_VALUES, company: 'Acme' }} onChange={onChange} />)
+    fireEvent.click(screen.getByRole('button', { name: 'detailsFields.toggleLabel' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'context.personalProjectLabel' }))
+
+    expect(onChange).toHaveBeenCalledWith('company', '')
+    expect(onChange).toHaveBeenCalledWith('isPersonalProject', true)
   })
 })
 

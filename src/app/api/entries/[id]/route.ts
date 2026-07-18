@@ -15,6 +15,10 @@ const updateEntrySchema = z.object({
   entry_date: z.string().nullable().optional(),
   impact: z.string().max(1000).nullable().optional(),
   metric: z.string().max(200).nullable().optional(),
+  // Revisão pós-implementação (026): destaque deixou de ter edição isolada — "editar tudo" via
+  // Drawer inclui as tags do registro (rollup em `entries.tags`, mesma coluna que
+  // `rollupEntryTags` recalcula a partir de `entry_highlights` a cada organização).
+  tags: z.array(z.string().max(60)).optional(),
   decision: z.string().max(1000).nullable().optional(),
   learning: z.string().max(1000).nullable().optional(),
 })

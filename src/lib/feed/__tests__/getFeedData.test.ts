@@ -295,6 +295,49 @@ describe('getFeedData — destaques por fonte (T057, US7)', () => {
     expect(result.items[0].highlights.map((h) => h.id)).toEqual(['h1', 'h2'])
   })
 
+  it('fonte organizada com 1 destaque real: título/métrica do cabeçalho vêm do destaque (outcome-first), não do entries.title/metric legado (bug real de produção)', async () => {
+    const entry = makeMockEntry({
+      id: 'org-single-1',
+      what_i_did: 'Em dezembro/24 e jan/25, liderei uma Discovery&Definition para um cliente que...',
+      title: null,
+      metric: null,
+      impact: null,
+    })
+    const highlightRows = [
+      {
+        id: 'h1',
+        entry_id: 'org-single-1',
+        title: 'Discovery & Definition para plataforma de saúde com recomendação inteligente de suplementos',
+        metric: '5 estrelas na Clutch',
+        impact: 'Cliente decidiu seguir com a execução do projeto',
+        tags: ['discovery'],
+      },
+    ]
+    const supabase = makeSupabase([entry], { highlightRows })
+
+    const result = await getFeedData(supabase as never, 'user-1', DEFAULT_QUERY)
+
+    expect(result.items[0].title).toBe(
+      'Discovery & Definition para plataforma de saúde com recomendação inteligente de suplementos'
+    )
+    expect(result.items[0].metric).toBe('5 estrelas na Clutch')
+    expect(result.items[0].impact).toBe('Cliente decidiu seguir com a execução do projeto')
+  })
+
+  it('fonte com 2+ destaques mantém o fallback no cabeçalho (nenhum destaque isolado representa a fonte inteira)', async () => {
+    const entry = makeMockEntry({ id: 'org-multi-1', title: null, metric: 'legado', what_i_did: 'Texto cru da fonte' })
+    const highlightRows = [
+      { id: 'h1', entry_id: 'org-multi-1', title: 'Destaque 1', metric: '10%', impact: null, tags: [] },
+      { id: 'h2', entry_id: 'org-multi-1', title: 'Destaque 2', metric: '20%', impact: null, tags: [] },
+    ]
+    const supabase = makeSupabase([entry], { highlightRows })
+
+    const result = await getFeedData(supabase as never, 'user-1', DEFAULT_QUERY)
+
+    expect(result.items[0].title).toBe('Texto cru da fonte')
+    expect(result.items[0].metric).toBeNull()
+  })
+
   it('destaques de uma fonte não vazam para outra fonte na mesma página', async () => {
     const entries = [makeMockEntry({ id: 'e1' }), makeMockEntry({ id: 'e2' })]
     const highlightRows = [{ id: 'h1', entry_id: 'e1', title: 'Só do e1', metric: null, impact: null, tags: [] }]

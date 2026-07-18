@@ -1069,7 +1069,6 @@
       "tagsPlaceholder": "add tag",
       "removeTagAriaLabel": "Remove tag",
       "companyLabel": "Company",
-      "companyPlaceholder": "Where this happened",
       "dateLabel": "Date"
     },
     "organize": {
@@ -1086,22 +1085,7 @@
       "searchPlaceholder": "Buscar..."
     },
     "highlight": {
-      "addNew": "Add highlight",
-      "deleteConfirm": {
-        "title": "Excluir este destaque?",
-        "description": "Essa ação não pode ser desfeita. O restante do registro continua intacto.",
-        "cancel": "Cancelar",
-        "confirm": "Excluir"
-      },
-      "titleLabel": "Título",
-      "metricLabel": "Métrica",
-      "impactLabel": "Impacto",
-      "tagsLabel": "Tags",
       "untitled": "Destaque sem título",
-      "edit": "Editar",
-      "save": "Salvar",
-      "cancel": "Cancelar",
-      "delete": "Excluir",
       "collapse": "Recolher destaque",
       "expand": "Expandir destaque"
     }

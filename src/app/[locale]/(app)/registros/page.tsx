@@ -4,7 +4,6 @@ import { getTranslations } from 'next-intl/server'
 import { FileUp } from 'lucide-react'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { getFeedData } from '@/lib/feed/getFeedData'
-import { getContextVocabulary } from '@/lib/entries/contextVocabulary'
 import { FeedPage } from '@/components/features/feed/FeedPage'
 import { RegistroTrigger } from '@/components/features/painel/RegistroTrigger'
 import type { FeedAxis, FeedQuery } from '@/lib/feed/types'
@@ -58,10 +57,7 @@ export default async function RegistrosPage({ searchParams }: RegistrosPageProps
   }
 
   const filterKey = [axis, q, from, to, company, rawTags, String(metricOnly), rawSource].join('|')
-  const [initialPage, contextVocabulary] = await Promise.all([
-    getFeedData(supabase, user.id, query),
-    getContextVocabulary(supabase, user.id),
-  ])
+  const initialPage = await getFeedData(supabase, user.id, query)
 
   return (
     <div className="max-w-[980px] mx-auto px-6 py-8">
@@ -90,12 +86,7 @@ export default async function RegistrosPage({ searchParams }: RegistrosPageProps
         </button>
       </div>
 
-      <FeedPage
-        filterKey={filterKey}
-        initialPage={initialPage}
-        initialQuery={query}
-        contextVocabulary={contextVocabulary}
-      />
+      <FeedPage filterKey={filterKey} initialPage={initialPage} initialQuery={query} />
     </div>
   )
 }

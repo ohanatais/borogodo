@@ -132,11 +132,12 @@ describe('organizeEntry não sobrescreve contexto resolvido manualmente via píl
       if (table === 'entry_highlights') {
         highlightsCallCount += 1
         if (highlightsCallCount === 1) {
+          // replaceHighlights: DELETE dos destaques antigos antes de inserir os novos (revisão
+          // pós-implementação — reorganizar substitui, não só soma).
           return {
-            select: vi.fn(function (this: unknown) { return this }),
+            delete: vi.fn(function (this: unknown) { return this }),
             eq: vi.fn(function (this: unknown) { return this }),
-            order: vi.fn(function (this: unknown) { return this }),
-            then: (resolve: (v: { data: never[]; error: null }) => unknown) => resolve({ data: [], error: null }),
+            then: (resolve: (v: { data: null; error: null }) => unknown) => resolve({ data: null, error: null }),
           }
         }
         return {

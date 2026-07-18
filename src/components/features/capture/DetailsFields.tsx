@@ -4,13 +4,18 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Plus, TrendingUp, Target, Tag, Building2, CalendarDays, X } from 'lucide-react'
 import type { DrawerManualFields } from '@/hooks/useDrawerDraft'
+import { ContextPillPicker } from '@/components/features/feed/ContextPillPicker'
 
 interface DetailsFieldsProps {
   values: DrawerManualFields
-  onChange: (field: keyof DrawerManualFields, value: string) => void
+  onChange: <K extends keyof DrawerManualFields>(field: K, value: DrawerManualFields[K]) => void
   /** "Organizar" (026) força a seção aberta pra mostrar o que preencheu — sem isso, ela ficaria
    * escondida atrás do toggle mesmo depois de a IA já ter preenchido os campos. */
   forceOpen?: boolean
+  /** Vocabulário de contextos da pessoa (Story 2, `getContextVocabulary`) — alimenta o
+   * `ContextPillPicker` de empresa/projeto pessoal, aqui em modo local (sem `entryId`): a
+   * seleção só atualiza o rascunho, nenhum `PATCH` acontece antes de salvar/editar de verdade. */
+  contextVocabulary?: string[]
 }
 
 /**
@@ -56,7 +61,7 @@ function parseTags(raw: string): string[] {
  * nenhuma chamada de IA (FR do US4). Abrir a seção é puramente local: nunca dispara rede. Os
  * valores são persistidos verbatim (contracts/capture.md `manualFields`).
  */
-export function DetailsFields({ values, onChange, forceOpen }: DetailsFieldsProps) {
+export function DetailsFields({ values, onChange, forceOpen, contextVocabulary = [] }: DetailsFieldsProps) {
   const t = useTranslations('registro')
   const [open, setOpen] = useState(false)
   // Tags já commitadas aparecem como pílula (com X pra remover); este é só o texto da PRÓXIMA
@@ -194,18 +199,23 @@ export function DetailsFields({ values, onChange, forceOpen }: DetailsFieldsProp
         </div>
       </FieldRow>
 
-      <FieldRow icon={Building2} label={t('detailsFields.companyLabel')} htmlFor="details-field-company">
-        <input
-          id="details-field-company"
-          type="text"
-          value={values.company}
-          onChange={(e) => onChange('company', e.target.value)}
-          placeholder={t('detailsFields.companyPlaceholder')}
-          aria-label={t('detailsFields.companyLabel')}
-          className="w-full bg-transparent outline-none focus-visible:shadow-none text-sm font-medium"
-          style={fieldInputStyle}
-        />
-      </FieldRow>
+      <div className="flex flex-col gap-1">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>
+          <Building2 size={13} aria-hidden="true" />
+          {t('detailsFields.companyLabel')}
+        </span>
+        <div className="rounded-lg px-3 py-2" style={{ background: 'var(--color-lilas-nevoa)' }}>
+          <ContextPillPicker
+            company={values.company || null}
+            isPersonalProject={values.isPersonalProject}
+            vocabulary={contextVocabulary}
+            onChange={(next) => {
+              onChange('company', next.company ?? '')
+              onChange('isPersonalProject', next.isPersonalProject)
+            }}
+          />
+        </div>
+      </div>
 
       <FieldRow icon={CalendarDays} label={t('detailsFields.dateLabel')} htmlFor="details-field-date">
         <input

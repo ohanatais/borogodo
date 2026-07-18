@@ -112,45 +112,27 @@ describe('SourceCard — contexto por pílulas (US2, feature 026)', () => {
   })
 
   it('T032 — sinaliza "contexto não identificado" de forma discreta quando nem empresa nem projeto pessoal foram resolvidos (FR-008)', () => {
-    render(<SourceCard item={BASE_ITEM} variant="feed" contextVocabulary={[]} />)
+    render(<SourceCard item={BASE_ITEM} variant="feed" />)
 
     expect(screen.getByText('context.unresolvedLabel')).toBeInTheDocument()
   })
 
   it('não mostra a sinalização de contexto não identificado quando a empresa já está resolvida', () => {
-    render(<SourceCard item={{ ...BASE_ITEM, company: 'Acme Corp' }} variant="feed" contextVocabulary={['Acme Corp']} />)
+    render(<SourceCard item={{ ...BASE_ITEM, company: 'Acme Corp' }} variant="feed" />)
 
     expect(screen.queryByText('context.unresolvedLabel')).not.toBeInTheDocument()
   })
 
   it('não mostra a sinalização quando "Projeto pessoal" foi selecionado, mesmo sem empresa', () => {
-    render(<SourceCard item={{ ...BASE_ITEM, is_personal_project: true }} variant="feed" contextVocabulary={[]} />)
+    render(<SourceCard item={{ ...BASE_ITEM, is_personal_project: true }} variant="feed" />)
 
     expect(screen.queryByText('context.unresolvedLabel')).not.toBeInTheDocument()
   })
 
-  it('T030 — renderiza o ContextPillPicker dentro do card expandido, com o vocabulário recebido', () => {
-    render(<SourceCard item={BASE_ITEM} variant="feed" contextVocabulary={['Acme Corp']} />)
-    expandCard()
-
-    expect(screen.getByRole('button', { name: 'Acme Corp' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'context.personalProjectLabel' })).toBeInTheDocument()
-  })
-
-  it('propaga a seleção de pílula via onContextChange', async () => {
-    vi.mocked(fetch).mockResolvedValue({ ok: true, json: async () => ({ ok: true }) } as Response)
-    const onContextChange = vi.fn()
-    render(
-      <SourceCard item={BASE_ITEM} variant="feed" contextVocabulary={['Acme Corp']} onContextChange={onContextChange} />
-    )
-    expandCard()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Acme Corp' }))
-
-    await waitFor(() =>
-      expect(onContextChange).toHaveBeenCalledWith('entry-1', { company: 'Acme Corp', isPersonalProject: false })
-    )
-  })
+  // Revisão pós-implementação: o ContextPillPicker saiu do card expandido (poluía o card com uma
+  // fileira de pílulas redundante com o próprio texto "· Empresa" já mostrado no cabeçalho).
+  // Empresa/projeto pessoal agora só se editam via Drawer ("Editar") — cobertura em
+  // DetailsFields.test.tsx e ContextPillPicker.test.tsx.
 })
 
 describe('SourceCard — 1 card por fonte (T058, US7, FR-025/FR-027)', () => {
@@ -232,7 +214,14 @@ describe('SourceCard — "Editar" abre o Drawer preenchido com o registro (026)'
     expect(detail.editEntry).toEqual({
       id: 'entry-1',
       rawText: BASE_ITEM.what_i_did,
-      manualFields: { metric: '50%', impact: 'reduziu retrabalho', company: 'Acme', entryDate: '2026-03-01' },
+      manualFields: {
+        metric: '50%',
+        impact: 'reduziu retrabalho',
+        tags: '',
+        company: 'Acme',
+        isPersonalProject: false,
+        entryDate: '2026-03-01',
+      },
     })
 
     window.removeEventListener('borogodo:open-drawer', listener)
@@ -273,41 +262,18 @@ describe('SourceCard — exclusão com confirmação', () => {
   })
 })
 
-describe('SourceCard — adicionar destaque em branco (FR-016)', () => {
-  beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn())
-  })
-
-  it('cria um destaque em branco via POST e o soma à lista existente', async () => {
-    vi.mocked(fetch).mockResolvedValue({
-      ok: true,
-      json: async () => ({ highlight: { id: 'h-new', title: null, metric: null, impact: null, tags: [] } }),
-    } as Response)
-
-    render(<SourceCard item={{ ...BASE_ITEM, highlights: [] }} variant="feed" />)
-    expandCard()
-
-    fireEvent.click(screen.getByRole('button', { name: 'highlight.addNew' }))
-
-    await waitFor(() =>
-      expect(fetch).toHaveBeenCalledWith('/api/entries/entry-1/highlights', { method: 'POST' })
-    )
-  })
-})
-
 describe('SourceCard — variant "panel" (sem ações de Registros)', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn())
   })
 
-  it('não renderiza ContextPillPicker, botão Organizar, editar, excluir ou adicionar destaque', () => {
+  it('não renderiza botão Organizar, editar ou excluir', () => {
     render(<SourceCard item={BASE_ITEM} variant="panel" onDelete={vi.fn()} />)
     expandCard()
 
     expect(screen.queryByRole('button', { name: 'organize.cta' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'card.edit' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'card.delete' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'highlight.addNew' })).not.toBeInTheDocument()
   })
 })
 

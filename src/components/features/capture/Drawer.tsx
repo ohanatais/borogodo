@@ -29,6 +29,9 @@ interface DrawerProps {
   /** Registros → Editar (026): quando presente, o Drawer abre em modo edição de uma fonte já
    * salva — pré-preenche texto cru + campos manuais, e salvar vira `PATCH` em vez de criar. */
   editEntry?: EditEntryDetail
+  /** Vocabulário de contextos da pessoa (Story 2) — alimenta o `ContextPillPicker` embutido em
+   * `DetailsFields`, em modo local (sem `entryId`: seleção só atualiza o rascunho). */
+  contextVocabulary?: string[]
 }
 
 type SaveStatus = 'idle' | 'saving' | 'error'
@@ -97,7 +100,7 @@ async function uploadAttachmentToEntry(
  * a entry já existe; confirmação editável (US3) substitui o corpo do drawer após salvar. Campos
  * manuais (US4) chegam em fase seguinte desta feature.
  */
-export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntry }: DrawerProps) {
+export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntry, contextVocabulary }: DrawerProps) {
   const t = useTranslations('registro')
   const router = useRouter()
   const draft = useDrawerDraft(initialText)
@@ -134,7 +137,9 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
     const fields = editEntry.manualFields
     if (fields?.metric) draft.setManualField('metric', fields.metric)
     if (fields?.impact) draft.setManualField('impact', fields.impact)
+    if (fields?.tags) draft.setManualField('tags', fields.tags)
     if (fields?.company) draft.setManualField('company', fields.company)
+    if (fields?.isPersonalProject) draft.setManualField('isPersonalProject', fields.isPersonalProject)
     if (fields?.entryDate) draft.setManualField('entryDate', fields.entryDate)
     wasEditingRef.current = true
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -151,8 +156,13 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
   // em vez do conteúdo esperado.
   useEffect(() => {
     if (!open) {
+      // Sincroniza com o efeito colateral real de `draft.reset()` (revoga object URLs de anexo)
+      // logo abaixo — não é um espelho de prop em state que desse pra resolver ajustando estado
+      // durante o render.
+      /* eslint-disable react-hooks/set-state-in-effect */
       setSavedResult(null)
       setStatus('idle')
+      /* eslint-enable react-hooks/set-state-in-effect */
       if (wasEditingRef.current) {
         draft.reset()
         wasEditingRef.current = false
@@ -242,10 +252,16 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
   async function handleEditSubmit(entry: EditEntryDetail): Promise<void> {
     try {
       const fields = draft.manualFields
-      const body: Record<string, string> = { what_i_did: draft.rawText }
+      const body: Record<string, string | string[] | boolean | null> = { what_i_did: draft.rawText }
       if (fields.metric.trim()) body.metric = fields.metric.trim()
       if (fields.impact.trim()) body.impact = fields.impact.trim()
-      if (fields.company.trim()) body.company = fields.company.trim()
+      const tags = fields.tags.split(',').map((tag) => tag.trim()).filter(Boolean)
+      if (tags.length > 0) body.tags = tags
+      // Empresa/projeto pessoal são mutuamente exclusivos e pré-preenchidos com o estado atual do
+      // servidor ao abrir a edição (handleEditClick) — sempre mandar os dois, mesmo sem toque,
+      // evita persistir os dois marcados ao mesmo tempo quando só um deles muda.
+      body.is_personal_project = fields.isPersonalProject
+      body.company = fields.isPersonalProject ? null : fields.company.trim() || null
       if (fields.entryDate.trim()) body.entry_date = fields.entryDate.trim()
 
       const response = await fetch(`/api/entries/${entry.id}`, {
@@ -595,7 +611,8 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
               <DetailsFields
                 values={draft.manualFields}
                 onChange={draft.setManualField}
-                forceOpen={organizeState === 'done'}
+                forceOpen={organizeState === 'done' || Boolean(editEntry)}
+                contextVocabulary={contextVocabulary}
               />
 
               {linkInputOpen && (

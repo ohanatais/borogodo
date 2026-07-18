@@ -53,12 +53,20 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
   const [otherValue, setOtherValue] = useState('')
   const [search, setSearch] = useState('')
 
+  // A empresa atual sempre aparece como pílula, mesmo quando ainda não faz parte do vocabulário
+  // histórico (ex.: acabou de ser inferida pelo "Organizar", ou resolvida via "Outro" numa sessão
+  // anterior) — sem isso, o valor real ficava "invisível" no seletor (nenhuma pílula acesa).
+  const vocabularyWithCurrent = useMemo(() => {
+    if (!company || vocabulary.includes(company)) return vocabulary
+    return [...vocabulary, company]
+  }, [vocabulary, company])
+
   const visibleVocabulary = useMemo(() => {
-    if (vocabulary.length <= SEARCH_THRESHOLD) return vocabulary
-    if (!search.trim()) return vocabulary
+    if (vocabularyWithCurrent.length <= SEARCH_THRESHOLD) return vocabularyWithCurrent
+    if (!search.trim()) return vocabularyWithCurrent
     const needle = search.trim().toLowerCase()
-    return vocabulary.filter((name) => name.toLowerCase().includes(needle))
-  }, [vocabulary, search])
+    return vocabularyWithCurrent.filter((name) => name.toLowerCase().includes(needle))
+  }, [vocabularyWithCurrent, search])
 
   async function select(selection: ContextSelection) {
     if (!entryId) {
@@ -81,7 +89,7 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
 
   return (
     <div className="flex flex-col gap-2">
-      {vocabulary.length > SEARCH_THRESHOLD && (
+      {vocabularyWithCurrent.length > SEARCH_THRESHOLD && (
         <input
           type="text"
           value={search}

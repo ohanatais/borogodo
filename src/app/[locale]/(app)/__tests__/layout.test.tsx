@@ -13,15 +13,26 @@ vi.mock('next/navigation', () => ({
   useSearchParams: vi.fn(() => new URLSearchParams()),
 }))
 
+// A mesma query `from(...).select(...)` atende dois usos no layout: o perfil (encerra em
+// `.maybeSingle()`) e o vocabulário de contextos (`getContextVocabulary`, encadeia
+// `.eq().not().order()` e é aguardada direto, sem terminal explícito) — o builder precisa
+// suportar as duas formas.
+function makeQueryBuilder(): Record<string, unknown> {
+  const builder: Record<string, unknown> = {
+    eq: vi.fn(() => builder),
+    not: vi.fn(() => builder),
+    order: vi.fn(() => builder),
+    maybeSingle: mockMaybeSingle,
+    then: (resolve: (value: { data: never[]; error: null }) => unknown) => resolve({ data: [], error: null }),
+  }
+  return builder
+}
+
 vi.mock('@/lib/db/supabase/server', () => ({
   createServerClient: vi.fn(async () => ({
     auth: { getUser: mockGetUser },
     from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          maybeSingle: mockMaybeSingle,
-        })),
-      })),
+      select: vi.fn(() => makeQueryBuilder()),
     })),
   })),
 }))
