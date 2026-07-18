@@ -50,6 +50,20 @@ describe('POST /api/capture/organize-preview', () => {
     expect(mockPreviewOrganize).not.toHaveBeenCalled()
   })
 
+  it('aceita rawText acima de 8000 caracteres — sem limite superior (bug real: transcrição longa colada no Drawer dava 400)', async () => {
+    const { POST } = await import('@/app/api/capture/organize-preview/route')
+    const longText = 'Trecho da transcrição. '.repeat(1000)
+
+    const response = await POST(buildRequest({ rawText: longText }))
+
+    expect(response.status).toBe(200)
+    expect(mockPreviewOrganize).toHaveBeenCalledWith(
+      expect.anything(),
+      'user-1',
+      expect.objectContaining({ rawText: longText })
+    )
+  })
+
   it('retorna 200 com highlights/company/entry_date no sucesso', async () => {
     const { POST } = await import('@/app/api/capture/organize-preview/route')
 

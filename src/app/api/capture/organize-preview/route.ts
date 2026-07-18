@@ -4,7 +4,12 @@ import { createServerClient } from '@/lib/db/supabase/server'
 import { previewOrganize } from '@/lib/entries/previewOrganize'
 
 const bodySchema = z.object({
-  rawText: z.string().min(1).max(8000),
+  // Sem limite superior — mesma regra do `/api/capture` (contracts/capture.md, "sem rejeição por
+  // tamanho de texto"). O corte de tokens pra IA já acontece dentro de `buildOrganizeUserPrompt`
+  // (`RAW_TEXT_LIMIT`, trunca em vez de rejeitar) — um `.max()` aqui só duplicava essa regra de um
+  // jeito pior: rejeitava a chamada inteira (400) em vez de truncar, quebrando "Organizar" pra
+  // qualquer transcrição colada acima de 8000 caracteres (bug real encontrado em teste manual).
+  rawText: z.string().min(1),
   company: z.string().nullable().optional(),
   isPersonalProject: z.boolean().optional(),
   entryDate: z.string().nullable().optional(),
