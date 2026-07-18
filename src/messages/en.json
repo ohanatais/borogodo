@@ -1067,6 +1067,7 @@
       "impactPlaceholder": "What changed because of this?",
       "tagsLabel": "Tags",
       "tagsPlaceholder": "add tag",
+      "removeTagAriaLabel": "Remove tag",
       "companyLabel": "Company",
       "companyPlaceholder": "Where this happened",
       "dateLabel": "Date"

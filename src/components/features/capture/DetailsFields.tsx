@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Plus, TrendingUp, Target, Tag, Building2, CalendarDays } from 'lucide-react'
+import { Plus, TrendingUp, Target, Tag, Building2, CalendarDays, X } from 'lucide-react'
 import type { DrawerManualFields } from '@/hooks/useDrawerDraft'
 
 interface DetailsFieldsProps {
@@ -44,6 +44,13 @@ function FieldRow({
 
 const fieldInputStyle: React.CSSProperties = { color: 'var(--foreground)' }
 
+function parseTags(raw: string): string[] {
+  return raw
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean)
+}
+
 /**
  * Seção opcional "+ adicionar detalhes" (US4) — colapsada por padrão, campos de texto livre sem
  * nenhuma chamada de IA (FR do US4). Abrir a seção é puramente local: nunca dispara rede. Os
@@ -52,6 +59,28 @@ const fieldInputStyle: React.CSSProperties = { color: 'var(--foreground)' }
 export function DetailsFields({ values, onChange, forceOpen }: DetailsFieldsProps) {
   const t = useTranslations('registro')
   const [open, setOpen] = useState(false)
+  // Tags já commitadas aparecem como pílula (com X pra remover); este é só o texto da PRÓXIMA
+  // tag, ainda sendo digitada — nunca duplica o que já virou pílula.
+  const [tagDraft, setTagDraft] = useState('')
+
+  function commitTagSegments(nextValue: string) {
+    if (!nextValue.includes(',')) {
+      setTagDraft(nextValue)
+      return
+    }
+    const segments = nextValue.split(',').map((s) => s.trim()).filter(Boolean)
+    const merged = Array.from(new Set([...parseTags(values.tags), ...segments]))
+    onChange('tags', merged.join(', '))
+    setTagDraft('')
+  }
+
+  function commitTagDraft() {
+    const trimmed = tagDraft.trim()
+    if (!trimmed) return
+    const merged = Array.from(new Set([...parseTags(values.tags), trimmed]))
+    onChange('tags', merged.join(', '))
+    setTagDraft('')
+  }
   // "Organizar" forçando a seção aberta — mesmo padrão de "ajustar estado durante o render" já
   // usado em `FeedPage.tsx` (resync de props em vez de useEffect + setState).
   const [prevForceOpen, setPrevForceOpen] = useState(forceOpen)
@@ -120,16 +149,49 @@ export function DetailsFields({ values, onChange, forceOpen }: DetailsFieldsProp
       </FieldRow>
 
       <FieldRow icon={Tag} label={t('detailsFields.tagsLabel')} htmlFor="details-field-tags">
-        <input
-          id="details-field-tags"
-          type="text"
-          value={values.tags}
-          onChange={(e) => onChange('tags', e.target.value)}
-          placeholder={t('detailsFields.tagsPlaceholder')}
-          aria-label={t('detailsFields.tagsLabel')}
-          className="w-full bg-transparent outline-none focus-visible:shadow-none text-sm"
-          style={fieldInputStyle}
-        />
+        <div className="flex flex-col gap-2">
+          {parseTags(values.tags).length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {parseTags(values.tags).map((tag, index) => (
+                <span
+                  key={`${tag}-${index}`}
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
+                  style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-lilas-nevoa-text)' }}
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = parseTags(values.tags).filter((_, i) => i !== index)
+                      onChange('tags', next.join(', '))
+                    }}
+                    aria-label={`${t('detailsFields.removeTagAriaLabel')} ${tag}`}
+                    className="opacity-70 hover:opacity-100"
+                  >
+                    <X size={11} aria-hidden="true" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <input
+            id="details-field-tags"
+            type="text"
+            value={tagDraft}
+            onChange={(e) => commitTagSegments(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                commitTagDraft()
+              }
+            }}
+            onBlur={commitTagDraft}
+            placeholder={t('detailsFields.tagsPlaceholder')}
+            aria-label={t('detailsFields.tagsLabel')}
+            className="w-full bg-transparent outline-none focus-visible:shadow-none text-sm"
+            style={fieldInputStyle}
+          />
+        </div>
       </FieldRow>
 
       <FieldRow icon={Building2} label={t('detailsFields.companyLabel')} htmlFor="details-field-company">

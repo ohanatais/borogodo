@@ -7,6 +7,9 @@ export interface DrawerManualFields {
   impact: string
   tags: string
   company: string
+  /** Pílula "Projeto pessoal" (Story 2) selecionada no Drawer, antes de salvar — contexto
+   * resolvido sem empresa, mesma semântica de `entries.is_personal_project`. */
+  isPersonalProject: boolean
   entryDate: string
 }
 
@@ -15,6 +18,7 @@ const EMPTY_MANUAL_FIELDS: DrawerManualFields = {
   impact: '',
   tags: '',
   company: '',
+  isPersonalProject: false,
   entryDate: '',
 }
 

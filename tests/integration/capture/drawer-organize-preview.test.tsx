@@ -49,7 +49,9 @@ describe('Drawer — "Organizar" antes de salvar (revisão de UX pós-implementa
     // A seção de detalhes abre sozinha mostrando o que foi preenchido.
     await waitFor(() => expect(screen.getByLabelText('detailsFields.metricLabel')).toHaveValue('aceite em 2 ciclos'))
     expect(screen.getByLabelText('detailsFields.impactLabel')).toHaveValue('reduziu retrabalho')
-    expect(screen.getByLabelText('detailsFields.tagsLabel')).toHaveValue('discovery, produto')
+    // Tags preenchidas viram pílulas (com X pra remover), não texto no campo de digitar a próxima.
+    expect(screen.getByText('discovery')).toBeInTheDocument()
+    expect(screen.getByText('produto')).toBeInTheDocument()
     expect(screen.getByLabelText('detailsFields.companyLabel')).toHaveValue('Acme')
     expect(screen.getByLabelText('detailsFields.dateLabel')).toHaveValue('2026-03-01')
   })

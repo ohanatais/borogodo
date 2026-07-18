@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import { useState } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { DetailsFields } from '../DetailsFields'
 import type { DrawerManualFields } from '@/hooks/useDrawerDraft'
@@ -8,7 +9,19 @@ const EMPTY_VALUES: DrawerManualFields = {
   impact: '',
   tags: '',
   company: '',
+  isPersonalProject: false,
   entryDate: '',
+}
+
+/** Host com estado real — pílulas de tag precisam de um `values.tags` que reage ao `onChange`. */
+function StatefulDetailsFields() {
+  const [values, setValues] = useState(EMPTY_VALUES)
+  return (
+    <DetailsFields
+      values={values}
+      onChange={(field, value) => setValues((prev) => ({ ...prev, [field]: value }))}
+    />
+  )
 }
 
 /**
@@ -53,5 +66,46 @@ describe('DetailsFields — sem regressão pós-026 (organizar não interfere)',
 
     expect(screen.getByLabelText('detailsFields.metricLabel')).toBeInTheDocument()
     expect(fetch).not.toHaveBeenCalled()
+  })
+})
+
+describe('DetailsFields — tags como pílulas com X pra remover (revisão pós-implementação, 026)', () => {
+  it('Enter commita a tag digitada como pílula e limpa o campo de digitar a próxima', () => {
+    render(<StatefulDetailsFields />)
+    fireEvent.click(screen.getByRole('button', { name: 'detailsFields.toggleLabel' }))
+
+    const input = screen.getByLabelText('detailsFields.tagsLabel')
+    fireEvent.change(input, { target: { value: 'liderança' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(screen.getByText('liderança')).toBeInTheDocument()
+    expect(input).toHaveValue('')
+  })
+
+  it('digitar com vírgula commita a(s) tag(s) imediatamente, sem precisar de Enter', () => {
+    render(<StatefulDetailsFields />)
+    fireEvent.click(screen.getByRole('button', { name: 'detailsFields.toggleLabel' }))
+
+    fireEvent.change(screen.getByLabelText('detailsFields.tagsLabel'), {
+      target: { value: 'negociação, processo' },
+    })
+
+    expect(screen.getByText('negociação')).toBeInTheDocument()
+    expect(screen.getByText('processo')).toBeInTheDocument()
+  })
+
+  it('clicar no X da pílula remove só aquela tag', () => {
+    render(<StatefulDetailsFields />)
+    fireEvent.click(screen.getByRole('button', { name: 'detailsFields.toggleLabel' }))
+
+    fireEvent.change(screen.getByLabelText('detailsFields.tagsLabel'), {
+      target: { value: 'liderança, processo' },
+    })
+    expect(screen.getByText('liderança')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'detailsFields.removeTagAriaLabel liderança' }))
+
+    expect(screen.queryByText('liderança')).not.toBeInTheDocument()
+    expect(screen.getByText('processo')).toBeInTheDocument()
   })
 })

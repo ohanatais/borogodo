@@ -19,6 +19,23 @@ describe('CAPTURE_ORGANIZE_SYSTEM_PROMPT — instruções de tags consistentes (
   })
 })
 
+describe('CAPTURE_ORGANIZE_SYSTEM_PROMPT — impact nunca infere consequência não afirmada no texto (revisão pós-implementação, 026)', () => {
+  it('proíbe explicitamente inferir desdobramento futuro/decisão de terceiro não afirmada no texto', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('nunca infira um desdobramento futuro')
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('decisão de terceiros')
+  })
+
+  it('mostra o exemplo real de alucinação encontrado em produção (satisfação → "contratou para a próxima fase")', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('Cliente contratou a empresa')
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('isso não foi dito')
+  })
+
+  it('explica por que a regra é dura, não estilística — registro pode virar prova em currículo/entrevista', () => {
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('regra dura')
+    expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT.toLowerCase()).toContain('currículo')
+  })
+})
+
 describe('CAPTURE_ORGANIZE_SYSTEM_PROMPT — título outcome-first (Story 5)', () => {
   it('FR-019 — instrui título substantivo-primeiro/outcome-first, com número quando presente', () => {
     expect(CAPTURE_ORGANIZE_SYSTEM_PROMPT).toContain('FR-019')

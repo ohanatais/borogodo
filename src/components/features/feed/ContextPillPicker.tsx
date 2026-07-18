@@ -8,7 +8,10 @@ import { useTranslations } from 'next-intl'
 const SEARCH_THRESHOLD = 8
 
 interface ContextPillPickerProps {
-  entryId: string
+  /** Presente (Registros, pós-salvar): seleção dispara `PATCH` direto no servidor. Ausente
+   * (Drawer, antes de salvar): seleção fica só local — nenhuma chamada de rede, `onChange`
+   * decide o que fazer com o valor (o rascunho ainda nem tem uma fonte salva pra atualizar). */
+  entryId?: string
   /** `company` atual da fonte — `null` quando ainda não resolvida (nem empresa, nem "Outro"). */
   company: string | null
   /** `true` quando a pílula "Projeto pessoal" já foi selecionada. */
@@ -58,6 +61,10 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
   }, [vocabulary, search])
 
   async function select(selection: ContextSelection) {
+    if (!entryId) {
+      onChange(selection)
+      return
+    }
     setPending(true)
     const ok = await patchContext(entryId, selection)
     setPending(false)

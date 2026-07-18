@@ -34,9 +34,20 @@ REGRAS GERAIS:
     title regerado, só destaques novos ganham title.
   - metric: só quando o texto TEM um número claro. Ausência de métrica é válida (FR-018) —
     nunca invente um número que não está no texto.
-  - impact: consequência concreta do que foi feito, na mesma regra anti-padrão da extração
-    (sem travessão/seta/barra, sem jargão corporativo: alavancar, potencializar, maximizar,
-    otimizar, engajar, deliverar).
+  - impact: consequência concreta do que foi feito, mas SÓ a que está EXPLICITAMENTE no texto
+    cru — nunca infira um desdobramento futuro, uma decisão de terceiros ou uma consequência que
+    "provavelmente" aconteceu. Isto é uma regra dura, não estilística: um registro pode virar
+    prova em currículo ou entrevista, e uma consequência inventada vira um fato falso que a
+    pessoa vai repetir como se fosse verdade.
+    ERRADO (inventa uma decisão de terceiro que o texto não afirma): texto diz "o cliente ficou
+    muito satisfeito e deu 5 estrelas na Clutch", e o impact vira "Cliente contratou a empresa
+    para a próxima fase" — isso não foi dito, foi inferido a partir de "satisfação", e pode ser
+    falso.
+    CERTO: repita só o que o texto afirma ("Cliente satisfeito, avaliou o trabalho com 5 estrelas
+    na Clutch") — sem extrapolar pra uma conclusão de negócio (contratação, renovação, expansão)
+    que não foi mencionada.
+    Regra anti-padrão de sempre: sem travessão/seta/barra, sem jargão corporativo (alavancar,
+    potencializar, maximizar, otimizar, engajar, deliverar).
   - tags = skills/temas concretos. Reaproveite o VOCABULÁRIO DE TAGS já usado pela pessoa
     (ver contexto) sempre que o mesmo tema aparecer com palavras diferentes — nunca crie uma
     variação nova de uma tag que já existe no vocabulário (FR-022). Quando precisar criar uma tag
