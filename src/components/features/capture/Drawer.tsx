@@ -111,6 +111,9 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
   const fileInputRef = useRef<HTMLInputElement>(null)
   const touchStartYRef = useRef<number | null>(null)
   const triggerElementRef = useRef<HTMLElement | null>(null)
+  // Marca que esta sessão do drawer entrou em modo edição — usado pra decidir se o fechamento
+  // deve limpar o rascunho (edição) ou preservá-lo (criação, FR-012a).
+  const wasEditingRef = useRef(false)
 
   // FR-012a: o Drawer fica sempre montado (draft sobrevive a fechar sem salvar), então o valor
   // inicial de `useDrawerDraft` só pega o `initialText` da primeira renderização. Este efeito
@@ -130,8 +133,20 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
     if (fields?.impact) draft.setManualField('impact', fields.impact)
     if (fields?.company) draft.setManualField('company', fields.company)
     if (fields?.entryDate) draft.setManualField('entryDate', fields.entryDate)
+    wasEditingRef.current = true
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editEntry?.id])
+
+  // Uma edição fechada (salva ou não) nunca deve "vazar" como rascunho de um Registrar em branco
+  // depois — diferente do rascunho de criação (FR-012a, que sobrevive de propósito a um fechar
+  // sem salvar), o texto pré-preenchido de uma edição não é um rascunho novo da pessoa.
+  useEffect(() => {
+    if (!open && wasEditingRef.current) {
+      draft.reset()
+      wasEditingRef.current = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   // Foco: guarda o elemento que abriu o drawer e devolve o foco a ele ao fechar (WCAG 2.4.3);
   // enquanto aberto, foca o próprio diálogo e prende o Tab dentro dele (sem isso, Tab escapa

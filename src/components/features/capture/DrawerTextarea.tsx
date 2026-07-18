@@ -47,7 +47,7 @@ export function DrawerTextarea({ value, onChange, disabled, autoFocus, onImagePa
         aria-label={t('drawer.textareaAriaLabel')}
         disabled={disabled}
         autoFocus={autoFocus}
-        className="flex-1 w-full resize-none rounded-xl px-4 py-3 text-sm outline-none min-h-[200px] leading-relaxed"
+        className="flex-1 w-full resize-none rounded-xl px-4 py-3 text-sm outline-none focus-visible:shadow-none min-h-[200px] leading-relaxed"
         style={{
           background: 'var(--muted)',
           border: '1px solid var(--border)',
