@@ -3,10 +3,6 @@
 import type { ClipboardEvent } from 'react'
 import { useTranslations } from 'next-intl'
 
-// FR-017: acima de ~200 caracteres colados, mostra um sinal confirmando que a fonte completa foi
-// preservada (mitigação do risco "cru preservado mas não usado" do decision record).
-const SOURCE_PRESERVED_THRESHOLD = 200
-
 interface DrawerTextareaProps {
   value: string
   onChange: (value: string) => void
@@ -18,7 +14,6 @@ interface DrawerTextareaProps {
 
 export function DrawerTextarea({ value, onChange, disabled, autoFocus, onImagePaste }: DrawerTextareaProps) {
   const t = useTranslations('registro')
-  const showSourcePreserved = value.length > SOURCE_PRESERVED_THRESHOLD
 
   function handlePaste(event: ClipboardEvent<HTMLTextAreaElement>) {
     if (!onImagePaste) return
@@ -55,11 +50,6 @@ export function DrawerTextarea({ value, onChange, disabled, autoFocus, onImagePa
           color: 'var(--foreground)',
         }}
       />
-      {showSourcePreserved && (
-        <p role="status" className="text-xs px-1" style={{ color: 'var(--muted-foreground)' }}>
-          {t('drawer.sourcePreserved')}
-        </p>
-      )}
     </div>
   )
 }

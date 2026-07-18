@@ -122,7 +122,7 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
               aria-pressed={active}
               disabled={pending}
               onClick={() => void select({ company: name, isPersonalProject: false })}
-              className="inline-flex items-center text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+              className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
               style={
                 active
                   ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }
@@ -139,7 +139,7 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
           aria-pressed={isPersonalProject}
           disabled={pending}
           onClick={() => void select({ company: null, isPersonalProject: true })}
-          className="inline-flex items-center text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+          className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
           style={
             isPersonalProject
               ? { background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }
@@ -165,7 +165,7 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
                 setOtherValue('')
               }
             }}
-            className="text-xs rounded-full px-4 py-2.5 border"
+            className="text-xs rounded-full px-2.5 py-1 border"
             style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
           />
         ) : (
@@ -173,7 +173,7 @@ export function ContextPillPicker({ entryId, company, isPersonalProject, vocabul
             type="button"
             disabled={pending}
             onClick={() => setOtherOpen(true)}
-            className="inline-flex items-center text-xs font-medium px-4 py-2.5 rounded-full border border-dashed transition-opacity hover:opacity-80 disabled:opacity-50"
+            className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full border border-dashed transition-opacity hover:opacity-80 disabled:opacity-50"
             style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}
           >
             {t('context.otherLabel')}

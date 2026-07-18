@@ -1022,7 +1022,6 @@
       "closeAriaLabel": "Fechar",
       "textareaPlaceholder": "Cole uma transcrição, um e-mail ou um documento. Ou escreva — fica salvo do jeito que está.",
       "textareaAriaLabel": "Texto do registro",
-      "sourcePreserved": "Fonte completa preservada. Guardo o texto inteiro.",
       "imageButton": "Imagem",
       "linkButton": "Link",
       "submitButton": "Registrar",
