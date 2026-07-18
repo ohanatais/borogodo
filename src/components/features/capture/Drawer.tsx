@@ -143,10 +143,20 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
   // Uma edição fechada (salva ou não) nunca deve "vazar" como rascunho de um Registrar em branco
   // depois — diferente do rascunho de criação (FR-012a, que sobrevive de propósito a um fechar
   // sem salvar), o texto pré-preenchido de uma edição não é um rascunho novo da pessoa.
+  //
+  // `savedResult` (tela de sucesso) também precisa ser limpo aqui, sempre — o Drawer fica
+  // montado entre aberturas, e fechar de qualquer jeito que não seja "Concluir" (handleDone),
+  // como clicar fora ou no X, deixava esse estado preso. Reabrir o Drawer (pra editar outra
+  // fonte, ou pra um novo registro) reexibia a tela de sucesso do registro salvo anteriormente
+  // em vez do conteúdo esperado.
   useEffect(() => {
-    if (!open && wasEditingRef.current) {
-      draft.reset()
-      wasEditingRef.current = false
+    if (!open) {
+      setSavedResult(null)
+      setStatus('idle')
+      if (wasEditingRef.current) {
+        draft.reset()
+        wasEditingRef.current = false
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
