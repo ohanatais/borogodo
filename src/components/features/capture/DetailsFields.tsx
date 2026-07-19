@@ -10,8 +10,12 @@ interface DetailsFieldsProps {
   values: DrawerManualFields
   onChange: <K extends keyof DrawerManualFields>(field: K, value: DrawerManualFields[K]) => void
   /** "Organizar" (026) força a seção aberta pra mostrar o que preencheu — sem isso, ela ficaria
-   * escondida atrás do toggle mesmo depois de a IA já ter preenchido os campos. */
-  forceOpen?: boolean
+   * escondida atrás do toggle mesmo depois de a IA já ter preenchido os campos. Aceita string
+   * (não só boolean) porque "Editar" precisa de uma CHAVE que muda a cada fonte diferente — um
+   * boolean fixo (`true` sempre que há `editEntry`) não reabre ao trocar de uma edição pra outra,
+   * já que `true !== true` nunca dispara a resincronização (bug real: editar um segundo registro
+   * na mesma sessão do Drawer mantinha a seção colapsada). */
+  forceOpen?: boolean | string
   /** Vocabulário de contextos da pessoa (Story 2, `getContextVocabulary`) — alimenta o
    * `ContextPillPicker` de empresa/projeto pessoal, aqui em modo local (sem `entryId`): a
    * seleção só atualiza o rascunho, nenhum `PATCH` acontece antes de salvar/editar de verdade. */

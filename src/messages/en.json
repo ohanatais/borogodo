@@ -1026,6 +1026,7 @@
       "imageButton": "Imagem",
       "linkButton": "Link",
       "submitButton": "Registrar",
+      "updateButton": "Atualizar",
       "submitAriaLabel": "Registrar",
       "shortcutHint": "Esc fecha · ⌘/Ctrl+Enter registra",
       "emptyPromptFirst": "O que tomou mais do seu tempo esta semana?",

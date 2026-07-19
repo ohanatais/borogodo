@@ -472,7 +472,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className="relative flex flex-col w-full h-[80dvh] rounded-t-[20px] lg:h-full lg:w-[480px] lg:rounded-none lg:rounded-l-2xl overflow-hidden"
+        className="relative flex flex-col w-full h-[80dvh] rounded-t-[20px] lg:h-full lg:w-[600px] lg:rounded-none lg:rounded-l-2xl overflow-hidden"
         style={{ background: 'var(--card)', boxShadow: 'var(--shadow-modal)' }}
       >
         {dragActive && (
@@ -619,7 +619,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
                 values={draft.manualFields}
                 onChange={draft.setManualField}
                 hideMetricImpact={isMultiHighlightEdit}
-                forceOpen={organizeState === 'done' || Boolean(editEntry)}
+                forceOpen={editEntry ? `edit-${editEntry.id}` : organizeState === 'done'}
                 contextVocabulary={contextVocabulary}
               />
 
@@ -690,7 +690,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
                   className="px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-40"
                   style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
                 >
-                  {t('drawer.submitButton')}
+                  {editEntry ? t('drawer.updateButton') : t('drawer.submitButton')}
                 </button>
               )}
             </div>
