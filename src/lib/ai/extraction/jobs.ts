@@ -3,6 +3,8 @@ import { maybeRegenerateMirror as regenerateMirror } from '@/lib/ai/mirror/maybe
 import { triggerProactiveInsight as generateProactiveInsight } from '@/lib/ai/insights/triggerProactiveInsight'
 import { getSupabaseAdmin } from '@/lib/db/supabaseAdmin'
 import { getEnrichmentNudge } from '@/lib/panel/getEnrichmentNudge'
+import { organizeEntry } from '@/lib/entries/organizeEntry'
+import { tryAcquireOrganizingLock } from '@/lib/entries/organizingLock'
 
 /**
  * Costura da feature 005-panel: delega para o corpo real (geração via Haiku, persistência
@@ -46,6 +48,32 @@ export async function triggerEnrichmentNudge(userId: string): Promise<void> {
   const existing = (insightsRes.data ?? []) as import('@/types/insight').ProactiveInsight[]
 
   await getEnrichmentNudge(userId, entries, existing)
+}
+
+/**
+ * Dispara a organização assíncrona (US3, feature 026) quando o registro é salvo sem clicar em
+ * "Organizar" (FR-009) — reusa `organizeEntry` (US1) e o mesmo lock atômico de
+ * `organizing_started_at` (`tryAcquireOrganizingLock`, FR-031) do clique manual, para nunca
+ * disparar duas chamadas de IA simultâneas para a mesma fonte — inclusive quando este job e um
+ * clique manual em "Organizar" competem pela mesma fonte nos primeiros instantes após salvar.
+ * Usa o client `service_role` (como os demais jobs deste arquivo) porque roda fora do ciclo de
+ * request com cookie de sessão. Nunca lança — falha de IA já é tratada dentro de `organizeEntry`
+ * (FR-030), e qualquer outro erro aqui é só logado, coerente com `fireAndForget`.
+ */
+export async function triggerOrganizeEntry(userId: string, entryId: string): Promise<void> {
+  const admin = getSupabaseAdmin()
+
+  try {
+    const lock = await tryAcquireOrganizingLock(admin as never, entryId, userId)
+    if (lock !== 'acquired') return
+
+    await organizeEntry(admin as never, userId, entryId)
+  } catch (jobError: unknown) {
+    logger.error('async job failed', {
+      job: 'triggerOrganizeEntry',
+      message: jobError instanceof Error ? jobError.message : 'unknown error',
+    })
+  }
 }
 
 /**

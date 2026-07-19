@@ -1,0 +1,533 @@
+# Tasks: Organizar + Destaques
+
+**Input**: Design documents de `/specs/026-organizar-destaques/` (spec.md, plan.md, research.md,
+data-model.md, contracts/organize.md, contracts/feed.md, quickstart.md)
+
+**Tests**: TDD é mandatório pela constituição do projeto (Princípio VI) — testes vêm ANTES da
+implementação e devem falhar primeiro.
+
+**Organization**: Tarefas agrupadas por user story (prioridades da spec.md — US1/US2/US3/US4/US6
+são P1, US5/US7 são P2), na ordem de prioridade.
+
+## Format: `[ID] [P?] [Story] Description`
+
+- **[P]**: pode rodar em paralelo (arquivos diferentes, sem dependência de tarefa incompleta)
+- **[Story]**: US1-US7, mapeando pra spec.md
+- Caminhos de arquivo exatos em cada descrição
+
+---
+
+## Phase 1: Setup
+
+**Purpose**: chaves i18n e scaffolding compartilhado antes de qualquer código de feature — sem
+dependência de pacote nova (ver plan.md, Technical Context)
+
+- [x] T001 [P] Criar/estender namespace i18n `registro` (ou `organize`, decidir no `/impeccable
+      shape`) em `src/messages/pt-BR.json` e `src/messages/en.json` (stub) com chaves vazias
+      para: botão "Organizar", estado "organizando…", selo "+N destaques", "+ adicionar
+      destaque", pílulas de contexto ("Projeto pessoal", "Outro"), sinalização "contexto não
+      identificado"
+- [x] T002 [P] Confirmar em ambiente de dev que `ANTHROPIC_API_KEY`/config de `claude-haiku-4-5`
+      já usados pela extração legada (`src/lib/ai/client.ts`) cobrem o novo prompt sem
+      configuração adicional
+
+**Checkpoint**: chaves i18n existem (mesmo vazias) — nenhum componente novo quebra por chave
+ausente
+
+---
+
+## Phase 2: Foundational (Blocking Prerequisites)
+
+**Purpose**: schema novo + tipos + infraestrutura de IA que TODAS as user stories dependem
+
+**⚠️ CRITICAL**: nenhuma user story pode ser implementada antes desta fase
+
+- [x] T003 Criar migration `supabase/migrations/016_entry_highlights.sql` — tabela
+      `entry_highlights` (FK `entries`, RLS própria por comando) + colunas aditivas em `entries`
+      (`organized_at`, `organizing_started_at`, `is_personal_project`) + índices
+      `(entry_id, position)` e `(user_id)`, conforme `data-model.md`
+- [ ] T004 [P] Aplicar migration `016` no ambiente de dev local (`supabase db reset` ou
+      `migration up`) e confirmar RLS via teste manual (usuário A não lê destaque de usuário B) —
+      **BLOQUEADO**: a MCP Supabase `apply_migration` foi negada pelo classificador automático de
+      segurança do ambiente ("Protected-Scope IaC Apply" — não há como o agente confirmar de forma
+      verificável que `tsxvlxszlynwmmlskugg`/"borogodo-dev" é o projeto de dev autorizado, mesmo
+      batendo com a URL do `.env.local`). Requer a Ohana rodar manualmente (ela pode confirmar o
+      projeto) ou conceder a permissão explicitamente. Arquivo da migration pronto e revisado em
+      `supabase/migrations/016_entry_highlights.sql`.
+- [x] T005 [P] Estender `src/types/entry.ts` com `EntryHighlight`, `SourceOrganizationStatus`
+      ('not_organized' | 'organizing' | 'organized'), `ContextStatus` ('unresolved' | 'company' |
+      'personal_project') — ver `data-model.md`
+- [x] T006 [P] Teste unitário para `organizeResultSchema` (Zod) em
+      `src/lib/ai/extraction/__tests__/schemas.test.ts` — valida shape `{ highlights: [{title,
+      metric, impact, tags}], company?, entry_date? }`, rejeita highlight sem `title`/`tags`
+      ausentes tratados como opcionais, tolera `tags` vazio — DEVE falhar antes de T007
+- [x] T007 Implementar `organizeResultSchema` em `src/lib/ai/extraction/schemas.ts` +
+      `validateOrganizeResult(raw): { highlights: OrganizeHighlight[]; company: string | null;
+      entry_date: string | null }`
+- [x] T008 [P] Criar `CAPTURE_ORGANIZE_SYSTEM_PROMPT` em
+      `src/lib/ai/extraction/prompts/organize.ts` — instruções: múltiplos destaques por fonte
+      (FR-014), título substantivo-primeiro/outcome-first com número quando presente (FR-019),
+      anti-nominalização vaga (FR-019/US5), tags reaproveitando vocabulário existente
+      (FR-022/FR-023), nenhuma tag adjetivo genérico (FR-024), empresa/período só por sinal
+      textual explícito e nunca por associação estatística (FR-006), pré-seleção de empresa
+      central quando o texto menciona mais de uma (FR-007) — reusa o anti-padrão de formatação já
+      documentado em `capture.ts` (sem travessão/seta/barra, sem jargão corporativo)
+- [x] T009 [P] Teste unitário para `buildOrganizeUserPrompt` em
+      `src/lib/ai/extraction/prompts/__tests__/organize.test.ts` — confirma que company/entry_date
+      são OMITIDOS do prompt quando a fonte já tem contexto/período resolvido (reforça FR-004/
+      FR-006 na origem) — DEVE falhar antes de T010
+- [x] T010 Implementar `buildOrganizeUserPrompt(rawContent, { company, entryDate, tagVocabulary,
+      existingHighlights })` em `src/lib/ai/extraction/prompts/organize.ts`
+- [x] T011 [P] Criar `src/lib/entries/` (novo diretório, ver plan.md "Structure Decision")
+- [x] T012 [P] Teste unitário para vocabulário de tags em
+      `src/lib/entries/__tests__/highlightVocabulary.test.ts` — `DISTINCT unnest(tags)` por
+      `user_id`, ordenado — DEVE falhar antes de T013
+- [x] T013 Implementar `getTagVocabulary(supabase, userId): Promise<string[]>` em
+      `src/lib/entries/highlightVocabulary.ts`
+- [x] T014 [P] Teste unitário para vocabulário de contextos em
+      `src/lib/entries/__tests__/contextVocabulary.test.ts` — `DISTINCT company` por `user_id`,
+      `company IS NOT NULL`, ordenado — DEVE falhar antes de T015
+- [x] T015 Implementar `getContextVocabulary(supabase, userId): Promise<string[]>` em
+      `src/lib/entries/contextVocabulary.ts`
+- [x] T016 [P] Teste unitário para o rollup de tags em
+      `src/lib/entries/__tests__/rollupEntryTags.test.ts` — união das tags de todos os
+      `entry_highlights` de uma fonte, ordenada e sem duplicatas — DEVE falhar antes de T017
+- [x] T017 Implementar `rollupEntryTags(supabase, entryId): Promise<string[]>` (recalcula e
+      persiste `entries.tags`) em `src/lib/entries/rollupEntryTags.ts`
+
+**Checkpoint**: schema, tipos, prompt e utilitários de vocabulário prontos — user stories podem
+começar
+
+---
+
+## Phase 3: User Story 1 - Organizar sob demanda (Priority: P1) 🎯 MVP
+
+**Goal**: botão "Organizar" infere métrica/impacto/tags/título (e empresa/período quando ainda
+vazios) a partir do texto cru e anexos, preenchendo só campos vazios
+
+**Independent Test**: salvar registro cru com anexo de imagem sem campos preenchidos, clicar
+"Organizar", ver métrica/impacto/tags preenchidos e editáveis; repetir preenchendo "impacto"
+manualmente antes — valor manual intacto após organizar
+
+### Tests for User Story 1 ⚠️
+
+- [x] T018 [P] [US1] Teste de integração para `organizeEntry()` — fonte sem nenhum campo
+      preenchido → cria `entry_highlights` com métrica/impacto/tags/título inferidos, em
+      `src/lib/entries/__tests__/organizeEntry.test.ts` — DEVE falhar antes de T021
+- [x] T019 [P] [US1] Teste de integração: fonte com "impacto" já preenchido manualmente em um
+      destaque existente → organização não sobrescreve esse campo (FR-002), mesmo arquivo de T018
+- [x] T020 [P] [US1] Teste de integração: fonte sem nenhum anexo → ainda infere a partir só do
+      texto cru (FR-001 acceptance #3), mesmo arquivo de T018
+- [x] T021 [P] [US1] Teste de integração para `POST /api/entries/[id]/organize` em
+      `tests/integration/api/entries-organize.test.ts` — 401 sem auth, 404 fonte de outro
+      usuário, 200 com highlights no sucesso, 200 `{status:'failed'}` em erro de IA (nunca 5xx só
+      por falha de IA, FR-030) — DEVE falhar antes de T023
+
+### Implementation for User Story 1
+
+- [x] T022 [US1] Implementar `organizeEntry(supabase, userId, entryId)` em
+      `src/lib/entries/organizeEntry.ts` — carrega fonte, monta prompt (T010), chama Haiku,
+      valida (T007), insere `entry_highlights` (nunca sobrescreve destaques existentes), aplica
+      "só preenche vazios" em `company`/`entry_date`, recalcula rollup (T017), seta
+      `organized_at`/limpa `organizing_started_at`; em falha, limpa `organizing_started_at` sem
+      lançar (depende de T003, T007, T010, T013, T015, T017)
+- [x] T023 [US1] Implementar `POST /api/entries/[id]/organize` em
+      `src/app/api/entries/[id]/organize/route.ts` — guarda de concorrência via
+      `organizing_started_at` (timeout curto), chama `organizeEntry` (T022), resposta conforme
+      `contracts/organize.md`
+- [x] T024 [US1] Botão "Organizar" no cartão de fonte (`src/components/features/feed/SourceCard.tsx`,
+      criado em US7 — se ainda não existir nesta fase, criar versão mínima aqui) chamando
+      `POST /organize`, com estado de carregamento local
+      — **Nota**: `SourceCard.tsx` é escopo da Phase 9 (US7, fora do agente desta fase); a versão
+      mínima do botão foi adicionada diretamente em `EntryCard.tsx` (o card real hoje em uso no
+      feed), com os três estados (Organizar / Organizando… / Organizar de novo), guarda de duplo
+      clique local e sem popup em falha (FR-030) — ver `EntryCard.test.tsx`.
+- [x] T025 [US1] Campos "+ adicionar detalhes" (herdados da 025) continuam vazios/editáveis
+      independente de o Organizar já ter rodado (FR-001 acceptance #4) — confirmar via teste de
+      integração que não há regressão nesse comportamento
+      — Coberto por `src/components/features/capture/__tests__/DetailsFields.test.tsx` (novo):
+      confirma que a seção abre vazia, edita sem chamada de rede, e não tem nenhum acoplamento
+      com `organizeEntry`/`POST /organize`.
+
+**Checkpoint**: User Story 1 funcional e testável de forma independente
+
+---
+
+## Phase 4: User Story 2 - Contexto por pílulas (Priority: P1)
+
+**Goal**: seletor de pílulas determinístico (empresas usadas + "Projeto pessoal" + "Outro") com
+precedência sobre inferência de IA
+
+**Independent Test**: abrir registro, ver pílulas com empresas + fixas; selecionar preenche
+imediatamente sem IA; "Outro" abre texto livre; registro não classificado fica sinalizado
+
+### Tests for User Story 2 ⚠️
+
+- [x] T026 [P] [US2] Teste de integração para `ContextPillPicker` — renderiza vocabulário (T015) +
+      "Projeto pessoal" + "Outro"; selecionar pílula dispara `PATCH` imediato sem chamada de IA,
+      em `src/components/features/feed/__tests__/ContextPillPicker.test.tsx` — DEVE falhar antes
+      de T029
+- [x] T027 [P] [US2] Teste de integração: `PATCH /api/entries/[id]` aceita `is_personal_project`
+      e `company`, e uma organização subsequente não sobrescreve o valor selecionado
+      manualmente (FR-004), em `tests/integration/api/entries-context.test.ts`
+- [x] T028 [P] [US2] Teste unitário: derivação de `ContextStatus` a partir de
+      `company`/`is_personal_project` (unresolved / company / personal_project), em
+      `src/lib/entries/__tests__/contextStatus.test.ts` — DEVE falhar antes de T031
+
+### Implementation for User Story 2
+
+- [x] T029 [US2] Estender `updateEntrySchema` em `src/app/api/entries/[id]/route.ts` para aceitar
+      `is_personal_project` (boolean) além do `company` já aceito
+- [x] T030 [US2] Criar `ContextPillPicker.tsx` em
+      `src/components/features/feed/ContextPillPicker.tsx` — pílulas de `getContextVocabulary`
+      (T015) + "Projeto pessoal" + "Outro" (abre input de texto livre), seleção dispara `PATCH`
+      direto (T029), toque ≥48px (Princípio VIII)
+      — Renderizado dentro do card expandido em `EntryCard.tsx` (`SourceCard.tsx` ainda não existe,
+      mesmo padrão de nota já usado em T024); vocabulário vem de `getContextVocabulary` calculado
+      em `RegistrosPage` (server) e repassado via `FeedPage` → `EntryCard`.
+- [x] T031 Implementar `deriveContextStatus(company, isPersonalProject): ContextStatus` em
+      `src/lib/entries/contextStatus.ts`
+- [x] T032 [US2] Sinalização discreta de "contexto não identificado" (FR-008) no cartão de fonte,
+      usando `deriveContextStatus` (T031) — estilo convite, não alerta/erro (constituição VII)
+      — Implementada no header do `EntryCard.tsx` (mesma nota de T024/T030: `SourceCard` é escopo
+      da Phase 9); usa `registro.context.unresolvedLabel`.
+- [x] T033 [US2] Garantir em `organizeEntry` (T022) que a pílula pré-selecionada por inferência
+      (FR-007, empresa central quando o texto cita mais de uma) continua editável — teste de
+      integração dedicado cobrindo esse cenário em `organizeEntry.test.ts` (T018)
+      — Coberto indiretamente: `organizeEntry`/`ContextPillPicker` nunca travam o campo (sempre
+      editável via PATCH); achado durante a implementação: `is_personal_project=true` não gateava
+      a inferência de `company` em `organizeEntry`/`buildOrganizeUserPrompt` (só `company === null`
+      era checado) — ajustado para tratar "Projeto pessoal" como contexto manualmente resolvido
+      (FR-004), com teste dedicado em `tests/integration/api/entries-context.test.ts` e em
+      `organize.test.ts` (prompt).
+
+**Checkpoint**: User Stories 1 e 2 funcionam juntas — contexto resolvido por pílula tem
+precedência sobre organização automática
+
+---
+
+## Phase 5: User Story 3 - Organização silenciosa (Priority: P1)
+
+**Goal**: ao salvar sem clicar em "Organizar", disparo automático em segundo plano
+(fire-and-forget), sem bloquear nem exigir confirmação
+
+**Independent Test**: salvar sem clicar em "Organizar", navegar e voltar — campos já preenchidos,
+sem ação adicional
+
+### Tests for User Story 3 ⚠️
+
+- [x] T034 [P] [US3] Teste de integração: `POST /api/capture` (`kind: 'deposito'`) dispara
+      `triggerOrganizeEntry` via `dispatchAsyncJobs` sem bloquear a resposta (mock/spy em
+      `organizeEntry`, resposta HTTP não espera a promise resolver), em
+      `tests/integration/api/capture-deposito-organize.test.ts` — DEVE falhar antes de T036
+- [x] T035 [P] [US3] Teste de integração: falha na chamada de IA durante a organização assíncrona
+      não afeta a entry salva (permanece visível, sem estado de erro bloqueante), mesmo arquivo
+      de T034
+
+### Implementation for User Story 3
+
+- [x] T036 [US3] Implementar `triggerOrganizeEntry(userId, entryId)` em
+      `src/lib/ai/extraction/jobs.ts` — chama `organizeEntry` (T022) com o mesmo guard de
+      concorrência de `organizing_started_at`
+      — Guarda de concorrência (FR-031) e derivação de recência extraídos para
+      `src/lib/entries/organizationStatus.ts` (`isOrganizingRecently`/`deriveOrganizationStatus`),
+      cobertos por `src/lib/entries/__tests__/organizationStatus.test.ts` e
+      `tests/unit/triggerOrganizeEntry.test.ts`. Usa `getSupabaseAdmin()` (mesmo padrão dos demais
+      jobs deste arquivo), nunca lança — qualquer erro (incluindo falha de IA que já é tratada
+      dentro de `organizeEntry`) é só logado.
+- [x] T037 [US3] Estender `dispatchAsyncJobs()` em `src/app/api/capture/route.ts` para incluir
+      `fireAndForget('triggerOrganizeEntry', triggerOrganizeEntry(userId, entryId))`
+      — `dispatchAsyncJobs` ganhou um `entryId?` opcional (só o caminho `deposito` tem uma fonte
+      única recém-salva para organizar; marco/texto/arquivo continuam sem esse job).
+- [x] T038 [US3] Chamar `dispatchAsyncJobs(userId, entryId)` a partir de `handleDepositoCapture`
+      (hoje não a chama — ver `research.md` §5) sem alterar seu comportamento de resposta (201
+      imediato, sem esperar os jobs)
+- [x] T039 [US3] Estado transitório "organizando…" no `EntryCard.tsx` (`SourceCard` ainda não
+      existe — mesma nota de T024/T030/T032), derivado de `organized_at`/`organizing_started_at`
+      via `deriveOrganizationStatus` — sem rótulo persistente nem CTA adicional após conclusão
+      (FR-011). `FeedItem`/`getFeedData` estendidos com os dois timestamps brutos (escopo mínimo;
+      a derivação completa de `organizationStatus`/join com `entry_highlights` para o feed
+      continua em US7/T059). O botão "Organizar" também reflete e respeita esse estado do
+      servidor (idempotência FR-031: clique manual não duplica chamada enquanto a versão
+      assíncrona já roda). Teste:
+      `src/components/features/feed/__tests__/EntryCardOrganizingState.test.tsx`.
+- [x] T040 [US3] Bloco "Organizando o resto em segundo plano" no `SavedPanel.tsx`
+      (`src/components/features/capture/SavedPanel.tsx`) — explicitamente fora de escopo da 025,
+      entregue aqui. Chave i18n `registro.savedPanel.organizingHint` (pt-BR/en). Teste:
+      `src/components/features/capture/__tests__/SavedPanelOrganizing.test.tsx`.
+
+**Checkpoint**: User Stories 1-3 funcionam juntas — todo registro ganha organização, manual ou
+automaticamente
+
+---
+
+## Phase 6: User Story 4 - Múltiplos destaques por fonte (Priority: P1)
+
+**Goal**: uma fonte rica gera vários destaques dentro do mesmo registro; edição/remoção/adição
+manual por destaque
+
+**Independent Test**: organizar fonte com 2 resultados distintos de uma mesma reunião → 2
+cartões de destaque no mesmo registro, sem registros adicionais
+
+### Tests for User Story 4 ⚠️
+
+- [x] T041 [P] [US4] Teste de integração: texto cru com 2 resultados distintos de mesmo contexto →
+      `organizeEntry` cria 2 `entry_highlights`, nenhuma nova linha em `entries`, mesmo arquivo de
+      T018 — DEVE falhar antes de nova asserção ser satisfeita por T022 (já implementado na fase
+      3 — este teste cobre o caso multi-destaque especificamente)
+      — Confirmado que `organizeEntry` já suporta N destaques genericamente (mapeia
+      `result.highlights` para N inserts); teste passou de imediato, sem alteração de
+      implementação necessária.
+- [x] T042 [P] [US4] Teste de integração: texto sem métrica clara → ao menos 1 destaque criado
+      sem métrica, tratado como válido (FR-018), mesmo arquivo
+- [x] T043 [P] [US4] Teste de integração: `POST /api/entries/[id]/highlights` cria destaque em
+      branco (`position` = último + 1); `PATCH`/`DELETE
+      /api/entries/[id]/highlights/[highlightId]` edita/remove afetando só aquele destaque, em
+      `tests/integration/api/entries-highlights.test.ts` — DEVE falhar antes de T045-T047
+      — Inclui também `GET /api/entries/[id]/highlights` (não estava na lista original de tasks,
+      mas necessário para o card listar os destaques existentes sem depender do join de
+      `getFeedData`, que é escopo de US7/T059 — decisão técnica documentada no PR).
+
+### Implementation for User Story 4
+
+- [x] T044 [US4] Criar `HighlightCard.tsx` em `src/components/features/feed/HighlightCard.tsx` —
+      aberto por padrão quando único (FR-017), colapsado quando múltiplo, campos editáveis
+      (título/métrica/impacto/tags)
+- [x] T045 [US4] Implementar `POST /api/entries/[id]/highlights/route.ts` (criar destaque em
+      branco, FR-016)
+- [x] T046 [US4] Implementar `PATCH /api/entries/[id]/highlights/[highlightId]/route.ts` (edita
+      campos; recalcula rollup de tags via T017 se `tags` mudou)
+- [x] T047 [US4] Implementar `DELETE` no mesmo arquivo de T046 (remove destaque; recalcula
+      rollup; nunca remove a fonte)
+- [x] T048 [US4] Botão "+ adicionar destaque" — `SourceCard.tsx` ainda não existe (escopo de
+      Phase 9/US7, mesma nota já usada em T024/T030/T032/T039/T040); adicionado diretamente em
+      `EntryCard.tsx`, chamando T045. A lista de destaques em si também é renderizada ali: busca
+      `GET /api/entries/[id]/highlights` sob demanda ao expandir o card (lazy, não bloqueia o
+      expand) e mantém estado local isolado por card — decisão técnica porque `FeedItem`/
+      `getFeedData` ainda não carregam `entry_highlights` (join é T059, US7). Quando US7 rodar,
+      este fetch lazy pode ser substituído pelo dado já vindo no payload do feed.
+
+**Checkpoint**: User Stories 1-4 funcionam juntas — destaques existem, são editáveis/removíveis, e
+a organização automática os popula
+
+---
+
+## Phase 7: User Story 6 - Tags consistentes (Priority: P1)
+
+**Goal**: tags novas reaproveitam o vocabulário já usado pela pessoa; formato consistente; nunca
+adjetivo genérico isolado
+
+**Independent Test**: organizar 2 registros com a mesma habilidade em palavras diferentes → mesma
+tag nos dois; filtro por tag em Registros retorna ambos
+
+### Tests for User Story 6 ⚠️
+
+- [x] T049 [P] [US6] Teste de integração: prompt de organização recebe o vocabulário de tags
+      (T013) e o resultado reaproveita uma tag existente em vez de criar variação, em
+      `organizeEntry.test.ts` (mesmo arquivo de T018) — DEVE falhar antes de T050
+- [x] T050 [US6] Ajustar `buildOrganizeUserPrompt` (T010) e `organizeEntry` (T022) para injetar
+      `getTagVocabulary` no contexto de cada chamada
+- [x] T051 [P] [US6] Teste de integração: `getFeedData` filtra por tag usando o rollup de
+      `entries.tags` e retorna as duas fontes organizadas com a tag reaproveitada, em
+      `src/lib/feed/__tests__/getFeedData.test.ts` (estende suíte existente) — DEVE falhar antes
+      de T052 (Phase 9)
+- [x] T052 [US6] Confirmar (via revisão do prompt T008 + teste) que nenhuma tag gerada é um
+      adjetivo genérico isolado — lista de bloqueio reaproveitada da extração legada
+      (`capture.ts`)
+
+**Checkpoint**: filtro por tag em Registros permanece útil com o vocabulário reaproveitado
+
+---
+
+## Phase 8: User Story 5 - Título outcome-first (Priority: P2)
+
+**Goal**: título de destaque substantivo-primeiro/outcome-first, com número quando presente,
+editável e protegido de sobrescrita
+
+**Independent Test**: organizar redução de tempo mensurável → título traz o número; editar e
+confirmar que reorganização futura não sobrescreve
+
+### Tests for User Story 5 ⚠️
+
+- [x] T053 [P] [US5] Teste de integração: destaque com métrica clara → título gerado inclui o
+      número (ex. "Redução de 50% no tempo de investigação de bug crítico"), em
+      `organizeEntry.test.ts` — DEVE falhar antes de ajuste no prompt (T008, já implementado —
+      este teste valida o comportamento específico de título)
+- [x] T054 [P] [US5] Teste de integração: título editado manualmente não é sobrescrito em
+      reorganização futura (FR-020, mesma regra "só preenche vazios" aplicada a `title`), mesmo
+      arquivo
+
+### Implementation for User Story 5
+
+- [x] T055 [US5] Ajustar `organizeEntry` (T022) para tratar `title` de um destaque existente com a
+      mesma regra "só preenche vazios" de métrica/impacto/tags (se ainda não coberto pela
+      implementação da Phase 3) — já satisfeito estruturalmente (`insertNewHighlights` só faz
+      INSERT, nunca UPDATE em `entry_highlights`); reforçado com teste explícito (T054) e prompt
+      (FR-020)
+- [x] T056 [US5] Campo de título editável inline em `HighlightCard.tsx` (T044) — já implementado
+      na US4 (campo `title` no form de edição)
+
+**Checkpoint**: títulos gerados seguem o padrão outcome-first e respeitam edição manual
+
+---
+
+## Phase 9: User Story 7 - Registros mostra a fonte (Priority: P2)
+
+**Goal**: 1 card por fonte no feed, com miniatura real, selo de contagem, timeline por mês,
+grade-faísca sem streak
+
+**Independent Test**: fonte com 3 destaques e fonte com 1 — primeira com selo "+3 destaques",
+segunda sem selo; expandir revela destaques + fonte completa
+
+### Tests for User Story 7 ⚠️
+
+- [x] T057 [P] [US7] Teste de integração: `getFeedData` retorna `FeedItem.highlights`,
+      `organizationStatus`, `contextStatus`, `isPersonalProject` por fonte legada (sem
+      `entry_highlights`, FR-032 → destaque sintético único) e por fonte organizada (N
+      destaques), em `src/lib/feed/__tests__/getFeedData.test.ts` — DEVE falhar antes de T059
+- [x] T058 [P] [US7] Teste de componente: `SourceCard` mostra selo apenas quando
+      `highlights.length > 1`; miniatura real quando há evidência de imagem; sinalização discreta
+      quando `contextStatus === 'unresolved'`, em
+      `src/components/features/feed/__tests__/SourceCard.test.tsx` — DEVE falhar antes de T060
+
+### Implementation for User Story 7
+
+- [x] T059 [US7] Estender `getFeedData`/`FeedItem`/`RawEntry` em `src/lib/feed/getFeedData.ts` e
+      `src/lib/feed/types.ts` — join com `entry_highlights` por página, fallback sintético para
+      fontes legadas, derivação de `organizationStatus`/`contextStatus` (conforme `data-model.md`)
+- [x] T060 [US7] Criar `SourceCard.tsx` completo em `src/components/features/feed/SourceCard.tsx`
+      — card único por fonte, miniatura real, selo de contagem, sinalização de contexto,
+      renderiza `HighlightCard` (T044) para cada destaque ao expandir. Implementado como
+      renomeação/consolidação de `EntryCard.tsx` (decisão registrada no relatório da fase — o
+      componente já tinha toda a estrutura de dois níveis fonte→destaque; a US7 removeu o fetch
+      lazy de destaques por card e passou a consumir `item.highlights` vindo pronto no payload do
+      feed) em vez de um componente novo do zero — `EntryItem.tsx` (Painel) também migrado.
+- [x] T061 [US7] Atualizar `FeedPage.tsx` (`src/components/features/feed/FeedPage.tsx`) para
+      renderizar `SourceCard` no lugar do card atual por entrada — inclui timeline por mês
+      (FR-028, `src/lib/feed/groupByMonth.ts`, antes inexistente: o feed só ordenava por data, sem
+      nenhum agrupamento visual).
+- [x] T062 [US7] ~~Confirmado `ActivityGrid.tsx` já satisfaz FR-029~~ — **revisão pós-impl.
+      (2026-07-15)**: `ActivityGrid.tsx` foi removido por decisão da Ohana (ver FR-029 no spec.md);
+      substituído por uma linha de texto discreta "N registros em M meses" direto em `FeedPage.tsx`.
+
+**Checkpoint**: todas as user stories funcionam juntas — Registros reestruturado, fim a fim
+
+---
+
+## Phase 10: Polish & Cross-Cutting Concerns
+
+- [x] T063 [P] Rodar `/impeccable shape` para a reestruturação de Registros e o `ContextPillPicker`
+      antes de finalizar qualquer decisão visual pendente (constituição VII) — se ainda não feito
+      antes da Phase 9
+      — Já feito ANTES do `/speckit-implement` (ver `specs/026-organizar-destaques/ux-shape.md`,
+      commit `9f7fb6c`): dois níveis fonte→destaque, seletor de pílulas com busca acima de 8 itens,
+      sem Framer Motion no collapse. Revisado pela Ohana antes da implementação (nota em
+      `CLAUDE.md` da raiz). Nenhuma decisão visual ficou pendente durante US1-US7.
+- [x] T064 [P] Rodar `/code-review medium` ao final de cada fase de user story (já indicado nos
+      checkpoints acima); consolidar achados críticos/altos antes do PR
+      — Passes por fase já rodados durante US1-US7 (histórico de commits). Consolidação final
+      feita nesta sessão com `/code-review high` sobre o diff completo (`4787bf9...HEAD`, todas as
+      7 stories) — achado principal: corrida real entre o guard de `organizing_started_at` do
+      clique manual (US1, `POST /organize`) e o disparo assíncrono (US3, `triggerOrganizeEntry`),
+      os dois faziam "ler, depois escrever" em passos separados. Corrigido com
+      `tryAcquireOrganizingLock` (UPDATE condicional atômico), commit `044656d`. Ver relatório da
+      sessão para a lista completa de achados MEDIUM documentados sem correção.
+- [x] T065 [P] Confirmar cobertura de teste ≥80% nas áreas novas (`src/lib/entries/`,
+      `src/lib/ai/extraction/prompts/organize.ts`, rotas novas) via `npm run test -- --coverage`
+      — `src/lib/entries/` 94%, `extraction/prompts/organize.ts` 93%, `entries/organizeEntry.ts`
+      91%. `SourceCard.tsx` estava em 66% (fluxos de editar/excluir/adicionar destaque e variant
+      "panel" sem teste) — subiu para 88% com testes novos (commit `05170dc`), sem mudança de
+      comportamento.
+- [x] T066 Rodar `quickstart.md` (todos os roteiros US1-US7) manualmente antes do `/impeccable
+      audit` e do PR
+      — **Parcial**: a migration `016_entry_highlights.sql` não está aplicada no ambiente de dev
+      (bloqueio de segurança do MCP Supabase, ver nota de T004) — não há como rodar os roteiros
+      fim a fim contra um servidor real neste ambiente (sandbox sem browser/servidor rodando
+      também). Validação de substituição feita por leitura de código + suíte de testes de
+      integração (1128 testes, cobrindo os mesmos cenários descritos no quickstart: "só preenche
+      vazios", múltiplos destaques, precedência de pílula sobre IA, organização silenciosa,
+      título protegido de sobrescrita, tags reaproveitadas, feed com selo/miniatura/timeline).
+      **Pendência real para a Ohana**: rodar os roteiros manuais do `quickstart.md` contra o app
+      rodando de verdade, depois que a migration `016` for aplicada em dev.
+- [x] T067 [P] `/impeccable audit` + `web-design-guidelines` — acessibilidade e identidade visual
+      do feed reestruturado e das pílulas (Princípios V/VII/VIII)
+      — Auditoria manual (sem tooling de browser ao vivo disponível neste ambiente) seguindo os
+      critérios de `.claude/skills/impeccable/reference/audit.md` sobre `SourceCard.tsx`,
+      `HighlightCard.tsx`, `ContextPillPicker.tsx`, `FeedPage.tsx`, `SavedPanel.tsx`. Achados
+      corrigidos (commit `0ecff2c`): 3 alvos de toque abaixo de 48px (Princípio VIII,
+      não-negociável) — botão "Concluir" do `SavedPanel`, input de busca do
+      `ContextPillPicker`, 3 inputs de edição inline do `HighlightCard`. Theming limpo (zero cor
+      hardcoded nos 5 arquivos, só tokens). i18n completo (aria-labels, `aria-expanded`,
+      `aria-pressed` nas pílulas). Achado sistêmico não corrigido: `outline-none` sem
+      `focus-visible` em vários inputs do app, herdado da 025 (`DrawerTextarea`,
+      `DetailsFields`) — mudar só nesta feature criaria inconsistência; fica para um
+      `/impeccable polish` futuro, decisão de design mais ampla da Ohana.
+- [x] T068 Atualizar `CLAUDE.md` (marcador `<!-- SPECKIT START -->`/`<!-- SPECKIT END -->`) para
+      status "implementada" e mover a entrada para a lista de features mergeadas, quando o PR for
+      aberto/mergeado (fora do escopo deste plano — nota para a etapa `/speckit-implement`)
+      — `CLAUDE.md` atualizado para "implementação completa, pronta para PR" (não movida para
+      "mergeadas" ainda — aguarda o PR/merge de verdade, feito pela Ohana).
+
+---
+
+## Dependencies & Execution Order
+
+### Phase Dependencies
+
+- **Setup (Phase 1)**: sem dependências
+- **Foundational (Phase 2)**: depende de Setup — BLOQUEIA todas as user stories (migration,
+  tipos, prompt, schema, vocabulários)
+- **User Stories (Phase 3-9)**: todas dependem de Foundational
+  - US1 (Phase 3) é a base de `organizeEntry`/rota `/organize` — US2, US3, US4, US6 estendem essa
+    mesma função em vez de duplicá-la, então na prática **US1 deve vir primeiro**, apesar de
+    todas serem P1
+  - US2 (Phase 4) depende de US1 (usa `organizeEntry` para validar precedência de pílula, FR-007)
+  - US3 (Phase 5) depende de US1 (reusa `organizeEntry` no disparo assíncrono)
+  - US4 (Phase 6) depende de US1 (múltiplos destaques é o mesmo `organizeEntry`, teste adicional)
+  - US6 (Phase 7) depende de US1 (vocabulário injetado na mesma função)
+  - US5 (Phase 8) depende de US1/US4 (título é campo de um destaque já existente)
+  - US7 (Phase 9) depende de US4 (feed mostra destaques que só existem a partir da Phase 6) e de
+    US2 (sinalização de contexto)
+- **Polish (Phase 10)**: depende de todas as user stories desejadas estarem completas
+
+### Parallel Opportunities
+
+- Todas as tasks `[P]` de Setup e Foundational rodam em paralelo entre si
+- Testes `[P]` de uma mesma user story rodam em paralelo (arquivos diferentes)
+- US6 e US5 podem ser trabalhadas em paralelo depois de US1/US4 completas (arquivos
+  praticamente disjuntos: prompt/vocabulário vs. componente de título)
+
+---
+
+## Implementation Strategy
+
+### MVP First (User Story 1 apenas)
+
+1. Completar Phase 1 (Setup) + Phase 2 (Foundational — migration, tipos, prompt, schema)
+2. Completar Phase 3 (US1 — organizar sob demanda)
+3. **PARAR e VALIDAR**: roteiro US1 do `quickstart.md`
+4. Deploy/demo se pronto
+
+### Entrega incremental
+
+1. Setup + Foundational → fundação pronta
+2. US1 → validar → (MVP: botão "Organizar" funciona)
+3. US2 → validar → contexto por pílula com precedência sobre IA
+4. US3 → validar → organização silenciosa (100% dos registros ganham destaque, SC-002)
+5. US4 → validar → múltiplos destaques por fonte
+6. US6 → validar → consistência de tags
+7. US5 → validar → título outcome-first
+8. US7 → validar → Registros reestruturado, fim a fim
+9. Cada história soma valor sem quebrar as anteriores
+
+---
+
+## Notes
+
+- [P] tasks = arquivos diferentes, sem dependência
+- [Story] mapeia a task para a user story correspondente (rastreabilidade)
+- Verificar que os testes falham antes de implementar
+- Rodar `/code-review medium` ao fim de cada checkpoint de fase
+- `/impeccable shape` é obrigatório antes de codar qualquer componente de UI novo
+  (`ContextPillPicker`, `SourceCard`, `HighlightCard`) — não incluído como task numerada porque é
+  um passo de processo (constituição VII), não uma unidade de trabalho de código

@@ -1,7 +1,7 @@
 'use client'
 
 import type { EntrySource } from '@/types/entry'
-import { EntryCard } from '@/components/features/feed/EntryCard'
+import { SourceCard } from '@/components/features/feed/SourceCard'
 import type { FeedItem } from '@/lib/feed/types'
 
 interface EntryItemProps {
@@ -28,6 +28,7 @@ export function EntryItem({ id, whatIDid, title, source, createdAt }: EntryItemP
     created_at: createdAt,
     entry_date: null,
     company: null,
+    is_personal_project: false,
     role_title: null,
     metric: null,
     tags: [],
@@ -37,7 +38,12 @@ export function EntryItem({ id, whatIDid, title, source, createdAt }: EntryItemP
     decision: null,
     learning: null,
     file_name: null,
+    organized_at: null,
+    organizing_started_at: null,
+    highlights: [],
+    organizationStatus: 'not_organized',
+    contextStatus: 'unresolved',
   }
 
-  return <EntryCard item={item} variant="panel" />
+  return <SourceCard item={item} variant="panel" />
 }

@@ -9,7 +9,13 @@ import { extractFromDocument } from '@/lib/ai/extraction/extractFromLinkedIn'
 import { extractTextFromPDF } from '@/lib/pdf/extractText'
 import { saveEntries } from '@/lib/db/entries'
 import { saveDeposito, EmptyContentError, type ManualFields } from '@/lib/capture/saveDeposito'
-import { fireAndForget, maybeRegenerateMirror, triggerProactiveInsight, triggerEnrichmentNudge } from '@/lib/ai/extraction/jobs'
+import {
+  fireAndForget,
+  maybeRegenerateMirror,
+  triggerProactiveInsight,
+  triggerEnrichmentNudge,
+  triggerOrganizeEntry,
+} from '@/lib/ai/extraction/jobs'
 import { errorMessage, NoExtractableContentError } from '@/lib/errors'
 import { logger } from '@/lib/log'
 
@@ -173,6 +179,9 @@ async function handleDepositoCapture(
       rawText,
       manualFields: readManualFields(body),
     })
+    // US3 (feature 026, FR-009): salvar sem clicar em "Organizar" dispara a organização em
+    // segundo plano, fire-and-forget — não bloqueia esta resposta (contracts/organize.md).
+    dispatchAsyncJobs(userId, result.id)
     return NextResponse.json(result, { status: 201 })
   } catch (error: unknown) {
     if (error instanceof EmptyContentError) {
@@ -252,8 +261,16 @@ async function handleFileCapture(
   }
 }
 
-function dispatchAsyncJobs(userId: string): void {
+/**
+ * `entryId` é opcional (US3, feature 026): só o caminho `deposito` tem uma única fonte recém-
+ * salva para organizar em segundo plano — os demais caminhos (marco/texto/arquivo) continuam
+ * disparando só os jobs pré-existentes.
+ */
+function dispatchAsyncJobs(userId: string, entryId?: string): void {
   fireAndForget('triggerProactiveInsight', triggerProactiveInsight(userId))
   fireAndForget('maybeRegenerateMirror', maybeRegenerateMirror(userId))
   fireAndForget('triggerEnrichmentNudge', triggerEnrichmentNudge(userId))
+  if (entryId) {
+    fireAndForget('triggerOrganizeEntry', triggerOrganizeEntry(userId, entryId))
+  }
 }

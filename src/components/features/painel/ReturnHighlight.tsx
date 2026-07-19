@@ -55,7 +55,7 @@ export function ReturnHighlight({ signal, strengthTheme, onCapture }: ReturnHigh
             type="button"
             onClick={onCapture}
             aria-label={t('welcomeAriaLabel')}
-            className="mt-3 text-sm font-semibold px-4 py-2 rounded-full min-h-[44px]"
+            className="mt-3 text-sm font-semibold px-4 py-2.5 rounded-full"
             style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
           >
             {t('invite')}

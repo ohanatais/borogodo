@@ -7,6 +7,9 @@ export interface DrawerManualFields {
   impact: string
   tags: string
   company: string
+  /** Pílula "Projeto pessoal" (Story 2) selecionada no Drawer, antes de salvar — contexto
+   * resolvido sem empresa, mesma semântica de `entries.is_personal_project`. */
+  isPersonalProject: boolean
   entryDate: string
 }
 
@@ -15,6 +18,7 @@ const EMPTY_MANUAL_FIELDS: DrawerManualFields = {
   impact: '',
   tags: '',
   company: '',
+  isPersonalProject: false,
   entryDate: '',
 }
 
@@ -40,7 +44,7 @@ export interface UseDrawerDraftResult {
   rawText: string
   setRawText: (text: string) => void
   manualFields: DrawerManualFields
-  setManualField: (field: keyof DrawerManualFields, value: string) => void
+  setManualField: <K extends keyof DrawerManualFields>(field: K, value: DrawerManualFields[K]) => void
   attachments: DrawerAttachment[]
   addImageAttachment: (file: File) => void
   addLinkAttachment: (url: string, label?: string) => void
@@ -70,7 +74,7 @@ export function useDrawerDraft(initialText = ''): UseDrawerDraftResult {
   const [manualFields, setManualFields] = useState<DrawerManualFields>(EMPTY_MANUAL_FIELDS)
   const [attachments, setAttachments] = useState<DrawerAttachment[]>([])
 
-  const setManualField = useCallback((field: keyof DrawerManualFields, value: string) => {
+  const setManualField = useCallback(<K extends keyof DrawerManualFields>(field: K, value: DrawerManualFields[K]) => {
     setManualFields((prev) => ({ ...prev, [field]: value }))
   }, [])
 

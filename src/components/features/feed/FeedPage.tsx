@@ -3,11 +3,12 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { useSearchParams, useRouter } from 'next/navigation'
-import type { FeedPage as FeedPageType, FeedItem, FeedQuery, FeedAxis, ActivityCell } from '@/lib/feed/types'
-import { EntryCard } from './EntryCard'
+import type { FeedPage as FeedPageType, FeedItem, FeedQuery, FeedAxis } from '@/lib/feed/types'
+import { groupFeedItemsByMonth } from '@/lib/feed/groupByMonth'
+import { SourceCard } from './SourceCard'
 import { EmptyFeed } from './EmptyFeed'
 import { FeedFilters } from './FeedFilters'
-import { ActivityGrid, GRID_MIN_DISTINCT_DAYS } from './ActivityGrid'
+import { ENTRY_UPDATED_EVENT, type EntryUpdatedDetail } from '@/components/features/painel/registroTriggerEvents'
 
 interface FeedPageProps {
   filterKey: string
@@ -18,7 +19,6 @@ interface FeedPageProps {
 function hasActiveFilters(searchParams: URLSearchParams): boolean {
   return !!(
     searchParams.get('q') ||
-    searchParams.get('metricOnly') === 'true' ||
     searchParams.get('from') ||
     searchParams.get('to') ||
     searchParams.get('company') ||
@@ -36,7 +36,6 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
   const [items, setItems] = useState<FeedItem[]>(initialPage.items)
   const [nextCursor, setNextCursor] = useState<string | null>(initialPage.nextCursor)
   const [isLoading, setIsLoading] = useState(false)
-  const [activityCells, setActivityCells] = useState<ActivityCell[]>([])
   const [deleteError, setDeleteError] = useState(false)
 
   // Resync feed state when filters change — the server returned a fresh page.
@@ -49,15 +48,6 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
     setItems(initialPage.items)
     setNextCursor(initialPage.nextCursor)
   }
-
-  useEffect(() => {
-    const controller = new AbortController()
-    fetch('/api/feed/activity', { signal: controller.signal })
-      .then((r) => r.ok ? r.json() : [])
-      .then((cells: ActivityCell[]) => setActivityCells(cells))
-      .catch(() => {})
-    return () => controller.abort()
-  }, [])
 
   // Deep-link "Ver registro" (autoavaliação, 019): o feed vem por SSR, então o alvo #registro-<id> já
   // existe no mount. O Next App Router não rola para hash em container de scroll próprio, então o
@@ -74,14 +64,10 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
     return () => clearTimeout(timer)
   }, [])
 
-  const distinctDays90 = useMemo(() => {
-    const cutoff = new Date()
-    cutoff.setDate(cutoff.getDate() - 90)
-    const cutoffStr = cutoff.toISOString().split('T')[0]
-    return activityCells.filter((c) => c.date >= cutoffStr && c.count > 0).length
-  }, [activityCells])
-
-  const showGrid = distinctDays90 >= GRID_MIN_DISTINCT_DAYS
+  // FR-028: timeline por mês — agrupa pela MESMA data usada para ordenar a página (`currentAxis`),
+  // nunca uma escolha fixa (ver `groupByMonth.ts`) — senão a seção do mês poderia divergir da
+  // ordem real da lista.
+  const monthGroups = useMemo(() => groupFeedItemsByMonth(items, currentAxis), [items, currentAxis])
 
   const handleLoadMore = useCallback(async () => {
     if (!nextCursor || isLoading) return
@@ -131,21 +117,45 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
     }
   }, [])
 
-  const handleEdit = useCallback((id: string, what_i_did: string) => {
-    setItems((prev) =>
-      prev.map((item) => item.id === id ? { ...item, what_i_did, title: what_i_did.slice(0, 60).trim() } : item)
-    )
+  // Editar (026): o Drawer que salva a edição vive no shell (AppShellClient), fora desta árvore —
+  // `router.refresh()` sozinho não resincroniza o estado local otimista de `items`, então ouvimos
+  // o mesmo evento que o Drawer dispara ao confirmar o PATCH.
+  useEffect(() => {
+    function handler(e: Event) {
+      const detail = (e as CustomEvent<EntryUpdatedDetail>).detail
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === detail.id
+            ? {
+                ...item,
+                what_i_did: detail.what_i_did,
+                title: detail.what_i_did.slice(0, 60).trim(),
+                ...(detail.metric !== undefined && detail.metric && { metric: detail.metric }),
+                ...(detail.company !== undefined && { company: detail.company || item.company }),
+                ...(detail.entryDate !== undefined && detail.entryDate && { entry_date: detail.entryDate }),
+              }
+            : item
+        )
+      )
+    }
+    window.addEventListener(ENTRY_UPDATED_EVENT, handler)
+    return () => window.removeEventListener(ENTRY_UPDATED_EVENT, handler)
   }, [])
 
-  const filtersActive = hasActiveFilters(searchParams)
+  // Story 2 (FR-004): atualização local, otimista, após o `PATCH` do `ContextPillPicker` já ter
+  // confirmado sucesso — não dispara nenhuma chamada de IA (FR-003, custo zero).
+  const handleContextChange = useCallback(
+    (id: string, next: { company: string | null; isPersonalProject: boolean }) => {
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, company: next.company, is_personal_project: next.isPersonalProject } : item
+        )
+      )
+    },
+    []
+  )
 
-  function handleCellClick(date: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('from', date)
-    params.set('to', date)
-    params.delete('cursor')
-    router.replace(`?${params.toString()}`, { scroll: false })
-  }
+  const filtersActive = hasActiveFilters(searchParams)
 
   if (items.length === 0 && !filtersActive) {
     return <EmptyFeed />
@@ -180,7 +190,7 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
           <button
             type="button"
             onClick={() => router.replace('?', { scroll: false })}
-            className="text-sm font-medium px-4 py-2 min-h-[44px] rounded-full transition-opacity hover:opacity-80"
+            className="text-sm font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
             style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
           >
             {t('filters.clear')}
@@ -188,33 +198,39 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
         </div>
       ) : (
         <>
-          {/* Mobile: faixa horizontal de faíscas acima da lista */}
-          {showGrid && (
-            <div className="lg:hidden">
-              <ActivityGrid cells={activityCells} onCellClick={handleCellClick} />
-            </div>
-          )}
-
-          <div className="lg:flex lg:gap-6 lg:items-start">
-            {/* Lista de registros */}
-            <ul className="flex-1 min-w-0 flex flex-col gap-2">
-              {items.map((item) => (
-                <EntryCard
-                  key={item.id}
-                  item={item}
-                  variant="feed"
-                  onDelete={handleDelete}
-                  onEdit={handleEdit}
-                />
-              ))}
-            </ul>
-
-            {/* Desktop: grade de faíscas como sidebar fixa à direita */}
-            {showGrid && (
-              <div className="hidden lg:block shrink-0 sticky top-4">
-                <ActivityGrid cells={activityCells} onCellClick={handleCellClick} />
-              </div>
-            )}
+          {/* Lista de registros, agrupada numa timeline por mês (FR-028) */}
+          <div className="flex flex-col gap-4">
+            {monthGroups.map((group) => (
+              <section key={group.monthKey} className="flex flex-col gap-2">
+                <div className="flex items-center gap-3 px-1">
+                  <h2
+                    className="shrink-0 text-sm font-display font-semibold"
+                    style={{ color: 'var(--muted-foreground)' }}
+                  >
+                    {group.label}
+                  </h2>
+                  <span
+                    aria-hidden="true"
+                    className="h-px flex-1"
+                    style={{ background: 'color-mix(in oklch, var(--border) 60%, transparent)' }}
+                  />
+                  <span className="shrink-0 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                    {t('timeline.count', { count: group.items.length })}
+                  </span>
+                </div>
+                <ul className="flex flex-col gap-2">
+                  {group.items.map((item) => (
+                    <SourceCard
+                      key={item.id}
+                      item={item}
+                      variant="feed"
+                      onDelete={handleDelete}
+                      onContextChange={handleContextChange}
+                    />
+                  ))}
+                </ul>
+              </section>
+            ))}
           </div>
 
           {nextCursor && (
@@ -223,7 +239,7 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
                 type="button"
                 onClick={handleLoadMore}
                 disabled={isLoading}
-                className="text-sm font-medium px-5 py-2.5 min-h-[48px] rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+                className="text-sm font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
                 style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
               >
                 {isLoading ? t('pagination.loading') : t('pagination.loadMore')}

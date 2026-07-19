@@ -26,7 +26,9 @@ describe('Drawer — abrir "+ adicionar detalhes" (US4)', () => {
     expect(screen.getByLabelText('detailsFields.metricLabel')).toHaveValue('')
     expect(screen.getByLabelText('detailsFields.impactLabel')).toHaveValue('')
     expect(screen.getByLabelText('detailsFields.tagsLabel')).toHaveValue('')
-    expect(screen.getByLabelText('detailsFields.companyLabel')).toHaveValue('')
+    // Empresa/projeto pessoal virou `ContextPillPicker` (revisão pós-implementação) — vazio por
+    // padrão é nenhuma pílula acesa, não um campo de texto.
+    expect(screen.getByRole('button', { name: 'context.personalProjectLabel' })).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByLabelText('detailsFields.dateLabel')).toHaveValue('')
 
     expect(mockFetch).not.toHaveBeenCalled()

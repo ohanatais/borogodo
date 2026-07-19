@@ -3,10 +3,6 @@
 import type { ClipboardEvent } from 'react'
 import { useTranslations } from 'next-intl'
 
-// FR-017: acima de ~200 caracteres colados, mostra um sinal confirmando que a fonte completa foi
-// preservada (mitigação do risco "cru preservado mas não usado" do decision record).
-const SOURCE_PRESERVED_THRESHOLD = 200
-
 interface DrawerTextareaProps {
   value: string
   onChange: (value: string) => void
@@ -18,7 +14,6 @@ interface DrawerTextareaProps {
 
 export function DrawerTextarea({ value, onChange, disabled, autoFocus, onImagePaste }: DrawerTextareaProps) {
   const t = useTranslations('registro')
-  const showSourcePreserved = value.length > SOURCE_PRESERVED_THRESHOLD
 
   function handlePaste(event: ClipboardEvent<HTMLTextAreaElement>) {
     if (!onImagePaste) return
@@ -38,7 +33,7 @@ export function DrawerTextarea({ value, onChange, disabled, autoFocus, onImagePa
   }
 
   return (
-    <div className="flex flex-col gap-2 flex-1 min-h-0">
+    <div className="flex flex-col gap-2 shrink-0">
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -47,18 +42,14 @@ export function DrawerTextarea({ value, onChange, disabled, autoFocus, onImagePa
         aria-label={t('drawer.textareaAriaLabel')}
         disabled={disabled}
         autoFocus={autoFocus}
-        className="flex-1 w-full resize-none rounded-xl px-4 py-3 text-sm outline-none min-h-[200px] leading-relaxed"
+        rows={7}
+        className="w-full resize-none rounded-xl px-4 py-3 text-sm outline-none focus-visible:shadow-none min-h-[200px] leading-relaxed"
         style={{
           background: 'var(--muted)',
           border: '1px solid var(--border)',
           color: 'var(--foreground)',
         }}
       />
-      {showSourcePreserved && (
-        <p role="status" className="text-xs px-1" style={{ color: 'var(--muted-foreground)' }}>
-          {t('drawer.sourcePreserved')}
-        </p>
-      )}
     </div>
   )
 }

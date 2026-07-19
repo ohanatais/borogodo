@@ -3,25 +3,16 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef } from 'react'
-import { Search, X } from 'lucide-react'
-import { Segmented } from '@/components/ui/Segmented'
+import { Search, X, CalendarRange, FileUp } from 'lucide-react'
 import type { FeedAxis } from '@/lib/feed/types'
+import { RegistrarButton } from './RegistrarButton'
+
+// Altura comum a busca/período/Registrar/Importar histórico (revisão manual: a fileira de cima
+// misturava um botão de 54px com pílulas de filtro bem mais baixas — "não harmônico").
+const FILTER_ROW_HEIGHT = 'h-[44px]'
 
 interface FeedFiltersProps {
   currentAxis: FeedAxis
-}
-
-const PERIOD_PRESETS = [
-  { key: 'today', days: 1 },
-  { key: 'week', days: 7 },
-  { key: 'month', days: 30 },
-  { key: 'quarter', days: 90 },
-] as const
-
-function daysAgoISO(days: number): string {
-  const d = new Date()
-  d.setDate(d.getDate() - days)
-  return d.toISOString().split('T')[0]
 }
 
 export function FeedFilters({ currentAxis }: FeedFiltersProps) {
@@ -30,8 +21,8 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
   const searchParams = useSearchParams()
 
   const currentQ = searchParams.get('q') ?? ''
-  const currentMetricOnly = searchParams.get('metricOnly') === 'true'
   const currentFrom = searchParams.get('from') ?? ''
+  const currentTo = searchParams.get('to') ?? ''
 
   function updateParam(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString())
@@ -44,9 +35,10 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
     router.replace(`?${params.toString()}`, { scroll: false })
   }
 
-  function handleAxisChange(newAxis: FeedAxis) {
+  function handleAxisToggle() {
     const params = new URLSearchParams(searchParams.toString())
-    params.set('axis', newAxis)
+    const nextAxis: FeedAxis = currentAxis === 'entry_date' ? 'created_at' : 'entry_date'
+    params.set('axis', nextAxis)
     params.delete('cursor')
     router.replace(`?${params.toString()}`, { scroll: false })
   }
@@ -55,7 +47,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
     router.replace('?', { scroll: false })
   }
 
-  const hasActiveFilters = currentQ || currentMetricOnly || currentFrom || searchParams.get('to')
+  const hasActiveFilters = currentQ || currentFrom || currentTo
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -75,96 +67,119 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
     [searchParams]
   )
 
-  const axes: FeedAxis[] = ['created_at', 'entry_date']
+  const isChronological = currentAxis === 'entry_date'
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Axis toggle — Segmented padrão do sistema (021) */}
+    <div className="flex flex-col gap-2">
+      {/* Busca + período à esquerda, Registrar/Importar histórico à direita — mesma altura nos
+          quatro (revisão manual pós-implementação, 026). */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative flex-1 min-w-[200px] max-w-[280px]">
+          <Search
+            size={14}
+            aria-hidden="true"
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--muted-foreground)' }}
+          />
+          <input
+            type="search"
+            defaultValue={currentQ}
+            onChange={handleSearchChange}
+            placeholder={t('filters.search')}
+            aria-label={t('filters.search')}
+            className={`w-full pl-8 pr-3 text-sm rounded-full outline-none focus-visible:ring-2 ${FILTER_ROW_HEIGHT}`}
+            style={{
+              background: 'var(--muted)',
+              color: 'var(--foreground)',
+              border: '1px solid transparent',
+            }}
+          />
+        </div>
+
+        {/* Período — um único controle (não duas caixas separadas De/Até). Mesmo tratamento
+            visual da busca (fundo --muted sólido, sem borda). */}
+        <div
+          className={`inline-flex items-center gap-1.5 text-xs px-4 rounded-full shrink-0 ${FILTER_ROW_HEIGHT}`}
+          style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
+        >
+          <CalendarRange size={13} aria-hidden="true" className="shrink-0" />
+          <input
+            type="date"
+            value={currentFrom}
+            max={currentTo || undefined}
+            aria-label={t('filters.dateFrom')}
+            onChange={(e) => updateParam('from', e.target.value || null)}
+            className="bg-transparent outline-none w-[110px]"
+            style={{ color: currentFrom ? 'var(--foreground)' : 'var(--muted-foreground)' }}
+          />
+          <span aria-hidden="true">–</span>
+          <input
+            type="date"
+            value={currentTo}
+            min={currentFrom || undefined}
+            aria-label={t('filters.dateTo')}
+            onChange={(e) => updateParam('to', e.target.value || null)}
+            className="bg-transparent outline-none w-[110px]"
+            style={{ color: currentTo ? 'var(--foreground)' : 'var(--muted-foreground)' }}
+          />
+        </div>
+
+        <div className="flex items-center gap-2 ml-auto">
+          <RegistrarButton height={FILTER_ROW_HEIGHT} />
+          <button
+            type="button"
+            disabled
+            title={t('composer.comingSoon')}
+            className={`inline-flex items-center gap-2 shrink-0 rounded-full px-4 text-sm font-semibold cursor-not-allowed opacity-60 ${FILTER_ROW_HEIGHT}`}
+            style={{ color: 'var(--color-primary)', background: 'var(--color-lilas-nevoa)', border: '1px solid var(--color-lilas-linha)' }}
+          >
+            <FileUp size={16} aria-hidden="true" />
+            {t('composer.importHistory')}
+          </button>
+        </div>
+      </div>
+
+      {/* Ordem cronológica (quando aconteceu) vs. ordem de registro (quando anotei, padrão) —
+          registros sem data de acontecimento simplesmente vão para o fim da lista quando
+          cronológica está ativa (getFeedData já resolve isso, `nullsFirst: false`). Numa fileira
+          própria abaixo da busca (revisão manual) — junto de "Limpar filtros" quando ativo. */}
       <div className="flex items-center gap-2">
-        <Segmented
-          ariaLabel="Eixo de ordenação"
-          items={axes.map((axis) => ({
-            key: axis,
-            label: t(`axis.${axis}`),
-            active: currentAxis === axis,
-            onClick: () => handleAxisChange(axis),
-          }))}
-        />
+        <label className="inline-flex items-center gap-2 text-xs shrink-0" style={{ color: 'var(--muted-foreground)' }}>
+          {t('axis.chronologicalLabel')}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isChronological}
+            onClick={handleAxisToggle}
+            className="relative inline-flex items-center rounded-full transition-colors shrink-0"
+            style={{ width: 34, height: 20, background: isChronological ? 'var(--color-primary)' : 'var(--muted)' }}
+          >
+            <span
+              aria-hidden="true"
+              className="absolute rounded-full transition-transform"
+              style={{
+                width: 16,
+                height: 16,
+                top: 2,
+                left: 2,
+                transform: isChronological ? 'translateX(14px)' : 'translateX(0)',
+                background: 'var(--card)',
+              }}
+            />
+          </button>
+        </label>
 
         {hasActiveFilters && (
           <button
             type="button"
             onClick={handleClearAll}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full transition-opacity hover:opacity-70 min-h-[44px]"
+            className="flex items-center gap-1 text-xs px-4 py-2.5 rounded-full transition-opacity hover:opacity-70 ml-auto"
             style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
           >
             <X size={12} aria-hidden="true" />
             {t('filters.clear')}
           </button>
         )}
-      </div>
-
-      {/* Search input */}
-      <div className="relative">
-        <Search
-          size={15}
-          aria-hidden="true"
-          className="absolute left-3 top-1/2 -translate-y-1/2"
-          style={{ color: 'var(--muted-foreground)' }}
-        />
-        <input
-          type="search"
-          defaultValue={currentQ}
-          onChange={handleSearchChange}
-          placeholder={t('filters.search')}
-          aria-label={t('filters.search')}
-          className="w-full pl-9 pr-4 py-2 text-sm rounded-xl min-h-[44px] outline-none focus-visible:ring-2"
-          style={{
-            background: 'var(--muted)',
-            color: 'var(--foreground)',
-            border: '1px solid transparent',
-          }}
-        />
-      </div>
-
-      {/* Filter chips row */}
-      <div className="flex flex-wrap items-center gap-2">
-        {/* Period presets */}
-        {PERIOD_PRESETS.map(({ key, days }) => {
-          const fromVal = daysAgoISO(days)
-          const active = currentFrom === fromVal
-          return (
-            <button
-              key={key}
-              type="button"
-              aria-pressed={active}
-              onClick={() => updateParam('from', active ? null : fromVal)}
-              className="inline-flex items-center justify-center text-xs font-medium px-3 min-h-[48px] md:min-h-[36px] rounded-full border transition-colors"
-              style={{
-                background: active ? 'var(--color-primary)' : 'var(--card)',
-                borderColor: active ? 'var(--color-primary)' : 'var(--border)',
-                color: active ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
-              }}
-            >
-              {t(`filters.${key}`)}
-            </button>
-          )
-        })}
-
-        {/* Com métrica */}
-        <button
-          type="button"
-          aria-pressed={currentMetricOnly}
-          onClick={() => updateParam('metricOnly', currentMetricOnly ? null : 'true')}
-          className="inline-flex items-center justify-center text-xs font-medium px-3 min-h-[48px] md:min-h-[36px] rounded-full border transition-colors"
-          style={{
-            background: currentMetricOnly ? 'var(--color-primary)' : 'var(--card)',
-            borderColor: currentMetricOnly ? 'var(--color-primary)' : 'var(--border)',
-            color: currentMetricOnly ? 'var(--color-primary-fg)' : 'var(--muted-foreground)',
-          }}
-        >
-          {t('filters.metricOnly')}
-        </button>
       </div>
     </div>
   )

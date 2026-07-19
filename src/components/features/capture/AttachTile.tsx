@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link2, X, RotateCw } from 'lucide-react'
 
@@ -27,10 +28,12 @@ function domainFromUrl(url: string): string {
 /**
  * Tile de anexo (US2) — miniatura real para imagem, domínio/título para link. Reusado tanto no
  * drawer (com `onRemove`/`onRetry`) quanto em contextos somente-leitura (feed) sem essas props.
+ * Clicar na miniatura de imagem abre em tela cheia (revisão manual: antes não tinha como ampliar).
  */
 export function AttachTile({ kind, previewUrl, label, status = 'done', onRemove, onRetry }: AttachTileProps) {
   const t = useTranslations('registro')
   const hasError = status === 'error'
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   return (
     <div
@@ -42,13 +45,20 @@ export function AttachTile({ kind, previewUrl, label, status = 'done', onRemove,
       }}
     >
       {kind === 'image' ? (
-        // eslint-disable-next-line @next/next/no-img-element -- preview local (blob:) antes do upload, next/image não suporta
-        <img
-          src={previewUrl}
-          alt={t('attach.imageAlt')}
-          className="w-full h-full object-cover rounded-xl"
-          style={{ border: `1px solid ${hasError ? 'var(--destructive)' : 'var(--border)'}` }}
-        />
+        <button
+          type="button"
+          onClick={() => setLightboxOpen(true)}
+          aria-label={t('attach.viewFullAriaLabel')}
+          className="w-full h-full block rounded-xl"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- preview local (blob:) antes do upload, next/image não suporta */}
+          <img
+            src={previewUrl}
+            alt={t('attach.imageAlt')}
+            className="w-full h-full object-cover rounded-xl"
+            style={{ border: `1px solid ${hasError ? 'var(--destructive)' : 'var(--border)'}` }}
+          />
+        </button>
       ) : (
         <span
           className="flex items-center gap-1.5 px-3 h-full rounded-xl text-xs truncate max-w-[180px]"
@@ -91,6 +101,34 @@ export function AttachTile({ kind, previewUrl, label, status = 'done', onRemove,
             <X size={10} />
           </span>
         </button>
+      )}
+
+      {kind === 'image' && lightboxOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('attach.imageAlt')}
+          onClick={() => setLightboxOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style={{ background: 'var(--overlay-bg)', backdropFilter: 'blur(4px)' }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- mesma preview local/remota do tile, só ampliada */}
+          <img
+            src={previewUrl}
+            alt={t('attach.imageAlt')}
+            className="max-w-full max-h-full rounded-lg object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(false)}
+            aria-label={t('attach.closeFullAriaLabel')}
+            className="absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center"
+            style={{ background: 'var(--overlay-bg)', color: 'var(--color-primary-fg)' }}
+          >
+            <X size={18} aria-hidden="true" />
+          </button>
+        </div>
       )}
     </div>
   )

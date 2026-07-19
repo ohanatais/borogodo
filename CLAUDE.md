@@ -25,28 +25,61 @@ Features mergeadas em `main` (até PR #40):
 - **017-feed-registros** — feed cru de registros (`/registros`), cards colapsáveis, busca/filtros, grade-faísca (PR #51)
 - **020-canal-suporte** — canal de contato/suporte pré-launch: `ContactCard` reutilizável (e-mail copiável via `lib/clipboard.ts`, LinkedIn secundário, SLA) no rodapé da LP (`Footer`) e em `/configuracoes`; i18n namespace `support` (PR #54)
 - **021-navegacao-espinha** — reforma de IA: menu de 6 → 4 destinos (Painel, Espelho c/ Forças+Trajetória, Registros, Usar), `Segmented` único, chat como porta no Painel (PR #55)
+- **023-freio-de-custo** — limite/hora + trava diária US$10 + alertas operacionais de IA (PR #57)
+- **024-termos-privacidade** — Termos de Uso + Política de Privacidade + consentimento auditável (LGPD), migration `015` (PR #58)
+- **025-registro-deposito** — drawer bloco-de-notas que sempre salva (sem IA no caminho crítico), anexo de imagem/link de primeira classe (clique/colar/arrastar), confirmação editável, campos manuais opcionais; Painel novo (saudação + gatilho único + Suas forças + Registros recentes) e navegação em grupos + dark mode (PR #59)
 
 **Bloco da Presença (fechado):** 013 → 014 → 015 mergeadas. Migrations `009` e `010` aplicadas em
 **dev e prod** (`borogodo`). Respeitar a ordem (`009` antes de `010`).
 
-<!-- SPECKIT START -->
-Current feature: **025-registro-deposito** (branch: `025-registro-deposito`) — **Registro como Depósito (fundação): drawer bloco-de-notas que sempre salva (sem IA no caminho crítico), anexo de imagem/link de primeira classe, confirmação editável, campos manuais opcionais; Painel novo (saudação + gatilho único + Suas forças + Registros recentes) e navegação em grupos + dark mode. Spec ✅ clarify ✅ plan ✅**
+**Fatiamento Registro-como-depósito (A → B → C, `docs/decisions/003-registro-deposito-e-captura.md`):**
+Feature A (`025-registro-deposito`) mergeada (PR #59). Feature B é esta (`026`); Feature C
+(`027-importar-historico`) depende de B.
 
-> Feature A do fatiamento A→B→C descrito em `docs/decisions/003-registro-deposito-e-captura.md`.
-> Remove a dependência de IA síncrona (Haiku) do caminho de salvar (`captureAndReflect`) e o
-> reroteamento por tamanho de texto (limiar de 150 chars) — hoje ambos quebram o dogfooding.
-> Reusa `entries`/`evidences` JSONB/bucket `evidence-files` (migration 007) sem migration nova.
-> Novo `kind: 'deposito'` em `/api/capture` salva texto+campos manuais direto (sem IA); anexos
-> vão pela rota já existente `/api/entries/[id]/evidence`, chamada após a entry já ter `id`.
-> Navegação em grupos ("Meu espelho"/"Usar") e dark mode via `next-themes` (nova dependência)
-> ficam dentro desta fatia — decidido no `/speckit-clarify`, não viram sub-feature. Fora de
-> escopo: botão Organizar/estruturação por IA, destaques, reestruturação de Registros, Importar
-> histórico (features `026-organizar-destaques` e `027-importar-historico`).
-Spec: [specs/025-registro-deposito/spec.md](specs/025-registro-deposito/spec.md) ·
-Plan: [specs/025-registro-deposito/plan.md](specs/025-registro-deposito/plan.md) ·
-Research: [specs/025-registro-deposito/research.md](specs/025-registro-deposito/research.md) ·
-Data-model: [specs/025-registro-deposito/data-model.md](specs/025-registro-deposito/data-model.md) ·
-Contracts: [specs/025-registro-deposito/contracts/capture.md](specs/025-registro-deposito/contracts/capture.md) ·
-Quickstart: [specs/025-registro-deposito/quickstart.md](specs/025-registro-deposito/quickstart.md) ·
-Tasks: (pendente — `/speckit-tasks`)
+## Pronta para PR (implementação completa, aguardando merge)
+
+- **026-organizar-destaques** (branch: `026-organizar-destaques`) — implementação completa das 7
+  user stories (US1-US7, T001-T062) + Polish (T063-T068), **mais uma rodada extensa de revisão
+  manual** (teste real no navegador, não só specs) que encontrou e corrigiu vários bugs e ajustes
+  de UX antes do merge:
+  - Título do cabeçalho do card ficava preso no "início do texto cru" mesmo depois de organizado
+    (`entries.title` nunca é atualizado pela organização) — com 1 destaque só, título/métrica do
+    cabeçalho agora vêm do destaque (outcome-first).
+  - Reabrir o Drawer travava na tela de sucesso do registro anterior; "Organizar de novo" agora
+    SUBSTITUI os destaques (delete+insert) em vez de só somar — destaque deixou de ter
+    edição/exclusão isolada, corrigir é reorganizar.
+  - Editar um registro com 2+ destaques mostra a lista (só leitura) + "Organizar de novo" dentro
+    do próprio Drawer (antes só existia no card); Métrica/Impacto (que não representam nada com
+    2+ destaques) somem nesse caso. Botão vira "Atualizar" em modo edição.
+  - `/api/capture/organize-preview` rejeitava (400) textos colados acima de 8000 caracteres —
+    inconsistente com o resto do código, que só trunca pra IA, nunca rejeita a chamada inteira.
+  - Prompt de organização ganhou uma regra pra reconhecer conquistas relatadas dentro de uma
+    conversa/entrevista (não só o que aconteceu no momento capturado) — achado com uma
+    transcrição real de entrevista de emprego.
+  - Polish visual: tags e pílula de empresa em roxo-jambo/contraste corrigido (achavam-se
+    "invisíveis" contra o fundo lilás), botão Editar sem outline, cabeçalho de Registros
+    redesenhado (botão Registrar sólido coral, filtros harmonizados), imagem anexada abre em tela
+    cheia, ações do card (Usar/Organizar de novo/Editar/Excluir) numa linha só.
+  Code-review high pós-implementação (antes da revisão manual) já tinha corrigido uma corrida
+  real entre o guard de `organizing_started_at` do clique manual e o disparo assíncrono (US1 ×
+  US3) — ver `src/lib/entries/organizingLock.ts`.
+  1141 testes passando, `tsc --noEmit` e `eslint` limpos.
+  **Pendências antes do merge:**
+  - Migration `016_entry_highlights.sql` confirmada funcionando em **dev** (testada ao vivo nesta
+    revisão manual — organizar, reorganizar e múltiplos destaques todos passaram por teste real);
+    ainda **não aplicada em prod** — aplicar como parte do deploy pós-merge.
+  - PR aberto nesta sessão — branch atualizada com `main` (merge-base = tip de `origin/main`, sem
+    rebase necessário).
+  Ver `specs/026-organizar-destaques/tasks.md` (Phase 10) para o detalhe completo do que foi
+  verificado em cada item de polish original.
+
+<!-- SPECKIT START -->
+Sem feature em especificação ativa no momento — a `026-organizar-destaques` está com PR aberto,
+aguardando review/merge (ver "Pronta para PR" acima). A próxima é `027-importar-historico`, que
+depende de `026` estar mergeada (ver fatiamento acima). Referências da 026: Spec
+[specs/026-organizar-destaques/spec.md](specs/026-organizar-destaques/spec.md) · Plan
+[specs/026-organizar-destaques/plan.md](specs/026-organizar-destaques/plan.md) · Tasks
+[specs/026-organizar-destaques/tasks.md](specs/026-organizar-destaques/tasks.md) (68 tasks, 10
+fases, todas concluídas) · Shape de UX
+[specs/026-organizar-destaques/ux-shape.md](specs/026-organizar-destaques/ux-shape.md).
 <!-- SPECKIT END -->

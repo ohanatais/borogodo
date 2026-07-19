@@ -1,12 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
-import { EntryCard } from '@/components/features/feed/EntryCard'
+import { SourceCard } from '@/components/features/feed/SourceCard'
 import type { FeedItem } from '@/lib/feed/types'
 
 // 025-registro-deposito (US2/T025): confirma que anexos persistidos via
 // `POST /api/entries/[id]/evidence` continuam visíveis ao reabrir o registro em `/registros` —
-// aqui exercitado no nível do componente que a página do feed renderiza (`EntryCard`), com os
-// dados exatamente como `getFeedData` os devolve (evidences populadas a partir da coluna JSONB).
+// aqui exercitado no nível do componente que a página do feed renderiza (`SourceCard`, US7), com
+// os dados exatamente como `getFeedData` os devolve (evidences populadas a partir da coluna JSONB).
 function buildItem(overrides: Partial<FeedItem> = {}): FeedItem {
   return {
     id: 'entry-with-evidence',
@@ -16,6 +16,7 @@ function buildItem(overrides: Partial<FeedItem> = {}): FeedItem {
     created_at: new Date().toISOString(),
     entry_date: null,
     company: null,
+    is_personal_project: false,
     role_title: null,
     metric: null,
     tags: [],
@@ -28,13 +29,18 @@ function buildItem(overrides: Partial<FeedItem> = {}): FeedItem {
     decision: null,
     learning: null,
     file_name: null,
+    organized_at: null,
+    organizing_started_at: null,
+    highlights: [],
+    organizationStatus: 'not_organized',
+    contextStatus: 'unresolved',
     ...overrides,
   }
 }
 
 describe('Registro reaberto em /registros mantém anexos visíveis (US2)', () => {
   it('mostra a miniatura da imagem e o link anexados ao expandir o card', () => {
-    render(<EntryCard item={buildItem()} variant="feed" />)
+    render(<SourceCard item={buildItem()} variant="feed" />)
 
     fireEvent.click(screen.getByRole('button', { name: 'card.expand' }))
 

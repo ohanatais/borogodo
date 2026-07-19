@@ -41,7 +41,7 @@ export function GenerateMirrorButton() {
         type="button"
         onClick={handleGenerate}
         disabled={loading}
-        className="text-sm font-semibold px-4 py-2 rounded-full disabled:opacity-50"
+        className="text-sm font-semibold px-4 py-2.5 rounded-full disabled:opacity-50"
         style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
       >
         {loading ? 'Gerando...' : 'Gerar espelho agora'}

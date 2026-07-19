@@ -1,5 +1,7 @@
 import type { createServerClient } from '@/lib/db/supabase/server'
-import type { FeedItem, FeedPage, FeedQuery } from './types'
+import { deriveContextStatus } from '@/lib/entries/contextStatus'
+import { deriveOrganizationStatus } from '@/lib/entries/organizationStatus'
+import type { FeedHighlight, FeedItem, FeedPage, FeedQuery } from './types'
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 
@@ -19,6 +21,7 @@ interface RawEntry {
   created_at: string
   entry_date: string | null
   company: string | null
+  is_personal_project: boolean
   role_title: string | null
   metric: string | null
   tags: string[]
@@ -27,6 +30,46 @@ interface RawEntry {
   decision: string | null
   learning: string | null
   file_name: string | null
+  organized_at: string | null
+  organizing_started_at: string | null
+}
+
+interface HighlightRow {
+  id: string
+  entry_id: string
+  title: string | null
+  metric: string | null
+  impact: string | null
+  tags: string[] | null
+}
+
+/**
+ * US7 (FR-025/FR-026): agrupa as linhas de `entry_highlights` por fonte — uma única query por
+ * página em vez de N (uma por card), o que elimina o fetch lazy que cada card fazia sob demanda.
+ */
+function groupHighlightsByEntry(rows: HighlightRow[]): Map<string, FeedHighlight[]> {
+  const map = new Map<string, FeedHighlight[]>()
+  for (const row of rows) {
+    const list = map.get(row.entry_id) ?? []
+    list.push({ id: row.id, title: row.title, metric: row.metric, impact: row.impact, tags: row.tags ?? [] })
+    map.set(row.entry_id, list)
+  }
+  return map
+}
+
+/**
+ * FR-032: uma fonte sem nenhuma linha em `entry_highlights` (registro antigo, ou ainda não
+ * organizado) é tratada como fonte de destaque único — sintetizado a partir dos campos legados
+ * da própria entry, nunca um array vazio (todo card do feed tem ao menos 1 destaque a mostrar).
+ */
+function syntheticHighlight(entry: RawEntry, title: string): FeedHighlight {
+  return {
+    id: entry.id,
+    title,
+    metric: entry.metric,
+    impact: entry.impact,
+    tags: entry.tags ?? [],
+  }
 }
 
 function applyFallbackTitle(entry: RawEntry): string {
@@ -86,7 +129,7 @@ export async function getFeedData(
   let req = supabase
     .from('entries')
     .select(
-      'id, what_i_did, title, source, created_at, entry_date, company, role_title, metric, tags, evidences, impact, decision, learning, file_name'
+      'id, what_i_did, title, source, created_at, entry_date, company, is_personal_project, role_title, metric, tags, evidences, impact, decision, learning, file_name, organized_at, organizing_started_at'
     )
     .eq('user_id', userId)
 
@@ -169,24 +212,58 @@ export async function getFeedData(
         )
       : null
 
-  const items: FeedItem[] = pageRows.map((entry) => ({
-    id: entry.id,
-    title: applyFallbackTitle(entry),
-    what_i_did: entry.what_i_did,
-    source: entry.source,
-    created_at: entry.created_at,
-    entry_date: entry.entry_date,
-    company: entry.company,
-    role_title: entry.role_title,
-    metric: entry.metric,
-    tags: entry.tags ?? [],
-    thumbnail: extractThumbnail(entry.evidences ?? []),
-    evidences: entry.evidences ?? [],
-    impact: entry.impact,
-    decision: entry.decision,
-    learning: entry.learning,
-    file_name: entry.file_name,
-  }))
+  // US7 (FR-025/FR-026): uma única query batched contra `entry_highlights` para toda a página,
+  // em vez de um fetch por card — elimina o round-trip lazy que o `SourceCard` fazia ao expandir.
+  let highlightRows: HighlightRow[] = []
+  if (pageRows.length > 0) {
+    const { data: highlightData } = await supabase
+      .from('entry_highlights')
+      .select('id, entry_id, title, metric, impact, tags')
+      .in(
+        'entry_id',
+        pageRows.map((entry) => entry.id)
+      )
+      .eq('user_id', userId)
+      .order('position', { ascending: true })
+    highlightRows = (highlightData ?? []) as HighlightRow[]
+  }
+  const highlightsByEntry = groupHighlightsByEntry(highlightRows)
+
+  const items: FeedItem[] = pageRows.map((entry) => {
+    const fallbackTitle = applyFallbackTitle(entry)
+    const highlights = highlightsByEntry.get(entry.id) ?? [syntheticHighlight(entry, fallbackTitle)]
+    // Com exatamente 1 destaque, o cabeçalho do card mostra o título/métrica DELE (outcome-first,
+    // gerado pelo "Organizar" — FR-019) em vez do `entries.title`/`entries.metric` legados: esses
+    // campos legados nunca são atualizados pela organização (só `entry_highlights` recebe o
+    // título outcome-first), então o cabeçalho ficava preso na heurística "início do texto cru"
+    // mesmo depois de organizado. Com 2+ destaques, nenhum título/métrica isolado representa a
+    // fonte inteira — mantém o fallback.
+    const singleHighlight = highlights.length === 1 ? highlights[0] : null
+    return {
+      id: entry.id,
+      title: (singleHighlight?.title || fallbackTitle),
+      what_i_did: entry.what_i_did,
+      source: entry.source,
+      created_at: entry.created_at,
+      entry_date: entry.entry_date,
+      company: entry.company,
+      is_personal_project: entry.is_personal_project ?? false,
+      role_title: entry.role_title,
+      metric: singleHighlight ? singleHighlight.metric : null,
+      tags: entry.tags ?? [],
+      thumbnail: extractThumbnail(entry.evidences ?? []),
+      evidences: entry.evidences ?? [],
+      impact: singleHighlight ? singleHighlight.impact : entry.impact,
+      decision: entry.decision,
+      learning: entry.learning,
+      file_name: entry.file_name,
+      organized_at: entry.organized_at ?? null,
+      organizing_started_at: entry.organizing_started_at ?? null,
+      highlights,
+      organizationStatus: deriveOrganizationStatus(entry.organized_at ?? null, entry.organizing_started_at ?? null),
+      contextStatus: deriveContextStatus(entry.company ?? null, entry.is_personal_project ?? false),
+    }
+  })
 
   return { items, nextCursor, total: null }
 }

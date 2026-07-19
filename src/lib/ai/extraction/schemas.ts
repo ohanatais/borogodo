@@ -104,3 +104,96 @@ export function validateEntries(
 
   return limited.map((entry) => toExtractedEntry(entry, rawContent, source))
 }
+
+// Feature 026-organizar-destaques (Story 6, FR-024): tags geradas por IA nunca são adjetivos
+// genéricos isolados — a extração legada (`capture.ts`) só tinha essa regra no texto do prompt;
+// aqui reforçamos com uma checagem de código, já que prompts podem falhar em seguir a instrução.
+// Lista pequena e deliberadamente conservadora (advérbios/adjetivos de elogio vago, não termos
+// técnicos) — nunca é exaustiva, é uma rede de segurança além do prompt (ver organize.ts).
+const GENERIC_ADJECTIVE_TAGS = new Set([
+  'importante',
+  'difícil',
+  'dificil',
+  'produtivo',
+  'proativo',
+  'eficiente',
+  'eficaz',
+  'engajado',
+  'dedicado',
+  'excelente',
+  'ótimo',
+  'otimo',
+  'bom',
+  'rápido',
+  'rapido',
+  'criativo',
+  'inovador',
+  'estratégico',
+  'estrategico',
+])
+
+// FR-023: uma tag nova MUST seguir formato consistente com as já existentes do vocabulário da
+// pessoa — normalizamos casing/espaços em vez de confiar só na instrução de prompt, para que o
+// vocabulário nunca divirja em capitalização por variação da IA entre chamadas.
+function normalizeTag(tag: string): string {
+  return tag.trim().toLowerCase()
+}
+
+function isGenericAdjectiveTag(tag: string): boolean {
+  return GENERIC_ADJECTIVE_TAGS.has(normalizeTag(tag))
+}
+
+function sanitizeOrganizeTags(tags: string[]): string[] {
+  const normalized = tags.map(normalizeTag).filter((tag) => tag.length > 0 && !isGenericAdjectiveTag(tag))
+  // Normalizar capitalização (FR-023) pode fazer duas tags distintas da IA colapsarem na mesma
+  // string (ex. "DevOps" e "devops") — dedup depois de normalizar evita duplicata persistida.
+  return Array.from(new Set(normalized))
+}
+
+// Feature 026-organizar-destaques: resultado da chamada de "Organizar" (Haiku). Ausência de
+// métrica é válida (FR-018) — nenhum campo de highlight é obrigatório além de `tags`.
+const organizeHighlightSchema = z.object({
+  title: textField,
+  metric: textField,
+  impact: textField,
+  tags: z.array(z.string()).default([]).transform(sanitizeOrganizeTags),
+})
+
+const organizeResultSchema = z.object({
+  highlights: z.array(organizeHighlightSchema),
+  company: z.string().nullish(),
+  entry_date: dateField,
+})
+
+export interface OrganizeHighlight {
+  title: string | null
+  metric: string | null
+  impact: string | null
+  tags: string[]
+}
+
+export interface OrganizeResult {
+  highlights: OrganizeHighlight[]
+  company: string | null
+  entry_date: string | null
+}
+
+/**
+ * Valida o JSON bruto retornado pela chamada de "Organizar" (`organizeEntry`, feature 026).
+ * Lança se o shape não bate — quem chama não persiste nada parcial (mesmo padrão de
+ * `validateCaptureResult`/`validateEntries`).
+ */
+export function validateOrganizeResult(raw: unknown): OrganizeResult {
+  const parsed = organizeResultSchema.parse(raw)
+
+  return {
+    highlights: parsed.highlights.map((h) => ({
+      title: h.title ?? null,
+      metric: h.metric ?? null,
+      impact: h.impact ?? null,
+      tags: h.tags,
+    })),
+    company: parsed.company ?? null,
+    entry_date: parsed.entry_date,
+  }
+}

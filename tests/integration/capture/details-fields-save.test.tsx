@@ -36,7 +36,11 @@ describe('Drawer — preencher e salvar campos manuais (US4)', () => {
     fireEvent.change(screen.getByLabelText('detailsFields.metricLabel'), { target: { value: 'aceite em 2 ciclos' } })
     fireEvent.change(screen.getByLabelText('detailsFields.impactLabel'), { target: { value: 'reduziu retrabalho do time' } })
     fireEvent.change(screen.getByLabelText('detailsFields.tagsLabel'), { target: { value: 'negociação, processo' } })
-    fireEvent.change(screen.getByLabelText('detailsFields.companyLabel'), { target: { value: 'Acme' } })
+    // Empresa virou `ContextPillPicker` local (revisão pós-implementação) — "Outro" abre o campo
+    // de texto livre pra uma empresa fora do vocabulário.
+    fireEvent.click(screen.getByRole('button', { name: 'context.otherLabel' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'context.otherLabel' }), { target: { value: 'Acme' } })
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'context.otherLabel' }), { key: 'Enter' })
     fireEvent.change(screen.getByLabelText('detailsFields.dateLabel'), { target: { value: '2026-07-10' } })
 
     fireEvent.click(screen.getByRole('button', { name: 'drawer.submitButton' }))

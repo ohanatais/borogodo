@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { CheckCircle2, Pencil } from 'lucide-react'
+import { CheckCircle2, Pencil, Sparkles } from 'lucide-react'
 import { AttachTile } from './AttachTile'
 import type { DrawerAttachment } from '@/hooks/useDrawerDraft'
 
@@ -50,6 +50,13 @@ export function SavedPanel({ entryId, initialTitle, attachments = [], onRetryAtt
         </p>
       </div>
 
+      {/* US3 (feature 026, T040): registro já está salvo e visível — a organização (métrica/
+          impacto/tags/título) roda em segundo plano sem bloquear nem exigir nenhuma ação aqui. */}
+      <div className="flex items-center gap-1.5 text-xs px-0.5" style={{ color: 'var(--muted-foreground)' }}>
+        <Sparkles size={13} aria-hidden="true" />
+        <span>{t('savedPanel.organizingHint')}</span>
+      </div>
+
       <div className="flex flex-col gap-1.5">
         <label htmlFor="saved-panel-title" className="text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>
           {t('savedPanel.titleLabel')}
@@ -91,7 +98,7 @@ export function SavedPanel({ entryId, initialTitle, attachments = [], onRetryAtt
       <button
         type="button"
         onClick={onDone}
-        className="self-end px-4 py-2 rounded-xl text-sm font-semibold"
+        className="self-end px-4 py-2 min-h-[48px] rounded-xl text-sm font-semibold transition-opacity hover:opacity-80"
         style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
       >
         {t('savedPanel.doneButton')}

@@ -789,6 +789,11 @@
   },
   "feed": {
     "title": "Seus registros",
+    "composer": {
+      "registerButton": "Registrar",
+      "importHistory": "Importar histórico",
+      "comingSoon": "Em breve"
+    },
     "empty": {
       "heading": "Nenhum registro ainda",
       "description": "Cada história que você conta vira um registro aqui. Comece pela mais recente.",
@@ -796,21 +801,17 @@
       "cta": "Fazer minha primeira captura"
     },
     "axis": {
-      "created_at": "Quando anotei",
-      "entry_date": "Quando aconteceu"
+      "chronologicalLabel": "Ordem cronológica"
     },
     "filters": {
       "search": "Buscar registros…",
       "period": "Período",
       "company": "Empresa",
       "tags": "Tags",
-      "metricOnly": "Com métrica",
       "source": "Origem",
       "clear": "Limpar filtros",
-      "today": "Hoje",
-      "week": "7 dias",
-      "month": "30 dias",
-      "quarter": "90 dias"
+      "dateFrom": "De",
+      "dateTo": "Até"
     },
     "card": {
       "expand": "Ver detalhes",
@@ -825,7 +826,16 @@
         "description": "Esta ação é definitiva. Rascunhos gerados a partir dele não são apagados.",
         "cancel": "Cancelar",
         "confirm": "Excluir"
-      }
+      },
+      "highlightsBadge": "+{count} destaques",
+      "viewFull": "Ver fonte completa",
+      "hideFull": "Ocultar fonte"
+    },
+    "grid": {
+      "subtitle": "{count, plural, one {# registro} other {# registros}} em {months, plural, one {# mês} other {# meses}}"
+    },
+    "timeline": {
+      "count": "{count, plural, one {# registro} other {# registros}}"
     },
     "pagination": {
       "loadMore": "Carregar mais",
@@ -1013,14 +1023,16 @@
       "closeAriaLabel": "Fechar",
       "textareaPlaceholder": "Cole uma transcrição, um e-mail ou um documento. Ou escreva — fica salvo do jeito que está.",
       "textareaAriaLabel": "Texto do registro",
-      "sourcePreserved": "Fonte completa preservada. Guardo o texto inteiro.",
       "imageButton": "Imagem",
       "linkButton": "Link",
       "submitButton": "Registrar",
+      "updateButton": "Atualizar",
       "submitAriaLabel": "Registrar",
       "shortcutHint": "Esc fecha · ⌘/Ctrl+Enter registra",
       "emptyPromptFirst": "O que tomou mais do seu tempo esta semana?",
-      "emptyPromptSecond": "O que só você conseguiu resolver?"
+      "emptyPromptSecond": "O que só você conseguiu resolver?",
+      "organizeHint": "Separa seu texto em métrica, impacto e tags.",
+      "organizeOptional": "Opcional, e você edita tudo."
     },
     "error": {
       "saveFailed": "Não foi possível salvar agora. Seu texto está salvo aqui.",
@@ -1036,22 +1048,50 @@
       "linkInputError": "Esse link não parece válido. Confira e tente de novo.",
       "imageAlt": "Pré-visualização da imagem anexada",
       "uploadError": "Não foi possível enviar",
-      "retryAriaLabel": "Tentar enviar de novo"
+      "retryAriaLabel": "Tentar enviar de novo",
+      "viewFullAriaLabel": "Ver imagem em tela cheia",
+      "closeFullAriaLabel": "Fechar imagem em tela cheia"
     },
     "savedPanel": {
       "confirmation": "Registrado. Já está nos seus Registros.",
+      "organizingHint": "Organizando o resto em segundo plano…",
       "titleLabel": "Título",
       "titleHint": "O título é seu. Ajuste como quiser.",
       "titleAriaLabel": "Título do registro",
       "doneButton": "Concluir"
     },
     "detailsFields": {
-      "toggleLabel": "+ adicionar detalhes",
+      "toggleLabel": "Adicionar detalhes",
+      "collapseLabel": "Recolher",
+      "sectionLabel": "Detalhes",
+      "multiHighlightHint": "Métrica/impacto não aparecem aqui — veja os destaques atuais acima e use \"Organizar de novo\" pra corrigi-los, editando o texto do registro antes.",
       "metricLabel": "Métrica",
+      "metricPlaceholder": "ex.: aceite em 2 ciclos",
       "impactLabel": "Impacto",
+      "impactPlaceholder": "O que mudou por causa disso?",
       "tagsLabel": "Tags",
+      "tagsPlaceholder": "adicionar tag",
+      "removeTagAriaLabel": "Remover tag",
       "companyLabel": "Empresa",
       "dateLabel": "Data"
+    },
+    "organize": {
+      "cta": "Organizar",
+      "ctaAgain": "Organizar de novo",
+      "organizing": "Organizando…"
+    },
+    "highlightsSectionLabel": "Destaques",
+    "context": {
+      "unresolvedLabel": "sem contexto ainda",
+      "personalProjectLabel": "Projeto pessoal",
+      "otherLabel": "Outro",
+      "otherPlaceholder": "Nome do projeto ou empresa",
+      "searchPlaceholder": "Buscar..."
+    },
+    "highlight": {
+      "untitled": "Destaque sem título",
+      "collapse": "Recolher destaque",
+      "expand": "Expandir destaque"
     }
   }
 }

@@ -6,8 +6,10 @@ export type AIRole = 'extraction' | 'synthesis'
 /**
  * Ação lógica que disparou a chamada de IA. Decide, no guard (`src/lib/ai/client.ts`), se a
  * chamada entra no limite por hora e na trava diária (023-freio-de-custo).
- * - `capture`/`insight`/`sufficiency`: NUNCA bloqueadas (captura é o moat; insight é proativo do
- *   sistema; sufficiency é checagem barata de prontidão do espelho — todas extração Haiku).
+ * - `capture`/`insight`/`sufficiency`/`organize`: NUNCA bloqueadas (captura é o moat; insight é
+ *   proativo do sistema; sufficiency é checagem barata de prontidão do espelho; `organize`
+ *   (026-organizar-destaques) é extração Haiku sobre um registro já salvo, mesma família de
+ *   `capture` — nunca conta contra o freio de geração).
  * - `mirror`/`post`/`self_assessment`/`chat`/`voice`: ações de geração (Sonnet) disparadas pela
  *   pessoa, sujeitas ao limite por hora e à trava diária. `voice` (calibração de voz) entra como
  *   extensão consciente da lista da spec: é Sonnet pago e user-triggered, então também tem freio.
@@ -16,6 +18,7 @@ export type AIAction =
   | 'capture'
   | 'insight'
   | 'sufficiency'
+  | 'organize'
   | 'mirror'
   | 'post'
   | 'self_assessment'
