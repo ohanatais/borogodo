@@ -223,6 +223,7 @@ describe('SourceCard — "Editar" abre o Drawer preenchido com o registro (026)'
         entryDate: '2026-03-01',
       },
       isMultiHighlight: false,
+      highlights: [],
     })
 
     window.removeEventListener('borogodo:open-drawer', listener)

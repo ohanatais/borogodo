@@ -13,7 +13,12 @@ import { AudioButton } from './AudioButton'
 import { useDrawerDraft } from '@/hooks/useDrawerDraft'
 import type { DrawerManualFields } from '@/hooks/useDrawerDraft'
 import type { ManualFields } from '@/lib/capture/saveDeposito'
-import { dispatchEntryUpdated, type EditEntryDetail } from '@/components/features/painel/registroTriggerEvents'
+import {
+  dispatchEntryUpdated,
+  dispatchEntryHighlightsUpdated,
+  type EditEntryDetail,
+} from '@/components/features/painel/registroTriggerEvents'
+import type { FeedHighlight } from '@/lib/feed/types'
 
 export interface DrawerSaveResult {
   id: string
@@ -113,11 +118,17 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
   // "Organizar" no Drawer, antes de salvar — mesma extração de `organizeEntry`, sem persistir
   // nada ainda (POST /api/capture/organize-preview). "done" força "+ adicionar detalhes" aberto.
   const [organizeState, setOrganizeState] = useState<'idle' | 'organizing' | 'done'>('idle')
-  // Editar uma fonte com 2+ destaques reais (revisão pós-implementação, 026): "Organizar" e
-  // Métrica/Impacto representam UM destaque só — sem efeito real numa fonte com vários, já que
-  // nenhuma tela mostra esses campos legados quando há 2+. Corrigir passa a ser editar o texto
-  // cru e usar "Organizar de novo" no card, que substitui todos os destaques de uma vez.
-  const isMultiHighlightEdit = Boolean(editEntry?.isMultiHighlight)
+  // Editar uma fonte com 2+ destaques reais (revisão pós-implementação, 026): Métrica/Impacto
+  // representam UM destaque só — sem efeito real numa fonte com vários, já que nenhuma tela
+  // mostra esses campos legados quando há 2+. No lugar, mostra a lista (só leitura) dos destaques
+  // atuais + "Organizar de novo" — a mesma ação do card, aqui dentro, pra não mandar a pessoa
+  // fechar o Drawer e procurar o botão em outro lugar (revisão manual: o aviso antigo mencionava
+  // um botão que não existia dentro do Drawer). Derivado da contagem AO VIVO de `editHighlights`
+  // (não do flag `editEntry.isMultiHighlight`, congelado no momento do clique em "Editar") — assim
+  // reorganizar aqui dentro reflete na hora se o número de destaques mudou.
+  const [editHighlights, setEditHighlights] = useState<FeedHighlight[]>([])
+  const [reorganizingEdit, setReorganizingEdit] = useState(false)
+  const isMultiHighlightEdit = editHighlights.length > 1
   const dialogRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const touchStartYRef = useRef<number | null>(null)
@@ -146,6 +157,10 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
     if (fields?.company) draft.setManualField('company', fields.company)
     if (fields?.isPersonalProject) draft.setManualField('isPersonalProject', fields.isPersonalProject)
     if (fields?.entryDate) draft.setManualField('entryDate', fields.entryDate)
+    // Sincroniza com o `editEntry` recém-chegado (mesmo padrão de `draft.setRawText` acima, só
+    // que local em vez de opaco a um hook importado, por isso o lint enxerga este e não os outros).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEditHighlights(editEntry.highlights ?? [])
     wasEditingRef.current = true
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editEntry?.id])
@@ -398,6 +413,29 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
     }
   }
 
+  /**
+   * "Organizar de novo" de DENTRO do Drawer, ao editar uma fonte com 2+ destaques — mesma chamada
+   * real do card (`POST /api/entries/[id]/organize`, persiste e SUBSTITUI os destaques, ver
+   * `organizeEntry.ts`), trazida pra cá porque o aviso mencionar um botão só existente em outra
+   * tela (o card, fora do Drawer) era inconsistente (revisão manual). Notifica o card via evento
+   * pra ele refletir a substituição sem esperar um reload de página inteira.
+   */
+  async function handleReorganizeInDrawer() {
+    if (!editEntry || reorganizingEdit) return
+    setReorganizingEdit(true)
+    try {
+      const res = await fetch(`/api/entries/${editEntry.id}/organize`, { method: 'POST' })
+      const body = (await res.json().catch(() => null)) as { status?: string; highlights?: FeedHighlight[] } | null
+      if (res.ok && body?.status === 'organized' && body.highlights) {
+        setEditHighlights(body.highlights)
+        dispatchEntryHighlightsUpdated({ id: editEntry.id, highlights: body.highlights })
+        router.refresh()
+      }
+    } finally {
+      setReorganizingEdit(false)
+    }
+  }
+
   function addImageFiles(files: File[]) {
     files.filter((file) => file.type.startsWith('image/')).forEach((file) => draft.addImageAttachment(file))
   }
@@ -590,7 +628,49 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
                 <AudioButton onTranscript={handleAudioTranscript} />
               </div>
 
-              {!isMultiHighlightEdit && (
+              {isMultiHighlightEdit ? (
+                <div className="flex flex-col gap-2.5 rounded-xl p-3.5" style={{ background: 'var(--color-lilas-nevoa)' }}>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>
+                    <Sparkles size={12} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+                    {t('highlightsSectionLabel')}
+                  </span>
+                  <ul className="flex flex-col gap-1.5">
+                    {editHighlights.map((highlight, index) => (
+                      <li key={highlight.id} className="flex items-start gap-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                        <span
+                          aria-hidden="true"
+                          className="mt-0.5 flex shrink-0 items-center justify-center rounded-full text-[10px] font-semibold"
+                          style={{ width: 18, height: 18, background: 'var(--color-accent)', color: 'var(--color-accent-fg)' }}
+                        >
+                          {index + 1}
+                        </span>
+                        <span className="leading-snug">
+                          {highlight.title || t('highlight.untitled')}
+                          {highlight.metric && (
+                            <span className="ml-1.5 font-medium" style={{ color: 'var(--color-accent-text)' }}>
+                              {highlight.metric}
+                            </span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    onClick={() => void handleReorganizeInDrawer()}
+                    disabled={reorganizingEdit}
+                    className="inline-flex items-center gap-2 self-start px-4 py-2.5 rounded-full text-xs font-semibold transition-opacity disabled:opacity-45"
+                    style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+                  >
+                    {reorganizingEdit ? (
+                      <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Sparkles size={14} aria-hidden="true" />
+                    )}
+                    {reorganizingEdit ? t('organize.organizing') : t('organize.ctaAgain')}
+                  </button>
+                </div>
+              ) : (
                 <div className="flex items-center gap-3 rounded-xl p-3.5" style={{ background: 'var(--color-lilas-nevoa)' }}>
                   <button
                     type="button"

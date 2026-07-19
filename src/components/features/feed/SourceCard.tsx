@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useTranslations } from 'next-intl'
 import { Trash2, Pencil, ChevronDown, ChevronUp, Paperclip, Sparkles } from 'lucide-react'
@@ -10,7 +10,11 @@ import { AttachTile } from '@/components/features/capture/AttachTile'
 import { HighlightCard } from './HighlightCard'
 import { deriveContextStatus } from '@/lib/entries/contextStatus'
 import { deriveOrganizationStatus } from '@/lib/entries/organizationStatus'
-import { dispatchOpenDrawer } from '@/components/features/painel/registroTriggerEvents'
+import {
+  dispatchOpenDrawer,
+  ENTRY_HIGHLIGHTS_UPDATED_EVENT,
+  type EntryHighlightsUpdatedDetail,
+} from '@/components/features/painel/registroTriggerEvents'
 
 interface SourceCardProps {
   item: FeedItem
@@ -68,6 +72,19 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
   // e os destaques novos que "Organizar" insere) sem esperar um novo carregamento do feed.
   const [highlights, setHighlights] = useState<FeedHighlight[]>(item.highlights)
 
+  // "Organizar de novo" disparado de DENTRO do Drawer (edição de fonte com 2+ destaques, revisão
+  // manual) — o Drawer vive fora desta árvore (AppShellClient), então precisa deste evento pra
+  // substituir os destaques aqui sem esperar um reload de página inteira.
+  useEffect(() => {
+    function handler(e: Event) {
+      const detail = (e as CustomEvent<EntryHighlightsUpdatedDetail>).detail
+      if (detail.id !== item.id) return
+      setHighlights(detail.highlights)
+    }
+    window.addEventListener(ENTRY_HIGHLIGHTS_UPDATED_EVENT, handler)
+    return () => window.removeEventListener(ENTRY_HIGHLIGHTS_UPDATED_EVENT, handler)
+  }, [item.id])
+
   // Espelha a regra de `getFeedData.ts`: com 1 destaque só, título/métrica do cabeçalho vêm DELE
   // (outcome-first, gerado pelo "Organizar") — recalculado aqui pro cabeçalho refletir, sem
   // esperar um novo carregamento da página, a substituição otimista que "Organizar de novo" faz.
@@ -104,6 +121,7 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
           entryDate: item.entry_date ?? '',
         },
         isMultiHighlight: highlights.length > 1,
+        highlights,
       },
     })
   }
@@ -231,16 +249,80 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
             </div>
           )}
 
-          {/* "Destaques" só faz sentido como cabeçalho de seção quando há 2+ — com 1 destaque só
-              (revisão manual: "Organizado pelo Borogodó" não dizia nada de útil ali, e some) nada
-              é exibido no lugar. Editar/Excluir/Organizar de novo vivem juntos na fileira de ações
-              mais abaixo (revisão manual: Editar reposicionado pra sair dessa linha isolada). */}
-          {highlights.length > 1 && (
-            <div className="flex items-center gap-1.5 pt-1 text-xs font-medium" style={{ borderTop: '1px solid color-mix(in oklch, var(--border) 60%, transparent)', color: 'var(--muted-foreground)' }}>
-              <Sparkles size={12} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
-              {tRegistro('highlightsSectionLabel')}
+          {/* "DESTAQUES" (maiúsculo, sem ícone) só faz sentido como cabeçalho de seção quando há
+              2+ — com 1 destaque só nada é exibido no lugar, só o espaçador que empurra as ações
+              pra direita. Usar/Organizar de novo/Editar/Excluir alinhados aqui, à direita, na
+              mesma linha (revisão manual de posicionamento). */}
+          <div className="flex items-center gap-3 pt-1" style={{ borderTop: '1px solid color-mix(in oklch, var(--border) 60%, transparent)' }}>
+            {highlights.length > 1 ? (
+              <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--muted-foreground)' }}>
+                {tRegistro('highlightsSectionLabel')}
+              </span>
+            ) : (
+              <span className="flex-1" />
+            )}
+            <div className="flex items-center gap-2 flex-wrap ml-auto">
+              <UsarButton
+                seedType="entry"
+                seedRef={item.id}
+                seedSummary={item.what_i_did}
+                formats={['post', 'impact_summary']}
+              />
+
+              {variant === 'feed' && (() => {
+                // US3: o botão reflete tanto o clique manual local (`organizeState`) quanto a
+                // organização assíncrona em andamento no servidor (`serverOrganizationStatus`) —
+                // qualquer um dos dois basta para mostrar "organizando…" e desabilitar (FR-031).
+                const isOrganizingNow = organizeState === 'organizing' || serverOrganizationStatus === 'organizing'
+                const isOrganizedAlready = organizeState === 'done' || serverOrganizationStatus === 'organized'
+                return (
+                  <button
+                    type="button"
+                    onClick={() => void handleOrganize()}
+                    disabled={isOrganizingNow}
+                    className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+                    style={{ color: 'var(--muted-foreground)' }}
+                  >
+                    <Sparkles size={12} aria-hidden="true" />
+                    {isOrganizingNow
+                      ? tRegistro('organize.organizing')
+                      : isOrganizedAlready
+                        ? tRegistro('organize.ctaAgain')
+                        : tRegistro('organize.cta')}
+                  </button>
+                )
+              })()}
+
+              {/* Editar (026): abre o Drawer de Registro pré-preenchido com esta fonte — edição é
+                  sobre o registro inteiro (revisão pós-implementação: destaque deixou de ter
+                  edição/exclusão isolada — empresa/projeto pessoal e o conteúdo do destaque único
+                  também se editam por aqui, não têm mais um seletor/editor próprio no card). */}
+              {variant === 'feed' && (
+                <button
+                  type="button"
+                  onClick={handleEditClick}
+                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  <Pencil size={12} aria-hidden="true" />
+                  {t('card.edit')}
+                </button>
+              )}
+
+              {variant === 'feed' && onDelete && (
+                <button
+                  type="button"
+                  aria-label={t('card.delete')}
+                  onClick={() => setDeleteOpen(true)}
+                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
+                  style={{ color: 'var(--destructive)' }}
+                >
+                  <Trash2 size={12} aria-hidden="true" />
+                  {t('card.delete')}
+                </button>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Com 1 destaque só, o bloco de destaque seria redundante com o cabeçalho (título e
               métrica já vêm dele) — mostra só o impacto, sem chrome/box, como um preview de
@@ -306,69 +388,6 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
               >
                 {item.what_i_did}
               </p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <UsarButton
-              seedType="entry"
-              seedRef={item.id}
-              seedSummary={item.what_i_did}
-              formats={['post', 'impact_summary']}
-            />
-
-            {variant === 'feed' && (() => {
-              // US3: o botão reflete tanto o clique manual local (`organizeState`) quanto a
-              // organização assíncrona em andamento no servidor (`serverOrganizationStatus`) —
-              // qualquer um dos dois basta para mostrar "organizando…" e desabilitar (FR-031).
-              const isOrganizingNow = organizeState === 'organizing' || serverOrganizationStatus === 'organizing'
-              const isOrganizedAlready = organizeState === 'done' || serverOrganizationStatus === 'organized'
-              return (
-                <button
-                  type="button"
-                  onClick={() => void handleOrganize()}
-                  disabled={isOrganizingNow}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  <Sparkles size={12} aria-hidden="true" />
-                  {isOrganizingNow
-                    ? tRegistro('organize.organizing')
-                    : isOrganizedAlready
-                      ? tRegistro('organize.ctaAgain')
-                      : tRegistro('organize.cta')}
-                </button>
-              )
-            })()}
-
-            {/* Editar (026): abre o Drawer de Registro pré-preenchido com esta fonte — edição é
-                sobre o registro inteiro (revisão pós-implementação: destaque deixou de ter
-                edição/exclusão isolada — empresa/projeto pessoal e o conteúdo do destaque único
-                também se editam por aqui, não têm mais um seletor/editor próprio no card). Entre
-                Organizar de novo e Excluir (revisão manual de posicionamento). */}
-            {variant === 'feed' && (
-              <button
-                type="button"
-                onClick={handleEditClick}
-                className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
-                style={{ color: 'var(--color-primary)' }}
-              >
-                <Pencil size={12} aria-hidden="true" />
-                {t('card.edit')}
-              </button>
-            )}
-
-            {variant === 'feed' && onDelete && (
-              <button
-                type="button"
-                aria-label={t('card.delete')}
-                onClick={() => setDeleteOpen(true)}
-                className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
-                style={{ color: 'var(--destructive)' }}
-              >
-                <Trash2 size={12} aria-hidden="true" />
-                {t('card.delete')}
-              </button>
             )}
           </div>
         </div>

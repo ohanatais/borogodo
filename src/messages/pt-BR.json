@@ -1064,7 +1064,7 @@
       "toggleLabel": "Adicionar detalhes",
       "collapseLabel": "Recolher",
       "sectionLabel": "Detalhes",
-      "multiHighlightHint": "Esse registro tem vários destaques — pra corrigir métrica/impacto, edite o texto abaixo e use \"Organizar de novo\" no card em Registros.",
+      "multiHighlightHint": "Métrica/impacto não aparecem aqui — veja os destaques atuais acima e use \"Organizar de novo\" pra corrigi-los, editando o texto do registro antes.",
       "metricLabel": "Métrica",
       "metricPlaceholder": "ex.: aceite em 2 ciclos",
       "impactLabel": "Impacto",
