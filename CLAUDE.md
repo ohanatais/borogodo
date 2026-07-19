@@ -39,32 +39,44 @@ Feature A (`025-registro-deposito`) mergeada (PR #59). Feature B é esta (`026`)
 ## Pronta para PR (implementação completa, aguardando merge)
 
 - **026-organizar-destaques** (branch: `026-organizar-destaques`) — implementação completa das 7
-  user stories (US1-US7, T001-T062) + Polish (T063-T068): botão opcional "Organizar" (Haiku, só
-  preenche campos vazios) infere métrica/impacto/tags/período; contexto por seletor de pílulas
-  determinístico (empresas já usadas + "Projeto pessoal" + "Outro", sem IA, precedência sobre
-  inferência); organização assíncrona disparada pelo salvar (fire-and-forget); registro = FONTE
-  com múltiplos destaques dentro (`entry_highlights`); tags reaproveitam o vocabulário já usado
-  pela pessoa; título outcome-first protegido de sobrescrita; Registros reestruturado
-  (`SourceCard`, miniatura real, selo "+N destaques", timeline por mês, grade-faísca sem streak).
-  Code-review high pós-implementação encontrou e corrigiu uma corrida real entre o guard de
-  `organizing_started_at` do clique manual e o disparo assíncrono (US1 × US3) — ver
-  `src/lib/entries/organizingLock.ts`. Impeccable audit corrigiu 3 alvos de toque abaixo de 48px.
-  1128 testes passando, `tsc --noEmit` limpo.
+  user stories (US1-US7, T001-T062) + Polish (T063-T068), **mais uma rodada extensa de revisão
+  manual** (teste real no navegador, não só specs) que encontrou e corrigiu vários bugs e ajustes
+  de UX antes do merge:
+  - Título do cabeçalho do card ficava preso no "início do texto cru" mesmo depois de organizado
+    (`entries.title` nunca é atualizado pela organização) — com 1 destaque só, título/métrica do
+    cabeçalho agora vêm do destaque (outcome-first).
+  - Reabrir o Drawer travava na tela de sucesso do registro anterior; "Organizar de novo" agora
+    SUBSTITUI os destaques (delete+insert) em vez de só somar — destaque deixou de ter
+    edição/exclusão isolada, corrigir é reorganizar.
+  - Editar um registro com 2+ destaques mostra a lista (só leitura) + "Organizar de novo" dentro
+    do próprio Drawer (antes só existia no card); Métrica/Impacto (que não representam nada com
+    2+ destaques) somem nesse caso. Botão vira "Atualizar" em modo edição.
+  - `/api/capture/organize-preview` rejeitava (400) textos colados acima de 8000 caracteres —
+    inconsistente com o resto do código, que só trunca pra IA, nunca rejeita a chamada inteira.
+  - Prompt de organização ganhou uma regra pra reconhecer conquistas relatadas dentro de uma
+    conversa/entrevista (não só o que aconteceu no momento capturado) — achado com uma
+    transcrição real de entrevista de emprego.
+  - Polish visual: tags e pílula de empresa em roxo-jambo/contraste corrigido (achavam-se
+    "invisíveis" contra o fundo lilás), botão Editar sem outline, cabeçalho de Registros
+    redesenhado (botão Registrar sólido coral, filtros harmonizados), imagem anexada abre em tela
+    cheia, ações do card (Usar/Organizar de novo/Editar/Excluir) numa linha só.
+  Code-review high pós-implementação (antes da revisão manual) já tinha corrigido uma corrida
+  real entre o guard de `organizing_started_at` do clique manual e o disparo assíncrono (US1 ×
+  US3) — ver `src/lib/entries/organizingLock.ts`.
+  1141 testes passando, `tsc --noEmit` e `eslint` limpos.
   **Pendências antes do merge:**
-  - Migration `016_entry_highlights.sql` ainda **não aplicada** em dev nem prod — bloqueio de
-    segurança do MCP Supabase (não confirma automaticamente que é o projeto de dev autorizado);
-    requer a Ohana rodar manualmente ou conceder a permissão.
-  - Roteiros manuais de `specs/026-organizar-destaques/quickstart.md` (US1-US7) não rodados fim a
-    fim contra o app de verdade — depende da migration acima estar aplicada.
-  - Abrir o PR (branch pronta, não commitada nenhuma alteração além do que está aqui).
+  - Migration `016_entry_highlights.sql` confirmada funcionando em **dev** (testada ao vivo nesta
+    revisão manual — organizar, reorganizar e múltiplos destaques todos passaram por teste real);
+    ainda **não aplicada em prod** — aplicar como parte do deploy pós-merge.
+  - PR aberto nesta sessão — branch atualizada com `main` (merge-base = tip de `origin/main`, sem
+    rebase necessário).
   Ver `specs/026-organizar-destaques/tasks.md` (Phase 10) para o detalhe completo do que foi
-  verificado em cada item de polish.
+  verificado em cada item de polish original.
 
 <!-- SPECKIT START -->
-Sem feature em especificação ativa no momento — a `026-organizar-destaques` está com
-implementação completa (ver "Pronta para PR" acima), só falta migration/validação manual e o
-merge. A próxima é `027-importar-historico`, que depende de `026` estar mergeada (ver
-fatiamento acima). Referências da 026: Spec
+Sem feature em especificação ativa no momento — a `026-organizar-destaques` está com PR aberto,
+aguardando review/merge (ver "Pronta para PR" acima). A próxima é `027-importar-historico`, que
+depende de `026` estar mergeada (ver fatiamento acima). Referências da 026: Spec
 [specs/026-organizar-destaques/spec.md](specs/026-organizar-destaques/spec.md) · Plan
 [specs/026-organizar-destaques/plan.md](specs/026-organizar-destaques/plan.md) · Tasks
 [specs/026-organizar-destaques/tasks.md](specs/026-organizar-destaques/tasks.md) (68 tasks, 10
