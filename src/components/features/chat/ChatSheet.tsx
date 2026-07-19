@@ -8,9 +8,8 @@ import { ChatMessage, type MessageData } from './ChatMessage'
 import { ChatInput } from './ChatInput'
 import { StarterPrompts } from './StarterPrompts'
 import { CorrectionConfirmCard } from './CorrectionConfirmCard'
-import { MarcoPreviewCard } from './MarcoPreviewCard'
 import { parseAiLimit } from '@/lib/ai/cost/clientLimit'
-import type { Citation, CorrectionAction, MarcoPreview } from '@/lib/ai/chat/answerCareerQuestion'
+import type { Citation, CorrectionAction } from '@/lib/ai/chat/answerCareerQuestion'
 import type { PrepMoment } from '@/lib/content/intentions'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -23,7 +22,6 @@ interface ChatOpenDetail {
     moment?: PrepMoment
   }
   prefillMessage?: string
-  mode?: 'registro'
 }
 
 type State = {
@@ -32,9 +30,7 @@ type State = {
   draft: string
   status: 'idle' | 'streaming' | 'error'
   context: ChatOpenDetail['context'] | null
-  mode: 'pergunta' | 'registro'
   pendingCorrection: CorrectionAction | null
-  pendingMarco: MarcoPreview | null
   pendingAutoSend: string | null
 }
 
@@ -47,7 +43,7 @@ type Action =
   | { type: 'USER_SENT'; id: string; content: string }
   | { type: 'ASSISTANT_STARTED'; id: string }
   | { type: 'ASSISTANT_DELTA'; id: string; text: string }
-  | { type: 'ASSISTANT_DONE'; id: string; citations: Citation[]; suggestions: string[]; correction?: CorrectionAction; marcoPreview?: MarcoPreview }
+  | { type: 'ASSISTANT_DONE'; id: string; citations: Citation[]; suggestions: string[]; correction?: CorrectionAction }
   | { type: 'ASSISTANT_ERROR'; id: string; message: string }
   | { type: 'ASSISTANT_LIMITED'; id: string; message: string }
   | { type: 'CARD_DISMISSED' }
@@ -68,11 +64,9 @@ function reducer(state: State, action: Action): State {
         ...state,
         open: true,
         context: newContext,
-        mode: action.payload.mode ?? 'pergunta',
         draft: '',
         messages: shouldReset ? [] : state.messages,
         pendingCorrection: shouldReset ? null : state.pendingCorrection,
-        pendingMarco: shouldReset ? null : state.pendingMarco,
         pendingAutoSend: hasPrefill ? prefill : null,
       }
     }
@@ -86,9 +80,7 @@ function reducer(state: State, action: Action): State {
         messages: [],
         draft: '',
         status: 'idle',
-        mode: 'pergunta',
         pendingCorrection: null,
-        pendingMarco: null,
         context: null,
       }
     case 'SET_DRAFT':
@@ -99,7 +91,6 @@ function reducer(state: State, action: Action): State {
         draft: '',
         status: 'streaming',
         pendingCorrection: null,
-        pendingMarco: null,
         messages: [
           ...state.messages,
           { id: action.id, role: 'user', content: action.content },
@@ -125,7 +116,6 @@ function reducer(state: State, action: Action): State {
         ...state,
         status: 'idle',
         pendingCorrection: action.correction ?? null,
-        pendingMarco: action.marcoPreview ?? null,
         messages: state.messages.map((m) =>
           m.id === action.id
             ? { ...m, isStreaming: false, citations: action.citations, suggestions: action.suggestions }
@@ -154,7 +144,7 @@ function reducer(state: State, action: Action): State {
         ),
       }
     case 'CARD_DISMISSED':
-      return { ...state, pendingCorrection: null, pendingMarco: null }
+      return { ...state, pendingCorrection: null }
     case 'SET_HELPFUL':
       return {
         ...state,
@@ -173,9 +163,7 @@ const initialState: State = {
   draft: '',
   status: 'idle',
   context: null,
-  mode: 'pergunta',
   pendingCorrection: null,
-  pendingMarco: null,
   pendingAutoSend: null,
 }
 
@@ -254,7 +242,6 @@ export function ChatSheet() {
                 citations?: Citation[]
                 suggestions?: string[]
                 correction?: CorrectionAction
-                marcoPreview?: MarcoPreview
                 message?: string
               }
 
@@ -267,7 +254,6 @@ export function ChatSheet() {
                   citations: json.citations ?? [],
                   suggestions: json.suggestions ?? [],
                   correction: json.correction,
-                  marcoPreview: json.marcoPreview,
                 })
               } else if (json.type === 'error') {
                 dispatch({
@@ -328,7 +314,7 @@ export function ChatSheet() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [state.messages, state.pendingCorrection, state.pendingMarco])
+  }, [state.messages, state.pendingCorrection])
 
   function handleSubmit() {
     void sendMessage(state.draft)
@@ -343,9 +329,7 @@ export function ChatSheet() {
   }
 
   const isEmpty = state.messages.length === 0
-  const isCorrectionMode = state.context?.type === 'entry'
   const isPreparacaoMode = state.context?.type === 'preparacao'
-  const isRegistroMode = state.mode === 'registro'
   // Suggestions don't make sense in correction/espelho context: the user needs to
   // type their own free-form correction, not pick a pre-canned response.
   const suggestionsEnabled = state.context?.type !== 'entry' && state.context?.type !== 'espelho'
@@ -384,16 +368,8 @@ export function ChatSheet() {
           >
             <div className="flex items-center gap-2">
               <Dialog.Title className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-                {isCorrectionMode ? 'Corrigir entrada' : isPreparacaoMode ? 'Me preparar pra um momento' : isRegistroMode ? 'Registrar sobre minha carreira' : 'Perguntar sobre minha carreira'}
+                {isPreparacaoMode ? 'Me preparar pra um momento' : 'Perguntar sobre minha carreira'}
               </Dialog.Title>
-              {isCorrectionMode && (
-                <span
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                  style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)' }}
-                >
-                  modo correção
-                </span>
-              )}
             </div>
             <div className="flex items-center gap-1">
               {state.messages.length > 0 && (
@@ -454,12 +430,6 @@ export function ChatSheet() {
                   />
                 )}
 
-                {state.pendingMarco && (
-                  <MarcoPreviewCard
-                    marco={state.pendingMarco}
-                    onDismiss={() => dispatch({ type: 'CARD_DISMISSED' })}
-                  />
-                )}
               </div>
             )}
           </div>
@@ -475,7 +445,7 @@ export function ChatSheet() {
               onChange={(text) => dispatch({ type: 'SET_DRAFT', text })}
               onSubmit={handleSubmit}
               disabled={state.status === 'streaming'}
-              placeholder={isCorrectionMode ? 'O que está incorreto nesta entrada?' : isRegistroMode ? 'Adicione mais contexto ou confirme...' : 'Pergunte algo sobre sua carreira...'}
+              placeholder="Pergunte algo sobre sua carreira..."
             />
           </div>
         </Dialog.Content>

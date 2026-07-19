@@ -77,62 +77,28 @@ const NEW_DEPOSITO_STANDALONE: RawEntry = {
 }
 
 describe('Regressão US /historico — registros antigos e novos convivendo (T073)', () => {
-  it('agrupa entries de kind antigo (text/marco) e novo (deposito) na mesma company/project sem perder nenhuma', () => {
+  it('agrupa entries de kind antigo e novo na mesma company sem reintroduzir projetos', () => {
     const companies = groupCompanies([LEGACY_TEXT_ENTRY, LEGACY_MARCO_ENTRY, NEW_DEPOSITO_ENTRY, NEW_DEPOSITO_STANDALONE])
 
     expect(companies).toHaveLength(1)
     const [acme] = companies
     expect(acme.company).toBe('Acme Corp')
 
-    const onboarding = acme.projects.find((p) => p.name === 'Onboarding')
-    expect(onboarding).toBeDefined()
-    expect(onboarding!.entries.map((e) => e.id).sort()).toEqual(
-      ['deposito-1', 'legacy-marco-1', 'legacy-text-1'].sort()
-    )
+    expect(acme.projects).toEqual([])
+    expect(acme.highlight_bullets).toEqual([
+      'Lançou o programa de onboarding self-serve',
+      'Marco: primeiro milhão de usuários ativos',
+      'Resolvi o bug de checkout duplicado',
+    ])
 
-    // Entrada avulsa (sem project_name) do caminho novo também entra como standalone/highlight,
-    // igual entraria uma entrada avulsa do caminho antigo.
-    expect(acme.highlight_bullets).toContain('Documentei o fluxo de suporte em uma página')
+    // A trajetória mostra no máximo três destaques; o restante continua disponível em Registros.
+    expect(acme.highlight_bullets).toHaveLength(3)
   })
 
-  it('preserva evidências (url e image) de entries antigas e novas no mesmo project sem crash', () => {
+  it('renderiza HistoricoTimeline com a experiência achatada', () => {
     const [acme] = groupCompanies([LEGACY_TEXT_ENTRY, LEGACY_MARCO_ENTRY, NEW_DEPOSITO_ENTRY])
-    const onboarding = acme.projects.find((p) => p.name === 'Onboarding')!
-
-    const legacyEntry = onboarding.entries.find((e) => e.id === 'legacy-text-1')!
-    const marcoEntry = onboarding.entries.find((e) => e.id === 'legacy-marco-1')!
-    const depositoEntry = onboarding.entries.find((e) => e.id === 'deposito-1')!
-
-    expect(legacyEntry.evidences).toEqual<EvidenceItem[]>([
-      { type: 'url', value: 'https://acme.com/case-study', label: 'Case study' },
-    ])
-    expect(marcoEntry.evidences).toEqual([])
-    expect(depositoEntry.evidences).toEqual<EvidenceItem[]>([
-      { type: 'image', value: 'https://cdn.borogodo.app/evidence/print.png', label: 'Print do bug' },
-    ])
-  })
-
-  it('renderiza HistoricoTimeline com o projeto aberto contendo entries antigas e novas lado a lado', () => {
-    const [acme] = groupCompanies([LEGACY_TEXT_ENTRY, LEGACY_MARCO_ENTRY, NEW_DEPOSITO_ENTRY])
-    const project = acme.projects.find((p) => p.name === 'Onboarding')!
-    const noop = () => undefined
-
-    render(
-      <HistoricoTimeline
-        data={{ companies: [acme] }}
-        activeProject={{ company: acme.company, project }}
-        onSelectProject={noop}
-        onCloseProject={noop}
-        onStartCapture={noop}
-      />
-    )
-
-    // HistoricoTimeline monta o ProjectDetailPanel em dois lugares (drawer mobile + coluna
-    // desktop) simultaneamente no DOM de teste (a diferença é só CSS de viewport) — por isso
-    // `getAllByText` em vez de `getByText`.
-    expect(screen.getAllByText('Lançou o programa de onboarding self-serve').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Marco: primeiro milhão de usuários ativos').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Resolvi o bug de checkout duplicado').length).toBeGreaterThan(0)
+    render(<HistoricoTimeline data={{ companies: [acme] }} />)
+    expect(screen.getByText(/Acme Corp/)).toBeInTheDocument()
   })
 
   it('EvidenceSection renderiza evidência de link (caminho antigo) e de imagem (Drawer novo) juntas', () => {

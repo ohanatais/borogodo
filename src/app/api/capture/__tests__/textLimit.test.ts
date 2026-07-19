@@ -42,6 +42,7 @@ vi.mock('@/lib/ai/extraction/jobs', () => ({
   fireAndForget: vi.fn(),
   maybeRegenerateMirror: vi.fn(),
   triggerProactiveInsight: vi.fn(),
+  refreshEntryEmbedding: vi.fn(),
 }))
 
 vi.mock('@/lib/errors', () => ({

@@ -491,18 +491,25 @@
   "bemvindo": {
     "step1": {
       "headline": "Hello, {nome}.",
-      "sub": "This is where your work becomes clarity.",
-      "promise": "You tell me what you did. I reveal what it says about who you are.",
+      "sub": "Your work already tells a story.",
+      "promise": "Upload your resume or LinkedIn. I will organize your experience and show the patterns in your work.",
       "cta": "Let's start"
     },
     "loop": {
-      "promptInicial": "Tell me the last relevant thing you did at work.",
-      "placeholder": "E.g.: I led the migration of a critical system, which reduced errors by 40%...",
-      "cta": "Tell",
-      "ctaLinkedin": "Import LinkedIn PDF",
-      "reading": "Reading what you told me...",
-      "evaluating": "Evaluating what I learned...",
-      "generating": "Creating your mirror...",
+      "promptInicial": "Start with what you have already built.",
+      "importHint": "Upload your resume or LinkedIn as a PDF. I will organize your experience and prepare your first Mirror.",
+      "ctaLinkedin": "Upload resume or LinkedIn PDF",
+      "reading1": "Reading your resume...",
+      "reading2": "Sorting your experiences...",
+      "reading3": "Finding the patterns across your path...",
+      "generating1": "Bringing the patterns together...",
+      "generating2": "Grounding each insight in evidence...",
+      "generating3": "Preparing your Mirror...",
+      "stageRead": "Read file",
+      "stageOrganize": "Organize path",
+      "stageMirror": "Build Mirror",
+      "longWaitTitle": "This is taking a little longer.",
+      "longWaitBody": "There is a lot to organize in your file. I am connecting the experiences before building your Mirror.",
       "ctaFinal": "See my full mirror",
       "retry": "Try again",
       "errorGeneric": "Something went wrong. Please try again."
@@ -638,9 +645,7 @@
       "label": "✦ This would make a good post",
       "cta": "Use"
     },
-    "resumeTitle": "Resume draft",
-    "useProject": "Use this project",
-    "projectSeed": "project {name} ({count, plural, one {# entry} other {# entries}})"
+    "resumeTitle": "Resume draft"
   },
   "autoavaliacao": {
     "title": "Your self-assessment",

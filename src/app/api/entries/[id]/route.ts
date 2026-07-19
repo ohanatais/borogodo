@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/db/supabase/server'
+import { fireAndForget, refreshEntryEmbedding } from '@/lib/ai/extraction/jobs'
 import { z } from 'zod'
 
 const updateEntrySchema = z.object({
@@ -7,6 +8,7 @@ const updateEntrySchema = z.object({
   // endpoint genérico em vez de criar uma rota nova.
   title: z.string().min(1).max(200).optional(),
   what_i_did: z.string().min(1).max(2000).optional(),
+  raw_content: z.string().min(1).max(20_000).optional(),
   company: z.string().max(200).nullable().optional(),
   // Story 2 (026-organizar-destaques): seleção da pílula "Projeto pessoal" — resolve o
   // contexto sem empresa (FR-003 acceptance #3), custo zero (sem chamada de IA, FR-003/SC-007).
@@ -57,6 +59,10 @@ export async function PATCH(request: Request, context: RouteContext): Promise<Ne
 
   if (Object.keys(updates).length === 0) return jsonError('Nenhum campo para atualizar', 400)
 
+  // A tabela não tem trigger de `updated_at`. Este carimbo também protege a indexação assíncrona:
+  // um embedding calculado antes desta edição não pode sobrescrever o vetor do texto novo.
+  updates.updated_at = new Date().toISOString()
+
   const { data, error } = await supabase
     .from('entries')
     .update(updates)
@@ -67,6 +73,10 @@ export async function PATCH(request: Request, context: RouteContext): Promise<Ne
 
   if (error) return jsonError('Erro ao atualizar entrada', 500)
   if (!data) return jsonError('Entrada não encontrada', 404)
+
+  if ('raw_content' in updates) {
+    fireAndForget('refreshEntryEmbedding', refreshEntryEmbedding(user.id, id))
+  }
 
   return NextResponse.json({ ok: true, entry: data })
 }

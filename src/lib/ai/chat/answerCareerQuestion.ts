@@ -5,7 +5,7 @@ import { getLatestSnapshot } from '@/lib/db/mirror'
 import { getProfile } from '@/lib/db/profiles'
 import { buildCareerChatSystemPrompt } from '@/lib/ai/chat/prompts/careerChat'
 import { logger } from '@/lib/log'
-import type { Entry } from '@/types/entry'
+import type { Entry, EntryHighlight } from '@/types/entry'
 import type { PrepMoment } from '@/lib/content/intentions'
 import type { createServerClient } from '@/lib/db/supabase/server'
 
@@ -24,15 +24,6 @@ export interface CorrectionAction {
   action: 'update' | 'delete' | 'enrich'
 }
 
-export interface MarcoPreview {
-  what_i_did: string
-  company?: string
-  role_title?: string
-  entry_date?: string
-  impact?: string
-  metric?: string
-}
-
 export interface ChatContext {
   type: 'espelho' | 'historico' | 'empresa' | 'entry' | 'preparacao'
   entityId?: string
@@ -42,7 +33,10 @@ export interface ChatContext {
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 
-type EntryWithEmbedding = Entry & { embedding: unknown }
+export type ChatEntry = Entry & {
+  embedding?: unknown
+  entry_highlights?: Pick<EntryHighlight, 'title' | 'metric' | 'impact' | 'tags' | 'position'>[]
+}
 
 const SEMANTIC_SEARCH_LIMIT = 200
 const TOP_K = 5
@@ -61,10 +55,10 @@ async function findRelevantEntries(
   supabase: SupabaseServerClient,
   userId: string,
   queryEmbedding: number[]
-): Promise<Entry[]> {
+): Promise<ChatEntry[]> {
   const { data } = await supabase
     .from('entries')
-    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at, embedding')
+    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at, embedding, entry_highlights(title, metric, impact, tags, position)')
     .eq('user_id', userId)
     .not('embedding', 'is', null)
     .order('created_at', { ascending: false })
@@ -72,46 +66,46 @@ async function findRelevantEntries(
 
   if (!data || data.length === 0) return []
 
-  return (data as EntryWithEmbedding[])
+  return (data as ChatEntry[])
     .map((row) => ({ entry: row, score: cosineSimilarity(queryEmbedding, parseEmbedding(row.embedding) ?? []) }))
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_K)
-    .map(({ entry }) => entry as Entry)
+    .map(({ entry }) => entry)
 }
 
 async function fetchCompanyEntries(
   supabase: SupabaseServerClient,
   userId: string,
   company: string
-): Promise<Entry[]> {
+): Promise<ChatEntry[]> {
   const { data } = await supabase
     .from('entries')
-    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at')
+    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at, entry_highlights(title, metric, impact, tags, position)')
     .eq('user_id', userId)
     .eq('company', company)
     .order('entry_date', { ascending: false })
     .limit(20)
 
-  return (data ?? []) as Entry[]
+  return (data ?? []) as ChatEntry[]
 }
 
 async function fetchEntryById(
   supabase: SupabaseServerClient,
   userId: string,
   entryId: string
-): Promise<Entry | null> {
+): Promise<ChatEntry | null> {
   const { data } = await supabase
     .from('entries')
-    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at')
+    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at, entry_highlights(title, metric, impact, tags, position)')
     .eq('id', entryId)
     .eq('user_id', userId)
     .maybeSingle()
 
-  return (data as Entry | null)
+  return (data as ChatEntry | null)
 }
 
-function buildCitations(entries: Entry[]): Citation[] {
+function buildCitations(entries: ChatEntry[]): Citation[] {
   return entries.map((e) => ({
     label: e.what_i_did.slice(0, 60) + (e.what_i_did.length > 60 ? '...' : ''),
     entryId: e.id,
@@ -123,7 +117,6 @@ function buildCitations(entries: Entry[]): Citation[] {
 interface BlocksPayload {
   followups?: string[]
   correction?: CorrectionAction
-  marco?: MarcoPreview
 }
 
 function parseBlocks(buffer: string): BlocksPayload {
@@ -143,7 +136,7 @@ function parseBlocks(buffer: string): BlocksPayload {
 
 export interface StreamEvents {
   onDelta: (text: string) => void
-  onDone: (citations: Citation[], suggestions: string[], correction?: CorrectionAction, marcoPreview?: MarcoPreview) => void
+  onDone: (citations: Citation[], suggestions: string[], correction?: CorrectionAction) => void
   onError: (message: string) => void
 }
 
@@ -263,8 +256,7 @@ export async function answerCareerQuestion(
   const blocks = parseBlocks(blocksBuffer)
   const suggestions = Array.isArray(blocks.followups) ? blocks.followups.filter((s): s is string => typeof s === 'string') : []
   const correction = blocks.correction
-  const marcoPreview = blocks.marco
   const citations = buildCitations(relevantEntries)
 
-  events.onDone(citations, suggestions, correction, marcoPreview)
+  events.onDone(citations, suggestions, correction)
 }

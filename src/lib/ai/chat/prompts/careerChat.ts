@@ -1,14 +1,14 @@
 import type { Profile } from '@/types/profile'
 import type { MirrorSnapshot } from '@/types/mirror'
-import type { Entry } from '@/types/entry'
+import type { ChatEntry } from '@/lib/ai/chat/answerCareerQuestion'
 import type { PrepMoment } from '@/lib/content/intentions'
 
 export interface CareerChatContext {
   profile: Profile | null
   latestMirror: MirrorSnapshot | null
-  relevantEntries: Entry[]
-  companyEntries: Entry[]
-  correctionEntry?: Entry | null
+  relevantEntries: ChatEntry[]
+  companyEntries: ChatEntry[]
+  correctionEntry?: ChatEntry | null
   /** Momento de preparação (017): quando presente, enquadra a conversa para ensaiar aquele momento. */
   prepMoment?: PrepMoment
 }
@@ -29,6 +29,13 @@ export function buildCareerChatSystemPrompt(ctx: CareerChatContext): string {
   const area = ctx.profile?.area ?? null
 
   const lines: string[] = []
+  const formatHighlights = (entry: ChatEntry): string => entry.entry_highlights?.length
+    ? `\n  Destaques: ${entry.entry_highlights
+      .slice()
+      .sort((a, b) => a.position - b.position)
+      .map((highlight) => [highlight.title, highlight.metric, highlight.impact].filter(Boolean).join(' | '))
+      .join('; ')}`
+    : ''
 
   lines.push(
     `Você é um assistente de carreira especializado que conversa com ${name}` +
@@ -41,7 +48,6 @@ REGRAS DE TOM (seguir sempre):
 - Direto, conversacional, brasileiro.
 - Nunca "Olá! Estou aqui para ajudar!" ou "Certamente!" ou "Ótima pergunta!".
 - Quando não tiver dados: "Ainda não tenho registros sobre isso." — nunca inventar.
-- Celebrações concisas: "Marco salvo." — não "Parabéns! Sua conquista foi registrada com sucesso!".
 - Resposta curta para perguntas curtas; detalhes só quando a pergunta exige.
 - Cite de onde vêm as informações ("Com base nas suas entradas de 2023 na empresa X...").
 - NUNCA use travessão (—), seta (->, →) ou barra (/) como separador em nenhuma parte da resposta.
@@ -73,7 +79,7 @@ ESPELHO PROFISSIONAL DE ${name.toUpperCase()}:
       const role = e.role_title ? ` | ${e.role_title}` : ''
       const impact = e.impact ? ` → ${e.impact}` : ''
       const metric = e.metric ? ` (${e.metric})` : ''
-      lines.push(`[${i + 1}] id:${e.id} (${date}${company}${role}) ${e.what_i_did}${impact}${metric}`)
+      lines.push(`[${i + 1}] id:${e.id} (${date}${company}${role}) Fonte: ${e.raw_content}${impact}${metric}${formatHighlights(e)}`)
     })
   }
 
@@ -81,7 +87,7 @@ ESPELHO PROFISSIONAL DE ${name.toUpperCase()}:
     lines.push(`\nENTRADAS DA EMPRESA EM CONTEXTO:`)
     ctx.companyEntries.forEach((e, i) => {
       const date = e.entry_date ?? e.created_at.slice(0, 10)
-      lines.push(`[C${i + 1}] id:${e.id} (${date}) ${e.what_i_did}`)
+      lines.push(`[C${i + 1}] id:${e.id} (${date}) Fonte: ${e.raw_content}${formatHighlights(e)}`)
     })
   }
 
@@ -90,12 +96,14 @@ ESPELHO PROFISSIONAL DE ${name.toUpperCase()}:
     lines.push(`
 ENTRADA PARA CORREÇÃO (o usuário quer corrigir esta entrada específica):
 id: ${e.id}
-O que fiz: ${e.what_i_did}
+Fonte original: ${e.raw_content}
+Resumo legado: ${e.what_i_did}
 Empresa: ${e.company ?? 'não informada'}
 Cargo: ${e.role_title ?? 'não informado'}
 Data: ${e.entry_date ?? 'não informada'}
 Impacto: ${e.impact ?? 'não informado'}
 Métrica: ${e.metric ?? 'não informada'}
+Destaques organizados: ${formatHighlights(e) || 'não informados'}
 
 Modo de correção ativo:
 1. Pergunte o que está incorreto.
@@ -107,7 +115,7 @@ Modo de correção ativo:
 
   if (ctx.relevantEntries.length === 0 && !ctx.latestMirror) {
     lines.push(`
-AVISO: Esta pessoa ainda não tem registros de carreira. Seja honesto e sugira que ela comece a registrar histórias para que você possa ajudá-la melhor.`)
+AVISO: Esta pessoa ainda não tem registros de carreira. Seja honesto e indique o botão Registrar como a porta para guardar uma história antes de continuar.`)
   }
 
   if (ctx.prepMoment) {
@@ -118,34 +126,12 @@ Conduza a conversa com esse objetivo em mente, sempre ancorado nas entradas reai
   }
 
   lines.push(`
-DETECÇÃO DE MARCO:
-Se o usuário mencionar uma conquista relevante ("fui promovido", "lançamos", "recebi um prêmio", "encerramos", "chegamos a X usuários"), mude para modo de marco guiado:
-1. Confirme o marco com entusiasmo conciso.
-2. Faça NO MÁXIMO 2 perguntas para completar. Priorize: empresa/período se ausentes, depois impacto. Se o usuário já deu empresa, cargo E contexto, salve direto sem perguntar mais.
-3. Cada pergunta em mensagem separada — não interrogatório.
-4. Após coletar o suficiente (what_i_did obrigatório + pelo menos 1 outro campo), inclua "marco" no bloco BLOCKS. Não prolongue a conversa desnecessariamente.
-5. Nunca salve sem what_i_did.
-
-NAVEGAÇÃO PÓS-REGISTRO:
-Quando o usuário perguntar onde ver o que foi salvo, responda: os marcos e entradas ficam na Linha do Tempo (/historico). O Painel (/painel) mostra as entradas mais recentes e o espelho atualizado.
-
-REGRA CRÍTICA — BLOCOS APÓS CONFIRMAÇÃO:
-Se o usuário indicar que um marco JÁ foi salvo (ex: "marco salvo", "já confirmei", "salvei", "pode registrar") ou que uma correção JÁ foi aplicada:
-- NÃO inclua "marco" no bloco BLOCKS da resposta seguinte.
-- NÃO inclua "correction" no bloco BLOCKS da resposta seguinte.
-- Responda sobre o assunto da nova mensagem e use apenas "followups" no BLOCKS.
-Esses campos devem aparecer SOMENTE quando você está ativamente guiando uma ação nova — nunca como repetição de algo já confirmado na conversa.`)
-
-  lines.push(`
 BLOCO ESTRUTURADO (OBRIGATÓRIO ao final de CADA resposta):
 Encerre sempre com exatamente um bloco assim:
 <BLOCKS>{"followups":["pergunta 1?","pergunta 2?"]}</BLOCKS>
 
 Se identificou uma correção confirmada pelo usuário, adicione o campo "correction":
 <BLOCKS>{"followups":["q1?","q2?"],"correction":{"entryId":"ID_DA_ENTRADA","fields":{"campo":"valor"},"action":"update"}}</BLOCKS>
-
-Se coletou informações suficientes para um marco, adicione o campo "marco":
-<BLOCKS>{"followups":["q1?","q2?"],"marco":{"what_i_did":"descrição","company":"empresa","entry_date":"YYYY-MM-DD","impact":"impacto","metric":"número"}}</BLOCKS>
 
 Regras do bloco:
 - Sempre presente, nunca omitir.

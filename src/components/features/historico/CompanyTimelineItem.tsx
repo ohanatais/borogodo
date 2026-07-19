@@ -1,20 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ArrowUpRight, MessageSquare } from 'lucide-react'
-import type { HistoricoCompany, HistoricoProject } from '@/lib/historico/getHistoricoData'
+import { ChevronDown } from 'lucide-react'
+import type { HistoricoCompany } from '@/lib/historico/getHistoricoData'
 
 interface CompanyTimelineItemProps {
   company: HistoricoCompany
-  activeProjectName: string | null
-  onSelectProject: (project: HistoricoProject) => void
   isLast: boolean
 }
 
 export function CompanyTimelineItem({
   company,
-  activeProjectName,
-  onSelectProject,
   isLast,
 }: CompanyTimelineItemProps) {
   const [expanded, setExpanded] = useState(false)
@@ -109,58 +105,6 @@ export function CompanyTimelineItem({
                 </ul>
               )}
 
-              {/* Project chips */}
-              {company.projects.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {company.projects.map((project) => {
-                    const isActive = activeProjectName === project.name
-                    return (
-                      <button
-                        key={project.name}
-                        type="button"
-                        onClick={() => onSelectProject(project)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors"
-                        style={{
-                          background: isActive
-                            ? 'var(--color-primary)'
-                            : 'var(--color-lilas-nevoa)',
-                          color: isActive
-                            ? 'var(--color-primary-fg)'
-                            : 'var(--foreground)',
-                        }}
-                        aria-pressed={isActive}
-                      >
-                        {project.name}
-                        <ArrowUpRight size={12} />
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-
-              {/* Ask about company */}
-              <button
-                type="button"
-                onClick={() => {
-                  window.dispatchEvent(
-                    new CustomEvent('borogodo:chat-open', {
-                      detail: {
-                        context: { type: 'empresa', entityId: company.company },
-                        prefillMessage: `O que posso destacar do meu tempo em ${company.company}?`,
-                      },
-                    })
-                  )
-                }}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-2.5 min-h-[44px] rounded-lg transition-opacity hover:opacity-80 mt-1"
-                style={{
-                  background: 'var(--color-lilas-nevoa)',
-                  color: 'var(--color-primary)',
-                  border: '1px solid transparent',
-                }}
-              >
-                <MessageSquare size={12} />
-                Perguntar sobre {company.company}
-              </button>
             </div>
           )}
         </div>

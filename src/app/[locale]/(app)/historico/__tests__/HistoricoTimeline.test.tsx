@@ -17,12 +17,10 @@ const COMPANY = {
   highlight_bullets: ['Montou o time de engenharia'],
 }
 
-const noop = () => undefined
-
 describe('HistoricoTimeline', () => {
   it('renders the headline', () => {
     const data: HistoricoData = { companies: [COMPANY] }
-    render(<HistoricoTimeline data={data} activeProject={null} onSelectProject={noop} onCloseProject={noop} onStartCapture={noop} />)
+    render(<HistoricoTimeline data={data} />)
     // h2: a Trajetória é uma vista do Espelho (segmented control), não uma página própria — o
     // intro deixou de ser page-title (h1) pra não duplicar título logo abaixo do toggle (021).
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(/fio da/)
@@ -30,62 +28,27 @@ describe('HistoricoTimeline', () => {
 
   it('renders the subtitle', () => {
     const data: HistoricoData = { companies: [COMPANY] }
-    render(<HistoricoTimeline data={data} activeProject={null} onSelectProject={noop} onCloseProject={noop} onStartCapture={noop} />)
+    render(<HistoricoTimeline data={data} />)
     expect(screen.getByText(/Cada passo/)).toBeInTheDocument()
   })
 
   it('renders all companies', () => {
     const data: HistoricoData = { companies: [COMPANY] }
-    render(<HistoricoTimeline data={data} activeProject={null} onSelectProject={noop} onCloseProject={noop} onStartCapture={noop} />)
+    render(<HistoricoTimeline data={data} />)
     expect(screen.getByText(/Beta Inc/)).toBeInTheDocument()
   })
 
   it('renders empty state when no companies', () => {
     const data: HistoricoData = { companies: [] }
-    render(<HistoricoTimeline data={data} activeProject={null} onSelectProject={noop} onCloseProject={noop} onStartCapture={noop} />)
+    render(<HistoricoTimeline data={data} />)
     expect(screen.getByText(/Seu fio ainda está em branco/)).toBeInTheDocument()
     expect(screen.getByText(/Conte uma história/)).toBeInTheDocument()
   })
 
   it('does not render timeline list when empty', () => {
     const data: HistoricoData = { companies: [] }
-    render(<HistoricoTimeline data={data} activeProject={null} onSelectProject={noop} onCloseProject={noop} onStartCapture={noop} />)
+    render(<HistoricoTimeline data={data} />)
     expect(screen.queryByText('Beta Inc')).not.toBeInTheDocument()
   })
 
-  it('renders ProjectDetailPanel when activeProject is set', () => {
-    const data: HistoricoData = { companies: [COMPANY] }
-    const project = {
-      name: 'Alpha',
-      entries: [{ id: 'e1', what_i_did: 'Entrega X', impact: null, metric: null, evidences: [] }],
-    }
-    render(
-      <HistoricoTimeline
-        data={data}
-        activeProject={{ company: 'Beta Inc', project }}
-        onSelectProject={noop}
-        onCloseProject={noop}
-        onStartCapture={noop}
-      />
-    )
-    expect(screen.getAllByText('Alpha').length).toBeGreaterThan(0)
-  })
-
-  it('calls onCloseProject from ProjectDetailPanel close button', () => {
-    const onClose = vi.fn()
-    const data: HistoricoData = { companies: [COMPANY] }
-    const project = { name: 'Alpha', entries: [] }
-    render(
-      <HistoricoTimeline
-        data={data}
-        activeProject={{ company: 'Beta Inc', project }}
-        onSelectProject={noop}
-        onCloseProject={onClose}
-        onStartCapture={noop}
-      />
-    )
-    const closeBtns = screen.getAllByRole('button', { name: /fechar/i })
-    closeBtns[0].click()
-    expect(onClose).toHaveBeenCalled()
-  })
 })

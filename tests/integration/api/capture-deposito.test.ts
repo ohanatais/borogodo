@@ -48,6 +48,7 @@ vi.mock('@/lib/ai/extraction/jobs', () => ({
   maybeRegenerateMirror: vi.fn(async () => {}),
   triggerEnrichmentNudge: vi.fn(async () => {}),
   triggerOrganizeEntry: vi.fn(async () => {}),
+  refreshEntryEmbedding: vi.fn(async () => {}),
   fireAndForget: mockFireAndForget,
 }))
 vi.mock('@/lib/pdf/extractText', () => ({ extractTextFromPDF: mockExtractTextFromPDF }))
@@ -139,15 +140,14 @@ describe('POST /api/capture — kind: deposito', () => {
     expect(mockInsert).not.toHaveBeenCalled()
   })
 
-  it('não altera o comportamento existente de kind=marco', async () => {
-    mockSaveEntries.mockResolvedValue([{ id: 'entry-marco' }])
-
+  it('rejeita o kind legado marco: registrar acontece exclusivamente pelo depósito', async () => {
     const { POST } = await import('@/app/api/capture/route')
     const response = await POST(buildJsonRequest({ kind: 'marco', what_i_did: 'fechei um marco' }))
     const body = await response.json()
 
-    expect(response.status).toBe(200)
-    expect(body.entries).toHaveLength(1)
+    expect(response.status).toBe(400)
+    expect(body.error).toBe('Tipo de captura inválido')
     expect(mockInsert).not.toHaveBeenCalled()
+    expect(mockSaveEntries).not.toHaveBeenCalled()
   })
 })

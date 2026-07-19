@@ -12,6 +12,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 
 const MAX_TOKENS = 4096
 const MAX_ENTRIES = 20
+const MAX_HIGHLIGHTS_PER_ENTRY = 5
 const FALLBACK_NAME = 'você'
 
 interface MirrorEntryRow {
@@ -22,12 +23,21 @@ interface MirrorEntryRow {
   tags: string[]
   impact: string | null
   metric: string | null
+  entry_highlights?: MirrorHighlightRow[]
+}
+
+interface MirrorHighlightRow {
+  title: string | null
+  metric: string | null
+  impact: string | null
+  tags: string[] | null
+  position: number
 }
 
 async function loadEntries(supabase: SupabaseServerClient, userId: string): Promise<MirrorEntryRow[]> {
   const { data, error } = await supabase
     .from('entries')
-    .select('id, what_i_did, company, role_title, tags, impact, metric')
+    .select('id, what_i_did, company, role_title, tags, impact, metric, entry_highlights(title, metric, impact, tags, position)')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(MAX_ENTRIES)
@@ -40,7 +50,13 @@ async function loadEntries(supabase: SupabaseServerClient, userId: string): Prom
     throw new NoEntriesError()
   }
 
-  return data as MirrorEntryRow[]
+  return (data as MirrorEntryRow[]).map((entry) => ({
+    ...entry,
+    entry_highlights: entry.entry_highlights
+      ?.slice()
+      .sort((a, b) => a.position - b.position)
+      .slice(0, MAX_HIGHLIGHTS_PER_ENTRY),
+  }))
 }
 
 async function loadUserName(supabase: SupabaseServerClient, userId: string): Promise<string> {

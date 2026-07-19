@@ -9,6 +9,12 @@ interface MirrorEntryInput {
   tags: string[]
   impact?: string | null
   metric?: string | null
+  entry_highlights?: Array<{
+    title: string | null
+    metric: string | null
+    impact: string | null
+    tags: string[] | null
+  }>
 }
 
 /**
@@ -263,8 +269,14 @@ function formatEntry(entry: MirrorEntryInput, index: number): string {
   const role = [entry.role_title, entry.company].filter(Boolean).join(' @ ')
   const meta = [role, entry.impact, entry.metric].filter(Boolean).join(' | ')
   const tags = entry.tags?.length ? ` (tags: ${entry.tags.join(', ')})` : ''
+  const highlights = entry.entry_highlights
+    ?.map((highlight) => {
+      const details = [highlight.metric, highlight.impact, highlight.tags?.join(', ')].filter(Boolean).join(' | ')
+      return `${highlight.title ?? 'Destaque sem título'}${details ? ` (${details})` : ''}`
+    })
+    .join('; ')
 
-  return `${label} ${entry.what_i_did}${meta ? ': ' + meta : ''}${tags}`
+  return `${label} ${entry.what_i_did}${meta ? ': ' + meta : ''}${tags}${highlights ? `\n  Destaques: ${highlights}` : ''}`
 }
 
 export function buildMirrorUserPrompt(

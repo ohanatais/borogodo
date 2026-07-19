@@ -491,18 +491,25 @@
   "bemvindo": {
     "step1": {
       "headline": "Olá, {nome}.",
-      "sub": "Aqui é onde o seu trabalho vira clareza.",
-      "promise": "Você me conta o que fez. Eu revelo o que isso diz sobre quem você é.",
+      "sub": "Seu trabalho já conta uma história.",
+      "promise": "Envie seu currículo ou LinkedIn. Eu organizo suas experiências e mostro os padrões do seu trabalho.",
       "cta": "Vamos começar"
     },
     "loop": {
-      "promptInicial": "Me conta a última coisa relevante que você fez no trabalho.",
-      "placeholder": "Ex: liderei a migração de um sistema crítico, que reduziu os erros em 40%...",
-      "cta": "Contar",
-      "ctaLinkedin": "Importar PDF do LinkedIn",
-      "reading": "Lendo o que você me contou...",
-      "evaluating": "Avaliando o que aprendi...",
-      "generating": "Criando seu espelho...",
+      "promptInicial": "Comece pelo que você já construiu.",
+      "importHint": "Envie seu currículo ou LinkedIn em PDF. Eu organizo suas experiências e preparo seu primeiro Espelho.",
+      "ctaLinkedin": "Enviar currículo ou PDF do LinkedIn",
+      "reading1": "Lendo seu currículo...",
+      "reading2": "Separando suas experiências...",
+      "reading3": "Encontrando o que se repete na sua trajetória...",
+      "generating1": "Juntando os padrões que encontrei...",
+      "generating2": "Ancorando cada leitura em evidências...",
+      "generating3": "Preparando seu Espelho...",
+      "stageRead": "Ler arquivo",
+      "stageOrganize": "Organizar trajetória",
+      "stageMirror": "Montar Espelho",
+      "longWaitTitle": "Isso está levando um pouco mais.",
+      "longWaitBody": "Seu arquivo tem bastante coisa para organizar. Estou conectando as experiências antes de montar o Espelho.",
       "ctaFinal": "Ver meu espelho completo",
       "retry": "Tentar de novo",
       "errorGeneric": "Algo deu errado. Tente de novo."
@@ -638,9 +645,7 @@
       "label": "✦ Isso daria um bom post",
       "cta": "Usar"
     },
-    "resumeTitle": "Retomar rascunho",
-    "useProject": "Usar este projeto",
-    "projectSeed": "projeto {name} ({count, plural, one {# entrada} other {# entradas}})"
+    "resumeTitle": "Retomar rascunho"
   },
   "autoavaliacao": {
     "title": "Sua autoavaliação",

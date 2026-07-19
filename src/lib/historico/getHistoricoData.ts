@@ -10,6 +10,7 @@ export interface EvidenceItem {
 
 export interface HistoricoEntry {
   id: string
+  display_key?: string
   what_i_did: string
   impact: string | null
   metric: string | null
@@ -105,9 +106,16 @@ export interface RawEntry {
   metric: string | null
   project_name: string | null
   evidences: EvidenceItem[]
+  is_personal_project?: boolean
+  entry_highlights?: Array<{
+    title: string | null
+    metric: string | null
+    impact: string | null
+  }>
 }
 
 const MAX_HIGHLIGHT_BULLETS = 3
+const NON_CAREER_CONTEXTS = new Set(['entrevista', 'entrevistas'])
 
 // Accumulates per-role data so we can merge duplicates captured from different documents.
 // Key: role_title + start-year + end-year (or "current") — same title/year-range = same role.
@@ -137,6 +145,30 @@ function dedupKey(text: string): string {
   return text.trim().slice(0, 120)
 }
 
+/** A fonte continua sendo a unidade de contexto, mas seus destaques são as unidades de narrativa. */
+function displayEntries(entry: RawEntry): HistoricoEntry[] {
+  const highlights = entry.entry_highlights?.filter((highlight) => highlight.title) ?? []
+  if (highlights.length === 0) {
+    return [{
+      id: entry.id,
+      what_i_did: entry.what_i_did,
+      impact: entry.impact,
+      metric: entry.metric,
+      evidences: entry.evidences,
+    }]
+  }
+
+  return highlights.map((highlight, index) => ({
+    // A ação de evidência/correção opera sobre a fonte real, não sobre uma linha sintética.
+    id: entry.id,
+    display_key: `${entry.id}:${index}`,
+    what_i_did: highlight.title!,
+    impact: highlight.impact,
+    metric: highlight.metric,
+    evidences: entry.evidences,
+  }))
+}
+
 export function levenshtein(a: string, b: string): number {
   const m = a.length, n = b.length
   const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
@@ -164,9 +196,13 @@ export function groupCompanies(entries: RawEntry[]): HistoricoCompany[] {
   const map = new Map<string, CompanyAccumulator>()
 
   for (const entry of entries) {
-    if (!entry.company) continue
+    const companyName = entry.company ?? (entry.is_personal_project ? 'Projetos pessoais' : null)
+    if (!companyName) continue
+    // Transcrições antigas podiam receber "Entrevistas" como empresa por engano. Elas continuam
+    // disponíveis em Registros, mas não devem virar uma empresa ou despejar texto cru na Trajetória.
+    if (NON_CAREER_CONTEXTS.has(companyName.trim().toLowerCase())) continue
 
-    const canonicalKey = findFuzzyKey(map, entry.company) ?? entry.company
+    const canonicalKey = findFuzzyKey(map, companyName) ?? companyName
 
     if (!map.has(canonicalKey)) {
       map.set(canonicalKey, {
@@ -220,29 +256,14 @@ export function groupCompanies(entries: RawEntry[]): HistoricoCompany[] {
       acc.maxEnd = entry.role_end
     }
 
-    // Route to project or standalone, deduplicating by first 120 chars of what_i_did
-    const key = dedupKey(entry.what_i_did)
+    // Projects are a legacy storage field. New trajectory treats every source as career evidence
+    // under the company, so old project-tagged entries are flattened into the same stream.
+    const entriesForDisplay = displayEntries(entry)
 
-    if (entry.project_name) {
-      if (!acc.projectMap.has(entry.project_name)) {
-        acc.projectMap.set(entry.project_name, { entries: [], seenKeys: new Set() })
-      }
-      const proj = acc.projectMap.get(entry.project_name)!
-      if (!proj.seenKeys.has(key)) {
-        proj.seenKeys.add(key)
-        proj.entries.push({
-          id: entry.id,
-          what_i_did: entry.what_i_did,
-          impact: entry.impact,
-          metric: entry.metric,
-          evidences: entry.evidences,
-        })
-      }
-    } else {
-      if (!acc.standaloneSeenKeys.has(key)) {
-        acc.standaloneSeenKeys.add(key)
-        acc.standaloneEntries.push(entry)
-      }
+    const key = entriesForDisplay.map((displayEntry) => dedupKey(displayEntry.what_i_did)).join('|')
+    if (!acc.standaloneSeenKeys.has(key)) {
+      acc.standaloneSeenKeys.add(key)
+      acc.standaloneEntries.push(entry)
     }
   }
 
@@ -260,15 +281,16 @@ export function groupCompanies(entries: RawEntry[]): HistoricoCompany[] {
       }
     })
 
+    const standaloneDisplayEntries = acc.standaloneEntries.flatMap(displayEntries)
     const sorted = [
-      ...acc.standaloneEntries.filter((e) => e.metric),
-      ...acc.standaloneEntries.filter((e) => !e.metric),
+      ...standaloneDisplayEntries.filter((entry) => entry.metric),
+      ...standaloneDisplayEntries.filter((entry) => !entry.metric),
     ]
-    const highlight_bullets = sorted.slice(0, MAX_HIGHLIGHT_BULLETS).map((e) => e.what_i_did)
+    const highlight_bullets = sorted.slice(0, MAX_HIGHLIGHT_BULLETS).map((entry) => entry.what_i_did)
 
-    const projects: HistoricoProject[] = Array.from(acc.projectMap.entries()).map(
-      ([name, proj]) => ({ name, entries: proj.entries })
-    )
+    // Kept as an empty compatibility shape for clients compiled against the old API. The UI no
+    // longer exposes a project hierarchy; legacy project_name values remain in storage only.
+    const projects: HistoricoProject[] = []
 
     result.push({
       company,
@@ -290,9 +312,9 @@ export async function getHistoricoData(
 ): Promise<HistoricoData> {
   const { data } = await supabase
     .from('entries')
-    .select('id, role_title, company, role_start, role_end, what_i_did, impact, metric, project_name, evidences')
+    .select('id, role_title, company, role_start, role_end, what_i_did, impact, metric, project_name, evidences, is_personal_project, entry_highlights(title, metric, impact)')
     .eq('user_id', userId)
-    .not('company', 'is', null)
+    .or('company.not.is.null,is_personal_project.eq.true')
     .order('role_start', { ascending: false, nullsFirst: false })
 
   const companies = groupCompanies((data ?? []) as RawEntry[])

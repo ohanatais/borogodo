@@ -11,7 +11,7 @@ profissional (currículo, LinkedIn export, relatório de desempenho, portfólio,
 Transforme o conteúdo em uma ou mais entradas estruturadas, uma por experiência/realização
 relevante. Campos disponíveis:
    what_i_did, title, decision, learning, impact, metric, entry_date, tags, company,
-   role_title, role_start, role_end, project_name.
+   role_title, role_start, role_end.
    - title: string curta ≤80 chars que captura a essência da entrada — 1 frase nominal sem
      ponto final. Ex: "Liderou Discovery para cliente HealthTech", "Expandiu squad de 3 para 12".
    - what_i_did: SEMPRE em português (PT-BR), mesmo que o documento esteja em inglês.
@@ -33,10 +33,6 @@ relevante. Campos disponíveis:
    - Preencha apenas os campos que existem no documento; deixe null o que não existir.
    - Cada cargo ou realização relevante vira pelo menos uma entrada.
    - Datas sempre em YYYY-MM-DD; se só tiver mês/ano use o primeiro dia do mês.
-   - project_name: nome do projeto específico dentro da empresa, quando identificável
-     (ex: "HealthTech Discovery & Definition", "AI Storytelling POC"). Use quando o
-     documento descreve projetos nomeados, clientes distintos, ou iniciativas com nome
-     próprio dentro de um cargo. null quando é responsabilidade geral do cargo.
 
 SAÍDA — apenas JSON dentro de bloco de código, sem texto adicional:
 \`\`\`json
@@ -55,7 +51,6 @@ SAÍDA — apenas JSON dentro de bloco de código, sem texto adicional:
       "role_title": "...",
       "role_start": "YYYY-MM-DD ou null",
       "role_end": "YYYY-MM-DD ou null",
-      "project_name": "nome do projeto ou null"
     }
   ]
 }
