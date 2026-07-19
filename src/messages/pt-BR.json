@@ -1048,7 +1048,9 @@
       "linkInputError": "Esse link não parece válido. Confira e tente de novo.",
       "imageAlt": "Pré-visualização da imagem anexada",
       "uploadError": "Não foi possível enviar",
-      "retryAriaLabel": "Tentar enviar de novo"
+      "retryAriaLabel": "Tentar enviar de novo",
+      "viewFullAriaLabel": "Ver imagem em tela cheia",
+      "closeFullAriaLabel": "Fechar imagem em tela cheia"
     },
     "savedPanel": {
       "confirmation": "Registrado. Já está nos seus Registros.",
@@ -1078,7 +1080,7 @@
       "ctaAgain": "Organizar de novo",
       "organizing": "Organizando…"
     },
-    "organizedBy": "Organizado pelo Borogodó",
+    "highlightsSectionLabel": "Destaques",
     "context": {
       "unresolvedLabel": "sem contexto ainda",
       "personalProjectLabel": "Projeto pessoal",

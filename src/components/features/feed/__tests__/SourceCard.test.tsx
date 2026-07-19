@@ -281,6 +281,45 @@ describe('SourceCard — exclusão com confirmação', () => {
   })
 })
 
+describe('SourceCard — rótulo "Destaques" e ordem das ações (revisão manual, 026)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn())
+  })
+
+  it('mostra "Destaques" como cabeçalho de seção quando há 2+ destaques', () => {
+    const highlights: FeedHighlight[] = [
+      { id: 'h1', title: 'Destaque 1', metric: null, impact: null, tags: [] },
+      { id: 'h2', title: 'Destaque 2', metric: null, impact: null, tags: [] },
+    ]
+    render(<SourceCard item={{ ...BASE_ITEM, highlights }} variant="feed" />)
+    expandCard()
+
+    expect(screen.getByText('highlightsSectionLabel')).toBeInTheDocument()
+  })
+
+  it('não mostra nenhum rótulo no lugar quando há só 1 destaque (nem "Destaques", nem "Organizado pelo Borogodó")', () => {
+    render(<SourceCard item={BASE_ITEM} variant="feed" />)
+    expandCard()
+
+    expect(screen.queryByText('highlightsSectionLabel')).not.toBeInTheDocument()
+    expect(screen.queryByText('organizedBy')).not.toBeInTheDocument()
+  })
+
+  it('ordem das ações é Usar, Organizar de novo, Editar, Excluir', () => {
+    render(<SourceCard item={BASE_ITEM} variant="feed" onDelete={vi.fn()} />)
+    expandCard()
+
+    const buttonNames = screen
+      .getAllByRole('button')
+      .map((btn) => btn.getAttribute('aria-label') ?? btn.textContent)
+      .filter((name): name is string => Boolean(name && /use:|organize\.|card\.edit|card\.delete/.test(name)))
+
+    const order = ['organize.cta', 'card.edit', 'card.delete']
+    const indices = order.map((name) => buttonNames.findIndex((n) => n?.includes(name)))
+    expect(indices).toEqual([...indices].sort((a, b) => a - b))
+  })
+})
+
 describe('SourceCard — variant "panel" (sem ações de Registros)', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn())

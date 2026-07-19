@@ -5,6 +5,7 @@
 // `presencaEvents.ts`.
 
 import type { DrawerManualFields } from '@/hooks/useDrawerDraft'
+import type { FeedHighlight } from '@/lib/feed/types'
 
 export const OPEN_DRAWER_EVENT = 'borogodo:open-drawer'
 
@@ -13,10 +14,13 @@ export interface EditEntryDetail {
   rawText: string
   manualFields?: Partial<DrawerManualFields>
   /** `true` quando a fonte tem 2+ destaques reais (revisão pós-implementação, 026) — nesse caso
-   * o Drawer esconde Métrica/Impacto e o "Organizar" (preview de 1 único conjunto de campos, sem
-   * efeito real numa fonte com vários destaques); corrigir passa a ser editar o texto cru e usar
-   * "Organizar de novo" no card, que substitui todos os destaques de uma vez. */
+   * o Drawer esconde Métrica/Impacto (representam 1 destaque só) e mostra, no lugar, a lista dos
+   * destaques atuais (só leitura) + "Organizar de novo" — a única forma de corrigir o conteúdo é
+   * editar o texto cru e reorganizar, que substitui todos os destaques de uma vez. */
   isMultiHighlight?: boolean
+  /** Destaques atuais da fonte — alimenta a lista só-leitura mostrada no Drawer quando
+   * `isMultiHighlight`. */
+  highlights?: FeedHighlight[]
 }
 
 export interface OpenDrawerDetail {
@@ -48,4 +52,18 @@ export interface EntryUpdatedDetail {
 
 export function dispatchEntryUpdated(detail: EntryUpdatedDetail): void {
   window.dispatchEvent(new CustomEvent(ENTRY_UPDATED_EVENT, { detail }))
+}
+
+// "Organizar de novo" disparado de DENTRO do Drawer (edição de fonte com 2+ destaques) — mesmo
+// motivo do evento acima: o Drawer vive fora da árvore de Registros, então precisa notificar o
+// card pra substituir seus destaques localmente sem esperar um reload de página inteira.
+export const ENTRY_HIGHLIGHTS_UPDATED_EVENT = 'borogodo:entry-highlights-updated'
+
+export interface EntryHighlightsUpdatedDetail {
+  id: string
+  highlights: FeedHighlight[]
+}
+
+export function dispatchEntryHighlightsUpdated(detail: EntryHighlightsUpdatedDetail): void {
+  window.dispatchEvent(new CustomEvent(ENTRY_HIGHLIGHTS_UPDATED_EVENT, { detail }))
 }

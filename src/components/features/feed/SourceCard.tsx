@@ -231,37 +231,14 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
             </div>
           )}
 
-          {(item.organized_at || variant === 'feed') && (
-            <div className="flex items-center gap-3 pt-1" style={{ borderTop: '1px solid color-mix(in oklch, var(--border) 60%, transparent)' }}>
-              {/* Selo "Organizado pelo Borogodó" só quando a IA de fato organizou esta fonte
-                  (item.organized_at) — destaques só criados manualmente ("+ adicionar destaque")
-                  não ganham o selo, sem precisar de um campo novo no banco para distinguir. */}
-              {item.organized_at ? (
-                <span
-                  className="inline-flex items-center gap-1.5 flex-1 min-w-0 text-xs font-medium"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  <Sparkles size={12} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
-                  {tRegistro('organizedBy')}
-                </span>
-              ) : (
-                <span className="flex-1" />
-              )}
-              {/* Editar (026): abre o Drawer de Registro pré-preenchido com esta fonte — edição é
-                  sobre o registro inteiro (revisão pós-implementação: destaque deixou de ter
-                  edição/exclusão isolada — empresa/projeto pessoal e o conteúdo do destaque único
-                  também se editam por aqui, não têm mais um seletor/editor próprio no card). */}
-              {variant === 'feed' && (
-                <button
-                  type="button"
-                  onClick={handleEditClick}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full shrink-0 transition-opacity hover:opacity-80"
-                  style={{ color: 'var(--color-primary)' }}
-                >
-                  <Pencil size={12} aria-hidden="true" />
-                  {t('card.edit')}
-                </button>
-              )}
+          {/* "Destaques" só faz sentido como cabeçalho de seção quando há 2+ — com 1 destaque só
+              (revisão manual: "Organizado pelo Borogodó" não dizia nada de útil ali, e some) nada
+              é exibido no lugar. Editar/Excluir/Organizar de novo vivem juntos na fileira de ações
+              mais abaixo (revisão manual: Editar reposicionado pra sair dessa linha isolada). */}
+          {highlights.length > 1 && (
+            <div className="flex items-center gap-1.5 pt-1 text-xs font-medium" style={{ borderTop: '1px solid color-mix(in oklch, var(--border) 60%, transparent)', color: 'var(--muted-foreground)' }}>
+              <Sparkles size={12} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+              {tRegistro('highlightsSectionLabel')}
             </div>
           )}
 
@@ -363,6 +340,23 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
                 </button>
               )
             })()}
+
+            {/* Editar (026): abre o Drawer de Registro pré-preenchido com esta fonte — edição é
+                sobre o registro inteiro (revisão pós-implementação: destaque deixou de ter
+                edição/exclusão isolada — empresa/projeto pessoal e o conteúdo do destaque único
+                também se editam por aqui, não têm mais um seletor/editor próprio no card). Entre
+                Organizar de novo e Excluir (revisão manual de posicionamento). */}
+            {variant === 'feed' && (
+              <button
+                type="button"
+                onClick={handleEditClick}
+                className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                <Pencil size={12} aria-hidden="true" />
+                {t('card.edit')}
+              </button>
+            )}
 
             {variant === 'feed' && onDelete && (
               <button
