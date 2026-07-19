@@ -47,41 +47,34 @@ describe('CaptureLoopStep', () => {
     vi.stubGlobal('fetch', vi.fn())
   })
 
-  it('renders idle state with textarea and submit button', () => {
+  function uploadPdf() {
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    fireEvent.change(input, { target: { files: [new File(['pdf'], 'curriculo.pdf', { type: 'application/pdf' })] } })
+  }
+
+  it('renders PDF import as the onboarding action', () => {
     render(<CaptureLoopStep />)
-    // translation mock returns key; t('cta') → 'cta'
-    expect(screen.getByRole('textbox')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'cta' })).toBeInTheDocument()
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'ctaLinkedin' })).toBeInTheDocument()
   })
 
-  it('send button is disabled when textarea is empty', () => {
-    render(<CaptureLoopStep />)
-    expect(screen.getByRole('button', { name: 'cta' })).toBeDisabled()
-  })
-
-  it('send button is enabled when textarea has text', () => {
-    render(<CaptureLoopStep />)
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Algo.' } })
-    expect(screen.getByRole('button', { name: 'cta' })).not.toBeDisabled()
-  })
-
-  it('shows evaluating state after capture returns (reflection: null)', async () => {
+  it('generates the mirror after capture returns without a reflection', async () => {
     vi.mocked(fetch)
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ entries: [{ id: 'e1' }], reflection: null }),
       } as Response)
-      // evaluate never resolves — keeps state in 'evaluating'
-      .mockReturnValueOnce(new Promise(() => {}) as Promise<Response>)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ mirror: mockMirror }),
+      } as Response)
 
     render(<CaptureLoopStep />)
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Algo.' } })
-
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'cta' }))
+      uploadPdf()
     })
 
-    await waitFor(() => expect(screen.getByText('Avaliando o que já temos...')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Liderança em ambientes de pressão')).toBeInTheDocument())
   })
 
   it('shows error message on capture API failure', async () => {
@@ -91,10 +84,8 @@ describe('CaptureLoopStep', () => {
     } as Response)
 
     render(<CaptureLoopStep />)
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Algo.' } })
-
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'cta' }))
+      uploadPdf()
     })
 
     await waitFor(() =>
@@ -110,20 +101,12 @@ describe('CaptureLoopStep', () => {
       } as Response)
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ sufficient: true }),
-      } as Response)
-      .mockResolvedValueOnce({
-        ok: true,
         json: () => Promise.resolve({ mirror: mockMirror }),
       } as Response)
 
     render(<CaptureLoopStep />)
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'Liderou migração crítica com 40% menos erros.' },
-    })
-
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'cta' }))
+      uploadPdf()
     })
 
     await waitFor(
@@ -139,10 +122,8 @@ describe('CaptureLoopStep', () => {
     } as Response)
 
     render(<CaptureLoopStep />)
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Algo.' } })
-
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'cta' }))
+      uploadPdf()
     })
 
     await waitFor(() =>

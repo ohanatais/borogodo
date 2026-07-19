@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/db/supabase/server'
 import { organizeEntry } from '@/lib/entries/organizeEntry'
 import { tryAcquireOrganizingLock } from '@/lib/entries/organizingLock'
+import { fireAndForget, maybeRegenerateMirror, refreshEntryEmbedding } from '@/lib/ai/extraction/jobs'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -42,6 +43,10 @@ export async function POST(_request: Request, context: RouteContext): Promise<Ne
   const result = await organizeEntry(supabase, user.id, id)
 
   if (result.status === 'not_found') return jsonError('Registro não encontrado', 404)
+  if (result.status === 'organized') {
+    fireAndForget('maybeRegenerateMirror', maybeRegenerateMirror(user.id))
+    fireAndForget('refreshEntryEmbedding', refreshEntryEmbedding(user.id, id))
+  }
 
   return NextResponse.json(result)
 }

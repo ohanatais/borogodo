@@ -50,6 +50,7 @@ vi.mock('@/lib/ai/extraction/jobs', () => ({
   triggerProactiveInsight: vi.fn(async () => {}),
   maybeRegenerateMirror: vi.fn(async () => {}),
   triggerEnrichmentNudge: vi.fn(async () => {}),
+  refreshEntryEmbedding: vi.fn(async () => {}),
   fireAndForget: mockFireAndForget,
 }))
 

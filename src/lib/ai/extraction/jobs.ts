@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/db/supabaseAdmin'
 import { getEnrichmentNudge } from '@/lib/panel/getEnrichmentNudge'
 import { organizeEntry } from '@/lib/entries/organizeEntry'
 import { tryAcquireOrganizingLock } from '@/lib/entries/organizingLock'
+import { generateEmbedding } from '@/lib/ai/embeddings'
 
 /**
  * Costura da feature 005-panel: delega para o corpo real (geração via Haiku, persistência
@@ -67,10 +68,62 @@ export async function triggerOrganizeEntry(userId: string, entryId: string): Pro
     const lock = await tryAcquireOrganizingLock(admin as never, entryId, userId)
     if (lock !== 'acquired') return
 
-    await organizeEntry(admin as never, userId, entryId)
+    const result = await organizeEntry(admin as never, userId, entryId)
+
+    // Indexa somente depois da organização, que também atualiza a fonte. Assim o vetor nunca
+    // perde para a escrita de organização no mesmo registro.
+    if (result.status !== 'not_found') {
+      await refreshEntryEmbedding(userId, entryId)
+    }
+
+    // A captura v2 salva primeiro e organiza depois. Só consideramos a fonte para uma possível
+    // atualização do Espelho após os destaques estarem persistidos, evitando gerar um retrato
+    // que ainda enxergaria somente o texto cru da nova fonte.
+    if (result.status === 'organized') {
+      await maybeRegenerateMirror(userId)
+    }
   } catch (jobError: unknown) {
     logger.error('async job failed', {
       job: 'triggerOrganizeEntry',
+      message: jobError instanceof Error ? jobError.message : 'unknown error',
+    })
+  }
+}
+
+/**
+ * Indexa o texto canônico da fonte fora do caminho crítico de salvar/editar. Assim, o depósito
+ * continua imediato, mas o chat semântico passa a encontrar o registro assim que a indexação
+ * termina. Falhas permanecem recuperáveis: o registro continua salvo e visível no feed.
+ */
+export async function refreshEntryEmbedding(userId: string, entryId: string): Promise<void> {
+  const admin = getSupabaseAdmin()
+
+  try {
+    const { data, error } = await admin
+      .from('entries')
+      .select('raw_content, what_i_did, updated_at')
+      .eq('id', entryId)
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (error) throw error
+    if (!data) return
+
+    const sourceText = (data.raw_content as string | null) ?? (data.what_i_did as string)
+    const sourceUpdatedAt = data.updated_at as string
+    const embedding = await generateEmbedding(sourceText)
+    const { error: updateError } = await admin
+      .from('entries')
+      .update({ embedding })
+      .eq('id', entryId)
+      .eq('user_id', userId)
+      // Não deixa uma indexação iniciada antes de uma edição substituir o vetor do texto novo.
+      .eq('updated_at', sourceUpdatedAt)
+
+    if (updateError) throw updateError
+  } catch (jobError: unknown) {
+    logger.error('entry embedding refresh failed', {
+      entryId,
       message: jobError instanceof Error ? jobError.message : 'unknown error',
     })
   }

@@ -1,7 +1,5 @@
-// Codificação da chave de um seed de projeto (014, US3). Um projeto não é uma linha de tabela: é a
-// agregação das entradas de uma empresa+projeto montada pelo histórico. Como o `seedRef` é um único
-// texto, encodamos `company` + `project_name` aqui — e só aqui — para servidor (loadSeed) e cliente
-// (UsarButton/originLabel) compartilharem a mesma forma. Nomes com o separador são improváveis.
+// Compatibilidade para rascunhos antigos gerados antes da remoção do conceito de projeto. Novos
+// fluxos não criam esses seeds; mantemos o parser para que rascunhos históricos continuem abrindo.
 
 const PROJECT_SEED_SEPARATOR = ':::'
 

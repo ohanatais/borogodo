@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
-import { RefreshCw, MessageSquare, Flag } from 'lucide-react'
+import { RefreshCw, MessageSquare } from 'lucide-react'
 import type { MirrorSnapshot } from '@/types/mirror'
 import { MirrorFeedback } from './MirrorFeedback'
 import { EvidenceText } from './EvidenceText'
@@ -31,25 +31,13 @@ const item = {
 
 interface SectionProps {
   label: string
-  sectionKey: string
   headline: string
   evidence: unknown
   warm?: boolean
   primary?: boolean
 }
 
-function MirrorSection({ label, sectionKey, headline, evidence, warm = false, primary = false }: SectionProps) {
-  function handleIncorrect() {
-    window.dispatchEvent(
-      new CustomEvent('borogodo:chat-open', {
-        detail: {
-          context: { type: 'espelho', entityId: sectionKey },
-          prefillMessage: `A seção "${label}" do meu espelho parece incorreta.`,
-        },
-      })
-    )
-  }
-
+function MirrorSection({ label, headline, evidence, warm = false, primary = false }: SectionProps) {
   return (
     <motion.div
       variants={item}
@@ -69,17 +57,6 @@ function MirrorSection({ label, sectionKey, headline, evidence, warm = false, pr
       </p>
       <EvidenceText evidence={evidence} />
 
-      {/* Visible on mobile; hover-only on desktop */}
-      <button
-        type="button"
-        onClick={handleIncorrect}
-        className="absolute top-4 right-4 flex items-center gap-1 text-[11px] px-2 py-1 rounded-md transition-opacity opacity-70 lg:opacity-0 lg:group-hover:opacity-100"
-        style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
-        aria-label={`Marcar seção "${label}" como incorreta`}
-      >
-        <Flag size={11} />
-        corrigir
-      </button>
     </motion.div>
   )
 }
@@ -196,7 +173,6 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
 
         <MirrorSection
           label={t('sections.primaryStrength')}
-          sectionKey="primary_strength"
           headline={mirror.primary_strength.headline}
           evidence={mirror.primary_strength.evidence}
           primary
@@ -204,7 +180,6 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
 
         <MirrorSection
           label={t('sections.invisibleSkill')}
-          sectionKey="invisible_skill"
           headline={mirror.invisible_skill.headline}
           evidence={mirror.invisible_skill.evidence}
           warm
@@ -212,7 +187,6 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
 
         <MirrorSection
           label={t('sections.contextPattern')}
-          sectionKey="context_pattern"
           headline={mirror.context_pattern.headline}
           evidence={mirror.context_pattern.evidence}
         />

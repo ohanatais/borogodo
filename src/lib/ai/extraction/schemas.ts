@@ -40,7 +40,6 @@ const extractedEntrySchema = z.object({
   role_title: z.string().nullish(),
   role_start: dateField,
   role_end: dateField,
-  project_name: z.string().nullish(),
 })
 
 const reflectionSchema = z.object({

@@ -272,7 +272,10 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
   async function handleEditSubmit(entry: EditEntryDetail): Promise<void> {
     try {
       const fields = draft.manualFields
-      const body: Record<string, string | string[] | boolean | null> = { what_i_did: draft.rawText }
+      const body: Record<string, string | string[] | boolean | null> = {
+        what_i_did: draft.rawText,
+        raw_content: draft.rawText,
+      }
       if (fields.metric.trim()) body.metric = fields.metric.trim()
       if (fields.impact.trim()) body.impact = fields.impact.trim()
       const tags = fields.tags.split(',').map((tag) => tag.trim()).filter(Boolean)

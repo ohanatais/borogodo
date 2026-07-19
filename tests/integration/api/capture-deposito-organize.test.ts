@@ -38,6 +38,7 @@ vi.mock('@/lib/ai/extraction/jobs', () => ({
   maybeRegenerateMirror: vi.fn(async () => {}),
   triggerEnrichmentNudge: vi.fn(async () => {}),
   triggerOrganizeEntry: mockTriggerOrganizeEntry,
+  refreshEntryEmbedding: vi.fn(async () => {}),
   fireAndForget: mockFireAndForget,
 }))
 vi.mock('@/lib/pdf/extractText', () => ({ extractTextFromPDF: vi.fn() }))

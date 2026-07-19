@@ -6,35 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import type { Reflection } from '@/types/capture'
 import type { Mirror } from '@/types/mirror'
-import type { SufficiencyResult } from '@/lib/ai/mirror/evaluateSufficiency'
 
-const LOADING_MESSAGES = {
-  reading: [
-    'Lendo o que você me contou...',
-    'Identificando o que importa...',
-    'Encontrando o padrão...',
-  ],
-  evaluating: [
-    'Avaliando o que já temos...',
-    'Verificando as conexões...',
-    'Quase decidindo...',
-  ],
-  generating: [
-    'Montando seu espelho...',
-    'Escolhendo as palavras certas...',
-    'Quase lá...',
-  ],
-} as const
-
-type LoadingPhase = keyof typeof LOADING_MESSAGES
-
-const MAX_FOLLOW_UPS = 3
+type LoadingPhase = 'reading' | 'generating'
+const LONG_WAIT_AFTER_MS = 20_000
 
 type LoopPhase =
   | { phase: 'idle'; prompt: string }
   | { phase: 'reading' }
   | { phase: 'reflecting'; reflection: Reflection }
-  | { phase: 'evaluating' }
   | { phase: 'generating' }
   | { phase: 'revealed'; mirror: Mirror }
   | { phase: 'error'; message: string }
@@ -46,26 +25,32 @@ export function CaptureLoopStep() {
     phase: 'idle',
     prompt: t('promptInicial'),
   })
-  const [roundCount, setRoundCount] = useState(0)
-  const [text, setText] = useState('')
   const [msgIndex, setMsgIndex] = useState(0)
+  const [waitMs, setWaitMs] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const loadingPhases: LoadingPhase[] = ['reading', 'evaluating', 'generating']
+  const loadingPhases: LoadingPhase[] = ['reading', 'generating']
   const currentPhase = loadingPhases.includes(loopState.phase as LoadingPhase)
     ? (loopState.phase as LoadingPhase)
     : null
 
   useEffect(() => {
     if (!currentPhase) return
+    const startedAt = Date.now()
+    const timer = setInterval(() => setWaitMs(Date.now() - startedAt), 1000)
+    const waitReset = setTimeout(() => setWaitMs(0), 0)
     const reset = setTimeout(() => setMsgIndex(0), 0)
     const id = setInterval(() => setMsgIndex((i) => (i + 1) % 3), 3000)
-    return () => { clearTimeout(reset); clearInterval(id) }
+    return () => { clearTimeout(waitReset); clearTimeout(reset); clearInterval(id); clearInterval(timer) }
   }, [currentPhase])
+
+  const loadingMessages = currentPhase === 'reading'
+    ? [t('reading1'), t('reading2'), t('reading3')]
+    : [t('generating1'), t('generating2'), t('generating3')]
+  const isLongWait = waitMs >= LONG_WAIT_AFTER_MS
 
   async function handleCapture(formData: FormData) {
     setLoopState({ phase: 'reading' })
-    setText('')
 
     try {
       const res = await fetch('/api/capture', { method: 'POST', body: formData })
@@ -80,44 +65,15 @@ export function CaptureLoopStep() {
       }
 
       if (!data.reflection) {
-        await runEvaluate()
+        await generateMirror()
         return
       }
 
       setLoopState({ phase: 'reflecting', reflection: data.reflection })
 
-      setTimeout(() => runEvaluate(), 1500)
+      setTimeout(() => generateMirror(), 1500)
     } catch {
       setLoopState({ phase: 'error', message: t('errorGeneric') })
-    }
-  }
-
-  async function runEvaluate() {
-    setLoopState({ phase: 'evaluating' })
-
-    const newRound = roundCount + 1
-    setRoundCount(newRound)
-
-    if (newRound > MAX_FOLLOW_UPS) {
-      await generateMirror()
-      return
-    }
-
-    try {
-      const res = await fetch('/api/onboarding/evaluate', { method: 'POST' })
-      if (!res.ok) {
-        await generateMirror()
-        return
-      }
-      const result = (await res.json()) as SufficiencyResult
-
-      if (result.sufficient) {
-        await generateMirror()
-      } else {
-        setLoopState({ phase: 'idle', prompt: result.follow_up_prompt })
-      }
-    } catch {
-      await generateMirror()
     }
   }
 
@@ -135,14 +91,6 @@ export function CaptureLoopStep() {
     } catch {
       setLoopState({ phase: 'error', message: t('errorGeneric') })
     }
-  }
-
-  function handleTextSubmit() {
-    if (!text.trim()) return
-    const formData = new FormData()
-    formData.set('kind', 'text')
-    formData.set('content', text.trim())
-    handleCapture(formData)
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -171,59 +119,35 @@ export function CaptureLoopStep() {
               className="flex flex-col gap-4"
             >
               <p
-                className="text-lg font-medium leading-snug"
+                className="text-xl font-medium leading-snug text-center"
                 style={{ fontFamily: 'Fraunces, serif', color: 'var(--foreground)' }}
               >
                 {loopState.prompt}
               </p>
 
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder={t('placeholder')}
-                rows={4}
-                className="w-full rounded-xl px-4 py-3 text-sm resize-none outline-none focus-visible:ring-2"
-                style={{
-                  background: 'var(--card)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--foreground)',
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleTextSubmit()
-                }}
-              />
+              <p className="text-sm leading-relaxed text-center" style={{ color: 'var(--muted-foreground)' }}>
+                {t('importHint')}
+              </p>
 
-              <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={handleTextSubmit}
-                  disabled={!text.trim()}
-                  className="w-full py-3 rounded-xl text-sm font-semibold transition-opacity disabled:opacity-40 min-h-[48px]"
-                  style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
-                >
-                  {t('cta')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-3 rounded-xl text-sm font-medium transition-opacity hover:opacity-80 min-h-[48px]"
-                  style={{
-                    background: 'var(--card)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--muted-foreground)',
-                  }}
-                >
-                  {t('ctaLinkedin')}
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf"
-                  className="sr-only"
-                  onChange={handleFileChange}
-                  aria-hidden="true"
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full py-3.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 min-h-[52px]"
+                style={{
+                  background: 'var(--color-primary)',
+                  color: 'var(--color-primary-fg)',
+                }}
+              >
+                {t('ctaLinkedin')}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf"
+                className="sr-only"
+                onChange={handleFileChange}
+                aria-hidden="true"
+              />
             </motion.div>
           )}
 
@@ -235,16 +159,34 @@ export function CaptureLoopStep() {
               exit={{ opacity: 0 }}
               className="flex flex-col items-center gap-4"
             >
-              <span
-                className="w-8 h-8 border-2 rounded-full animate-spin"
-                style={{
-                  borderColor: 'var(--color-primary)',
-                  borderTopColor: 'transparent',
-                }}
-              />
+              <div className="w-full max-w-sm space-y-3" role="status" aria-live="polite">
+                <div className="h-2 overflow-hidden rounded-full" style={{ background: 'var(--muted)' }}>
+                  <motion.div
+                    className="h-full w-1/3 rounded-full"
+                    style={{ background: 'var(--color-primary)' }}
+                    animate={{ x: ['0%', '200%', '0%'] }}
+                    transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                </div>
+                <div className="flex justify-between gap-2 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                  <span className="font-medium" style={{ color: 'var(--foreground)' }}>{t('stageRead')}</span>
+                  <span>{t('stageOrganize')}</span>
+                  <span>{t('stageMirror')}</span>
+                </div>
+              </div>
               <p className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>
-                {LOADING_MESSAGES.reading[msgIndex]}
+                {loadingMessages[msgIndex]}
               </p>
+              {isLongWait && (
+                <div className="max-w-sm text-center space-y-1.5" aria-live="polite">
+                  <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                    {t('longWaitTitle')}
+                  </p>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                    {t('longWaitBody')}
+                  </p>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -276,27 +218,6 @@ export function CaptureLoopStep() {
             </motion.div>
           )}
 
-          {loopState.phase === 'evaluating' && (
-            <motion.div
-              key="evaluating"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-4"
-            >
-              <span
-                className="w-8 h-8 border-2 rounded-full animate-spin"
-                style={{
-                  borderColor: 'var(--color-primary)',
-                  borderTopColor: 'transparent',
-                }}
-              />
-              <p className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>
-                {LOADING_MESSAGES.evaluating[msgIndex]}
-              </p>
-            </motion.div>
-          )}
-
           {loopState.phase === 'generating' && (
             <motion.div
               key="generating"
@@ -305,16 +226,34 @@ export function CaptureLoopStep() {
               exit={{ opacity: 0 }}
               className="flex flex-col items-center gap-4"
             >
-              <span
-                className="w-8 h-8 border-2 rounded-full animate-spin"
-                style={{
-                  borderColor: 'var(--color-primary)',
-                  borderTopColor: 'transparent',
-                }}
-              />
+              <div className="w-full max-w-sm space-y-3" role="status" aria-live="polite">
+                <div className="h-2 overflow-hidden rounded-full" style={{ background: 'var(--muted)' }}>
+                  <motion.div
+                    className="h-full w-1/3 rounded-full"
+                    style={{ background: 'var(--color-primary)' }}
+                    animate={{ x: ['0%', '200%', '0%'] }}
+                    transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                </div>
+                <div className="flex justify-between gap-2 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                  <span>{t('stageRead')}</span>
+                  <span>{t('stageOrganize')}</span>
+                  <span className="font-medium" style={{ color: 'var(--foreground)' }}>{t('stageMirror')}</span>
+                </div>
+              </div>
               <p className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>
-                {LOADING_MESSAGES.generating[msgIndex]}
+                {loadingMessages[msgIndex]}
               </p>
+              {isLongWait && (
+                <div className="max-w-sm text-center space-y-1.5" aria-live="polite">
+                  <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                    {t('longWaitTitle')}
+                  </p>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                    {t('longWaitBody')}
+                  </p>
+                </div>
+              )}
             </motion.div>
           )}
 

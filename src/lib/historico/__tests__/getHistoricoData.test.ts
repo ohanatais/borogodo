@@ -17,6 +17,7 @@ const BASE_ENTRY = {
   metric: '20%',
   project_name: null,
   evidences: [],
+  is_personal_project: false,
 }
 
 describe('getCompanyInitials', () => {
@@ -121,32 +122,56 @@ describe('groupCompanies', () => {
     expect(result[0].roles).toHaveLength(2)
   })
 
-  it('puts entry with project_name into projects, not highlight_bullets', () => {
+  it('flattens legacy project entries into the career evidence', () => {
     const entries = [
       { ...BASE_ENTRY, id: 'e1', what_i_did: 'Feature X', project_name: 'Alpha', impact: null, metric: null },
     ]
     const result = groupCompanies(entries)
-    expect(result[0].projects).toHaveLength(1)
-    expect(result[0].projects[0].name).toBe('Alpha')
-    expect(result[0].highlight_bullets).toHaveLength(0)
+    expect(result[0].projects).toHaveLength(0)
+    expect(result[0].highlight_bullets).toContain('Feature X')
   })
 
-  it('groups multiple entries under the same project', () => {
+  it('includes a personal project in the trajectory without inventing a company', () => {
+    const result = groupCompanies([
+      { ...BASE_ENTRY, id: 'personal-1', company: null, is_personal_project: true, what_i_did: 'Lancei um produto autoral' },
+    ])
+
+    expect(result[0].company).toBe('Projetos pessoais')
+    expect(result[0].highlight_bullets).toContain('Lancei um produto autoral')
+  })
+
+  it('uses organized highlights, rather than the raw source, in the trajectory narrative', () => {
+    const result = groupCompanies([{
+      ...BASE_ENTRY,
+      id: 'organized-1',
+      what_i_did: 'Transcrição longa e crua da conversa',
+      entry_highlights: [{ title: 'Reduziu o ciclo de entrega', metric: '30%', impact: 'Mais previsibilidade' }],
+    }])
+
+    expect(result[0].highlight_bullets).toEqual(['Reduziu o ciclo de entrega'])
+  })
+
+  it('does not turn legacy interview transcripts into a fake career company', () => {
+    const result = groupCompanies([{ ...BASE_ENTRY, company: 'Entrevistas', what_i_did: 'transcrição inteira' }])
+    expect(result).toEqual([])
+  })
+
+  it('keeps multiple legacy project entries as separate evidence', () => {
     const entries = [
       { ...BASE_ENTRY, id: 'e1', what_i_did: 'Tarefa A', project_name: 'Alpha', impact: null, metric: null },
       { ...BASE_ENTRY, id: 'e2', what_i_did: 'Tarefa B', project_name: 'Alpha', impact: null, metric: null },
     ]
     const result = groupCompanies(entries)
-    expect(result[0].projects[0].entries).toHaveLength(2)
+    expect(result[0].highlight_bullets).toEqual(['Tarefa A', 'Tarefa B'])
   })
 
-  it('deduplicates project entries with the same what_i_did', () => {
+  it('deduplicates legacy project entries with the same what_i_did', () => {
     const entries = [
       { ...BASE_ENTRY, id: 'e1', what_i_did: 'Mesmo conteúdo', project_name: 'Alpha', impact: null, metric: null },
       { ...BASE_ENTRY, id: 'e2', what_i_did: 'Mesmo conteúdo', project_name: 'Alpha', impact: null, metric: null },
     ]
     const result = groupCompanies(entries)
-    expect(result[0].projects[0].entries).toHaveLength(1)
+    expect(result[0].highlight_bullets).toHaveLength(1)
   })
 
   it('deduplicates standalone entries with the same what_i_did', () => {
@@ -158,14 +183,13 @@ describe('groupCompanies', () => {
     expect(result[0].highlight_bullets).toHaveLength(1)
   })
 
-  it('preserves entry id and evidences in project entries', () => {
+  it('preserves legacy project entries in the flattened narrative', () => {
     const evidences = [{ type: 'url' as const, value: 'https://example.com', label: 'Demo' }]
     const entries = [
       { ...BASE_ENTRY, id: 'e-unique', what_i_did: 'Feature X', project_name: 'Alpha', impact: null, metric: null, evidences },
     ]
     const result = groupCompanies(entries)
-    expect(result[0].projects[0].entries[0].id).toBe('e-unique')
-    expect(result[0].projects[0].entries[0].evidences).toEqual(evidences)
+    expect(result[0].highlight_bullets).toContain('Feature X')
   })
 
   it('limits highlight_bullets to 3', () => {

@@ -109,15 +109,15 @@ describe('Regressão — modo Perguntar (chat) após reposicionamento no menu (T
     })
   })
 
-  it('modo registro (prefill vindo de outro fluxo) ainda auto-envia e abre com o título certo', async () => {
+  it('prefill vindo de outro fluxo ainda auto-envia uma pergunta', async () => {
     render(<ChatSheet />)
 
     act(() => {
-      openChatSheet({ prefillMessage: 'Fiz uma entrega importante', mode: 'registro' })
+      openChatSheet({ prefillMessage: 'Fiz uma entrega importante' })
     })
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText('Registrar sobre minha carreira')).toBeInTheDocument()
+    expect(screen.getByText('Perguntar sobre minha carreira')).toBeInTheDocument()
     await waitFor(() => {
       expect(screen.getByText('Fiz uma entrega importante')).toBeInTheDocument()
     })

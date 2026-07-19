@@ -89,9 +89,6 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   if (contentType.includes('application/json')) {
     const body = await request.json() as Record<string, unknown>
-    if (body.kind === 'marco') {
-      return handleMarcoCapture(supabase, user.id, body, t)
-    }
     if (body.kind === 'deposito') {
       return handleDepositoCapture(supabase, user.id, body, t)
     }
@@ -114,38 +111,6 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   return handleTextCapture(supabase, user.id, formData, t)
-}
-
-async function handleMarcoCapture(
-  supabase: SupabaseServerClient,
-  userId: string,
-  body: Record<string, unknown>,
-  t: ApiErrors
-): Promise<NextResponse> {
-  const what_i_did = typeof body.what_i_did === 'string' ? body.what_i_did.trim() : ''
-  if (!what_i_did) return jsonError(t('textTooShort'), 400)
-
-  const entry = {
-    what_i_did,
-    company: typeof body.company === 'string' ? body.company : null,
-    role_title: typeof body.role_title === 'string' ? body.role_title : null,
-    entry_date: typeof body.entry_date === 'string' ? body.entry_date : null,
-    impact: typeof body.impact === 'string' ? body.impact : null,
-    metric: typeof body.metric === 'string' ? body.metric : null,
-    tags: [],
-    raw_content: what_i_did,
-    source: 'text' as const,
-  }
-
-  try {
-    const saved = await saveEntries(supabase, userId, [entry])
-    dispatchAsyncJobs(userId)
-    return NextResponse.json({ entries: saved, reflection: null }, { status: 200 })
-  } catch (error: unknown) {
-    const message = errorMessage(error)
-    logger.error('marco capture failed', { message })
-    return jsonError(t('generic'), 500)
-  }
 }
 
 function readManualFields(body: Record<string, unknown>): ManualFields | undefined {
@@ -204,18 +169,10 @@ async function handleTextCapture(
     return textInput.error
   }
 
-  const projectName = formData.get('project_name')
-  const overrideProjectName = typeof projectName === 'string' && projectName.trim()
-    ? projectName.trim()
-    : undefined
-
   try {
     const context = await buildCaptureContext(supabase, userId)
     const { entries, reflection } = await captureAndReflect(textInput.rawText, 'text', context, userId)
-    const entriesWithProject = overrideProjectName
-      ? entries.map((e) => ({ ...e, project_name: overrideProjectName }))
-      : entries
-    const saved = await saveEntries(supabase, userId, entriesWithProject)
+    const saved = await saveEntries(supabase, userId, entries)
 
     dispatchAsyncJobs(userId)
 
@@ -263,14 +220,15 @@ async function handleFileCapture(
 
 /**
  * `entryId` é opcional (US3, feature 026): só o caminho `deposito` tem uma única fonte recém-
- * salva para organizar em segundo plano — os demais caminhos (marco/texto/arquivo) continuam
+ * salva para organizar em segundo plano — os demais caminhos (texto/arquivo) continuam
  * disparando só os jobs pré-existentes.
  */
 function dispatchAsyncJobs(userId: string, entryId?: string): void {
   fireAndForget('triggerProactiveInsight', triggerProactiveInsight(userId))
-  fireAndForget('maybeRegenerateMirror', maybeRegenerateMirror(userId))
   fireAndForget('triggerEnrichmentNudge', triggerEnrichmentNudge(userId))
   if (entryId) {
     fireAndForget('triggerOrganizeEntry', triggerOrganizeEntry(userId, entryId))
+  } else {
+    fireAndForget('maybeRegenerateMirror', maybeRegenerateMirror(userId))
   }
 }

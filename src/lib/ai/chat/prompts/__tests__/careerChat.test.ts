@@ -28,3 +28,21 @@ describe('buildCareerChatSystemPrompt — modo preparação (017)', () => {
     expect(prompt).not.toContain('MODO PREPARAÇÃO')
   })
 })
+
+describe('buildCareerChatSystemPrompt — fontes organizadas (026)', () => {
+  it('entrega ao chat a fonte canônica e seus destaques organizados', () => {
+    const prompt = buildCareerChatSystemPrompt({
+      ...BASE,
+      relevantEntries: [{
+        id: 'entry-1', user_id: 'user-1', what_i_did: 'Resumo legado', raw_content: 'Fonte completa do registro',
+        decision: null, learning: null, impact: null, metric: null, entry_date: '2026-07-19', tags: [],
+        company: null, role_title: null, role_start: null, role_end: null, project_name: null, source: 'deposito',
+        created_at: '2026-07-19T12:00:00.000Z', updated_at: '2026-07-19T12:00:00.000Z',
+        entry_highlights: [{ title: 'Resultado organizado', metric: '30%', impact: 'Mais previsibilidade', tags: [], position: 0 }],
+      }],
+    })
+
+    expect(prompt).toContain('Fonte completa do registro')
+    expect(prompt).toContain('Resultado organizado | 30% | Mais previsibilidade')
+  })
+})

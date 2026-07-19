@@ -36,6 +36,9 @@ const OWN_ENTRY = {
   tags: ['migração'],
   impact: 'Reduziu downtime',
   metric: null,
+  entry_highlights: [
+    { title: 'Migração concluída no prazo', metric: null, impact: 'Reduziu downtime', tags: ['migração'] },
+  ],
 }
 
 const OTHER_USER_ENTRY = {
@@ -95,6 +98,15 @@ describe('generateAndSaveMirror', () => {
     const userPrompt = mockComplete.mock.calls[0]?.[0]?.user as string
     expect(userPrompt).toContain(OWN_ENTRY.what_i_did)
     expect(userPrompt).not.toContain(OTHER_USER_ENTRY.what_i_did)
+  })
+
+  it('inclui os destaques organizados como índice da fonte no contexto do espelho', async () => {
+    const supabase = buildSupabase([OWN_ENTRY])
+
+    await generateAndSaveMirror(supabase as never, 'user-1')
+
+    const userPrompt = mockComplete.mock.calls[0]?.[0]?.user as string
+    expect(userPrompt).toContain('Destaques: Migração concluída no prazo')
   })
 
   it('valida e persiste o espelho gerado, com entry_count correto', async () => {
