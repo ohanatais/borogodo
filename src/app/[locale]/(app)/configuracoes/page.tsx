@@ -6,6 +6,8 @@ import { MeusDadosCard } from '@/components/features/perfil/MeusDadosCard'
 import { ContactCard } from '@/components/features/support/ContactCard'
 import { LegalLinksCard } from '@/components/features/legal/LegalLinksCard'
 import { ConfiguracoesTabs } from '@/components/features/perfil/ConfiguracoesTabs'
+import { PageContainer } from '@/components/layout/PageContainer'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 export default async function ConfiguracoesPage() {
   const supabase = await createServerClient()
@@ -21,13 +23,8 @@ export default async function ConfiguracoesPage() {
   ])
 
   return (
-    <div className="max-w-[980px] mx-auto px-6 py-8 pb-32 lg:pb-8">
-      <h1
-        className="text-2xl font-semibold mb-8"
-        style={{ fontFamily: 'Fraunces, serif', color: 'var(--foreground)' }}
-      >
-        {t('title')}
-      </h1>
+    <PageContainer className="pb-32 lg:pb-10">
+      <PageHeader title={t('title')} />
 
       <ConfiguracoesTabs
         groupAriaLabel={t('title')}
@@ -44,6 +41,6 @@ export default async function ConfiguracoesPage() {
         }
         suporte={<ContactCard />}
       />
-    </div>
+    </PageContainer>
   )
 }

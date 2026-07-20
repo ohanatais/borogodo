@@ -5,7 +5,6 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { useTranslations } from 'next-intl'
 import { Trash2, Pencil, ChevronDown, ChevronUp, Paperclip, Sparkles } from 'lucide-react'
 import type { FeedHighlight, FeedItem } from '@/lib/feed/types'
-import { UsarButton } from '@/components/features/content/UsarButton'
 import { AttachTile } from '@/components/features/capture/AttachTile'
 import { HighlightCard } from './HighlightCard'
 import { deriveContextStatus } from '@/lib/entries/contextStatus'
@@ -19,6 +18,7 @@ import {
 interface SourceCardProps {
   item: FeedItem
   variant: 'feed' | 'panel'
+  initialExpanded?: boolean
   onDelete?: (id: string) => void
   /** Notifica o pai da nova seleção de contexto, após o "Organizar" confirmar sucesso (a IA pode
    * resolver empresa/projeto pessoal quando ainda vazios, FR-002/FR-006). */
@@ -48,10 +48,10 @@ interface OrganizeResponseBody {
  * chegam prontos em `item.highlights` (join feito em `getFeedData`, ver `contracts/feed.md`) —
  * não há mais fetch lazy por card ao expandir.
  */
-export function SourceCard({ item, variant, onDelete, onContextChange }: SourceCardProps) {
+export function SourceCard({ item, variant, initialExpanded = false, onDelete, onContextChange }: SourceCardProps) {
   const t = useTranslations('feed')
   const tRegistro = useTranslations('registro')
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(initialExpanded)
   // Story 2 (FR-008): sinalização discreta de "contexto não identificado" no header do card —
   // nunca um badge de erro/alerta, um convite a completar (ux-shape.md §6).
   const contextStatus = deriveContextStatus(item.company, item.is_personal_project)
@@ -253,21 +253,22 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
               2+ — com 1 destaque só nada é exibido no lugar, só o espaçador que empurra as ações
               pra direita. Usar/Organizar de novo/Editar/Excluir alinhados aqui, à direita, na
               mesma linha (revisão manual de posicionamento). */}
-          <div className="flex items-center gap-3 pt-1" style={{ borderTop: '1px solid color-mix(in oklch, var(--border) 60%, transparent)' }}>
+          <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:gap-3" style={{ borderTop: '1px solid color-mix(in oklch, var(--border) 60%, transparent)' }}>
             {highlights.length > 1 ? (
               <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--muted-foreground)' }}>
                 {tRegistro('highlightsSectionLabel')}
               </span>
             ) : (
-              <span className="flex-1" />
+              <span className="hidden flex-1 sm:block" />
             )}
-            <div className="flex items-center gap-2 flex-wrap ml-auto">
-              <UsarButton
-                seedType="entry"
-                seedRef={item.id}
-                seedSummary={item.what_i_did}
-                formats={['post', 'impact_summary']}
-              />
+            <div className="flex w-full items-center gap-1 overflow-x-auto sm:ml-auto sm:w-auto sm:flex-wrap sm:justify-end sm:overflow-visible">
+              <span
+                className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full border px-3 py-2.5 text-xs font-medium"
+                style={{ color: 'var(--muted-foreground)', borderColor: 'var(--border)' }}
+                aria-label="Gerar conteúdo em breve"
+              >
+                Em breve
+              </span>
 
               {variant === 'feed' && (() => {
                 // US3: o botão reflete tanto o clique manual local (`organizeState`) quanto a
@@ -280,7 +281,7 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
                     type="button"
                     onClick={() => void handleOrganize()}
                     disabled={isOrganizingNow}
-                    className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 disabled:opacity-50"
+                    className="inline-flex min-h-11 shrink-0 items-center gap-1 px-3 py-2.5 text-xs font-medium transition-opacity hover:opacity-80 disabled:opacity-50 sm:rounded-full sm:px-4"
                     style={{ color: 'var(--muted-foreground)' }}
                   >
                     <Sparkles size={12} aria-hidden="true" />
@@ -301,7 +302,7 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
                 <button
                   type="button"
                   onClick={handleEditClick}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
+                  className="inline-flex min-h-11 shrink-0 items-center gap-1 px-3 py-2.5 text-xs font-medium transition-opacity hover:opacity-80 sm:rounded-full sm:px-4"
                   style={{ color: 'var(--color-primary)' }}
                 >
                   <Pencil size={12} aria-hidden="true" />
@@ -314,7 +315,7 @@ export function SourceCard({ item, variant, onDelete, onContextChange }: SourceC
                   type="button"
                   aria-label={t('card.delete')}
                   onClick={() => setDeleteOpen(true)}
-                  className="inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80"
+                  className="inline-flex min-h-11 shrink-0 items-center gap-1 px-3 py-2.5 text-xs font-medium transition-opacity hover:opacity-80 sm:rounded-full sm:px-4"
                   style={{ color: 'var(--destructive)' }}
                 >
                   <Trash2 size={12} aria-hidden="true" />

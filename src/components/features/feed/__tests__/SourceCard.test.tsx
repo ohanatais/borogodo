@@ -44,6 +44,13 @@ describe('SourceCard — botão Organizar (US1, feature 026)', () => {
     expect(screen.getByRole('button', { name: 'organize.cta' })).toBeInTheDocument()
   })
 
+  it('já abre expandido quando veio de um link direto para o registro', () => {
+    render(<SourceCard item={BASE_ITEM} variant="feed" initialExpanded />)
+
+    expect(screen.getByRole('button', { name: 'card.collapse' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'organize.cta' })).toBeInTheDocument()
+  })
+
   it('ao clicar, chama POST /api/entries/[id]/organize e mostra o estado "organizando…"', async () => {
     let resolveFetch: (value: unknown) => void = () => {}
     const fetchPromise = new Promise((resolve) => {

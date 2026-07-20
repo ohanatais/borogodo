@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AiLimitNotice } from '@/components/features/cost/AiLimitNotice'
 import { parseAiLimit, type AiLimitInfo } from '@/lib/ai/cost/clientLimit'
+import { Button } from '@/components/ui/button'
 
 export function GenerateMirrorButton() {
   const router = useRouter()
@@ -37,15 +38,14 @@ export function GenerateMirrorButton() {
 
   return (
     <div className="space-y-2">
-      <button
+      <Button
         type="button"
         onClick={handleGenerate}
         disabled={loading}
-        className="text-sm font-semibold px-4 py-2.5 rounded-full disabled:opacity-50"
-        style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+        className="rounded-full"
       >
         {loading ? 'Gerando...' : 'Gerar espelho agora'}
-      </button>
+      </Button>
       {aiLimit && <AiLimitNotice info={aiLimit} onDismiss={() => setAiLimit(null)} />}
       {error && (
         <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>

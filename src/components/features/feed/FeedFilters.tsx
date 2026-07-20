@@ -2,10 +2,11 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useRef } from 'react'
-import { Search, X, CalendarRange, FileUp } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Search, X, CalendarRange, SlidersHorizontal } from 'lucide-react'
 import type { FeedAxis } from '@/lib/feed/types'
 import { RegistrarButton } from './RegistrarButton'
+import { Button } from '@/components/ui/button'
 
 // Altura comum a busca/período/Registrar/Importar histórico (revisão manual: a fileira de cima
 // misturava um botão de 54px com pílulas de filtro bem mais baixas — "não harmônico").
@@ -19,6 +20,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
   const t = useTranslations('feed')
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const currentQ = searchParams.get('q') ?? ''
   const currentFrom = searchParams.get('from') ?? ''
@@ -74,7 +76,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
       {/* Busca + período à esquerda, Registrar/Importar histórico à direita — mesma altura nos
           quatro (revisão manual pós-implementação, 026). */}
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="relative flex-1 min-w-[200px] max-w-[280px]">
+        <div className="relative w-full sm:flex-1 sm:min-w-[200px] sm:max-w-[280px]">
           <Search
             size={14}
             aria-hidden="true"
@@ -99,7 +101,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
         {/* Período — um único controle (não duas caixas separadas De/Até). Mesmo tratamento
             visual da busca (fundo --muted sólido, sem borda). */}
         <div
-          className={`inline-flex items-center gap-1.5 text-xs px-4 rounded-full shrink-0 ${FILTER_ROW_HEIGHT}`}
+          className={`${mobileFiltersOpen ? 'flex' : 'hidden'} w-full min-w-0 items-center gap-1.5 overflow-hidden rounded-full px-3 text-xs sm:flex sm:w-auto sm:shrink-0 sm:px-4 ${FILTER_ROW_HEIGHT}`}
           style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
         >
           <CalendarRange size={13} aria-hidden="true" className="shrink-0" />
@@ -109,7 +111,7 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
             max={currentTo || undefined}
             aria-label={t('filters.dateFrom')}
             onChange={(e) => updateParam('from', e.target.value || null)}
-            className="bg-transparent outline-none w-[110px]"
+            className="min-w-0 flex-1 bg-transparent outline-none sm:w-[110px] sm:flex-none"
             style={{ color: currentFrom ? 'var(--foreground)' : 'var(--muted-foreground)' }}
           />
           <span aria-hidden="true">–</span>
@@ -119,31 +121,32 @@ export function FeedFilters({ currentAxis }: FeedFiltersProps) {
             min={currentFrom || undefined}
             aria-label={t('filters.dateTo')}
             onChange={(e) => updateParam('to', e.target.value || null)}
-            className="bg-transparent outline-none w-[110px]"
+            className="min-w-0 flex-1 bg-transparent outline-none sm:w-[110px] sm:flex-none"
             style={{ color: currentTo ? 'var(--foreground)' : 'var(--muted-foreground)' }}
           />
         </div>
 
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="ml-auto hidden items-center gap-2 sm:flex">
           <RegistrarButton height={FILTER_ROW_HEIGHT} />
-          <button
-            type="button"
-            disabled
-            title={t('composer.comingSoon')}
-            className={`inline-flex items-center gap-2 shrink-0 rounded-full px-4 text-sm font-semibold cursor-not-allowed opacity-60 ${FILTER_ROW_HEIGHT}`}
-            style={{ color: 'var(--color-primary)', background: 'var(--color-lilas-nevoa)', border: '1px solid var(--color-lilas-linha)' }}
-          >
-            <FileUp size={16} aria-hidden="true" />
-            {t('composer.importHistory')}
-          </button>
         </div>
+
+        <Button
+          type="button"
+          onClick={() => setMobileFiltersOpen((open) => !open)}
+          aria-expanded={mobileFiltersOpen}
+          variant="secondary"
+          className="rounded-full sm:hidden"
+        >
+          <SlidersHorizontal size={16} aria-hidden="true" />
+          {t('filters.mobileToggle')}
+        </Button>
       </div>
 
       {/* Ordem cronológica (quando aconteceu) vs. ordem de registro (quando anotei, padrão) —
           registros sem data de acontecimento simplesmente vão para o fim da lista quando
           cronológica está ativa (getFeedData já resolve isso, `nullsFirst: false`). Numa fileira
           própria abaixo da busca (revisão manual) — junto de "Limpar filtros" quando ativo. */}
-      <div className="flex items-center gap-2">
+      <div className={`${mobileFiltersOpen ? 'flex' : 'hidden'} items-center gap-2 sm:flex`}>
         <label className="inline-flex items-center gap-2 text-xs shrink-0" style={{ color: 'var(--muted-foreground)' }}>
           {t('axis.chronologicalLabel')}
           <button

@@ -1,6 +1,8 @@
+import { PageContainer } from '@/components/layout/PageContainer'
+
 export default function RegistrosLoading() {
   return (
-    <div className="max-w-[980px] mx-auto px-6 py-8">
+    <PageContainer className="pb-28 lg:pb-10">
       <div className="h-8 w-48 rounded-lg mb-6 animate-pulse" style={{ background: 'var(--muted)' }} />
       <div className="flex flex-col gap-2">
         {Array.from({ length: 5 }).map((_, i) => (
@@ -11,6 +13,6 @@ export default function RegistrosLoading() {
           />
         ))}
       </div>
-    </div>
+    </PageContainer>
   )
 }

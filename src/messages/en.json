@@ -124,23 +124,29 @@
       "placeholder": "Ask anything about your career — e.g. \"what makes me stand out?\"",
       "ariaLabel": "Open chat and ask about your career"
     },
-    "greetingByTime": {
-      "morning": "Bom dia, {name}.",
-      "afternoon": "Boa tarde, {name}.",
-      "evening": "Boa noite, {name}."
-    },
-    "greetingSubtitle": "Cada registro de hoje afina o seu Espelho.",
+    "panelPrompt": "{name}, what did you do that should not be forgotten?",
     "registroTrigger": {
       "label": "Registrar o que você fez",
       "ariaLabel": "Registrar o que você fez"
     },
     "suasForcas": {
-      "title": "Suas forças",
-      "viewMirror": "Ver espelho"
+      "title": "Your strengths",
+      "viewMirror": "View in Mirror",
+      "statusLabel": "Como suas competências estão se formando",
+      "proofSummary": "{proven} of {total} skills are already proven.",
+      "formingSummary": "Your first patterns are emerging. More records make this reading more reliable.",
+      "tierCount": "{count} {tier}",
+      "moreSkills": "+{count} no Espelho",
+      "noSkills": "Nenhuma ainda",
+      "tiers": {
+        "Comprovada": "comprovada",
+        "Consistente": "consistente",
+        "Emergente": "emergente"
+      }
     },
     "registrosRecentes": {
       "title": "Registros recentes",
-      "viewAll": "Ver todos"
+      "viewAll": "View records"
     },
     "newAccount": {
       "heading": "Painel",
@@ -295,8 +301,9 @@
     }
   },
   "historico": {
+    "pageTitle": "Trajectory",
     "title": "O fio da sua carreira",
-    "subtitle": "Cada passo, com a evidência que ficou.",
+    "subtitle": "Where you worked, studied, and what you accomplished at each stage.",
     "evidencias": "Evidências (em breve)",
     "empty": "Nenhuma entrada com cargo e empresa ainda.",
     "emptyHint": "Conte histórias com seu cargo e empresa e elas aparecem aqui."
@@ -317,9 +324,13 @@
     "perfil": "Perfil",
     "trajetoria": "Trajetória",
     "gerarConteudo": "Gerar conteúdo",
+    "comingSoon": "Em breve",
     "mePreparar": "Me preparar",
+    "autoavaliacao": "Self-assessment",
     "groups": {
-      "meuEspelho": "Meu espelho",
+      "meuEspelho": "Discover and understand",
+      "entender": "Descobrir e entender",
+      "provar": "Provar",
       "usar": "Usar"
     },
     "theme": {
@@ -543,7 +554,7 @@
     "formats": {
       "post": "Post",
       "impactSummary": "To talk about your work",
-      "miniBio": "Your bio",
+      "miniBio": "Legacy draft",
       "selfAssessment": "Self-assessment"
     },
     "adjust": {
@@ -592,7 +603,7 @@
       "goRegister": "Go to the Panel"
     },
     "page": {
-      "title": "Repertoire",
+      "title": "Use your borogodó",
       "subtitle": "Your history ready to use: show your value and prepare for a moment.",
       "myDrafts": "My drafts",
       "empty": {
@@ -633,7 +644,7 @@
       "allFormats": "All",
       "post": "Post",
       "impactSummary": "To talk",
-      "miniBio": "Bio"
+      "miniBio": "Legacy draft"
     },
     "deleteConfirm": {
       "title": "Delete this draft?",
@@ -749,11 +760,11 @@
     }
   },
   "repertorio": {
-    "nav": "Repertoire",
+    "nav": "Use",
     "hubs": {
       "mostrar": {
         "title": "Show my value",
-        "examples": "LinkedIn post, professional bio"
+        "examples": "LinkedIn post"
       },
       "preparar": {
         "title": "Prepare for a moment",
@@ -762,7 +773,6 @@
     },
     "cards": {
       "post": "Post",
-      "bio": "Bio",
       "chooseTheme": "Choose a theme"
     },
     "moments": {
@@ -770,6 +780,11 @@
       "review": "Performance review",
       "salario": "Ask for a raise",
       "autoavaliacao": "Write self-assessment"
+    },
+    "momentDescriptions": {
+      "entrevista": "Connect your experience to the role.",
+      "review": "Gather impact and growth for the conversation.",
+      "salario": "Build your case with evidence of value."
     },
     "prepare": {
       "heading": "How do you want to prepare?",
@@ -783,17 +798,21 @@
     "invite": {
       "title": "Ready to use what you've recorded?",
       "cta": "Open"
-    },
-    "bio": {
-      "cta": "Create my bio"
-    },
-    "bioFocus": {
-      "title": "What should the bio focus on?",
-      "geral": "General (whole trajectory)"
     }
+  },
+  "preparation": {
+    "intake": {
+      "eyebrow": { "entrevista": "Interview", "review": "Performance review", "salario": "Ask for a raise" },
+      "question": { "entrevista": "What role do you want to land?", "review": "What period and outcome do you want to discuss?", "salario": "What changed in your scope and what do you want to negotiate?" },
+      "hint": { "entrevista": "Paste the job description or describe what it asks for. I'll connect it to evidence from your career.", "review": "Share the review period and whether you want recognition, promotion, or alignment.", "salario": "Share new responsibilities, recent impact, and the raise or range you want to discuss." },
+      "placeholder": { "entrevista": "Paste the job description here…", "review": "E.g. last semester; I want to make a case for promotion…", "salario": "E.g. I started leading X, delivered Y, and want to negotiate…" },
+      "submit": "Start preparation"
+    },
+    "chat": { "title": "Prepare with my history", "generalTitle": "Ask about my career", "newConversation": "New conversation", "close": "Close chat", "placeholder": "Continue preparing…", "generalPlaceholder": "Ask something about your career…", "intakePlaceholder": { "entrevista": "Paste the job description or describe what it asks for…", "review": "Share the review period and goal…", "salario": "Share what changed in your scope and what you want to negotiate…" } }
   },
   "feed": {
     "title": "Your records",
+    "subtitle": "What you did, the impact you created, and the context of each result.",
     "composer": {
       "registerButton": "Registrar",
       "importHistory": "Import history",
@@ -803,7 +822,7 @@
       "heading": "No records yet",
       "description": "Every story you share becomes a record here. Start with the most recent one.",
       "filtered": "No records match these filters.",
-      "cta": "Make my first capture"
+      "cta": "Record my first story"
     },
     "axis": {
       "chronologicalLabel": "Chronological order"
@@ -814,6 +833,7 @@
       "company": "Company",
       "tags": "Tags",
       "source": "Source",
+      "mobileToggle": "Filter",
       "clear": "Clear filters",
       "dateFrom": "From",
       "dateTo": "To"
@@ -1011,11 +1031,12 @@
     "genericLabel": "IA genérica"
   },
   "usar": {
+    "comingSoon": "Em breve",
     "title": "What do you want to do with your borogodó?",
     "subtitle": "Two paths: show it outward or prepare inward.",
     "conteudo": {
       "label": "Content",
-      "when": "Show your value outward — post, bio."
+      "when": "Turn your experience into a LinkedIn post."
     },
     "preparo": {
       "label": "Prep",

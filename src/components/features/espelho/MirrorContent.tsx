@@ -202,8 +202,8 @@ export function MirrorContent({ snapshot, userName = '', avatarUrl }: MirrorCont
         {mirror.strength_themes.length > 0 && (
           <motion.div variants={item} className="pb-8">
             <SectionLabel>{t('themes')}</SectionLabel>
-            {/* Tags de leitura — só os temas, sem ação por item nem CTA de bio. A ação ("usar" um
-                tema, gerar bio) vive no destino Usar; aqui o Espelho é contemplação, não launchpad. */}
+            {/* Tags de leitura, sem ação por item. O Espelho organiza a leitura; as ações ficam no
+                destino Usar. */}
             <div className="flex flex-wrap gap-2">
               {mirror.strength_themes.map((theme) => (
                 <span

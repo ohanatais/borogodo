@@ -57,7 +57,7 @@ describe('PresencaCreate', () => {
     expect(screen.getByText('Liderei a migração do sistema de cobrança')).toBeInTheDocument()
   })
 
-  it('escolher um tema dispara a geração com o seed de tema (post + mini-bio)', async () => {
+  it('escolher um tema dispara a geração somente de post', async () => {
     openChooser()
     await screen.findByText('create.title')
 
@@ -69,7 +69,7 @@ describe('PresencaCreate', () => {
       seedType: 'theme',
       seedRef: 'produto 0→1',
       seedSummary: 'produto 0→1',
-      formats: ['post', 'mini_bio'],
+      formats: ['post'],
     })
   })
 

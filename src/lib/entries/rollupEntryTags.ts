@@ -19,9 +19,11 @@ interface HighlightTagsRow {
  */
 export async function rollupEntryTags(
   supabase: SupabaseServerClient,
-  entryId: string
+  entryId: string,
+  userId?: string
 ): Promise<string[]> {
-  const { data, error } = await supabase.from('entry_highlights').select('tags').eq('entry_id', entryId)
+  const highlightsQuery = supabase.from('entry_highlights').select('tags').eq('entry_id', entryId)
+  const { data, error } = await (userId ? highlightsQuery.eq('user_id', userId) : highlightsQuery)
 
   if (error || !data) return []
 
@@ -29,7 +31,8 @@ export async function rollupEntryTags(
   const allTags = rows.flatMap((row) => row.tags ?? [])
   const rollup = Array.from(new Set(allTags)).sort((a, b) => a.localeCompare(b))
 
-  const { error: updateError } = await supabase.from('entries').update({ tags: rollup }).eq('id', entryId)
+  const entriesQuery = supabase.from('entries').update({ tags: rollup }).eq('id', entryId)
+  const { error: updateError } = await (userId ? entriesQuery.eq('user_id', userId) : entriesQuery)
 
   if (updateError) {
     logger.error('rollup_entry_tags_persist_failed', { entryId })

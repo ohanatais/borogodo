@@ -15,6 +15,8 @@ import { ReviewCheckIn } from '@/components/features/autoavaliacao/ReviewCheckIn
 import { YearInFactsRecap } from '@/components/features/autoavaliacao/YearInFactsRecap'
 import { AssessmentEditor } from '@/components/features/autoavaliacao/AssessmentEditor'
 import { SelfAssessmentHistory } from '@/components/features/autoavaliacao/SelfAssessmentHistory'
+import { PageContainer } from '@/components/layout/PageContainer'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 export const metadata: Metadata = {
   title: 'Autoavaliação | Borogodó',
@@ -81,18 +83,8 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
     : { show: false as const }
 
   return (
-    <div className="max-w-[980px] mx-auto px-6 py-8 pb-28 lg:pb-8">
-      <header className="mb-10">
-        <h1
-          className="text-3xl sm:text-4xl"
-          style={{ fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--foreground)' }}
-        >
-          {t('title')}
-        </h1>
-        <p className="text-base mt-2 max-w-prose" style={{ color: 'var(--muted-foreground)' }}>
-          {t('subtitle')}
-        </p>
-      </header>
+    <PageContainer className="pb-28 lg:pb-10">
+      <PageHeader title={t('title')} description={t('subtitle')} className="mb-10" />
 
       {period ? (
         <CockpitForPeriod
@@ -125,7 +117,7 @@ export default async function AutoavaliacaoPage({ searchParams }: AutoavaliacaoP
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   )
 }
 

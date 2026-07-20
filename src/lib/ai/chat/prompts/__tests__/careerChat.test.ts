@@ -14,6 +14,9 @@ describe('buildCareerChatSystemPrompt — modo preparação (017)', () => {
     const prompt = buildCareerChatSystemPrompt({ ...BASE, prepMoment: 'entrevista' })
     expect(prompt).toContain('MODO PREPARAÇÃO')
     expect(prompt).toContain('ENTREVISTA')
+    expect(prompt).toContain('Não use títulos com # ou ##')
+    expect(prompt).toContain('sequências de hífens como separadores')
+    expect(prompt).toContain('Evite absolutos como "exatamente o que a vaga pede"')
   })
 
   it('cada momento tem um enquadramento distinto', () => {

@@ -49,20 +49,23 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
     setNextCursor(initialPage.nextCursor)
   }
 
-  // Deep-link "Ver registro" (autoavaliação, 019): o feed vem por SSR, então o alvo #registro-<id> já
-  // existe no mount. O Next App Router não rola para hash em container de scroll próprio, então o
-  // fazemos aqui — rola e realça por 2s. Best-effort: se o registro não está na 1ª página, nada ocorre.
+  const deepLinkedEntryId = searchParams.get('entry')
+
+  // Deep-link de evidência: abre, centraliza e realça o registro sem depender apenas do hash.
   useEffect(() => {
-    const hash = window.location.hash
-    if (!hash.startsWith('#registro-')) return
-    const el = document.getElementById(hash.slice(1))
+    const hashEntryId = window.location.hash.startsWith('#registro-')
+      ? window.location.hash.replace('#registro-', '')
+      : null
+    const entryId = deepLinkedEntryId ?? hashEntryId
+    if (!entryId) return
+    const el = document.getElementById(`registro-${entryId}`)
     if (!el) return
     el.scrollIntoView({ block: 'center', behavior: 'smooth' })
     el.style.transition = 'box-shadow 300ms ease-out'
     el.style.boxShadow = '0 0 0 2px var(--color-primary)'
     const timer = setTimeout(() => { el.style.boxShadow = '' }, 2000)
     return () => clearTimeout(timer)
-  }, [])
+  }, [deepLinkedEntryId])
 
   // FR-028: timeline por mês — agrupa pela MESMA data usada para ordenar a página (`currentAxis`),
   // nunca uma escolha fixa (ver `groupByMonth.ts`) — senão a seção do mês poderia divergir da
@@ -130,9 +133,11 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
                 ...item,
                 what_i_did: detail.what_i_did,
                 title: detail.what_i_did.slice(0, 60).trim(),
-                ...(detail.metric !== undefined && detail.metric && { metric: detail.metric }),
-                ...(detail.company !== undefined && { company: detail.company || item.company }),
-                ...(detail.entryDate !== undefined && detail.entryDate && { entry_date: detail.entryDate }),
+                ...(detail.metric !== undefined && { metric: detail.metric || null }),
+                ...(detail.impact !== undefined && { impact: detail.impact || null }),
+                ...(detail.company !== undefined && { company: detail.company || null }),
+                ...(detail.isPersonalProject !== undefined && { is_personal_project: detail.isPersonalProject }),
+                ...(detail.entryDate !== undefined && { entry_date: detail.entryDate || null }),
               }
             : item
         )
@@ -224,6 +229,7 @@ export function FeedPage({ filterKey, initialPage, initialQuery }: FeedPageProps
                       key={item.id}
                       item={item}
                       variant="feed"
+                      initialExpanded={item.id === deepLinkedEntryId}
                       onDelete={handleDelete}
                       onContextChange={handleContextChange}
                     />

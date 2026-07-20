@@ -1,6 +1,5 @@
 'use client'
 
-import { UserPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { RegistroTrigger } from './RegistroTrigger'
 
@@ -18,10 +17,8 @@ interface NewAccountPromptProps {
 
 /**
  * Modo "novo" do Painel (US5, FR-021/FR-022) — conta sem nenhum registro ainda. Substitui
- * `PanelEmptyState`: gatilho de Registro em destaque, botão "Importar currículo ou LinkedIn"
- * visível mas **sem ação** (vitrine da feature 027, FR-021), e um cartão de progresso rumo ao
- * primeiro espelho usando o limiar já existente (`FIRST_MIRROR_MIN_ENTRIES`, FR-022) — sem
- * inventar número novo.
+ * `PanelEmptyState`: gatilho de Registro em destaque e progresso rumo ao primeiro Espelho.
+ * A importação não aparece até ser funcional: o primeiro contato não oferece controles mortos.
  */
 export function NewAccountPrompt({ entryCount, firstMirrorMinEntries }: NewAccountPromptProps) {
   const t = useTranslations('painel')
@@ -30,14 +27,7 @@ export function NewAccountPrompt({ entryCount, firstMirrorMinEntries }: NewAccou
     <div className="flex flex-col gap-6">
       <h1 className="sr-only">{t('newAccount.heading')}</h1>
       <RegistroTrigger />
-
-      {/* Vitrine não-funcional (FR-021): sem href, sem onClick — clicar não faz nada, de propósito. */}
-      <button
-        type="button"
-        className="self-start inline-flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-full"
-        style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
-      >
-        <UserPlus size={16} aria-hidden="true" />
+      <button type="button" disabled className="min-h-12 rounded-full border px-4 text-sm opacity-60" style={{ borderColor: 'var(--border)' }}>
         {t('newAccount.importButton')}
       </button>
 

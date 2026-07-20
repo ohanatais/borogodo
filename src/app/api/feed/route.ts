@@ -14,7 +14,7 @@ const feedQuerySchema = z.object({
   company: z.string().optional(),
   tags: z.string().optional(),
   metricOnly: z.enum(['true', 'false']).optional(),
-  source: z.enum(['linkedin_pdf', 'audio', 'text', 'chips', 'image']).optional(),
+  source: z.enum(['linkedin_pdf', 'audio', 'text', 'chips', 'image', 'deposito']).optional(),
   cursor: z.string().optional(),
 })
 

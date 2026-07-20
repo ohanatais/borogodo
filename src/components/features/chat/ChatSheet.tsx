@@ -7,10 +7,13 @@ import { X, Plus } from 'lucide-react'
 import { ChatMessage, type MessageData } from './ChatMessage'
 import { ChatInput } from './ChatInput'
 import { StarterPrompts } from './StarterPrompts'
+import { PreparationIntake } from './PreparationIntake'
+import { ShareConversationButton } from './ShareConversationButton'
 import { CorrectionConfirmCard } from './CorrectionConfirmCard'
 import { parseAiLimit } from '@/lib/ai/cost/clientLimit'
 import type { Citation, CorrectionAction } from '@/lib/ai/chat/answerCareerQuestion'
 import type { PrepMoment } from '@/lib/content/intentions'
+import { trackPreparationEvent } from '@/lib/preparation/trackPreparationEvent'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -73,7 +76,7 @@ function reducer(state: State, action: Action): State {
     case 'CLEAR_AUTO_SEND':
       return { ...state, pendingAutoSend: null }
     case 'CLOSE':
-      return { ...state, open: false }
+      return state.context?.type === 'preparacao' ? initialState : { ...state, open: false }
     case 'NEW_CONVERSATION':
       return {
         ...state,
@@ -167,13 +170,31 @@ const initialState: State = {
   pendingAutoSend: null,
 }
 
+// Keep the response visibly progressive without adding several seconds of artificial delay.
+const STREAM_REVEAL_CHUNK = 24
+
+async function revealStreamText(text: string, onChunk: (chunk: string) => void): Promise<void> {
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  if (reduceMotion) {
+    onChunk(text)
+    return
+  }
+
+  for (let index = 0; index < text.length; index += STREAM_REVEAL_CHUNK) {
+    onChunk(text.slice(index, index + STREAM_REVEAL_CHUNK))
+    await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
+  }
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function ChatSheet() {
   const [state, dispatch] = useReducer(reducer, initialState)
   const tLimit = useTranslations('aiLimit')
+  const t = useTranslations('preparation.chat')
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputAreaRef = useRef<HTMLDivElement>(null)
+  const followOutputRef = useRef(true)
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -185,6 +206,7 @@ export function ChatSheet() {
 
       dispatch({ type: 'USER_SENT', id: userMsgId, content: trimmed })
       dispatch({ type: 'ASSISTANT_STARTED', id: assistantMsgId })
+      followOutputRef.current = true
 
       const history = state.messages.map((m) => ({ role: m.role, content: m.content }))
 
@@ -246,13 +268,18 @@ export function ChatSheet() {
               }
 
               if (json.type === 'delta' && json.text) {
-                dispatch({ type: 'ASSISTANT_DELTA', id: assistantMsgId, text: json.text })
+                await revealStreamText(json.text, (chunk) => {
+                  dispatch({ type: 'ASSISTANT_DELTA', id: assistantMsgId, text: chunk })
+                })
               } else if (json.type === 'done') {
+                const suggestions = (json.suggestions ?? []).filter(
+                  (suggestion) => !/^(quero|vamos)\s+(treinar|praticar)\b/i.test(suggestion.trim())
+                )
                 dispatch({
                   type: 'ASSISTANT_DONE',
                   id: assistantMsgId,
                   citations: json.citations ?? [],
-                  suggestions: json.suggestions ?? [],
+                  suggestions,
                   correction: json.correction,
                 })
               } else if (json.type === 'error') {
@@ -313,10 +340,14 @@ export function ChatSheet() {
   }, [state.open, state.pendingAutoSend])
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
+    if (!followOutputRef.current) return
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'auto' })
   }, [state.messages, state.pendingCorrection])
 
   function handleSubmit() {
+    if (isPreparacaoMode && isEmpty && state.context?.moment && state.draft.trim()) {
+      trackPreparationEvent('context_submitted', state.context.moment, { hasContext: true })
+    }
     void sendMessage(state.draft)
   }
 
@@ -339,18 +370,16 @@ export function ChatSheet() {
       <Dialog.Portal>
         {/* Mobile overlay full-screen; desktop overlay transparent (panel is floating, non-blocking) */}
         <Dialog.Overlay
-          className="fixed inset-0 z-40 lg:hidden"
-          style={{ background: 'oklch(18% 0.02 260 / 0.4)', backdropFilter: 'blur(2px)' }}
+          className="fixed inset-0 z-40"
+          style={{ background: 'oklch(18% 0.02 260 / 0.12)', backdropFilter: 'blur(1px)' }}
         />
 
         {/* Mobile: bottom sheet (60dvh fixed). Desktop: right-side drawer fixed height */}
         <Dialog.Content
           onInteractOutside={(e) => e.preventDefault()}
           aria-describedby={undefined}
-          className="fixed z-50 flex flex-col focus:outline-none overflow-hidden
-            bottom-0 left-0 right-0 rounded-t-[20px] h-[72dvh]
-            lg:bottom-4 lg:right-6 lg:left-auto lg:top-4
-            lg:w-[480px] lg:h-auto lg:max-h-[calc(100dvh-32px)] lg:rounded-2xl"
+          className={`fixed z-50 flex flex-col focus:outline-none overflow-hidden bottom-0 left-0 right-0
+            ${isPreparacaoMode ? 'inset-0 h-[100dvh] rounded-none lg:left-auto lg:bottom-4 lg:right-6 lg:top-4 lg:h-auto lg:w-[min(760px,calc(100vw-48px))] lg:max-h-[calc(100dvh-32px)] lg:rounded-2xl' : 'rounded-t-[20px] h-[72dvh] lg:bottom-4 lg:right-6 lg:left-auto lg:top-4 lg:w-[480px] lg:h-auto lg:max-h-[calc(100dvh-32px)] lg:rounded-2xl'}`}
           style={{
             background: 'var(--color-creme)',
             boxShadow: '0 8px 40px oklch(18% 0.02 260 / 0.25), 0 2px 8px oklch(18% 0.02 260 / 0.1)',
@@ -368,7 +397,7 @@ export function ChatSheet() {
           >
             <div className="flex items-center gap-2">
               <Dialog.Title className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-                {isPreparacaoMode ? 'Me preparar pra um momento' : 'Perguntar sobre minha carreira'}
+                {isPreparacaoMode ? t('title') : 'Perguntar sobre minha carreira'}
               </Dialog.Title>
             </div>
             <div className="flex items-center gap-1">
@@ -402,9 +431,17 @@ export function ChatSheet() {
             ref={scrollRef}
             className="flex-1 overflow-y-auto px-4 py-4"
             style={{ minHeight: '200px' }}
+            onScroll={(event) => {
+              const target = event.currentTarget
+              followOutputRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < 96
+            }}
           >
             {isEmpty ? (
-              <StarterPrompts onSelect={handleStarterClick} moment={isPreparacaoMode ? state.context?.moment : undefined} />
+              isPreparacaoMode && state.context?.moment ? (
+                <PreparationIntake moment={state.context.moment} />
+              ) : (
+                <StarterPrompts onSelect={handleStarterClick} />
+              )
             ) : (
               <div className="flex flex-col gap-4">
                 {(() => {
@@ -417,11 +454,27 @@ export function ChatSheet() {
                       key={msg.id}
                       message={msg}
                       onSuggestionClick={handleSuggestionClick}
-                      onHelpful={(helpful) => dispatch({ type: 'SET_HELPFUL', id: msg.id, helpful })}
+                      onHelpful={(helpful, reason) => {
+                        dispatch({ type: 'SET_HELPFUL', id: msg.id, helpful })
+                        trackPreparationEvent(
+                          'response_feedback',
+                          isPreparacaoMode ? state.context?.moment : undefined,
+                          {
+                            helpful,
+                            hasEvidence: (msg.citations?.length ?? 0) > 0,
+                            ...(reason ? { reasonProvided: true, reasonLength: reason.length } : {}),
+                          }
+                        )
+                      }}
                       showSuggestions={suggestionsEnabled && i === lastAssistantIdx}
+                      prepMoment={isPreparacaoMode ? state.context?.moment : undefined}
                     />
                   ))
                 })()}
+
+                {isPreparacaoMode && state.messages.length > 0 && (
+                  <ShareConversationButton messages={state.messages} moment={state.context?.moment} />
+                )}
 
                 {state.pendingCorrection && (
                   <CorrectionConfirmCard
@@ -429,6 +482,7 @@ export function ChatSheet() {
                     onDismiss={() => dispatch({ type: 'CARD_DISMISSED' })}
                   />
                 )}
+
 
               </div>
             )}
@@ -445,7 +499,7 @@ export function ChatSheet() {
               onChange={(text) => dispatch({ type: 'SET_DRAFT', text })}
               onSubmit={handleSubmit}
               disabled={state.status === 'streaming'}
-              placeholder="Pergunte algo sobre sua carreira..."
+              placeholder={isPreparacaoMode && isEmpty && state.context?.moment ? t(`intakePlaceholder.${state.context.moment}`) : isPreparacaoMode ? t('placeholder') : 'Pergunte algo sobre sua carreira...'}
             />
           </div>
         </Dialog.Content>
