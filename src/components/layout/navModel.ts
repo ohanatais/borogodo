@@ -8,6 +8,7 @@ import {
   Megaphone,
   Target,
   MessageCircle,
+  FileSignature,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -58,6 +59,8 @@ export interface NavLink {
   path: string
   activePrefixes: string[]
   activeQuery?: { key: string; value: string; defaultValue?: string }
+  /** Mantém o destino visível como sinalização, mas sem permitir navegação. */
+  disabled?: boolean
 }
 
 /** Item de navegação que dispara uma ação local (abrir o Drawer, abrir o ChatSheet) — não navega. */
@@ -79,9 +82,9 @@ export interface NavGroup {
 }
 
 /**
- * Grupos da sidebar desktop (025): Painel + Registrar isolados no topo, depois "Meu espelho"
- * (Perfil/Trajetória/Registros) e "Usar" (Gerar conteúdo/Me preparar/Perguntar). A tab bar
- * mobile NÃO usa esta estrutura — continua em `NAV_DESTINOS` (FR-025).
+ * Grupos da sidebar: Painel + Registrar no topo, depois os movimentos do produto.
+ * Descobrir/Entender contém Perfil e Trajetória; Provar contém Registros; Usar contém os jobs
+ * de saída. O mobile mantém quatro destinos, mas Espelho e Usar abrem estes mesmos subdestinos.
  */
 export const NAV_GROUPS: NavGroup[] = [
   {
@@ -92,7 +95,7 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    id: 'meuEspelho',
+    id: 'entender',
     labelKey: 'appNav.groups.meuEspelho',
     items: [
       {
@@ -113,6 +116,12 @@ export const NAV_GROUPS: NavGroup[] = [
         activePrefixes: ['/espelho'],
         activeQuery: { key: 'vista', value: 'trajetoria', defaultValue: 'forcas' },
       },
+    ],
+  },
+  {
+    id: 'provar',
+    labelKey: 'appNav.groups.provar',
+    items: [
       { kind: 'link', id: 'registros', labelKey: 'appNav.registros', icon: LayoutList, path: '/registros', activePrefixes: ['/registros'] },
     ],
   },
@@ -128,6 +137,7 @@ export const NAV_GROUPS: NavGroup[] = [
         path: '/presenca?hub=mostrar',
         activePrefixes: ['/presenca'],
         activeQuery: { key: 'hub', value: 'mostrar' },
+        disabled: true,
       },
       {
         kind: 'link',
@@ -137,6 +147,14 @@ export const NAV_GROUPS: NavGroup[] = [
         path: '/presenca?hub=preparar',
         activePrefixes: ['/presenca'],
         activeQuery: { key: 'hub', value: 'preparar' },
+      },
+      {
+        kind: 'link',
+        id: 'autoavaliacao',
+        labelKey: 'appNav.autoavaliacao',
+        icon: FileSignature,
+        path: '/autoavaliacao',
+        activePrefixes: ['/autoavaliacao'],
       },
       { kind: 'action', id: 'perguntar', labelKey: 'appNav.perguntar', icon: MessageCircle, action: 'open-chat' },
     ],

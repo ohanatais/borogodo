@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
 vi.mock('next/navigation', () => ({
@@ -25,21 +25,22 @@ function hrefs(): string[] {
 }
 
 describe('AppShellClient — menu de 4 destinos', () => {
-  it('mostra os 4 destinos de topo + Configurações', () => {
+  it('mostra destinos diretos e grupos contextuais no mobile', () => {
     render(<AppShellClient userName="Ana">conteúdo</AppShellClient>)
     const links = hrefs()
     expect(links).toContain('/painel')
     expect(links).toContain('/espelho')
     expect(links).toContain('/registros')
-    expect(links).toContain('/usar')
     expect(links).toContain('/configuracoes')
+    expect(screen.getByRole('link', { name: 'appNav.espelho' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'appNav.usar' })).toBeInTheDocument()
   })
 
-  it('NÃO mostra Linha do Tempo, Repertório nem Autoavaliação no topo', () => {
+  it('não mostra destinos antigos e mantém Autoavaliação dentro de Usar', () => {
     render(<AppShellClient userName="Ana">conteúdo</AppShellClient>)
     const links = hrefs()
     expect(links).not.toContain('/historico')
     expect(links).not.toContain('/presenca')
-    expect(links).not.toContain('/autoavaliacao')
+    expect(links).toContain('/autoavaliacao')
   })
 })

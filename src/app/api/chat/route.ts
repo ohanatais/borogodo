@@ -7,10 +7,16 @@ import { logger } from '@/lib/log'
 import { z } from 'zod'
 
 const chatRequestSchema = z.object({
-  message: z.string().min(1).max(2000),
+  // Descrições de vaga completas passam facilmente de 2 mil caracteres. O limite protege a rota
+  // sem transformar o principal insumo da preparação em erro de validação.
+  message: z.string().min(1).max(30000),
   history: z
-    .array(z.object({ role: z.enum(['user', 'assistant']), content: z.string() }))
+    .array(z.object({ role: z.enum(['user', 'assistant']), content: z.string().max(12000) }))
     .max(20)
+    .superRefine((items, ctx) => {
+      const total = items.reduce((sum, item) => sum + item.content.length, 0)
+      if (total > 60000) ctx.addIssue({ code: z.ZodIssueCode.too_big, origin: 'string', maximum: 60000, inclusive: true, message: 'history too long' })
+    })
     .optional(),
   context: z
     .object({

@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import type { createServerClient } from '@/lib/db/supabase/server'
 import type { Entry } from '@/types/entry'
 import type { ProactiveInsight } from '@/types/insight'
-import type { MacroCategory } from '@/types/mirror'
+import type { MacroCategory, SkillTier } from '@/types/mirror'
 import { getMirrorStatus, type MirrorStatus } from './getMirrorStatus'
 import { getCapturePrompt } from './getCapturePrompt'
 import { getReturnSignal, type ReturnSignal, type ReturnSignalEntry } from './getReturnSignal'
@@ -43,6 +43,8 @@ export interface PanelMirror {
   headline: string | null
   strengthThemes: string[]
   skillSummary: SkillSummary | null
+  /** Presente em snapshots com categorias; opcional para compatibilidade com dados legados. */
+  skills?: Array<{ name: string; tier: SkillTier }>
 }
 
 export interface PanelData {
@@ -175,6 +177,7 @@ export async function getPanelData(supabase: SupabaseServerClient, userId: strin
         headline: mirrorRow.primary_strength?.headline ?? null,
         strengthThemes: mirrorRow.strength_themes ?? [],
         skillSummary,
+        ...(allSkills.length > 0 ? { skills: allSkills.map(({ name, tier }) => ({ name, tier })) } : {}),
       }
     : null
 

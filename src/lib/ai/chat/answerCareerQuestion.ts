@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { z } from 'zod'
 import { recordUsageAndMaybeAlert } from '@/lib/ai/client'
 import { generateEmbedding, cosineSimilarity, parseEmbedding } from '@/lib/ai/embeddings'
 import { getLatestSnapshot } from '@/lib/db/mirror'
@@ -16,6 +17,9 @@ export interface Citation {
   entryId: string
   company: string | null
   date: string | null
+  metric: string | null
+  impact: string | null
+  proofs: { type: 'url' | 'image'; value: string; label?: string }[]
 }
 
 export interface CorrectionAction {
@@ -36,6 +40,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>
 export type ChatEntry = Entry & {
   embedding?: unknown
   entry_highlights?: Pick<EntryHighlight, 'title' | 'metric' | 'impact' | 'tags' | 'position'>[]
+  evidences?: { type: 'url' | 'image'; value: string; label?: string }[]
 }
 
 const SEMANTIC_SEARCH_LIMIT = 200
@@ -58,7 +63,7 @@ async function findRelevantEntries(
 ): Promise<ChatEntry[]> {
   const { data } = await supabase
     .from('entries')
-    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at, embedding, entry_highlights(title, metric, impact, tags, position)')
+    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at, embedding, evidences, entry_highlights(title, metric, impact, tags, position)')
     .eq('user_id', userId)
     .not('embedding', 'is', null)
     .order('created_at', { ascending: false })
@@ -81,7 +86,7 @@ async function fetchCompanyEntries(
 ): Promise<ChatEntry[]> {
   const { data } = await supabase
     .from('entries')
-    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at, entry_highlights(title, metric, impact, tags, position)')
+    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at, evidences, entry_highlights(title, metric, impact, tags, position)')
     .eq('user_id', userId)
     .eq('company', company)
     .order('entry_date', { ascending: false })
@@ -97,7 +102,7 @@ async function fetchEntryById(
 ): Promise<ChatEntry | null> {
   const { data } = await supabase
     .from('entries')
-    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at, entry_highlights(title, metric, impact, tags, position)')
+    .select('id, user_id, what_i_did, decision, learning, impact, metric, entry_date, tags, company, role_title, role_start, role_end, project_name, raw_content, source, created_at, updated_at, evidences, entry_highlights(title, metric, impact, tags, position)')
     .eq('id', entryId)
     .eq('user_id', userId)
     .maybeSingle()
@@ -107,16 +112,57 @@ async function fetchEntryById(
 
 function buildCitations(entries: ChatEntry[]): Citation[] {
   return entries.map((e) => ({
-    label: e.what_i_did.slice(0, 60) + (e.what_i_did.length > 60 ? '...' : ''),
+    label: e.title ?? e.entry_highlights?.[0]?.title ?? e.what_i_did,
     entryId: e.id,
     company: e.company ?? null,
     date: e.entry_date ?? e.created_at.slice(0, 10),
+    metric: e.entry_highlights?.find((item) => item.metric)?.metric ?? e.metric ?? null,
+    impact: e.entry_highlights?.find((item) => item.impact)?.impact ?? e.impact ?? null,
+    proofs: e.evidences ?? [],
   }))
 }
 
 interface BlocksPayload {
   followups?: string[]
+  evidenceRefs?: string[]
   correction?: CorrectionAction
+  insight?: {
+    objective?: string
+    themes?: string[]
+    gaps?: string[]
+  }
+}
+
+const conversationInsightSchema = z.object({
+  objective: z.string().trim().min(1).max(180),
+  themes: z.array(z.string().trim().min(1).max(80)).max(5).default([]),
+  gaps: z.array(z.string().trim().min(1).max(120)).max(5).default([]),
+})
+
+async function recordConversationInsight(
+  supabase: SupabaseServerClient,
+  userId: string,
+  context: ChatContext | undefined,
+  history: ChatMessage[],
+  blocks: BlocksPayload,
+  evidenceCount: number
+): Promise<void> {
+  const insight = conversationInsightSchema.safeParse(blocks.insight)
+  if (!insight.success) return
+  const { error } = await supabase.from('preparation_events').insert({
+    user_id: userId,
+    event_name: 'conversation_summarized',
+    moment: context?.type === 'preparacao' ? context.moment ?? null : null,
+    properties: {
+      evidence_count: evidenceCount,
+      turn_count: history.filter((item) => item.role === 'user').length + 1,
+      objective_present: insight.data.objective.length > 0,
+      theme_count: insight.data.themes.length,
+      gap_count: insight.data.gaps.length,
+      preparation_mode: context?.type === 'preparacao',
+    },
+  })
+  if (error) logger.error('conversation insight persistence failed', { code: error.code })
 }
 
 function parseBlocks(buffer: string): BlocksPayload {
@@ -148,10 +194,13 @@ export async function answerCareerQuestion(
   context: ChatContext | undefined,
   events: StreamEvents
 ): Promise<void> {
+  const retrievalQuery = context?.type === 'preparacao'
+    ? [context.moment, ...history.filter((item) => item.role === 'user').slice(-3).map((item) => item.content), userMessage].join('\n').slice(-6000)
+    : userMessage
   const [profile, latestMirror, queryEmbedding] = await Promise.all([
     getProfile(supabase, userId),
     getLatestSnapshot(supabase, userId),
-    generateEmbedding(userMessage),
+    generateEmbedding(retrievalQuery),
   ])
 
   const [relevantEntries, companyEntries, correctionEntry] = await Promise.all([
@@ -256,7 +305,12 @@ export async function answerCareerQuestion(
   const blocks = parseBlocks(blocksBuffer)
   const suggestions = Array.isArray(blocks.followups) ? blocks.followups.filter((s): s is string => typeof s === 'string') : []
   const correction = blocks.correction
-  const citations = buildCitations(relevantEntries)
+  const referenced = new Set(Array.isArray(blocks.evidenceRefs) ? blocks.evidenceRefs.filter((id): id is string => typeof id === 'string') : [])
+  const sourceEntries = [...relevantEntries, ...companyEntries, ...(correctionEntry ? [correctionEntry] : [])]
+  const uniqueSources = Array.from(new Map(sourceEntries.map((entry) => [entry.id, entry])).values())
+  const citations = buildCitations(uniqueSources.filter((entry) => referenced.has(entry.id)))
+
+  await recordConversationInsight(supabase, userId, context, history, blocks, citations.length)
 
   events.onDone(citations, suggestions, correction)
 }

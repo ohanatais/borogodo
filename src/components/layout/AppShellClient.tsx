@@ -63,10 +63,11 @@ export function AppShellClient({ userName, contextVocabulary, children }: AppShe
     if (item.action === 'open-chat') openChatSheet()
   }
 
-  function renderMobileNavLink(item: NavDestino) {
+  function renderMobileNavItem(item: NavDestino) {
     const active = isActive(item, pathname)
     const Icon = item.icon
     const label = tNav(item.labelKey)
+
     return (
       <Link
         key={item.id}
@@ -130,6 +131,25 @@ export function AppShellClient({ userName, contextVocabulary, children }: AppShe
                   )
                 }
 
+                if (item.disabled) {
+                  return (
+                    <div key={item.id} className="relative mb-1">
+                      <div
+                        className="flex min-h-12 cursor-not-allowed items-center gap-3 rounded-lg px-4 py-2.5 text-sm opacity-55"
+                        aria-disabled="true"
+                        title={tNav('appNav.comingSoon')}
+                        style={{ color: 'var(--muted-foreground)' }}
+                      >
+                        <Icon size={20} aria-hidden="true" />
+                        <span className="flex-1">{label}</span>
+                        <span className="rounded-full border px-2 py-0.5 text-[10px] font-semibold" style={{ borderColor: 'var(--border)' }}>
+                          {tNav('appNav.comingSoon')}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                }
+
                 const active = isGroupItemActive(item, pathname, searchParams)
                 return (
                   <div key={item.id} className="relative mb-1">
@@ -188,8 +208,8 @@ export function AppShellClient({ userName, contextVocabulary, children }: AppShe
       <div className="flex flex-col flex-1 min-w-0">
         {/* Mobile top bar */}
         <header
-          className="lg:hidden flex items-center justify-between px-5 border-b shrink-0"
-          style={{ height: '60px', background: 'var(--card)', borderColor: 'var(--border)' }}
+          className="lg:hidden flex min-h-[60px] items-center justify-between border-b px-5 shrink-0"
+          style={{ background: 'var(--card)', borderColor: 'var(--border)', paddingTop: 'env(safe-area-inset-top)' }}
         >
           <Logo variant="light" size="sm" />
           <div className="flex items-center gap-1">
@@ -197,7 +217,7 @@ export function AppShellClient({ userName, contextVocabulary, children }: AppShe
             <Link
               href="/configuracoes"
               aria-label="Configurações"
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+              className="flex h-12 w-12 items-center justify-center rounded-full text-xs font-bold"
               style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
             >
               {userName.charAt(0).toUpperCase()}
@@ -219,6 +239,7 @@ export function AppShellClient({ userName, contextVocabulary, children }: AppShe
             background: 'color-mix(in oklch, var(--card) 95%, transparent)',
             backdropFilter: 'blur(12px)',
             borderColor: 'var(--border)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
           }}
         >
           {/* FAB central (US7) — abre o Drawer como bottom sheet. Flutua acima da barra, sombra
@@ -248,9 +269,9 @@ export function AppShellClient({ userName, contextVocabulary, children }: AppShe
             className="flex items-center justify-around px-2 pb-2"
             aria-label="Navegação"
           >
-            {NAV_DESTINOS.slice(0, 2).map(renderMobileNavLink)}
+            {NAV_DESTINOS.slice(0, 2).map(renderMobileNavItem)}
             <span className="w-12 shrink-0" aria-hidden="true" />
-            {NAV_DESTINOS.slice(2).map(renderMobileNavLink)}
+            {NAV_DESTINOS.slice(2).map(renderMobileNavItem)}
           </nav>
         </div>
       </div>

@@ -47,6 +47,7 @@ export interface EntryUpdatedDetail {
   metric?: string
   impact?: string
   company?: string
+  isPersonalProject?: boolean
   entryDate?: string
 }
 

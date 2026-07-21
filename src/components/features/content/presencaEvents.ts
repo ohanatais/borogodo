@@ -11,7 +11,7 @@ export interface PresencaOpenDetail {
   seedRef: string
   /** Texto curto da evidência base, mostrado como "Baseado em:". */
   seedSummary: string
-  /** Formatos oferecidos: tema → ['post', 'mini_bio']; entrada → ['post', 'impact_summary']. */
+  /** Formatos oferecidos pela superfície de conteúdo. Hoje, temas e entradas geram apenas post. */
   formats: DraftFormat[]
   /**
    * Ângulo opcional que orienta a geração (017): no fluxo de preparação é o enquadramento do

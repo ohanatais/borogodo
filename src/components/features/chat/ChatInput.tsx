@@ -44,6 +44,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, placeholder }: 
         placeholder={disabled ? 'Aguarde a resposta...' : (placeholder ?? 'Pergunte algo sobre sua carreira...')}
         rows={1}
         disabled={disabled}
+        maxLength={30000}
         aria-label="Campo de pergunta sobre sua carreira"
         className="flex-1 resize-none text-sm outline-none focus-visible:shadow-none bg-transparent leading-snug min-h-[24px] max-h-[120px] transition-opacity"
         style={{ color: 'var(--foreground)', opacity: disabled ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'text' }}

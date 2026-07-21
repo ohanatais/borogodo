@@ -123,7 +123,7 @@ export async function getFeedData(
   userId: string,
   query: FeedQuery
 ): Promise<FeedPage> {
-  const { axis = 'created_at', cursor, q, from, to, company, tags, metricOnly, source } = query
+  const { axis = 'created_at', cursor, q, from, to, company, tags, metricOnly, source, entryId } = query
   const limit = FEED_PAGE_SIZE + 1
 
   let req = supabase
@@ -198,7 +198,19 @@ export async function getFeedData(
   req = req.limit(limit)
 
   const { data } = await req
-  const rows = (data ?? []) as RawEntry[]
+  let rows = (data ?? []) as RawEntry[]
+
+  // Evidence links can point to older records outside the first page. Fetch that one owned
+  // record explicitly so the deep link opens a real card instead of silently landing on page 1.
+  if (entryId && !rows.some((entry) => entry.id === entryId)) {
+    const { data: target } = await supabase
+      .from('entries')
+      .select('id, what_i_did, title, source, created_at, entry_date, company, is_personal_project, role_title, metric, tags, evidences, impact, decision, learning, file_name, organized_at, organizing_started_at')
+      .eq('id', entryId)
+      .eq('user_id', userId)
+      .maybeSingle()
+    if (target) rows = [target as RawEntry, ...rows]
+  }
 
   const hasNextPage = rows.length > FEED_PAGE_SIZE
   const pageRows = hasNextPage ? rows.slice(0, FEED_PAGE_SIZE) : rows

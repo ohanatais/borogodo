@@ -28,7 +28,7 @@ export function UsarButton({ seedType, seedRef, seedSummary, formats, className 
       type="button"
       onClick={() => openPresenca({ seedType, seedRef, seedSummary, formats })}
       aria-label={`${text}: ${seedSummary}`}
-      className={`inline-flex items-center gap-1 text-xs font-medium px-4 py-2.5 rounded-full transition-opacity hover:opacity-80 ${className}`}
+      className={`inline-flex min-h-11 items-center gap-1 rounded-lg px-4 py-2.5 text-xs font-medium transition-opacity hover:opacity-80 sm:rounded-full ${className}`}
       style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)' }}
     >
       <Sparkles size={12} aria-hidden="true" />

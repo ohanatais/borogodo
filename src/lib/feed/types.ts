@@ -60,6 +60,7 @@ export type FeedAxis = 'created_at' | 'entry_date'
 
 export interface FeedQuery {
   axis: FeedAxis
+  entryId?: string
   q?: string
   from?: string
   to?: string

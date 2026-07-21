@@ -1,31 +1,24 @@
 'use client'
 
-import { ThumbsUp, ThumbsDown } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Copy, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { CitationChip } from './CitationChip'
+import { ChatEvidenceList } from './ChatEvidenceList'
+import { SavePreparationButton } from './SavePreparationButton'
 import type { Citation } from '@/lib/ai/chat/answerCareerQuestion'
+import type { PrepMoment } from '@/lib/content/intentions'
+import { FormattedAiText } from '@/components/ui/FormattedAiText'
 
-function renderMarkdown(text: string): React.ReactNode[] {
-  // Split on **bold** and render each segment
-  const parts = text.split(/(\*\*[^*]+\*\*)/g)
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i}>{part.slice(2, -2)}</strong>
-    }
-    return part
-  })
-}
-
-function MarkdownText({ content }: { content: string }) {
-  const lines = content.split('\n')
+function UserMessageText({ content }: { content: string }) {
+  if (content.length <= 700) return content
   return (
-    <>
-      {lines.map((line, i) => (
-        <span key={i}>
-          {renderMarkdown(line)}
-          {i < lines.length - 1 && <br />}
-        </span>
-      ))}
-    </>
+    <details className="group">
+      <summary className="cursor-pointer list-none">
+        <span>{content.slice(0, 520).trimEnd()}…</span>
+        <span className="mt-2 block text-xs font-semibold underline underline-offset-4 group-open:hidden">Ver descrição completa</span>
+      </summary>
+      <span className="mt-3 block">{content.slice(520)}</span>
+    </details>
   )
 }
 
@@ -43,11 +36,16 @@ export interface MessageData {
 interface ChatMessageProps {
   message: MessageData
   onSuggestionClick: (suggestion: string) => void
-  onHelpful?: (helpful: boolean) => void
+  onHelpful?: (helpful: boolean, reason?: string) => void
   showSuggestions?: boolean
+  prepMoment?: PrepMoment
 }
 
-export function ChatMessage({ message, onSuggestionClick, onHelpful, showSuggestions = true }: ChatMessageProps) {
+export function ChatMessage({ message, onSuggestionClick, onHelpful, showSuggestions = true, prepMoment }: ChatMessageProps) {
+  const [copied, setCopied] = useState(false)
+  const [negativeFeedbackOpen, setNegativeFeedbackOpen] = useState(false)
+  const [negativeFeedback, setNegativeFeedback] = useState('')
+  const [negativeFeedbackSent, setNegativeFeedbackSent] = useState(false)
   const isUser = message.role === 'user'
   const isError = !isUser && !!message.isError
   const showFeedback = !isUser && !message.isStreaming && !isError && message.content.length > 0
@@ -78,7 +76,7 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful, showSuggest
   return (
     <div className={`flex flex-col gap-1.5 ${isUser ? 'items-end' : 'items-start'}`}>
       <div
-        className="max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
+        className={`max-w-[85%] break-words px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${isUser ? 'whitespace-pre-wrap' : ''}`}
         style={
           isUser
             ? {
@@ -102,9 +100,9 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful, showSuggest
         }
       >
         {isUser
-          ? message.content
+          ? <UserMessageText content={message.content} />
           : message.content
-            ? <MarkdownText content={message.content} />
+            ? <FormattedAiText content={message.content} />
             : message.isStreaming
               ? <span className="opacity-50">...</span>
               : null}
@@ -116,7 +114,11 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful, showSuggest
         )}
       </div>
 
-      {!isUser && collapsedCitations.length > 0 && !message.isStreaming && (
+      {!isUser && prepMoment && message.citations && !message.isStreaming && (
+        <div className="w-full max-w-[92%]"><ChatEvidenceList citations={message.citations} moment={prepMoment} /></div>
+      )}
+
+      {!isUser && !prepMoment && collapsedCitations.length > 0 && !message.isStreaming && (
         <div className="flex flex-col gap-1 pl-1 max-w-[85%]">
           <span className="text-[10px] font-medium" style={{ color: 'var(--muted-foreground)' }}>
             Fontes
@@ -125,13 +127,18 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful, showSuggest
             {collapsedCitations.map((c, i) => (
               <CitationChip
                 key={c.entryId}
-                citation={c}
+                citation={{ ...c, metric: null, impact: null, proofs: [] }}
                 index={i}
                 count={c.count}
               />
             ))}
           </div>
         </div>
+      )}
+
+      {!isUser && prepMoment && !message.isStreaming && !isError && message.content &&
+        (message.content.length >= 280 || (message.citations?.length ?? 0) > 0) && (
+        <SavePreparationButton moment={prepMoment} body={message.content} evidenceEntryIds={(message.citations ?? []).map((item) => item.entryId)} />
       )}
 
       {!isUser && showSuggestions && message.suggestions && message.suggestions.length > 0 && !message.isStreaming && (
@@ -155,30 +162,111 @@ export function ChatMessage({ message, onSuggestionClick, onHelpful, showSuggest
       )}
 
       {showFeedback && onHelpful && (
-        <div className="flex items-center gap-0.5 pl-1">
+        <div className="flex flex-wrap items-center gap-0.5 pl-1" aria-label="Avaliar resposta">
+          <span className="mr-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>Essa resposta foi útil?</span>
           <button
             type="button"
-            onClick={() => onHelpful(true)}
+            onClick={() => {
+              void navigator.clipboard.writeText(message.content).then(() => {
+                setCopied(true)
+                window.setTimeout(() => setCopied(false), 1600)
+              }).catch(() => undefined)
+            }}
+            aria-label={copied ? 'Resposta copiada' : 'Copiar resposta'}
+            title={copied ? 'Copiado' : 'Copiar'}
+            className="flex min-h-10 min-w-10 items-center justify-center rounded-full transition-colors hover:bg-black/5"
+            style={{ color: copied ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
+          >
+            {copied ? <Check size={15} /> : <Copy size={15} />}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setNegativeFeedbackOpen(false)
+              setNegativeFeedbackSent(false)
+              onHelpful(true)
+            }}
             aria-label="Útil"
-            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition-opacity hover:opacity-70"
+            title="Útil"
+            className="flex min-h-10 min-w-10 items-center justify-center rounded-full transition-colors hover:bg-black/5"
             style={{
               color: message.helpful === true ? 'var(--color-primary)' : 'var(--muted-foreground)',
             }}
           >
-            <ThumbsUp size={13} />
+            <ThumbsUp size={15} fill={message.helpful === true ? 'currentColor' : 'none'} />
           </button>
           <button
             type="button"
-            onClick={() => onHelpful(false)}
+            onClick={() => {
+              setNegativeFeedbackOpen(true)
+              setNegativeFeedbackSent(false)
+              onHelpful(false)
+            }}
             aria-label="Não útil"
-            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-lg transition-opacity hover:opacity-70"
+            title="Não foi útil"
+            className="flex min-h-10 min-w-10 items-center justify-center rounded-full transition-colors hover:bg-black/5"
             style={{
               color: message.helpful === false ? 'var(--foreground)' : 'var(--muted-foreground)',
             }}
           >
-            <ThumbsDown size={13} />
+            <ThumbsDown size={15} fill={message.helpful === false ? 'currentColor' : 'none'} />
           </button>
+          {(message.helpful === true || negativeFeedbackSent) && (
+            <span className="ml-1 text-xs" role="status" style={{ color: 'var(--muted-foreground)' }}>
+              Feedback enviado
+            </span>
+          )}
         </div>
+      )}
+
+      {showFeedback && onHelpful && negativeFeedbackOpen && (
+        <form
+          className="mt-1 w-full max-w-[92%] pl-1"
+          onSubmit={(event) => {
+            event.preventDefault()
+            const reason = negativeFeedback.trim()
+            if (!reason) return
+            onHelpful(false, reason)
+            setNegativeFeedbackOpen(false)
+            setNegativeFeedbackSent(true)
+          }}
+        >
+          <label htmlFor={`negative-feedback-${message.id}`} className="text-xs font-semibold">
+            O que faltou nesta resposta?
+          </label>
+          <textarea
+            id={`negative-feedback-${message.id}`}
+            autoFocus
+            value={negativeFeedback}
+            onChange={(event) => setNegativeFeedback(event.target.value)}
+            maxLength={800}
+            rows={3}
+            placeholder="Conte o que estava errado, genérico ou pouco útil."
+            className="mt-2 w-full resize-none rounded-lg border bg-white px-3 py-2.5 text-sm leading-relaxed outline-none focus:ring-2 focus:ring-offset-1"
+            style={{ borderColor: 'var(--border)', '--tw-ring-color': 'var(--color-primary)' } as React.CSSProperties}
+          />
+          <div className="mt-2 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setNegativeFeedbackOpen(false)
+                setNegativeFeedback('')
+              }}
+              className="min-h-10 rounded-lg px-3 text-xs font-semibold hover:bg-black/[0.03]"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={!negativeFeedback.trim()}
+              className="min-h-10 rounded-lg px-4 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
+              style={{ background: 'var(--color-primary)' }}
+            >
+              Enviar feedback
+            </button>
+          </div>
+        </form>
       )}
     </div>
   )

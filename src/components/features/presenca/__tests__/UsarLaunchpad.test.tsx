@@ -54,40 +54,22 @@ describe('UsarLaunchpad', () => {
     })
   })
 
-  it('o card Bio abre o seletor de foco; escolher um tema gera a mini-bio com esse ângulo', () => {
+  it('não oferece criação de bio', () => {
     render(<UsarLaunchpad themes={['produto 0→1']} />)
-    // Clicar em Bio não gera direto — abre o seletor de foco (021).
-    act(() => {
-      screen.getByRole('button', { name: 'cards.bio' }).click()
-    })
-    expect(presenca).toBeNull()
-    // Escolher o tema como foco gera a mini-bio ancorada nesse ângulo.
-    act(() => {
-      screen.getByRole('button', { name: 'produto 0→1' }).click()
-    })
-    expect(presenca?.formats).toEqual(['mini_bio'])
-    expect(presenca?.angle).toBe('produto 0→1')
+    expect(screen.queryByRole('button', { name: 'cards.bio' })).not.toBeInTheDocument()
   })
 
-  it('o foco "Geral" gera a mini-bio sem fixar num único tema', () => {
-    render(<UsarLaunchpad themes={['produto 0→1']} />)
-    act(() => {
-      screen.getByRole('button', { name: 'cards.bio' }).click()
-    })
-    act(() => {
-      screen.getByRole('button', { name: 'bioFocus.geral' }).click()
-    })
-    expect(presenca?.formats).toEqual(['mini_bio'])
-    expect(presenca?.seedSummary).toBe('bioFocus.geral')
-  })
-
-  it('escolher um momento abre a bifurcação de preparação', () => {
+  it('escolher um momento abre o chat diretamente, sem bifurcação', () => {
+    let detail: unknown = null
+    const listener = (event: Event) => { detail = (event as CustomEvent).detail }
+    window.addEventListener('borogodo:chat-open', listener)
     render(<UsarLaunchpad themes={['produto 0→1']} />)
     act(() => {
       screen.getByRole('button', { name: /moments\.entrevista/ }).click()
     })
-    expect(screen.getByText('prepare.heading')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /prepare\.ready/ })).toBeInTheDocument()
+    expect(detail).toEqual({ context: { type: 'preparacao', moment: 'entrevista' } })
+    expect(screen.queryByText('prepare.heading')).not.toBeInTheDocument()
+    window.removeEventListener('borogodo:chat-open', listener)
   })
 
   it('sem temas, os cards de mostrar ficam desabilitados e avisam para gerar o Espelho', () => {

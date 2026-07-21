@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { HistoricoTimeline } from '@/components/features/historico/HistoricoTimeline'
 import type { HistoricoData } from '@/lib/historico/getHistoricoData'
+import { OPEN_DRAWER_EVENT } from '@/components/features/painel/registroTriggerEvents'
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ refresh: vi.fn() }),
@@ -18,18 +19,10 @@ const COMPANY = {
 }
 
 describe('HistoricoTimeline', () => {
-  it('renders the headline', () => {
+  it('leaves the page heading to the Trajectory page shell', () => {
     const data: HistoricoData = { companies: [COMPANY] }
     render(<HistoricoTimeline data={data} />)
-    // h2: a Trajetória é uma vista do Espelho (segmented control), não uma página própria — o
-    // intro deixou de ser page-title (h1) pra não duplicar título logo abaixo do toggle (021).
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(/fio da/)
-  })
-
-  it('renders the subtitle', () => {
-    const data: HistoricoData = { companies: [COMPANY] }
-    render(<HistoricoTimeline data={data} />)
-    expect(screen.getByText(/Cada passo/)).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument()
   })
 
   it('renders all companies', () => {
@@ -49,6 +42,17 @@ describe('HistoricoTimeline', () => {
     const data: HistoricoData = { companies: [] }
     render(<HistoricoTimeline data={data} />)
     expect(screen.queryByText('Beta Inc')).not.toBeInTheDocument()
+  })
+
+  it('opens the capture drawer from the empty state', () => {
+    const onOpen = vi.fn()
+    window.addEventListener(OPEN_DRAWER_EVENT, onOpen)
+    render(<HistoricoTimeline data={{ companies: [] }} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Registrar agora' }))
+
+    expect(onOpen).toHaveBeenCalledOnce()
+    window.removeEventListener(OPEN_DRAWER_EVENT, onOpen)
   })
 
 })

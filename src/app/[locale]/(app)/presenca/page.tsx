@@ -7,9 +7,11 @@ import { getLatestSnapshot } from '@/lib/db/mirror'
 import { getRecentEntries } from '@/lib/db/entries'
 import type { PresencaSeedEntry } from '@/components/features/content/PresencaCreate'
 import { RepertorioContent } from '@/components/features/presenca/RepertorioContent'
+import { PageContainer } from '@/components/layout/PageContainer'
+import { listPreparations } from '@/lib/db/preparations'
 
 export const metadata: Metadata = {
-  title: 'Repertório | Borogodó',
+  title: 'Usar | Borogodó',
 }
 
 const RECENT_ENTRY_SEEDS = 8
@@ -41,13 +43,17 @@ export default async function PresencaPage({ searchParams }: PresencaPageProps) 
   const { hub: hubParam } = await searchParams
   const hub = parseHub(hubParam)
 
-  const [page, anyDrafts, snapshot, recentEntries, voiceSignal, voiceProfile] = await Promise.all([
+  // Geração de conteúdo está pausada no MVP. Só o fluxo de preparação permanece acessível.
+  if (hub !== 'preparar') redirect('/painel')
+
+  const [page, anyDrafts, snapshot, recentEntries, voiceSignal, voiceProfile, preparations] = await Promise.all([
     listDrafts(supabase, user.id, { limit: HUB_PAGE_SIZE }),
     hasAnyDraft(supabase, user.id),
     getLatestSnapshot(supabase, user.id),
     getRecentEntries(supabase, user.id, RECENT_ENTRY_SEEDS),
     getVoiceSignal(supabase, user.id),
     getVoiceProfile(supabase, user.id),
+    listPreparations(supabase, user.id),
   ])
 
   const themes = snapshot?.strength_themes ?? []
@@ -55,7 +61,7 @@ export default async function PresencaPage({ searchParams }: PresencaPageProps) 
   const suggestRecalibration = shouldSuggestRecalibration(voiceSignal, voiceProfile)
 
   return (
-    <div className="max-w-[980px] mx-auto px-6 py-8">
+    <PageContainer className="pb-28 lg:pb-10">
       <RepertorioContent
         themes={themes}
         initialPage={page}
@@ -64,7 +70,8 @@ export default async function PresencaPage({ searchParams }: PresencaPageProps) 
         suggestRecalibration={suggestRecalibration}
         recalibrateSignalKey={voiceSignal.lastFeedbackAt}
         hub={hub}
+        initialPreparations={preparations}
       />
-    </div>
+    </PageContainer>
   )
 }

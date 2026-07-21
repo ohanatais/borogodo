@@ -46,7 +46,12 @@ const BASE_DATA: PanelData = {
   monthsSpan: 2,
   daysSince: 1,
   recentEntries: [],
-  mirror: { headline: 'Você media conflitos com leveza.', strengthThemes: ['mediação'], skillSummary: null },
+  mirror: {
+    headline: 'Você media conflitos com leveza.',
+    strengthThemes: ['mediação'],
+    skillSummary: null,
+    skills: [{ name: 'Mediação de conflitos', tier: 'Consistente' }],
+  },
   insight: null,
   composerPlaceholder: 'O que aconteceu no trabalho ontem?',
   returnSignal: { type: 'welcome', strengthAha: false, entry: null },
@@ -54,14 +59,16 @@ const BASE_DATA: PanelData = {
 }
 
 describe('PainelPage', () => {
-  it('025/US5: renderiza "Suas forças" a partir dos temas do mirror (substitui BorogodoCard)', async () => {
+  it('resume a distribuição sem repetir temas ou competências detalhadas do Espelho', async () => {
     mockGetPanelData.mockResolvedValueOnce(BASE_DATA)
 
     const { default: PainelPage } = await import('../page')
     const jsx = await PainelPage()
     render(jsx)
 
-    expect(screen.getByText('mediação')).toBeInTheDocument()
+    expect(screen.queryByText('Mediação de conflitos')).not.toBeInTheDocument()
+    expect(screen.queryByText('mediação')).not.toBeInTheDocument()
+    expect(screen.getByText('tiers.Consistente')).toBeInTheDocument()
     expect(screen.getByText('viewMirror')).toBeInTheDocument()
   })
 

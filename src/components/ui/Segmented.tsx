@@ -29,7 +29,7 @@ interface SegmentedProps {
 
 const SIZE: Record<'sm' | 'md', string> = {
   sm: 'text-xs px-3 min-h-9',
-  md: 'text-sm px-4 min-h-11',
+  md: 'text-sm px-4 min-h-12 sm:min-h-11',
 }
 
 export function Segmented({ items, ariaLabel, size = 'md' }: SegmentedProps) {

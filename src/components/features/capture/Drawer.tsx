@@ -63,7 +63,7 @@ function buildManualFieldsPayload(fields: DrawerManualFields): ManualFields | un
     .map((tag) => tag.trim())
     .filter(Boolean)
 
-  const hasAnyField = Boolean(metric || impact || company || entryDate || tags.length > 0)
+  const hasAnyField = Boolean(metric || impact || company || entryDate || tags.length > 0 || fields.isPersonalProject)
   if (!hasAnyField) return undefined
 
   return {
@@ -71,6 +71,7 @@ function buildManualFieldsPayload(fields: DrawerManualFields): ManualFields | un
     ...(impact && { impact }),
     ...(tags.length > 0 && { tags }),
     ...(company && { company }),
+    ...(fields.isPersonalProject && { isPersonalProject: true }),
     ...(entryDate && { entryDate }),
   }
 }
@@ -276,16 +277,16 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
         what_i_did: draft.rawText,
         raw_content: draft.rawText,
       }
-      if (fields.metric.trim()) body.metric = fields.metric.trim()
-      if (fields.impact.trim()) body.impact = fields.impact.trim()
+      body.metric = fields.metric.trim() || null
+      body.impact = fields.impact.trim() || null
       const tags = fields.tags.split(',').map((tag) => tag.trim()).filter(Boolean)
-      if (tags.length > 0) body.tags = tags
+      body.tags = tags
       // Empresa/projeto pessoal são mutuamente exclusivos e pré-preenchidos com o estado atual do
       // servidor ao abrir a edição (handleEditClick) — sempre mandar os dois, mesmo sem toque,
       // evita persistir os dois marcados ao mesmo tempo quando só um deles muda.
       body.is_personal_project = fields.isPersonalProject
       body.company = fields.isPersonalProject ? null : fields.company.trim() || null
-      if (fields.entryDate.trim()) body.entry_date = fields.entryDate.trim()
+      body.entry_date = fields.entryDate.trim() || null
 
       const response = await fetch(`/api/entries/${entry.id}`, {
         method: 'PATCH',
@@ -307,6 +308,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
         metric: fields.metric.trim(),
         impact: fields.impact.trim(),
         company: fields.company.trim(),
+        isPersonalProject: fields.isPersonalProject,
         entryDate: fields.entryDate.trim(),
       })
       router.refresh()
@@ -391,6 +393,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
         body: JSON.stringify({
           rawText: draft.rawText,
           company: draft.manualFields.company.trim() || null,
+          isPersonalProject: draft.manualFields.isPersonalProject,
           entryDate: draft.manualFields.entryDate.trim() || null,
         }),
       })
@@ -407,7 +410,7 @@ export function Drawer({ open, onOpenChange, initialText = '', onSaved, editEntr
       if (firstHighlight?.metric && !draft.manualFields.metric.trim()) draft.setManualField('metric', firstHighlight.metric)
       if (firstHighlight?.impact && !draft.manualFields.impact.trim()) draft.setManualField('impact', firstHighlight.impact)
       if (firstHighlight?.tags?.length && !draft.manualFields.tags.trim()) draft.setManualField('tags', firstHighlight.tags.join(', '))
-      if (body.company && !draft.manualFields.company.trim()) draft.setManualField('company', body.company)
+      if (body.company && !draft.manualFields.company.trim() && !draft.manualFields.isPersonalProject) draft.setManualField('company', body.company)
       if (body.entry_date && !draft.manualFields.entryDate.trim()) draft.setManualField('entryDate', body.entry_date)
 
       setOrganizeState('done')

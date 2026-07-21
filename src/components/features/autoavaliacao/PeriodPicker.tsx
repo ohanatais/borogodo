@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ArrowRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { resolvePeriodPreset, type PeriodPreset } from '@/lib/content/period'
 
 type Choice = PeriodPreset | 'outro_periodo'
@@ -108,16 +109,16 @@ export function PeriodPicker() {
         </div>
       </fieldset>
 
-      <button
+      <Button
         type="button"
         onClick={handleStart}
         disabled={!isValidRange}
-        className="inline-flex items-center justify-center gap-2 self-start text-base font-medium px-5 py-3 min-h-[48px] rounded-xl transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+        size="lg"
+        className="self-start text-base"
       >
         {t('editor.start')}
         <ArrowRight size={16} aria-hidden="true" />
-      </button>
+      </Button>
     </div>
   )
 }

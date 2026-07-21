@@ -59,7 +59,8 @@ async function replaceHighlights(
   userId: string,
   highlights: OrganizeHighlight[]
 ): Promise<EntryHighlight[]> {
-  await supabase.from('entry_highlights').delete().eq('entry_id', entryId).eq('user_id', userId)
+  const { error: deleteError } = await supabase.from('entry_highlights').delete().eq('entry_id', entryId).eq('user_id', userId)
+  if (deleteError) throw new Error('Falha ao substituir destaques existentes')
 
   if (highlights.length === 0) return []
 
@@ -121,7 +122,8 @@ async function applyResolvedContextFields(
 
   if (Object.keys(updates).length === 0) return
 
-  await supabase.from('entries').update(updates).eq('id', entryId).eq('user_id', userId)
+  const { error } = await supabase.from('entries').update(updates).eq('id', entryId).eq('user_id', userId)
+  if (error) throw new Error('Falha ao persistir contexto da entrada')
 }
 
 async function clearOrganizingStartedAt(supabase: SupabaseServerClient, entryId: string, userId: string): Promise<void> {
@@ -133,11 +135,12 @@ async function clearOrganizingStartedAt(supabase: SupabaseServerClient, entryId:
 }
 
 async function markOrganized(supabase: SupabaseServerClient, entryId: string, userId: string): Promise<void> {
-  await supabase
+  const { error } = await supabase
     .from('entries')
     .update({ organized_at: new Date().toISOString(), organizing_started_at: null })
     .eq('id', entryId)
     .eq('user_id', userId)
+  if (error) throw new Error('Falha ao marcar entrada organizada')
 }
 
 /**

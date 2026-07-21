@@ -25,9 +25,8 @@ function formatDate(dateStr: string): string {
 }
 
 /**
- * "Registros recentes" (US5) — até 3 registros, card discreto com métrica em destaque + data +
- * empresa (design-brief §5/§6). Substitui `RecentEntries` no Painel: mesma fonte de dados
- * (`getPanelData`), visual mais compacto e sem o link de item completo do feed.
+ * "Registros recentes" (US5) — até 3 registros numa lista contínua. Sem cards individuais: o
+ * conteúdo é recorrente e não precisa parecer um conjunto de objetos independentes.
  */
 export function RegistrosRecentes({ entries }: RegistrosRecentesProps) {
   const t = useTranslations('painel.registrosRecentes')
@@ -38,10 +37,10 @@ export function RegistrosRecentes({ entries }: RegistrosRecentesProps) {
 
   return (
     <section aria-label={t('title')}>
-      <div className="flex items-center justify-between gap-3 mb-2">
+      <div className="flex items-center justify-between gap-3 mb-3">
         <h2
-          className="text-[11px] font-semibold uppercase tracking-wide"
-          style={{ fontFamily: 'var(--font-sans)', color: 'var(--color-primary)' }}
+          className="text-lg font-semibold"
+          style={{ color: 'var(--foreground)', fontFamily: 'var(--font-sans)' }}
         >
           {t('title')}
         </h2>
@@ -54,7 +53,10 @@ export function RegistrosRecentes({ entries }: RegistrosRecentesProps) {
           <ArrowRight size={14} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
-      <ul className="flex flex-col gap-2">
+      <ul
+        className="divide-y rounded-xl border px-5 py-2"
+        style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
+      >
         {visible.map((entry) => {
           const label = entry.title?.trim() || entry.what_i_did
           const dateLabel = formatDate(entry.entry_date ?? entry.created_at)
@@ -62,8 +64,7 @@ export function RegistrosRecentes({ entries }: RegistrosRecentesProps) {
           return (
             <li
               key={entry.id}
-              className="rounded-xl px-4 py-3 border"
-              style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
+              className="py-3 first:pt-2"
             >
               <p className="text-sm font-medium line-clamp-1" style={{ color: 'var(--foreground)' }}>
                 {label}

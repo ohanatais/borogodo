@@ -7,6 +7,7 @@ import { Sparkles, X, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { DraftFormat } from '@/types/content'
 import { openPresenca, type PresencaOpenDetail } from './presencaEvents'
+import { Button } from '@/components/ui/button'
 
 export interface PresencaSeedEntry {
   id: string
@@ -20,10 +21,7 @@ interface PresencaCreateProps {
   variant?: 'solid' | 'subtle'
 }
 
-// Tema do espelho carrega a trajetória recente inteira como evidência (loadThemeSeed → entradas
-// recentes), então é o seed certo para a mini-bio (sobre a pessoa como um todo, não um feito só).
-// A bio a partir de uma entrada única ficaria estreita demais, por isso não entra em ENTRY_FORMATS.
-const THEME_FORMATS: DraftFormat[] = ['post', 'mini_bio']
+const THEME_FORMATS: DraftFormat[] = ['post']
 // impact_summary saiu das opções oferecidas (021); permanece no enum/motor (FR-015).
 export const ENTRY_FORMATS: DraftFormat[] = ['post']
 
@@ -44,23 +42,22 @@ export function PresencaCreate({ themes, entries, variant = 'solid' }: PresencaC
 
   const trigger =
     variant === 'solid' ? (
-      <button
+      <Button
         type="button"
-        className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 min-h-[48px] rounded-full transition-opacity hover:opacity-90"
-        style={{ background: 'var(--color-primary)', color: 'var(--color-primary-fg)' }}
+        className="min-h-12 rounded-full"
       >
         <Sparkles size={16} aria-hidden="true" />
         {t('create.open')}
-      </button>
+      </Button>
     ) : (
-      <button
+      <Button
         type="button"
-        className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 min-h-[48px] rounded-full border transition-opacity hover:opacity-80"
-        style={{ background: 'var(--color-lilas-nevoa)', color: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}
+        variant="outline"
+        className="min-h-12 rounded-full"
       >
         <Sparkles size={16} aria-hidden="true" />
         {t('create.open')}
-      </button>
+      </Button>
     )
 
   return (

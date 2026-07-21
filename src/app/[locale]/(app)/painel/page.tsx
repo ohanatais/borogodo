@@ -46,10 +46,12 @@ export default async function PainelPage() {
         <NewAccountPrompt entryCount={data.entryCount} firstMirrorMinEntries={FIRST_MIRROR_MIN_ENTRIES} />
       ) : (
         <>
-          <HomeGreeting name={name} />
-          <RegistroTrigger />
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <HomeGreeting name={name} />
+            <RegistroTrigger />
+          </div>
 
-          <div className="mt-8 flex flex-col gap-8">
+          <div className="mt-10 flex flex-col gap-12">
             <SuasForcas mirror={data.mirror} />
             <RegistrosRecentes entries={data.recentEntries} />
           </div>

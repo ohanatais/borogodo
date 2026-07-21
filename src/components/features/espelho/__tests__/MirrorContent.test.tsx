@@ -104,7 +104,7 @@ describe('MirrorContent', () => {
     expect(screen.getByTestId('mirror-feedback')).toBeInTheDocument()
   })
 
-  it('021: os temas de força são tags de leitura, sem ação por item nem CTA de bio', () => {
+  it('021: os temas de força são tags de leitura, sem ação por item', () => {
     let captured: unknown = null
     const listener = (e: Event) => {
       captured = (e as CustomEvent).detail
@@ -113,7 +113,7 @@ describe('MirrorContent', () => {
     render(<MirrorContent snapshot={snapshot} />)
     window.removeEventListener('borogodo:presenca-open', listener)
 
-    // O Espelho é contemplação: a ação ("usar" tema, gerar bio) saiu pro destino Usar (021).
+    // O Espelho organiza a leitura; ações ficam no destino Usar.
     expect(screen.queryByRole('button', { name: /bio\.cta/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /usar/i })).not.toBeInTheDocument()
     expect(captured).toBeNull()

@@ -12,6 +12,7 @@ export interface ManualFields {
   impact?: string | null
   tags?: string[]
   company?: string | null
+  isPersonalProject?: boolean
   entryDate?: string | null
 }
 
@@ -63,6 +64,7 @@ export async function saveDeposito(
     impact: manual.impact ?? null,
     tags: manual.tags ?? [],
     company: manual.company ?? null,
+    is_personal_project: manual.isPersonalProject ?? false,
     entry_date: manual.entryDate ?? null,
   }
 

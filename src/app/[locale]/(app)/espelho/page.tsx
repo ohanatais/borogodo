@@ -4,10 +4,11 @@ import { createServerClient } from '@/lib/db/supabase/server'
 import { getLatestSnapshot } from '@/lib/db/mirror'
 import { getHistoricoData } from '@/lib/historico/getHistoricoData'
 import { MirrorContent } from '@/components/features/espelho/MirrorContent'
-import { EspelhoViews } from '@/components/features/espelho/EspelhoViews'
-import { parseVista, type EspelhoVista } from '@/components/features/espelho/vista'
+import { parseVista } from '@/components/features/espelho/vista'
 import { HistoricoPageClient } from '@/app/[locale]/(app)/historico/HistoricoPageClient'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { PageContainer } from '@/components/layout/PageContainer'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 interface EspelhoPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -23,6 +24,7 @@ export default async function EspelhoPage({ searchParams }: EspelhoPageProps) {
 
   const { vista: vistaParam } = await searchParams
   const vista = parseVista(vistaParam)
+  const tHistorico = await getTranslations('historico')
 
   // Busca condicional (FR-010): só a vista ativa consulta o banco.
   const content =
@@ -31,12 +33,12 @@ export default async function EspelhoPage({ searchParams }: EspelhoPageProps) {
       : await renderForcas(supabase, user.id)
 
   return (
-    <div className="px-5 lg:px-9 pt-6 pb-24 max-w-[980px] mx-auto w-full">
-      <div className="mb-6">
-        <EspelhoViews vista={vista as EspelhoVista} />
-      </div>
+    <PageContainer className="pb-24">
+      {vista === 'trajetoria' && (
+        <PageHeader title={tHistorico('pageTitle')} description={tHistorico('subtitle')} className="mb-6" />
+      )}
       {content}
-    </div>
+    </PageContainer>
   )
 }
 

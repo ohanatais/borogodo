@@ -35,10 +35,12 @@ describe('AppShellClient — alvos da navegação em grupos (US6)', () => {
     expect(link).toHaveAttribute('href', '/espelho?vista=trajetoria')
   })
 
-  it('"Gerar conteúdo" abre /presenca?hub=mostrar direto', () => {
+  it('"Gerar conteúdo" aparece desabilitado e sem link', () => {
     render(<AppShellClient userName="Ana">conteúdo</AppShellClient>)
-    const link = screen.getByText('appNav.gerarConteudo').closest('a')
-    expect(link).toHaveAttribute('href', '/presenca?hub=mostrar')
+    const item = screen.getByText('appNav.gerarConteudo').closest('[aria-disabled="true"]')
+    expect(item).not.toBeNull()
+    expect(screen.getByText('appNav.gerarConteudo').closest('a')).toBeNull()
+    expect(screen.getAllByText('appNav.comingSoon').length).toBeGreaterThan(0)
   })
 
   it('"Me preparar" abre /presenca?hub=preparar direto', () => {

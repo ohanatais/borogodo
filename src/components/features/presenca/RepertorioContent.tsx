@@ -8,6 +8,9 @@ import type { DraftListPage } from '@/types/content'
 import { PresencaCreate, type PresencaSeedEntry } from '@/components/features/content/PresencaCreate'
 import { UsarLaunchpad, type LaunchpadHub } from './UsarLaunchpad'
 import { PresencaHub } from './PresencaHub'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { SavedPreparations } from './SavedPreparations'
+import type { Preparation } from '@/types/preparation'
 
 interface RepertorioContentProps {
   themes: string[]
@@ -18,6 +21,7 @@ interface RepertorioContentProps {
   recalibrateSignalKey: string | null
   /** Escopo vindo do splash de intenção (`?hub=`): mostra só um hub. Ver UsarLaunchpad. */
   hub?: LaunchpadHub
+  initialPreparations?: Preparation[]
 }
 
 /**
@@ -35,6 +39,7 @@ export function RepertorioContent({
   suggestRecalibration,
   recalibrateSignalKey,
   hub,
+  initialPreparations = [],
 }: RepertorioContentProps) {
   const t = useTranslations('presenca.page')
   const tr = useTranslations('repertorio')
@@ -54,7 +59,7 @@ export function RepertorioContent({
       {!preparing && hub && (
         <Link
           href="/usar"
-          className="inline-flex items-center gap-1.5 text-sm mb-4 transition-opacity hover:opacity-70"
+          className="hidden items-center gap-1.5 text-sm mb-4 transition-opacity hover:opacity-70 lg:inline-flex"
           style={{ color: 'var(--color-primary)' }}
         >
           <ArrowLeft size={16} aria-hidden="true" />
@@ -63,27 +68,17 @@ export function RepertorioContent({
       )}
 
       {!preparing && (
-        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1
-              className="text-2xl font-semibold"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--foreground)' }}
-            >
-              {title}
-            </h1>
-            <p className="text-base mt-1" style={{ color: 'var(--muted-foreground)' }}>
-              {subtitle}
-            </p>
-          </div>
-          {showDrafts && (
-            <div className="shrink-0">
-              <PresencaCreate themes={themes} entries={entries} />
-            </div>
-          )}
-        </header>
+        <PageHeader
+          title={title}
+          description={subtitle}
+          className="mb-6"
+          actions={showDrafts ? <PresencaCreate themes={themes} entries={entries} /> : undefined}
+        />
       )}
 
       <UsarLaunchpad themes={themes} onPreparingChange={setPreparing} hub={hub} hideLabel={!!hub} />
+
+      {!preparing && hub === 'preparar' && <SavedPreparations initialPreparations={initialPreparations} />}
 
       {!preparing && showDrafts && (
         <section className="mt-10">

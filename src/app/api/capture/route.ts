@@ -123,6 +123,7 @@ function readManualFields(body: Record<string, unknown>): ManualFields | undefin
     impact: typeof fields.impact === 'string' ? fields.impact : null,
     tags: Array.isArray(fields.tags) ? fields.tags.filter((tag): tag is string => typeof tag === 'string') : [],
     company: typeof fields.company === 'string' ? fields.company : null,
+    isPersonalProject: fields.isPersonalProject === true,
     entryDate: typeof fields.entryDate === 'string' ? fields.entryDate : null,
   }
 }

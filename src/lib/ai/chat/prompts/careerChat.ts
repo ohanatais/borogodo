@@ -29,6 +29,10 @@ export function buildCareerChatSystemPrompt(ctx: CareerChatContext): string {
   const area = ctx.profile?.area ?? null
 
   const lines: string[] = []
+  const excerpt = (value: string | null | undefined, max = 2400) => {
+    if (!value) return ''
+    return value.length > max ? `${value.slice(0, max)}…` : value
+  }
   const formatHighlights = (entry: ChatEntry): string => entry.entry_highlights?.length
     ? `\n  Destaques: ${entry.entry_highlights
       .slice()
@@ -52,6 +56,9 @@ REGRAS DE TOM (seguir sempre):
 - Cite de onde vêm as informações ("Com base nas suas entradas de 2023 na empresa X...").
 - NUNCA use travessão (—), seta (->, →) ou barra (/) como separador em nenhuma parte da resposta.
 - Para negrito use **texto** (markdown). Evite listas com — ou bullet de texto; prefira parágrafos curtos.
+- Não use títulos com # ou ## e não use linhas horizontais ou sequências de hífens como separadores. Para nomear uma seção,
+  escreva o título em **negrito** numa linha própria.
+- Não use setas nem mesmo dentro de expressões como "0→1". Escreva "do zero ao primeiro produto".
 - DATAS: sempre exiba no formato brasileiro DD/MM/AAAA. Nunca escreva datas no formato ISO (YYYY-MM-DD) na resposta. Exemplo: escreva "01/06/2026", nunca "2026-06-01".`)
 
   if (ctx.latestMirror) {
@@ -79,7 +86,7 @@ ESPELHO PROFISSIONAL DE ${name.toUpperCase()}:
       const role = e.role_title ? ` | ${e.role_title}` : ''
       const impact = e.impact ? ` → ${e.impact}` : ''
       const metric = e.metric ? ` (${e.metric})` : ''
-      lines.push(`[${i + 1}] id:${e.id} (${date}${company}${role}) Fonte: ${e.raw_content}${impact}${metric}${formatHighlights(e)}`)
+      lines.push(`[${i + 1}] id:${e.id} (${date}${company}${role}) Fonte: ${excerpt(e.raw_content)}${impact}${metric}${formatHighlights(e)}`)
     })
   }
 
@@ -87,7 +94,7 @@ ESPELHO PROFISSIONAL DE ${name.toUpperCase()}:
     lines.push(`\nENTRADAS DA EMPRESA EM CONTEXTO:`)
     ctx.companyEntries.forEach((e, i) => {
       const date = e.entry_date ?? e.created_at.slice(0, 10)
-      lines.push(`[C${i + 1}] id:${e.id} (${date}) Fonte: ${e.raw_content}${formatHighlights(e)}`)
+      lines.push(`[C${i + 1}] id:${e.id} (${date}) Fonte: ${excerpt(e.raw_content)}${formatHighlights(e)}`)
     })
   }
 
@@ -96,7 +103,7 @@ ESPELHO PROFISSIONAL DE ${name.toUpperCase()}:
     lines.push(`
 ENTRADA PARA CORREÇÃO (o usuário quer corrigir esta entrada específica):
 id: ${e.id}
-Fonte original: ${e.raw_content}
+Fonte original: ${excerpt(e.raw_content, 8000)}
 Resumo legado: ${e.what_i_did}
 Empresa: ${e.company ?? 'não informada'}
 Cargo: ${e.role_title ?? 'não informado'}
@@ -122,25 +129,43 @@ AVISO: Esta pessoa ainda não tem registros de carreira. Seja honesto e indique 
     lines.push(`
 MODO PREPARAÇÃO (foco desta conversa):
 ${PREP_MOMENT_FRAMING[ctx.prepMoment]}
-Conduza a conversa com esse objetivo em mente, sempre ancorado nas entradas reais da pessoa.`)
+Conduza a conversa com esse objetivo em mente, sempre ancorado nas entradas reais da pessoa.
+
+Ao analisar uma vaga ou outro contexto externo:
+- Comece com uma leitura curta de aderência e depois separe: evidências fortes, lacunas reais e próximo passo de treino.
+- Diferencie explicitamente fato, inferência e informação ainda não confirmada.
+- Nunca use uma evidência adjacente como prova direta de outro requisito. Curso técnico não comprova uso profissional de IA; experiência com clientes B2B não comprova product-led growth.
+- Trate informações de perfil que podem estar desatualizadas, como nível de idioma, como algo a confirmar. Diga "seu registro atual indica" e pergunte se ainda é verdade.
+- Evite absolutos como "exatamente o que a vaga pede". Diga em que aspecto a evidência sustenta a aderência e onde ela não basta.
+- Priorize no máximo três histórias do histórico para o treino, explicando o papel de cada uma.`)
   }
 
   lines.push(`
 BLOCO ESTRUTURADO (OBRIGATÓRIO ao final de CADA resposta):
 Encerre sempre com exatamente um bloco assim:
-<BLOCKS>{"followups":["pergunta 1?","pergunta 2?"]}</BLOCKS>
+<BLOCKS>{"followups":["pergunta 1?","pergunta 2?"],"evidenceRefs":["uuid-da-entrada-realmente-usada"],"insight":{"objective":"objetivo concreto da pessoa nesta interação","themes":["tema discutido"],"gaps":["informação importante que ainda falta"]}}</BLOCKS>
 
 Se identificou uma correção confirmada pelo usuário, adicione o campo "correction":
-<BLOCKS>{"followups":["q1?","q2?"],"correction":{"entryId":"ID_DA_ENTRADA","fields":{"campo":"valor"},"action":"update"}}</BLOCKS>
+<BLOCKS>{"followups":["q1?","q2?"],"evidenceRefs":["ID_DA_ENTRADA"],"insight":{"objective":"corrigir uma informação da trajetória","themes":["correção"],"gaps":[]},"correction":{"entryId":"ID_DA_ENTRADA","fields":{"campo":"valor"},"action":"update"}}</BLOCKS>
 
 Regras do bloco:
 - Sempre presente, nunca omitir.
+- "evidenceRefs": ids exatos SOMENTE das entradas que sustentam afirmações feitas nesta resposta.
+  Não inclua uma entrada só porque ela foi recebida no contexto. Se a resposta não usou nenhuma,
+  envie um array vazio.
+- "insight": síntese operacional desta interação para telemetria, sem copiar frases da conversa.
+  "objective" descreve o que a pessoa busca; "themes" contém até 5 assuntos; "gaps" contém até
+  5 informações que faltaram. Nunca inclua descrição de vaga, nomes próprios, empresas, links,
+  números sensíveis ou trechos literais da pessoa.
 - "followups": exatamente 2 frases escritas na VOZ DO USUÁRIO — coisas que ele poderia
   querer dizer ou perguntar a seguir. Nunca escreva perguntas que você (assistente) faria
   ao usuário. Exemplos corretos: "Quero ver as entradas que geraram essa conclusão",
   "Pode me explicar o que significa X?", "Isso está errado, o certo é Y".
   Exemplos ERRADOS (perspectiva do assistente): "Qual parte está incorreta?",
   "Você tem algum número para ilustrar?".
+- Não repita uma ação que a resposta acabou de propor. Se você já convidou a pessoa a responder
+  uma pergunta de treino, não sugira "Quero treinar" ou "Vamos praticar"; ofereça outro caminho
+  concreto ou uma frase que avance diretamente a resposta.
 - Campos null ou desconhecidos: omita-os (não escreva null).
 - entryId em "correction" deve ser o id exato da entrada (formato uuid).
 - "action" em correction: "update" (corrigir campos), "delete" (remover entrada), "enrich" (adicionar contexto).`)

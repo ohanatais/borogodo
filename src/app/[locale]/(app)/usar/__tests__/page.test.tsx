@@ -8,19 +8,19 @@ vi.mock('next-intl/server', () => ({
 import UsarPage from '../page'
 
 describe('UsarPage — splash de intenção', () => {
-  it('renderiza os dois caminhos: Conteúdo e Preparo', async () => {
+  it('mantém Conteúdo visível como em breve e deixa apenas Preparo acessível', async () => {
     render(await UsarPage())
     const links = Array.from(document.querySelectorAll('a[href]')).map(
       (a) => a.getAttribute('href') || ''
     )
-    // Cada caminho leva a um hub ESCOPADO do Repertório — não à tela com tudo (021).
-    expect(links).toContain('/presenca?hub=mostrar')
+    expect(links).not.toContain('/presenca?hub=mostrar')
     expect(links).toContain('/presenca?hub=preparar')
+    expect(document.querySelector('[aria-disabled="true"]')).not.toBeNull()
   })
 
-  it('expõe exatamente dois caminhos (sem card-grid de opções extras)', async () => {
+  it('expõe exatamente um caminho navegável', async () => {
     render(await UsarPage())
     const links = Array.from(document.querySelectorAll('a[href]'))
-    expect(links).toHaveLength(2)
+    expect(links).toHaveLength(1)
   })
 })
